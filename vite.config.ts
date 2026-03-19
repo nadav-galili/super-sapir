@@ -1,9 +1,13 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { TanStackRouterVite } from '@tanstack/router-plugin/vite'
+import { fileURLToPath } from 'node:url'
 import path from 'path'
 
+const rootDir = path.dirname(fileURLToPath(import.meta.url))
+
 export default defineConfig({
+  cacheDir: '.vite-cache',
   plugins: [
     TanStackRouterVite({
       routesDirectory: './src/routes',
@@ -13,7 +17,7 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      '@': path.resolve(rootDir, './src'),
     },
   },
 })
