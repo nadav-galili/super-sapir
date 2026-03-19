@@ -1,6 +1,6 @@
-@import '@fontsource-variable/noto-sans-hebrew';
-@import '@fontsource/cousine/400.css';
-@import '@fontsource/cousine/700.css';
+@import '@fontsource-variable/rubik';
+@import '@fontsource/fira-code/400.css';
+@import '@fontsource/fira-code/700.css';
 
 @tailwind base;
 @tailwind components;
@@ -8,26 +8,26 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+    --background: 28 60% 98%;
+    --foreground: 213 24% 22%;
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card-foreground: 213 24% 22%;
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 240 5.9% 10%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 240 5.9% 10%;
-    --radius: 0.75rem;
+    --popover-foreground: 213 24% 22%;
+    --primary: 356 65% 53%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 184 66% 51%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 20 50% 96%;
+    --muted-foreground: 213 10% 63%;
+    --accent: 20 50% 96%;
+    --accent-foreground: 213 24% 22%;
+    --destructive: 356 65% 53%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 20 100% 93%;
+    --input: 20 100% 93%;
+    --ring: 356 65% 53%;
+    --radius: 1rem;
   }
 }
 
@@ -52,50 +52,6 @@
   right: auto !important;
 }
 
-/* Dashboard background — dot grid + gradient orbs */
-.dashboard-bg {
-  position: relative;
-  background-color: #f7f8fb;
-  background-image:
-    radial-gradient(circle at 1px 1px, rgba(100, 116, 139, 0.28) 1px, transparent 0);
-  background-size: 28px 28px;
-}
-
-.dashboard-bg::before,
-.dashboard-bg::after {
-  content: '';
-  position: fixed;
-  border-radius: 50%;
-  pointer-events: none;
-  filter: blur(90px);
-  z-index: 0;
-  animation: float-orb 25s ease-in-out infinite;
-}
-
-.dashboard-bg::before {
-  width: 700px;
-  height: 700px;
-  top: -100px;
-  right: 5%;
-  background: radial-gradient(circle, rgba(59, 130, 246, 0.18) 0%, rgba(139, 92, 246, 0.10) 40%, transparent 70%);
-}
-
-.dashboard-bg::after {
-  width: 800px;
-  height: 800px;
-  bottom: -150px;
-  left: 0;
-  background: radial-gradient(circle, rgba(16, 185, 129, 0.14) 0%, rgba(14, 165, 233, 0.08) 40%, transparent 70%);
-  animation-delay: -12s;
-  animation-direction: reverse;
-}
-
-@keyframes float-orb {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(40px, -25px) scale(1.08); }
-  66% { transform: translate(-30px, 20px) scale(0.92); }
-}
-
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 6px;
@@ -106,10 +62,18 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--border));
+  background: #F5E6DE;
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground));
+  background: #A0AEC0;
+}
+
+/* Phone mockup scan line animation */
+@keyframes scanLine {
+  0% { top: 10%; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: 85%; opacity: 0; }
 }

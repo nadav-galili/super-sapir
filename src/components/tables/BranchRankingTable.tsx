@@ -89,7 +89,7 @@ export function BranchRankingTable({ branches, title = 'דירוג סניפים'
       cell: ({ getValue }) => {
         const growth = getValue() as number
         return (
-          <span className={growth >= 0 ? 'text-emerald-600' : 'text-red-500'} dir="ltr">
+          <span className={growth >= 0 ? 'text-[#2EC4D5]' : 'text-[#DC4E59]'} dir="ltr">
             {growth >= 0 ? '+' : ''}{formatPercent(growth)}
           </span>
         )

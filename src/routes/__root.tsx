@@ -19,7 +19,7 @@ function RootLayout() {
 
   return (
     <DirectionProvider dir="rtl">
-      <div className="min-h-screen dashboard-bg">
+      <div className="min-h-screen bg-[#FDF8F6]">
         <Sidebar />
         <div className="ms-[280px] transition-all duration-300 relative z-[1]">
           <Header title={title} />

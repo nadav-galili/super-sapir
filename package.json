@@ -10,8 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@fontsource-variable/noto-sans-hebrew": "^5.2.8",
-    "@fontsource/cousine": "^5.2.7",
+    "@fontsource-variable/rubik": "^5.2.8",
+    "@fontsource/fira-code": "^5.2.7",
     "@radix-ui/react-direction": "^1.1.1",
     "@tanstack/react-router": "^1.167.5",
     "@tanstack/react-table": "^8.21.3",

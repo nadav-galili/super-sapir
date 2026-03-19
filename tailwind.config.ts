@@ -12,8 +12,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['"Noto Sans Hebrew Variable"', 'sans-serif'],
-        mono: ['Cousine', '"Noto Sans Hebrew Variable"', 'monospace'],
+        sans: ['"Rubik Variable"', 'sans-serif'],
+        mono: ['"Fira Code"', 'monospace'],
       },
       colors: {
         border: 'hsl(var(--border))',
@@ -49,14 +49,17 @@ export default {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
-        sapir: {
-          green: '#10b981',
-          blue: '#3b82f6',
-          orange: '#f59e0b',
-          red: '#ef4444',
-          purple: '#8b5cf6',
-          teal: '#14b8a6',
-          pink: '#ec4899',
+        // Design system palette
+        warm: {
+          red: '#DC4E59',
+          cyan: '#2EC4D5',
+          violet: '#6C5CE7',
+          amber: '#F6B93B',
+          muted: '#A0AEC0',
+          bg: '#FDF8F6',
+          border: '#FFE8DE',
+          divider: '#FFF0EA',
+          separator: '#F5E6DE',
         },
       },
       borderRadius: {
@@ -73,15 +76,10 @@ export default {
           from: { height: 'var(--radix-accordion-content-height)' },
           to: { height: '0' },
         },
-        shimmer: {
-          '0%': { backgroundPosition: '-200% 0' },
-          '100%': { backgroundPosition: '200% 0' },
-        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
-        shimmer: 'shimmer 2s linear infinite',
       },
     },
   },

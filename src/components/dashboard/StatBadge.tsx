@@ -11,16 +11,16 @@ interface StatBadgeProps {
 export function StatBadge({ label, value, delta, className }: StatBadgeProps) {
   return (
     <div className={cn('flex items-center justify-between py-2', className)}>
-      <span className="text-sm text-muted-foreground">{label}</span>
+      <span className="text-sm text-[#A0AEC0]">{label}</span>
       <div className="flex items-center gap-2">
-        <span className="font-semibold text-sm" dir="ltr">{value}</span>
+        <span className="font-semibold text-sm text-[#2D3748] font-mono" dir="ltr">{value}</span>
         {delta !== undefined && (
           <span
             className={cn(
-              'flex items-center gap-0.5 text-xs',
-              delta > 0 && 'text-emerald-600',
-              delta < 0 && 'text-red-500',
-              delta === 0 && 'text-muted-foreground'
+              'flex items-center gap-0.5 text-xs font-mono',
+              delta > 0 && 'text-[#2EC4D5]',
+              delta < 0 && 'text-[#DC4E59]',
+              delta === 0 && 'text-[#A0AEC0]'
             )}
           >
             {delta > 0 ? <TrendingUp className="w-3 h-3" /> : delta < 0 ? <TrendingDown className="w-3 h-3" /> : <Minus className="w-3 h-3" />}

@@ -2,20 +2,21 @@ import { motion } from 'motion/react'
 import { TrendingUp, TrendingDown } from 'lucide-react'
 import { useAnimatedCounter } from '@/hooks/useAnimatedCounter'
 import { formatCurrencyShort, formatNumber, formatPercent, formatCompact } from '@/lib/format'
+import { PALETTE } from '@/lib/colors'
 import type { KPICardData } from '@/data/types'
 
 interface KPICardProps extends KPICardData {
   delay?: number
 }
 
-const ACCENT_COLORS: Record<string, { border: string; text: string; trendBg: string }> = {
-  green:  { border: '#0f766e', text: '#0f766e', trendBg: 'bg-teal-50 text-teal-700' },
-  blue:   { border: '#1e40af', text: '#1e40af', trendBg: 'bg-blue-50 text-blue-700' },
-  purple: { border: '#6d28d9', text: '#6d28d9', trendBg: 'bg-violet-50 text-violet-700' },
-  teal:   { border: '#0e7490', text: '#0e7490', trendBg: 'bg-cyan-50 text-cyan-700' },
-  orange: { border: '#c2410c', text: '#c2410c', trendBg: 'bg-orange-50 text-orange-700' },
-  pink:   { border: '#be185d', text: '#be185d', trendBg: 'bg-pink-50 text-pink-700' },
-  red:    { border: '#b91c1c', text: '#b91c1c', trendBg: 'bg-red-50 text-red-700' },
+const ACCENT_MAP: Record<string, { border: string; text: string }> = {
+  green:  { border: PALETTE.cyan,   text: PALETTE.cyan },
+  blue:   { border: PALETTE.cyan,   text: PALETTE.cyan },
+  purple: { border: PALETTE.violet, text: PALETTE.violet },
+  teal:   { border: PALETTE.cyan,   text: PALETTE.cyan },
+  orange: { border: PALETTE.amber,  text: PALETTE.amber },
+  pink:   { border: PALETTE.red,    text: PALETTE.red },
+  red:    { border: PALETTE.red,    text: PALETTE.red },
 }
 
 function formatValue(value: number, format: KPICardData['format']): string {
@@ -30,44 +31,33 @@ function formatValue(value: number, format: KPICardData['format']): string {
 
 export function KPICard({ label, value, format, trend, trendLabel, gradient, delay = 0 }: KPICardProps) {
   const animatedValue = useAnimatedCounter(value, 1500, delay)
-  const accent = ACCENT_COLORS[gradient] ?? ACCENT_COLORS.blue
+  const accent = ACCENT_MAP[gradient] ?? ACCENT_MAP.blue
   const isPositive = trend >= 0
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20, scale: 0.97 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ delay: delay / 1000, type: 'spring', stiffness: 300, damping: 24 }}
-      whileHover={{ y: -2, boxShadow: '0 8px 24px rgba(0,0,0,0.08)' }}
-      className="relative overflow-hidden rounded-xl bg-white border border-gray-200/80 shadow-sm cursor-default"
+      whileHover={{ y: -2, boxShadow: 'rgba(220, 78, 89, 0.08) 0px 8px 24px' }}
+      className="relative overflow-hidden rounded-[16px] bg-white border border-warm-border cursor-default"
     >
-      {/* Left accent border */}
-      <div
-        className="absolute top-0 right-0 w-1 h-full rounded-r-xl"
-        style={{ background: accent.border }}
-      />
+      {/* Right accent border (RTL) */}
+      <div className="absolute top-0 right-0 w-1 h-full" style={{ background: accent.border }} />
 
       <div className="p-4 pr-5">
-        <p className="text-xs font-medium text-slate-500 mb-1">{label}</p>
-        <p
-          className="text-2xl font-bold font-mono tabular-nums tracking-tight"
-          style={{ color: accent.text }}
-          dir="ltr"
-        >
+        <p className="text-xs font-medium text-warm-muted mb-1">{label}</p>
+        <p className="text-2xl font-bold font-mono tabular-nums" style={{ color: accent.text }} dir="ltr">
           {formatValue(animatedValue, format)}
         </p>
         <div className="flex items-center gap-1.5 mt-2">
-          <span className={`inline-flex items-center gap-1 text-xs font-semibold px-1.5 py-0.5 rounded ${
-            isPositive ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'
+          <span className={`inline-flex items-center gap-1 text-xs font-semibold px-1.5 py-0.5 rounded-[20px] ${
+            isPositive ? 'bg-[#2EC4D5]/10 text-[#2EC4D5]' : 'bg-[#DC4E59]/10 text-[#DC4E59]'
           }`} dir="ltr">
-            {isPositive ? (
-              <TrendingUp className="w-3 h-3" />
-            ) : (
-              <TrendingDown className="w-3 h-3" />
-            )}
+            {isPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
             {isPositive ? '+' : ''}{trend}%
           </span>
-          <span className="text-[10px] text-slate-400">{trendLabel}</span>
+          <span className="text-[11px] text-warm-muted">{trendLabel}</span>
         </div>
       </div>
     </motion.div>

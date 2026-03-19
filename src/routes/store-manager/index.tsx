@@ -35,10 +35,10 @@ function MonthlyComparisonChart({ data }: { data: MonthlyDetail[] }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.4, duration: 0.6 }}
     >
-      <Card className="border-0 shadow-md">
+      <Card className="border-warm-border rounded-[16px]">
         <CardHeader className="pb-2">
-          <CardTitle className="text-base flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+          <CardTitle className="text-base flex items-center gap-2 text-[#2D3748]">
+            <div className="w-7 h-7 rounded-[10px] flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #2EC4D5, #5DD8E3)' }}>
               <TrendingUp className="w-4 h-4 text-white" />
             </div>
             מגמת מכירות חודשית — 2025 מול 2024
@@ -50,28 +50,28 @@ function MonthlyComparisonChart({ data }: { data: MonthlyDetail[] }) {
               <ComposedChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="gradCurrent" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.35} />
-                    <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.02} />
+                    <stop offset="0%" stopColor="#DC4E59" stopOpacity={0.18} />
+                    <stop offset="100%" stopColor="#DC4E59" stopOpacity={0.02} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                <XAxis dataKey="month" tick={{ fontSize: 11 }} />
-                <YAxis tickFormatter={(v: number) => formatCurrencyShort(v)} tick={{ fontSize: 10 }} width={60} />
-                <YAxis yAxisId="pct" orientation="right" tickFormatter={(v: number) => `${v}%`} tick={{ fontSize: 10 }} width={40} domain={[-15, 10]} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#FFF0EA" />
+                <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#4A5568' }} />
+                <YAxis tickFormatter={(v: number) => formatCurrencyShort(v)} tick={{ fontSize: 10, fill: '#A0AEC0' }} width={60} />
+                <YAxis yAxisId="pct" orientation="right" tickFormatter={(v: number) => `${v}%`} tick={{ fontSize: 10, fill: '#A0AEC0' }} width={40} domain={[-15, 10]} />
                 <Tooltip
                   formatter={(value, name) => {
                     if (name === 'currentSales') return [formatCurrencyShort(value as number), '2025']
                     if (name === 'lastYearSales') return [formatCurrencyShort(value as number), '2024']
                     return [`${value}%`, 'שינוי שנתי']
                   }}
-                  contentStyle={{ direction: 'rtl', borderRadius: '12px', border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
+                  contentStyle={{ direction: 'rtl', borderRadius: '10px', border: '1px solid #FFE8DE', boxShadow: 'rgba(220,78,89,0.08) 0 4px 20px' }}
                 />
                 <Legend formatter={(v: string) => v === 'currentSales' ? '2025' : v === 'lastYearSales' ? '2024' : 'שינוי %'} />
-                <Area type="monotone" dataKey="currentSales" stroke="#3b82f6" strokeWidth={2.5} fill="url(#gradCurrent)" animationDuration={1500} />
-                <Line type="monotone" dataKey="lastYearSales" stroke="#94a3b8" strokeWidth={1.5} strokeDasharray="6 3" dot={false} animationDuration={1500} animationBegin={300} />
-                <Bar yAxisId="pct" dataKey="yoyChange" barSize={16} radius={[3, 3, 0, 0]} animationDuration={1200} animationBegin={600}>
+                <Area type="monotone" dataKey="currentSales" stroke="#DC4E59" strokeWidth={2.5} fill="url(#gradCurrent)" animationDuration={1500} />
+                <Line type="monotone" dataKey="lastYearSales" stroke="#A0AEC0" strokeWidth={1.5} strokeDasharray="6 3" dot={false} animationDuration={1500} animationBegin={300} />
+                <Bar yAxisId="pct" dataKey="yoyChange" barSize={16} radius={[4, 4, 0, 0]} animationDuration={1200} animationBegin={600}>
                   {data.map((entry, i) => (
-                    <Cell key={i} fill={entry.yoyChange >= 0 ? '#10b981' : '#ef4444'} opacity={0.7} />
+                    <Cell key={i} fill={entry.yoyChange >= 0 ? '#2EC4D5' : '#DC4E59'} opacity={0.7} />
                   ))}
                 </Bar>
               </ComposedChart>
@@ -85,9 +85,9 @@ function MonthlyComparisonChart({ data }: { data: MonthlyDetail[] }) {
 
 // ─── Department Breakdown ────────────────────────────────────────
 const CATEGORIES = [
-  { key: 'fresh' as const, name: 'טרי', color: '#10b981', bgClass: 'bg-emerald-50 border-emerald-200 text-emerald-700' },
-  { key: 'food' as const, name: 'מזון', color: '#f59e0b', bgClass: 'bg-amber-50 border-amber-200 text-amber-700' },
-  { key: 'nonfood' as const, name: 'נון-פוד', color: '#3b82f6', bgClass: 'bg-blue-50 border-blue-200 text-blue-700' },
+  { key: 'fresh' as const, name: 'טרי', color: '#DC4E59', bgClass: 'bg-[#DC4E59]/8 border-[#DC4E59]/20 text-[#DC4E59]' },
+  { key: 'food' as const, name: 'מזון', color: '#2EC4D5', bgClass: 'bg-[#2EC4D5]/8 border-[#2EC4D5]/20 text-[#2EC4D5]' },
+  { key: 'nonfood' as const, name: 'נון-פוד', color: '#6C5CE7', bgClass: 'bg-[#6C5CE7]/8 border-[#6C5CE7]/20 text-[#6C5CE7]' },
 ]
 
 function DepartmentBreakdown({ departments }: { departments: DepartmentSales[] }) {
@@ -99,10 +99,10 @@ function DepartmentBreakdown({ departments }: { departments: DepartmentSales[] }
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.5, duration: 0.5 }}
     >
-      <Card className="border-0 shadow-md h-full">
+      <Card className="border-warm-border rounded-[16px] h-full">
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
+            <div className="w-7 h-7 rounded-[10px] flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #DC4E59, #E8777F)' }}>
               <CartIcon className="w-4 h-4 text-white" />
             </div>
             פילוח מכירות לפי מחלקה
@@ -129,7 +129,7 @@ function DepartmentBreakdown({ departments }: { departments: DepartmentSales[] }
                         className="flex items-center gap-2"
                       >
                         <span className="text-xs w-24 text-right shrink-0 text-muted-foreground">{dept.name}</span>
-                        <div className="flex-1 relative h-5 bg-gray-50 rounded overflow-hidden">
+                        <div className="flex-1 relative h-5 bg-[#FDF8F6] rounded-[4px] overflow-hidden border border-warm-border">
                           <motion.div
                             initial={{ width: 0 }}
                             animate={{ width: `${barPct}%` }}
@@ -137,7 +137,7 @@ function DepartmentBreakdown({ departments }: { departments: DepartmentSales[] }
                             className="absolute inset-y-0 right-0 rounded"
                             style={{ background: cat.color, opacity: 0.75 }}
                           />
-                          <span className="absolute left-1.5 top-1/2 -translate-y-1/2 text-[10px] font-semibold text-gray-600 tabular-nums" dir="ltr">
+                          <span className="absolute left-1.5 top-1/2 -translate-y-1/2 text-[10px] font-semibold text-[#4A5568] tabular-nums" dir="ltr">
                             {formatCurrencyShort(dept.currentMonth)}
                           </span>
                         </div>
@@ -145,7 +145,7 @@ function DepartmentBreakdown({ departments }: { departments: DepartmentSales[] }
                           {dept.sharePercent}%
                         </span>
                         <span
-                          className={`text-[10px] font-bold w-10 text-left tabular-nums ${dept.yoyChangePercent >= 0 ? 'text-emerald-600' : 'text-red-500'}`}
+                          className={`text-[10px] font-bold w-10 text-left tabular-nums ${dept.yoyChangePercent >= 0 ? 'text-[#2EC4D5]' : 'text-[#DC4E59]'}`}
                           dir="ltr"
                         >
                           {dept.yoyChangePercent > 0 ? '+' : ''}{dept.yoyChangePercent}%
@@ -166,10 +166,10 @@ function DepartmentBreakdown({ departments }: { departments: DepartmentSales[] }
 // ─── Operations Stats Card ───────────────────────────────────────
 function OperationsStatsCard({ operations }: { operations: typeof haderaFullReport.operations }) {
   return (
-    <Card className="border-0 shadow-md">
+    <Card className="border-warm-border rounded-[16px]">
       <CardHeader className="pb-2">
         <CardTitle className="text-base flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
+          <div className="w-7 h-7 rounded-[10px] flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #2EC4D5, #5DD8E3)' }}>
             <ShieldCheck className="w-4 h-4 text-white" />
           </div>
           תפעול ואיכות
@@ -208,10 +208,10 @@ function StaffingSection({ hr }: { hr: typeof haderaFullReport.hr }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.6, duration: 0.5 }}
     >
-      <Card className="border-0 shadow-md h-full">
+      <Card className="border-warm-border rounded-[16px] h-full">
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+            <div className="w-7 h-7 rounded-[10px] flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #6C5CE7, #8B7FED)' }}>
               <Users className="w-4 h-4 text-white" />
             </div>
             כח אדם ומשרות
@@ -220,20 +220,20 @@ function StaffingSection({ hr }: { hr: typeof haderaFullReport.hr }) {
         <CardContent>
           {/* Summary badges */}
           <div className="grid grid-cols-3 gap-2 mb-4">
-            <div className="rounded-lg bg-blue-50 p-3 text-center">
-              <UserCheck className="w-4 h-4 mx-auto text-blue-500 mb-1" />
-              <p className="text-lg font-bold text-blue-700" dir="ltr">{hr.authorized}</p>
-              <p className="text-[10px] text-blue-500">תקן</p>
+            <div className="rounded-[16px] bg-[#2EC4D5]/8 p-3 text-center">
+              <UserCheck className="w-4 h-4 mx-auto text-[#6C5CE7] mb-1" />
+              <p className="text-lg font-bold text-[#6C5CE7]" dir="ltr">{hr.authorized}</p>
+              <p className="text-[10px] text-[#6C5CE7]">תקן</p>
             </div>
-            <div className="rounded-lg bg-emerald-50 p-3 text-center">
-              <Users className="w-4 h-4 mx-auto text-emerald-500 mb-1" />
-              <p className="text-lg font-bold text-emerald-700" dir="ltr">{hr.actual}</p>
-              <p className="text-[10px] text-emerald-500">בפועל</p>
+            <div className="rounded-[16px] bg-[#2EC4D5]/8 p-3 text-center">
+              <Users className="w-4 h-4 mx-auto text-[#2EC4D5] mb-1" />
+              <p className="text-lg font-bold text-[#2EC4D5]" dir="ltr">{hr.actual}</p>
+              <p className="text-[10px] text-[#2EC4D5]">בפועל</p>
             </div>
-            <div className="rounded-lg bg-amber-50 p-3 text-center">
-              <Percent className="w-4 h-4 mx-auto text-amber-500 mb-1" />
-              <p className="text-lg font-bold text-amber-700" dir="ltr">{hr.turnoverRate}%</p>
-              <p className="text-[10px] text-amber-500">תחלופה</p>
+            <div className="rounded-[16px] bg-[#F6B93B]/10 p-3 text-center">
+              <Percent className="w-4 h-4 mx-auto text-[#F6B93B] mb-1" />
+              <p className="text-lg font-bold text-[#F6B93B]" dir="ltr">{hr.turnoverRate}%</p>
+              <p className="text-[10px] text-[#F6B93B]">תחלופה</p>
             </div>
           </div>
 
@@ -250,16 +250,16 @@ function StaffingSection({ hr }: { hr: typeof haderaFullReport.hr }) {
               </thead>
               <tbody>
                 {hr.staffing.map((row, i) => (
-                  <tr key={i} className="border-b border-gray-50 hover:bg-gray-50/50">
+                  <tr key={i} className="border-b border-warm-divider hover:bg-[#FDF8F6]">
                     <td className="py-1.5 font-medium">{row.role}</td>
                     <td className="py-1.5 text-center tabular-nums" dir="ltr">{row.authorized}</td>
                     <td className="py-1.5 text-center tabular-nums" dir="ltr">{row.actual}</td>
                     <td className="py-1.5 text-center" dir="ltr">
                       <span className={`inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
                         row.gap > 0
-                          ? 'bg-emerald-100 text-emerald-700'
+                          ? 'bg-[#2EC4D5]/15 text-[#2EC4D5]'
                           : row.gap < 0
-                            ? 'bg-red-100 text-red-700'
+                            ? 'bg-[#DC4E59]/15 text-[#DC4E59]'
                             : 'bg-gray-100 text-gray-500'
                       }`}>
                         {row.gap > 0 ? <TrendingUp className="w-2.5 h-2.5" /> : row.gap < 0 ? <TrendingDown className="w-2.5 h-2.5" /> : null}
@@ -294,7 +294,7 @@ function MiniSparkline({ data, dataKey, color, label, currentValue, suffix = '' 
   suffix?: string
 }) {
   return (
-    <div className="p-3 rounded-xl bg-gray-50/80 border border-gray-100">
+    <div className="p-3 rounded-xl bg-[#FDF8F6] border border-warm-border">
       <div className="flex items-baseline justify-between mb-1">
         <span className="text-xs text-muted-foreground">{label}</span>
         <span className="text-sm font-bold tabular-nums" style={{ color }} dir="ltr">{currentValue}{suffix}</span>
@@ -318,10 +318,10 @@ function MonthlyOpsGrid({ data }: { data: MonthlyDetail[] }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.7, duration: 0.5 }}
     >
-      <Card className="border-0 shadow-md h-full">
+      <Card className="border-warm-border rounded-[16px] h-full">
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-teal-500 to-emerald-600 flex items-center justify-center">
+            <div className="w-7 h-7 rounded-[10px] flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #2EC4D5, #5DD8E3)' }}>
               <Eye className="w-4 h-4 text-white" />
             </div>
             מגמות תפעוליות — 12 חודשים
@@ -370,11 +370,11 @@ function ExpenseSummary({ expenses }: { expenses: typeof haderaFullReport.expens
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.8 }}
     >
-      <Card className="border-0 shadow-md">
+      <Card className="border-warm-border rounded-[16px]">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <CardTitle className="text-base flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center">
+              <div className="w-7 h-7 rounded-[10px] flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #DC4E59, #E8777F)' }}>
                 <Beef className="w-4 h-4 text-white" />
               </div>
               סיכום הוצאות תפעוליות
@@ -388,7 +388,7 @@ function ExpenseSummary({ expenses }: { expenses: typeof haderaFullReport.expens
           {sorted.map((exp, i) => (
             <div key={i} className="flex items-center gap-2">
               <span className="text-xs w-28 text-right shrink-0 text-muted-foreground">{exp.name}</span>
-              <div className="flex-1 relative h-4 bg-gray-50 rounded overflow-hidden">
+              <div className="flex-1 relative h-4 bg-[#FDF8F6] rounded-[4px] overflow-hidden border border-warm-border">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${(exp.currentMonth / maxExpense) * 100}%` }}
@@ -716,7 +716,7 @@ function StoreManagerPage() {
           <Badge variant="outline" className="text-xs">דצמבר 2025</Badge>
         </div>
         {view !== 'overview' && (
-          <h2 className="text-lg font-bold text-slate-700">{VIEW_TITLES[view] ?? ''}</h2>
+          <h2 className="text-lg font-bold text-[#2D3748]">{VIEW_TITLES[view] ?? ''}</h2>
         )}
       </div>
 

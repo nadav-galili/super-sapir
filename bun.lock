@@ -4,8 +4,8 @@
     "": {
       "name": "supersapir",
       "dependencies": {
-        "@fontsource-variable/noto-sans-hebrew": "^5.2.8",
-        "@fontsource/cousine": "^5.2.7",
+        "@fontsource-variable/rubik": "^5.2.8",
+        "@fontsource/fira-code": "^5.2.7",
         "@radix-ui/react-direction": "^1.1.1",
         "@tanstack/react-router": "^1.167.5",
         "@tanstack/react-table": "^8.21.3",
@@ -159,9 +159,9 @@
 
     "@eslint/plugin-kit": ["@eslint/plugin-kit@0.4.1", "", { "dependencies": { "@eslint/core": "^0.17.0", "levn": "^0.4.1" } }, "sha512-43/qtrDUokr7LJqoF2c3+RInu/t4zfrpYdoSDfYyhg52rwLV6TnOvdG4fXm7IkSB3wErkcmJS9iEhjVtOSEjjA=="],
 
-    "@fontsource-variable/noto-sans-hebrew": ["@fontsource-variable/noto-sans-hebrew@5.2.8", "", {}, "sha512-km22GjnWdDcHExbnbzVQWsgwWWFglny2TPHAm9SITmW3lYhDPFumnbZxAfSFmRZafuXkm0NCcLfaxQG1koB2tw=="],
+    "@fontsource-variable/rubik": ["@fontsource-variable/rubik@5.2.8", "", {}, "sha512-vGDExLzB4a2Fj9mca5LqNoA2ZKcU9o+x5FEBLte/nxYkCB9hOQwZS6ZlItUv+Ssn7YMzKauGuI/Po+YueFuZbg=="],
 
-    "@fontsource/cousine": ["@fontsource/cousine@5.2.7", "", {}, "sha512-2l6qNHghWeQDGqaR1QmS8iR1YWzhZczcVQpR/MJVNSKE8bELI6v2Rqe+d4pFfG+5PY9QhvZ+aKriqlbKubcR8g=="],
+    "@fontsource/fira-code": ["@fontsource/fira-code@5.2.7", "", {}, "sha512-tnB9NNund9TwIym8/7DMJe573nlPEQb+fKUV5GL8TBYXjIhDvL0D7mgmNVNQUPhXp+R7RylQeiBdkA4EbOHPGQ=="],
 
     "@humanfs/core": ["@humanfs/core@0.19.1", "", {}, "sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA=="],
 

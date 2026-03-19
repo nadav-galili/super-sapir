@@ -7,7 +7,6 @@ import {
   Package, Users, LayoutGrid, Receipt, ShieldCheck, BarChart3, Bell,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { Separator } from '@/components/ui/separator'
 
 const generalNavItems = [
   { to: '/', label: 'סקירה כללית', icon: LayoutDashboard },
@@ -44,16 +43,16 @@ export function Sidebar() {
     return (
       <Link to={to}>
         <motion.div
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.99 }}
           className={cn(
-            'flex items-center gap-3 px-3 py-2 rounded-lg transition-colors cursor-pointer',
+            'flex items-center gap-3 px-3 py-2 rounded-[10px] transition-colors cursor-pointer',
             isActive
-              ? 'bg-slate-800 text-white font-medium'
-              : 'text-muted-foreground hover:bg-accent hover:text-foreground'
+              ? 'bg-[#DC4E59]/8 text-[#DC4E59] font-medium'
+              : 'text-[#4A5568] hover:bg-[#FDF8F6] hover:text-[#2D3748]'
           )}
         >
-          <Icon className={cn('w-4.5 h-4.5 shrink-0', collapsed && 'mx-auto')} />
+          <Icon className={cn('w-[18px] h-[18px] shrink-0', collapsed && 'mx-auto')} />
           <AnimatePresence mode="wait">
             {!collapsed && (
               <motion.span
@@ -77,18 +76,15 @@ export function Sidebar() {
     const isActive = activeView === view
     return (
       <button
-        onClick={() => navigate({
-          to: '/store-manager',
-          search: { view },
-        })}
+        onClick={() => navigate({ to: '/store-manager', search: { view } })}
         className={cn(
-          'flex items-center gap-3 px-3 py-2 rounded-lg transition-all cursor-pointer w-full text-right',
+          'flex items-center gap-3 px-3 py-2 rounded-[10px] transition-all cursor-pointer w-full text-right',
           isActive
-            ? 'bg-teal-50 text-teal-800 font-semibold border border-teal-200'
-            : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
+            ? 'bg-[#DC4E59]/8 text-[#DC4E59] font-semibold border border-[#DC4E59]/15'
+            : 'text-[#4A5568] hover:bg-[#FDF8F6] hover:text-[#2D3748]'
         )}
       >
-        <Icon className={cn('w-4 h-4 shrink-0', collapsed && 'mx-auto', isActive && 'text-teal-600')} />
+        <Icon className={cn('w-4 h-4 shrink-0', collapsed && 'mx-auto')} />
         <AnimatePresence mode="wait">
           {!collapsed && (
             <motion.span
@@ -110,25 +106,20 @@ export function Sidebar() {
       initial={false}
       animate={{ width: collapsed ? 72 : 280 }}
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-      className="fixed top-0 right-0 h-screen bg-white border-s border-border z-40 flex flex-col shadow-sm"
+      className="fixed top-0 right-0 h-screen bg-white border-s border-warm-border z-40 flex flex-col"
     >
       {/* Logo */}
-      <div className="h-14 flex items-center px-4 border-b border-border">
+      <div className="h-14 flex items-center px-4 border-b border-warm-border">
         <AnimatePresence mode="wait">
           {!collapsed ? (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="flex items-center gap-2"
-            >
-              <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-[10px] flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #DC4E59, #E8777F)' }}>
                 <span className="text-white font-bold text-sm">S</span>
               </div>
-              <span className="font-bold text-base text-slate-800">Sapir Analytics</span>
+              <span className="font-bold text-base text-[#2D3748]">Sapir Analytics</span>
             </motion.div>
           ) : (
-            <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center mx-auto">
+            <div className="w-8 h-8 rounded-[10px] flex items-center justify-center mx-auto" style={{ background: 'linear-gradient(135deg, #DC4E59, #E8777F)' }}>
               <span className="text-white font-bold text-sm">S</span>
             </div>
           )}
@@ -138,37 +129,27 @@ export function Sidebar() {
       {/* Collapse toggle */}
       <button
         onClick={() => setCollapsed(!collapsed)}
-        className="absolute -start-3 top-[4.5rem] w-6 h-6 rounded-full bg-white border border-border shadow-sm flex items-center justify-center hover:bg-accent transition-colors"
+        className="absolute -start-3 top-[4.5rem] w-6 h-6 rounded-full bg-white border border-warm-border flex items-center justify-center hover:bg-[#FDF8F6] transition-colors"
       >
-        {collapsed ? <PanelRightOpen className="w-3 h-3" /> : <PanelRightClose className="w-3 h-3" />}
+        {collapsed ? <PanelRightOpen className="w-3 h-3 text-[#A0AEC0]" /> : <PanelRightClose className="w-3 h-3 text-[#A0AEC0]" />}
       </button>
 
-      {/* Main content area */}
+      {/* Main content */}
       <div className="flex-1 overflow-y-auto">
         {isStoreManager ? (
           <>
-            {/* Store Manager Categories */}
             <div className="py-3 px-2">
               {!collapsed && (
-                <p className="px-3 pb-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                  ניווט סניף
-                </p>
+                <p className="px-3 pb-2 text-[10px] font-bold text-[#A0AEC0] uppercase tracking-wider">ניווט סניף</p>
               )}
               <div className="space-y-0.5">
-                {storeCategories.map(cat => (
-                  <CategoryItem key={cat.view} {...cat} />
-                ))}
+                {storeCategories.map(cat => <CategoryItem key={cat.view} {...cat} />)}
               </div>
             </div>
-
-            <Separator className="mx-3" />
-
-            {/* General nav at bottom */}
+            <div className="mx-3 h-px bg-warm-separator" />
             <div className="py-3 px-2">
               {!collapsed && (
-                <p className="px-3 pb-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                  ניווט ראשי
-                </p>
+                <p className="px-3 pb-2 text-[10px] font-bold text-[#A0AEC0] uppercase tracking-wider">ניווט ראשי</p>
               )}
               <div className="space-y-0.5">
                 {generalNavItems.map(item => {
@@ -181,7 +162,6 @@ export function Sidebar() {
             </div>
           </>
         ) : (
-          /* Normal navigation */
           <nav className="py-3 px-2 space-y-0.5">
             {generalNavItems.map(item => {
               const isActive = item.to === '/'
@@ -194,13 +174,11 @@ export function Sidebar() {
       </div>
 
       {/* Footer */}
-      <div className="p-3 border-t border-border">
+      <div className="p-3 border-t border-warm-border">
         <AnimatePresence mode="wait">
           {!collapsed && (
             <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="text-[10px] text-muted-foreground text-center">
-              דצמבר 2025
-            </motion.p>
+              className="text-[11px] text-[#A0AEC0] text-center">דצמבר 2025</motion.p>
           )}
         </AnimatePresence>
       </div>

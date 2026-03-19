@@ -1,41 +1,39 @@
 import { Link } from '@tanstack/react-router'
 import { motion } from 'motion/react'
-import { type LucideIcon } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { type LucideIcon, ArrowLeft } from 'lucide-react'
 
 interface RoleCardProps {
   title: string
   description: string
   icon: LucideIcon
   to: string
-  gradient: string
+  accentColor: string
   delay?: number
 }
 
-export function RoleCard({ title, description, icon: Icon, to, gradient, delay = 0 }: RoleCardProps) {
+export function RoleCard({ title, description, icon: Icon, to, accentColor, delay = 0 }: RoleCardProps) {
   return (
     <Link to={to}>
       <motion.div
-        initial={{ opacity: 0, y: 30 }}
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: delay / 1000, type: 'spring', stiffness: 300, damping: 24 }}
-        whileHover={{ scale: 1.03, boxShadow: '0 12px 40px rgba(0,0,0,0.15)' }}
-        whileTap={{ scale: 0.98 }}
-        className={cn(
-          'relative overflow-hidden rounded-2xl p-8 text-white cursor-pointer shadow-lg h-full',
-        )}
-        style={{ background: gradient }}
+        whileHover={{ y: -3, boxShadow: 'rgba(220, 78, 89, 0.08) 0px 12px 32px' }}
+        whileTap={{ scale: 0.99 }}
+        className="relative overflow-hidden rounded-[16px] p-6 bg-white border border-warm-border cursor-pointer h-full transition-shadow"
       >
-        <div className="relative z-10">
-          <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center mb-4">
-            <Icon className="w-7 h-7" />
-          </div>
-          <h3 className="text-2xl font-bold mb-2">{title}</h3>
-          <p className="text-sm text-white/80 leading-relaxed">{description}</p>
+        {/* Top accent stripe */}
+        <div className="absolute top-0 right-0 left-0 h-1 rounded-t-[16px]" style={{ background: accentColor }} />
+
+        <div className="w-12 h-12 rounded-[10px] flex items-center justify-center mb-4" style={{ background: `${accentColor}15` }}>
+          <Icon className="w-6 h-6" style={{ color: accentColor }} />
         </div>
-        {/* Decorative elements */}
-        <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full bg-white/10" />
-        <div className="absolute -top-4 -right-4 w-20 h-20 rounded-full bg-white/5" />
+        <h3 className="text-lg font-bold text-[#2D3748] mb-2">{title}</h3>
+        <p className="text-sm text-[#A0AEC0] leading-relaxed mb-4">{description}</p>
+        <div className="flex items-center gap-1 text-sm font-medium" style={{ color: accentColor }}>
+          <span>צפייה</span>
+          <ArrowLeft className="w-4 h-4" />
+        </div>
       </motion.div>
     </Link>
   )
