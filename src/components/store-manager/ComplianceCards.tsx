@@ -69,7 +69,7 @@ export function ComplianceCards({ compliance }: { compliance: ComplianceData }) 
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <ComplianceItem icon={<RotateCcw className="w-4 h-4" />} label="חזרות" actual={compliance.returns.actual} target={compliance.returns.target} met={compliance.returns.met} ranking={compliance.returns.ranking} delay={0} />
           <ComplianceItem icon={<Package className="w-4 h-4" />} label="מלאי גבוה" actual={compliance.highInventory.actual} target={compliance.highInventory.target} met={compliance.highInventory.met} ranking={compliance.highInventory.ranking} delay={80} />
           <ComplianceItem icon={<Bell className="w-4 h-4" />} label="התראות אדומות" actual={compliance.redAlerts.actual} target={compliance.redAlerts.target} met={compliance.redAlerts.met} ranking={compliance.redAlerts.ranking} detail={`${compliance.redAlerts.redSubscriptions} מנויים אדומים (${compliance.redAlerts.rate}%)`} delay={160} />

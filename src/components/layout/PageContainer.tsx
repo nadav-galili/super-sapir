@@ -12,7 +12,7 @@ export function PageContainer({ children }: PageContainerProps) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
-      className="p-6 space-y-6"
+      className="p-4 sm:p-6 space-y-4 sm:space-y-6"
     >
       {children}
     </motion.div>

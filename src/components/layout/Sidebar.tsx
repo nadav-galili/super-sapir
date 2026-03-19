@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useMatchRoute, useLocation, useNavigate } from '@tanstack/react-router'
 import { motion, AnimatePresence } from 'motion/react'
 import {
   LayoutDashboard, Store, Map, ShoppingCart,
   PanelRightClose, PanelRightOpen,
   Package, Users, LayoutGrid, Receipt, ShieldCheck, BarChart3, Bell,
+  X,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -26,7 +27,12 @@ const storeCategories = [
   { view: 'alerts', label: 'התראות', icon: Bell },
 ] as const
 
-export function Sidebar() {
+interface SidebarProps {
+  mobileOpen?: boolean
+  onMobileClose?: () => void
+}
+
+export function Sidebar({ mobileOpen = false, onMobileClose }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false)
   const matchRoute = useMatchRoute()
   const location = useLocation()
@@ -36,6 +42,11 @@ export function Sidebar() {
   const activeView = isStoreManager
     ? (location.search as Record<string, string>).view || 'overview'
     : null
+
+  // Close mobile sidebar on route change
+  useEffect(() => {
+    onMobileClose?.()
+  }, [location.pathname, location.search, onMobileClose])
 
   function NavItem({ to, label, icon: Icon, isActive }: {
     to: string; label: string; icon: typeof LayoutDashboard; isActive: boolean
@@ -52,9 +63,9 @@ export function Sidebar() {
               : 'text-[#4A5568] hover:bg-[#FDF8F6] hover:text-[#2D3748]'
           )}
         >
-          <Icon className={cn('w-[18px] h-[18px] shrink-0', collapsed && 'mx-auto')} />
+          <Icon className={cn('w-[18px] h-[18px] shrink-0', !mobileOpen && collapsed && 'lg:mx-auto')} />
           <AnimatePresence mode="wait">
-            {!collapsed && (
+            {(mobileOpen || !collapsed) && (
               <motion.span
                 initial={{ opacity: 0, width: 0 }}
                 animate={{ opacity: 1, width: 'auto' }}
@@ -84,9 +95,9 @@ export function Sidebar() {
             : 'text-[#4A5568] hover:bg-[#FDF8F6] hover:text-[#2D3748]'
         )}
       >
-        <Icon className={cn('w-4 h-4 shrink-0', collapsed && 'mx-auto')} />
+        <Icon className={cn('w-4 h-4 shrink-0', !mobileOpen && collapsed && 'lg:mx-auto')} />
         <AnimatePresence mode="wait">
-          {!collapsed && (
+          {(mobileOpen || !collapsed) && (
             <motion.span
               initial={{ opacity: 0, width: 0 }}
               animate={{ opacity: 1, width: 'auto' }}
@@ -101,17 +112,12 @@ export function Sidebar() {
     )
   }
 
-  return (
-    <motion.aside
-      initial={false}
-      animate={{ width: collapsed ? 72 : 280 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-      className="fixed top-0 right-0 h-screen bg-white border-s border-warm-border z-40 flex flex-col"
-    >
+  const sidebarContent = (
+    <>
       {/* Logo */}
-      <div className="h-14 flex items-center px-4 border-b border-warm-border">
+      <div className="h-14 flex items-center px-4 border-b border-warm-border justify-between">
         <AnimatePresence mode="wait">
-          {!collapsed ? (
+          {(mobileOpen || !collapsed) ? (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-[10px] flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #DC4E59, #E8777F)' }}>
                 <span className="text-white font-bold text-sm">S</span>
@@ -124,22 +130,23 @@ export function Sidebar() {
             </div>
           )}
         </AnimatePresence>
+        {/* Mobile close button */}
+        {mobileOpen && (
+          <button
+            onClick={onMobileClose}
+            className="lg:hidden p-1 rounded-[10px] text-[#A0AEC0] hover:bg-[#FDF8F6]"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        )}
       </div>
-
-      {/* Collapse toggle */}
-      <button
-        onClick={() => setCollapsed(!collapsed)}
-        className="absolute -start-3 top-[4.5rem] w-6 h-6 rounded-full bg-white border border-warm-border flex items-center justify-center hover:bg-[#FDF8F6] transition-colors"
-      >
-        {collapsed ? <PanelRightOpen className="w-3 h-3 text-[#A0AEC0]" /> : <PanelRightClose className="w-3 h-3 text-[#A0AEC0]" />}
-      </button>
 
       {/* Main content */}
       <div className="flex-1 overflow-y-auto">
         {isStoreManager ? (
           <>
             <div className="py-3 px-2">
-              {!collapsed && (
+              {(mobileOpen || !collapsed) && (
                 <p className="px-3 pb-2 text-[10px] font-bold text-[#A0AEC0] uppercase tracking-wider">ניווט סניף</p>
               )}
               <div className="space-y-0.5">
@@ -148,7 +155,7 @@ export function Sidebar() {
             </div>
             <div className="mx-3 h-px bg-warm-separator" />
             <div className="py-3 px-2">
-              {!collapsed && (
+              {(mobileOpen || !collapsed) && (
                 <p className="px-3 pb-2 text-[10px] font-bold text-[#A0AEC0] uppercase tracking-wider">ניווט ראשי</p>
               )}
               <div className="space-y-0.5">
@@ -176,12 +183,59 @@ export function Sidebar() {
       {/* Footer */}
       <div className="p-3 border-t border-warm-border">
         <AnimatePresence mode="wait">
-          {!collapsed && (
+          {(mobileOpen || !collapsed) && (
             <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               className="text-[11px] text-[#A0AEC0] text-center">דצמבר 2025</motion.p>
           )}
         </AnimatePresence>
       </div>
-    </motion.aside>
+    </>
+  )
+
+  return (
+    <>
+      {/* Desktop sidebar */}
+      <motion.aside
+        initial={false}
+        animate={{ width: collapsed ? 72 : 280 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        className="hidden lg:flex fixed top-0 right-0 h-screen bg-white border-s border-warm-border z-40 flex-col"
+      >
+        {/* Collapse toggle — desktop only */}
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className="absolute -start-3 top-[4.5rem] w-6 h-6 rounded-full bg-white border border-warm-border flex items-center justify-center hover:bg-[#FDF8F6] transition-colors"
+        >
+          {collapsed ? <PanelRightOpen className="w-3 h-3 text-[#A0AEC0]" /> : <PanelRightClose className="w-3 h-3 text-[#A0AEC0]" />}
+        </button>
+        {sidebarContent}
+      </motion.aside>
+
+      {/* Mobile sidebar overlay */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={onMobileClose}
+              className="lg:hidden fixed inset-0 bg-black/30 z-40"
+            />
+            {/* Drawer */}
+            <motion.aside
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className="lg:hidden fixed top-0 right-0 h-screen w-[280px] bg-white border-s border-warm-border z-50 flex flex-col"
+            >
+              {sidebarContent}
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
+    </>
   )
 }

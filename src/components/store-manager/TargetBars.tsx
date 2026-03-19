@@ -27,7 +27,7 @@ function TargetBar({ label, actual, target, vsTarget, ranking, delay = 0 }: Targ
       transition={{ delay: delay / 1000, duration: 0.5 }}
       className="space-y-2"
     >
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-0">
         <div className="flex items-center gap-2">
           <span className="text-sm font-semibold text-[#2D3748]">{label}</span>
           {ranking && (
@@ -37,10 +37,10 @@ function TargetBar({ label, actual, target, vsTarget, ranking, delay = 0 }: Targ
           )}
         </div>
         <div className="flex items-center gap-3 text-sm">
-          <span className="text-[#A0AEC0] tabular-nums font-mono" dir="ltr">
+          <span className="text-[#A0AEC0] tabular-nums font-mono text-xs sm:text-sm" dir="ltr">
             {formatCurrencyShort(actual)} / {formatCurrencyShort(target)}
           </span>
-          <span className={`font-bold tabular-nums font-mono ${vsTarget >= 0 ? 'text-[#2EC4D5]' : 'text-[#DC4E59]'}`} dir="ltr">
+          <span className={`font-bold tabular-nums font-mono text-xs sm:text-sm ${vsTarget >= 0 ? 'text-[#2EC4D5]' : 'text-[#DC4E59]'}`} dir="ltr">
             {vsTarget > 0 ? '+' : ''}{vsTarget}%
           </span>
         </div>

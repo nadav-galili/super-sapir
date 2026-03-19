@@ -45,7 +45,7 @@ function MonthlyComparisonChart({ data }: { data: MonthlyDetail[] }) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div dir="ltr" className="h-[380px]">
+          <div dir="ltr" className="h-[260px] sm:h-[320px] lg:h-[380px]">
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                 <defs>
@@ -128,7 +128,7 @@ function DepartmentBreakdown({ departments }: { departments: DepartmentSales[] }
                         transition={{ delay: 0.6 + i * 0.04 }}
                         className="flex items-center gap-2"
                       >
-                        <span className="text-xs w-24 text-right shrink-0 text-muted-foreground">{dept.name}</span>
+                        <span className="text-xs w-16 sm:w-24 text-right shrink-0 text-muted-foreground truncate">{dept.name}</span>
                         <div className="flex-1 relative h-5 bg-[#FDF8F6] rounded-[4px] overflow-hidden border border-warm-border">
                           <motion.div
                             initial={{ width: 0 }}
@@ -219,7 +219,7 @@ function StaffingSection({ hr }: { hr: typeof haderaFullReport.hr }) {
         </CardHeader>
         <CardContent>
           {/* Summary badges */}
-          <div className="grid grid-cols-3 gap-2 mb-4">
+          <div className="grid grid-cols-3 gap-2 mb-4 sm:grid-cols-3">
             <div className="rounded-[16px] bg-[#2EC4D5]/8 p-3 text-center">
               <UserCheck className="w-4 h-4 mx-auto text-[#6C5CE7] mb-1" />
               <p className="text-lg font-bold text-[#6C5CE7]" dir="ltr">{hr.authorized}</p>
@@ -328,7 +328,7 @@ function MonthlyOpsGrid({ data }: { data: MonthlyDetail[] }) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <MiniSparkline data={data} dataKey="qualityScore" color="#0891b2" label="ציון איכות" currentValue={String(last.qualityScore)} />
             <MiniSparkline data={data} dataKey="salaryCostPercent" color="#be185d" label="עלות שכר %" currentValue={String(last.salaryCostPercent)} suffix="%" />
             <MiniSparkline data={data} dataKey="supplyRate" color="#059669" label="אחוז אספקה" currentValue={String(last.supplyRate)} suffix="%" />
@@ -387,7 +387,7 @@ function ExpenseSummary({ expenses }: { expenses: typeof haderaFullReport.expens
         <CardContent className="space-y-2">
           {sorted.map((exp, i) => (
             <div key={i} className="flex items-center gap-2">
-              <span className="text-xs w-28 text-right shrink-0 text-muted-foreground">{exp.name}</span>
+              <span className="text-xs w-16 sm:w-28 text-right shrink-0 text-muted-foreground truncate">{exp.name}</span>
               <div className="flex-1 relative h-4 bg-[#FDF8F6] rounded-[4px] overflow-hidden border border-warm-border">
                 <motion.div
                   initial={{ width: 0 }}
@@ -632,7 +632,7 @@ function QualityView({ report }: { report: Report }) {
   return (
     <>
       <KPIGrid items={kpis} />
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <QualityGauge
           score={ops.qualityScore.current}
           maxScore={100}
@@ -705,15 +705,15 @@ function StoreManagerPage() {
   return (
     <PageContainer key={`${selectedBranchId}-${view}`}>
       {/* Branch Selector */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
           <Select
             options={branchOptions}
             value={selectedBranchId}
             onChange={e => setSelectedBranchId(e.target.value)}
-            className="w-64"
+            className="w-full sm:w-64"
           />
-          <Badge variant="outline" className="text-xs">דצמבר 2025</Badge>
+          <Badge variant="outline" className="text-xs w-fit">דצמבר 2025</Badge>
         </div>
         {view !== 'overview' && (
           <h2 className="text-lg font-bold text-[#2D3748]">{VIEW_TITLES[view] ?? ''}</h2>

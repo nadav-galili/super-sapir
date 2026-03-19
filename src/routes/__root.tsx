@@ -1,3 +1,4 @@
+import { useState, useCallback } from 'react'
 import { createRootRoute, Outlet, useMatches } from '@tanstack/react-router'
 import { DirectionProvider } from '@radix-ui/react-direction'
 import { AnimatePresence } from 'motion/react'
@@ -16,13 +17,15 @@ function RootLayout() {
   const currentPath = matches[matches.length - 1]?.pathname ?? '/'
   const basePath = '/' + (currentPath.split('/')[1] ?? '')
   const title = pageTitles[basePath] ?? 'Sapir Analytics'
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const closeMobile = useCallback(() => setMobileOpen(false), [])
 
   return (
     <DirectionProvider dir="rtl">
       <div className="min-h-screen bg-[#FDF8F6]">
-        <Sidebar />
-        <div className="ms-[280px] transition-all duration-300 relative z-[1]">
-          <Header title={title} />
+        <Sidebar mobileOpen={mobileOpen} onMobileClose={closeMobile} />
+        <div className="lg:ms-[280px] transition-all duration-300 relative z-[1]">
+          <Header title={title} onMenuToggle={() => setMobileOpen(o => !o)} />
           <main>
             <AnimatePresence mode="wait">
               <Outlet />
