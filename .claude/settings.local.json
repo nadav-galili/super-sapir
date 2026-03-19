@@ -3,7 +3,8 @@
     "allow": [
       "WebSearch",
       "Bash(bun --version)",
-      "Bash(bun run:*)"
+      "Bash(bun run:*)",
+      "mcp__plugin_compound-engineering_pw__browser_evaluate"
     ]
   }
 }

@@ -7,8 +7,8 @@ import {
   BarChart as ReBarChart,
 } from 'recharts'
 import {
-  ShieldCheck, TrendingUp, TrendingDown, Beef, Eye, MessageSquare,
-  ShoppingCart as CartIcon, Users, UserCheck, UserMinus, Percent,
+  ShieldCheck, TrendingUp, TrendingDown, Beef, Eye,
+  ShoppingCart as CartIcon, Users, UserCheck, Percent,
 } from 'lucide-react'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { KPIGrid } from '@/components/dashboard/KPIGrid'
@@ -23,9 +23,8 @@ import { TargetBars } from '@/components/store-manager/TargetBars'
 import { ComplianceCards } from '@/components/store-manager/ComplianceCards'
 import { haderaFullReport, type DepartmentSales, type MonthlyDetail } from '@/data/hadera-real'
 import { allBranches } from '@/data/mock-branches'
-import { COMPETITORS } from '@/data/constants'
-import { formatCurrencyShort, formatNumber } from '@/lib/format'
-import { getGrowthColor, CHART_COLORS } from '@/lib/colors'
+import { formatCurrencyShort } from '@/lib/format'
+import { CHART_COLORS } from '@/lib/colors'
 import type { KPICardData } from '@/data/types'
 
 // ─── Monthly Sales Comparison Chart ──────────────────────────────
@@ -415,136 +414,324 @@ function ExpenseSummary({ expenses }: { expenses: typeof haderaFullReport.expens
 // ═══════════════════════════════════════════════════════════════════
 // MAIN PAGE
 // ═══════════════════════════════════════════════════════════════════
-function StoreManagerPage() {
-  const [selectedBranchId, setSelectedBranchId] = useState('hadera-44')
-  const report = haderaFullReport
+function seededValue(seed: number, offset: number) {
+  const raw = Math.sin(seed * 12.9898 + offset * 78.233) * 43758.5453
+  return raw - Math.floor(raw)
+}
+
+function seededInt(seed: number, offset: number, min: number, max: number) {
+  return Math.round(min + seededValue(seed, offset) * (max - min))
+}
+
+function seededFloat(seed: number, offset: number, min: number, max: number, digits = 1) {
+  return +(min + seededValue(seed, offset) * (max - min)).toFixed(digits)
+}
+
+function seededBool(seed: number, offset: number, threshold = 0.5) {
+  return seededValue(seed, offset) > threshold
+}
+
+// ─── Adapt a generic Branch into the full report shape ────────────
+function branchToFullReport(branch: typeof allBranches[0]): typeof haderaFullReport {
+  const m = branch.metrics
+  const seed = branch.branchNumber * 1000 + branch.id.length * 37
+
+  return {
+    info: {
+      branchNumber: branch.branchNumber,
+      name: branch.name,
+      manager: 'מנהל סניף',
+      divisionManager: 'מנהל אזור',
+      hasInternet: true,
+      grade: m.qualityScore >= 80 ? 'A' : m.qualityScore >= 60 ? 'B' : 'C',
+      sellingArea: seededInt(seed, 1, 2500, 4000),
+      revenuePerMeter: Math.round(m.totalSales / 3000),
+    },
+    sales: {
+      network: { current: m.networkSales, lastYear: Math.round(m.networkSales * 0.95), target: Math.round(m.networkSales * 1.05), monthlyAvg2025: m.networkSales, ranking: seededInt(seed, 2, 20, 50), yoyChange: m.yoyGrowth, vsTarget: +(m.yoyGrowth - 5).toFixed(1) },
+      internet: { current: m.internetSales, lastYear: Math.round(m.internetSales * 1.1), target: Math.round(m.internetSales * 1.08), monthlyAvg2025: m.internetSales, ranking: seededInt(seed, 3, 5, 20), yoyChange: seededFloat(seed, 4, -12, 3), vsTarget: seededFloat(seed, 5, -12, -2) },
+      total: { current: m.totalSales, lastYear: Math.round(m.totalSales * 0.97), target: Math.round(m.totalSales * 1.05), monthlyAvg2025: m.totalSales, yoyChange: m.yoyGrowth, vsTarget: +(m.yoyGrowth - 5).toFixed(1) },
+      avgBasket: { current: m.avgBasket, change: seededFloat(seed, 6, -2, 8), ranking: seededInt(seed, 7, 8, 24) },
+      customers: { current: m.customersPerDay * 26, target: m.customersPerDay * 25, change: seededFloat(seed, 8, -3, 5), ranking: seededInt(seed, 9, 18, 34) },
+      revenuePerMeter: { ranking: seededInt(seed, 10, 18, 42), change: seededFloat(seed, 11, -8, 4) },
+    },
+    targets: { revenueToStore: 3000, salaryCostTarget: 7.5, qualityTarget: 85 },
+    operations: {
+      qualityScore: { current: m.qualityScore, target: 85, ranking: seededInt(seed, 12, 30, 50) },
+      freshQualityScore: { current: seededInt(seed, 13, 85, 100) },
+      supplyRate: { current: m.supplyRate, shopperPercent: 88, ranking: 10 },
+      internetSupplyProducts: { ordered: 0, actualPercent: 40 },
+      meatWaste: m.meatWastePercent,
+      fishWaste: 0,
+      customerComplaints: { current: m.complaints, target: 5 },
+      focusReports: { current: 4, target: 10 },
+      shopperUsage: { ramiLevy: 33, shufersal: 18 },
+      annualWaste: { amount: Math.round(m.totalSales * 0.004), percent: 0.4, prev2024: Math.round(m.totalSales * 0.003), prev2023: Math.round(m.totalSales * 0.005) },
+    },
+    compliance: {
+      highInventory: { target: 60, actual: seededInt(seed, 14, 55, 75), met: seededBool(seed, 15), ranking: seededInt(seed, 16, 20, 50) },
+      missingActivities: { fixedTarget: 120, timeTarget: 131, actual: seededInt(seed, 17, 110, 140), deviation: seededInt(seed, 18, 8, 18), met: seededBool(seed, 19), ranking: seededInt(seed, 20, 15, 45) },
+      returns: { target: 100, advancePercent: 90, timeTarget: 90, actual: seededInt(seed, 21, 95, 105), met: seededBool(seed, 22, 0.4), ranking: seededInt(seed, 23, 1, 41) },
+      redAlerts: { target: 40, actual: seededInt(seed, 24, 30, 50), redSubscriptions: seededInt(seed, 25, 15, 30), rate: seededInt(seed, 26, 10, 15), met: seededBool(seed, 27), ranking: seededInt(seed, 28, 20, 55) },
+    },
+    hr: {
+      authorized: m.totalEmployees - seededInt(seed, 29, 0, 8),
+      actual: m.totalEmployees,
+      salaryCostPercent: m.salaryCostPercent,
+      salaryTarget: 7.5,
+      productivityRanking: seededInt(seed, 30, 30, 55),
+      turnoverRate: seededInt(seed, 31, 60, 90),
+      turnoverRanking: seededInt(seed, 32, 20, 45),
+      recruitmentTotal: seededInt(seed, 33, 50, 90),
+      placementCompanyPercent: seededInt(seed, 34, 15, 25),
+      salaryExpense: { current: Math.round(m.totalSales * m.salaryCostPercent / 100), monthlyAvg2025: Math.round(m.totalSales * 0.08), monthlyAvg2024: Math.round(m.totalSales * 0.075) },
+      salaryPercentOfRevenue: { current: m.salaryCostPercent, target: 7.5, threeYearAvg: [m.salaryCostPercent, 7.8, 7.5] },
+      staffing: [
+        { role: 'צוות ניהולי', authorized: 5, actual: 4.5, gap: -0.5 },
+        { role: 'ירקות', authorized: 8, actual: 9, gap: 1 },
+        { role: 'מחסן', authorized: 7, actual: 8, gap: 1 },
+        { role: 'סדרנות', authorized: 20, actual: 22, gap: 2 },
+        { role: 'קופה/ית', authorized: 10, actual: 9, gap: -1 },
+      ],
+    },
+    departments: branch.departments.map(d => ({
+      id: d.id,
+      name: d.name,
+      category: (['vegetables', 'fresh-chef', 'fresh-meat', 'fresh-fish', 'deli', 'pastries'].includes(d.id) ? 'fresh' : ['grocery', 'bread', 'drinks', 'frozen', 'dairy', 'organic'].includes(d.id) ? 'food' : 'nonfood') as 'fresh' | 'food' | 'nonfood',
+      currentMonth: d.sales,
+      yearToDate: Math.round(d.sales * 1.05),
+      yoyChangePercent: d.yoyChange,
+      sharePercent: d.sharePercent,
+      targetSharePercent: d.targetShare,
+      shareChangePercent: +(d.sharePercent - d.targetShare).toFixed(1),
+    })),
+    monthly: branch.monthlyTrends.map(t => ({
+      month: t.month,
+      monthNum: t.monthNum,
+      currentSales: t.totalSales,
+      lastYearSales: Math.round(t.totalSales * 0.97),
+      yoyChange: seededFloat(seed + t.monthNum, 35, -4, 8),
+      businessDaysImpact: seededFloat(seed + t.monthNum, 36, -3, 3),
+      salaryCostPercent: seededFloat(seed + t.monthNum, 37, 7, 9.5),
+      supplyRate: seededInt(seed + t.monthNum, 38, 88, 96),
+      shopperUsage: seededInt(seed + t.monthNum, 39, 25, 35),
+      qualityScore: seededInt(seed + t.monthNum, 40, 60, 90),
+      freshQualityScore: seededInt(seed + t.monthNum, 41, 70, 100),
+      focusReports: seededInt(seed + t.monthNum, 42, 0, 15),
+      customerComplaints: seededInt(seed + t.monthNum, 43, 0, 6),
+      meatWastePercent: seededFloat(seed + t.monthNum, 44, 0, 8),
+    })),
+    expenses: [
+      { name: 'שכר', currentMonth: Math.round(m.totalSales * m.salaryCostPercent / 100), monthlyAvg2025: Math.round(m.totalSales * 0.08), monthlyAvg2024: Math.round(m.totalSales * 0.075), percentOfRevenue: m.salaryCostPercent },
+      { name: 'שכר דירה, אריזה', currentMonth: Math.round(m.totalSales * 0.035), monthlyAvg2025: Math.round(m.totalSales * 0.035), monthlyAvg2024: Math.round(m.totalSales * 0.033), percentOfRevenue: 3.5 },
+      { name: 'חשמל', currentMonth: Math.round(m.totalSales * 0.006), monthlyAvg2025: Math.round(m.totalSales * 0.006), monthlyAvg2024: Math.round(m.totalSales * 0.006), percentOfRevenue: 0.6 },
+      { name: 'שמירה', currentMonth: Math.round(m.totalSales * 0.003), monthlyAvg2025: Math.round(m.totalSales * 0.003), monthlyAvg2024: Math.round(m.totalSales * 0.003), percentOfRevenue: 0.3 },
+    ],
+  }
+}
+
+const branchOptions = allBranches.map(b => ({
+  value: b.id,
+  label: `${b.name} #${b.branchNumber}`,
+}))
+
+// ─── View-specific content renderers ─────────────────────────────
+type Report = typeof haderaFullReport
+
+function OverviewView({ report }: { report: Report }) {
   const s = report.sales
-
-  const branchOptions = allBranches.map(b => ({
-    value: b.id,
-    label: `${b.name} #${b.branchNumber}`,
-  }))
-
   const kpis: KPICardData[] = [
     { label: 'סה"כ מכירות', value: s.total.current, format: 'currencyShort', trend: s.total.yoyChange, trendLabel: 'שנתי', gradient: 'green' },
     { label: 'מכירות רשת', value: s.network.current, format: 'currencyShort', trend: s.network.yoyChange, trendLabel: 'שנתי', gradient: 'blue' },
     { label: 'מכירות אינטרנט', value: s.internet.current, format: 'currencyShort', trend: s.internet.yoyChange, trendLabel: 'שנתי', gradient: 'purple' },
     { label: 'סל ממוצע (ללא מע"מ)', value: s.avgBasket.current, format: 'currency', trend: s.avgBasket.change, trendLabel: 'שנתי', gradient: 'teal' },
     { label: 'ציון איכות', value: report.operations.qualityScore.current, format: 'number', trend: -17.6, trendLabel: 'יעד: 85', gradient: 'orange' },
-    { label: 'עלות שכר %', value: 8, format: 'number', trend: 0.9, trendLabel: 'יעד: 7.5%', gradient: 'pink' },
+    { label: 'עלות שכר %', value: Math.round(report.hr.salaryCostPercent), format: 'number', trend: 0.9, trendLabel: 'יעד: 7.5%', gradient: 'pink' },
   ]
+  return (
+    <>
+      <KPIGrid items={kpis} columns={6} />
+      <TargetBars sales={report.sales} />
+      <MonthlyComparisonChart data={report.monthly} />
+    </>
+  )
+}
+
+function InventoryView({ report }: { report: Report }) {
+  const ops = report.operations
+  const kpis: KPICardData[] = [
+    { label: 'אחוז אספקה', value: ops.supplyRate.current, format: 'number', trend: 1.0, trendLabel: 'שנתי', gradient: 'green' },
+    { label: 'פריטי מלאי גבוה', value: report.compliance.highInventory.actual, format: 'number', trend: report.compliance.highInventory.met ? 0 : -11.7, trendLabel: `יעד: ${report.compliance.highInventory.target}`, gradient: 'orange' },
+    { label: 'חסרי פעילות', value: report.compliance.missingActivities.actual, format: 'number', trend: -report.compliance.missingActivities.deviation, trendLabel: `יעד: ${report.compliance.missingActivities.timeTarget}`, gradient: 'red' },
+    { label: 'אספקת אינטרנט %', value: Math.round(ops.internetSupplyProducts.actualPercent), format: 'number', trend: ops.internetSupplyProducts.actualPercent, trendLabel: '% מוצרים', gradient: 'blue' },
+  ]
+  return (
+    <>
+      <KPIGrid items={kpis} />
+      <ComplianceCards compliance={report.compliance} />
+    </>
+  )
+}
+
+function HRView({ report }: { report: Report }) {
+  const hr = report.hr
+  const kpis: KPICardData[] = [
+    { label: 'תקן עובדים', value: hr.authorized, format: 'number', trend: 0, trendLabel: '', gradient: 'blue' },
+    { label: 'עובדים בפועל', value: hr.actual, format: 'number', trend: ((hr.actual - hr.authorized) / hr.authorized) * 100, trendLabel: 'מעל תקן', gradient: 'green' },
+    { label: 'עלות שכר %', value: Math.round(hr.salaryCostPercent), format: 'number', trend: 0.9, trendLabel: `יעד: ${hr.salaryTarget}%`, gradient: 'pink' },
+    { label: 'תחלופה שנתית', value: Math.round(hr.turnoverRate), format: 'number', trend: -2.3, trendLabel: `דירוג #${hr.turnoverRanking}`, gradient: 'orange' },
+  ]
+  return (
+    <>
+      <KPIGrid items={kpis} />
+      <StaffingSection hr={hr} />
+    </>
+  )
+}
+
+function DepartmentsView({ report }: { report: Report }) {
+  const bestDept = report.departments.reduce((a, b) => a.yoyChangePercent > b.yoyChangePercent ? a : b)
+  const worstDept = report.departments.reduce((a, b) => a.yoyChangePercent < b.yoyChangePercent ? a : b)
+  const kpis: KPICardData[] = [
+    { label: 'מחלקות פעילות', value: report.departments.length, format: 'number', trend: 0, trendLabel: '', gradient: 'blue' },
+    { label: `מוביל: ${bestDept.name}`, value: Math.round(bestDept.yoyChangePercent), format: 'number', trend: bestDept.yoyChangePercent, trendLabel: 'צמיחה', gradient: 'green' },
+    { label: `נחלש: ${worstDept.name}`, value: Math.abs(Math.round(worstDept.yoyChangePercent)), format: 'number', trend: worstDept.yoyChangePercent, trendLabel: 'ירידה', gradient: 'red' },
+  ]
+  return (
+    <>
+      <KPIGrid items={kpis} columns={3} />
+      <DepartmentBreakdown departments={report.departments} />
+    </>
+  )
+}
+
+function CostsView({ report }: { report: Report }) {
+  const totalExpenses = report.expenses.reduce((s, e) => s + e.currentMonth, 0)
+  const kpis: KPICardData[] = [
+    { label: 'הכנסות', value: report.sales.total.current, format: 'currencyShort', trend: report.sales.total.yoyChange, trendLabel: 'שנתי', gradient: 'green' },
+    { label: 'סה"כ הוצאות', value: totalExpenses, format: 'currencyShort', trend: 3.1, trendLabel: 'שנתי', gradient: 'red' },
+    { label: 'יחס הוצאות', value: 11, format: 'number', trend: -0.5, trendLabel: '% מהכנסות', gradient: 'orange' },
+    { label: 'הוצאת שכר', value: report.hr.salaryExpense.current, format: 'currencyShort', trend: 0.9, trendLabel: `${report.hr.salaryCostPercent}%`, gradient: 'pink' },
+  ]
+  return (
+    <>
+      <KPIGrid items={kpis} />
+      <ExpenseSummary expenses={report.expenses} />
+    </>
+  )
+}
+
+function QualityView({ report }: { report: Report }) {
+  const ops = report.operations
+  const kpis: KPICardData[] = [
+    { label: 'ציון איכות', value: ops.qualityScore.current, format: 'number', trend: -17.6, trendLabel: `יעד: ${ops.qualityScore.target}`, gradient: 'orange' },
+    { label: 'איכות טרי', value: ops.freshQualityScore.current, format: 'number', trend: 3.4, trendLabel: '', gradient: 'green' },
+    { label: 'פחת בשר %', value: Math.round(ops.meatWaste * 10), format: 'number', trend: -2.1, trendLabel: '', gradient: 'red' },
+    { label: 'תלונות לקוחות', value: ops.customerComplaints.current, format: 'number', trend: 0, trendLabel: `יעד: ${ops.customerComplaints.target}`, gradient: 'teal' },
+  ]
+  return (
+    <>
+      <KPIGrid items={kpis} />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <QualityGauge
+          score={ops.qualityScore.current}
+          maxScore={100}
+          title={`ציון איכות (דירוג #${ops.qualityScore.ranking})`}
+        />
+        <OperationsStatsCard operations={ops} />
+      </div>
+    </>
+  )
+}
+
+function ReportsView({ report }: { report: Report }) {
+  return (
+    <>
+      <MonthlyComparisonChart data={report.monthly} />
+      <MonthlyOpsGrid data={report.monthly} />
+    </>
+  )
+}
+
+function AlertsView({ report }: { report: Report }) {
+  const kpis: KPICardData[] = [
+    { label: 'התראות אדומות', value: report.compliance.redAlerts.actual, format: 'number', trend: -10, trendLabel: `יעד: ${report.compliance.redAlerts.target}`, gradient: 'red' },
+    { label: 'מנויים אדומים', value: report.compliance.redAlerts.redSubscriptions, format: 'number', trend: -report.compliance.redAlerts.rate, trendLabel: '', gradient: 'orange' },
+    { label: 'דיווחי מוקד', value: report.operations.focusReports.current, format: 'number', trend: -50, trendLabel: `יעד: ${report.operations.focusReports.target}`, gradient: 'purple' },
+  ]
+  return (
+    <>
+      <KPIGrid items={kpis} columns={3} />
+      <ComplianceCards compliance={report.compliance} />
+    </>
+  )
+}
+
+const VIEW_TITLES: Record<string, string> = {
+  overview: 'סקירה כללית',
+  inventory: 'מלאי',
+  hr: 'כח אדם',
+  departments: 'מחלקות',
+  costs: 'הוצאות ועלויות',
+  quality: 'בקרת איכות',
+  reports: 'דוחות',
+  alerts: 'התראות',
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// MAIN PAGE
+// ═══════════════════════════════════════════════════════════════════
+function StoreManagerPage() {
+  const { view } = Route.useSearch()
+  const [selectedBranchId, setSelectedBranchId] = useState('hadera-44')
+
+  const isHadera = selectedBranchId === 'hadera-44'
+  const branch = allBranches.find(b => b.id === selectedBranchId) ?? allBranches[0]
+  const report = isHadera ? haderaFullReport : branchToFullReport(branch)
+
+  const renderView = () => {
+    switch (view) {
+      case 'inventory': return <InventoryView report={report} />
+      case 'hr': return <HRView report={report} />
+      case 'departments': return <DepartmentsView report={report} />
+      case 'costs': return <CostsView report={report} />
+      case 'quality': return <QualityView report={report} />
+      case 'reports': return <ReportsView report={report} />
+      case 'alerts': return <AlertsView report={report} />
+      default: return <OverviewView report={report} />
+    }
+  }
 
   return (
-    <PageContainer>
+    <PageContainer key={`${selectedBranchId}-${view}`}>
       {/* Branch Selector */}
-      <div className="flex items-center gap-3">
-        <Select
-          options={branchOptions}
-          value={selectedBranchId}
-          onChange={e => setSelectedBranchId(e.target.value)}
-          className="w-64"
-        />
-        <Badge variant="outline" className="text-xs">דצמבר 2025</Badge>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Select
+            options={branchOptions}
+            value={selectedBranchId}
+            onChange={e => setSelectedBranchId(e.target.value)}
+            className="w-64"
+          />
+          <Badge variant="outline" className="text-xs">דצמבר 2025</Badge>
+        </div>
+        {view !== 'overview' && (
+          <h2 className="text-lg font-bold text-slate-700">{VIEW_TITLES[view] ?? ''}</h2>
+        )}
       </div>
 
       {/* Branch Info Header */}
       <BranchInfoBar info={report.info} />
 
-      {/* KPI Cards */}
-      <KPIGrid items={kpis} columns={6} />
-
-      {/* Target Achievement */}
-      <TargetBars sales={report.sales} />
-
-      {/* Monthly Sales Comparison */}
-      <MonthlyComparisonChart data={report.monthly} />
-
-      {/* Department Breakdown + Operations Panel */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-        <div className="lg:col-span-3">
-          <DepartmentBreakdown departments={report.departments} />
-        </div>
-        <div className="lg:col-span-2 space-y-6">
-          <QualityGauge
-            score={report.operations.qualityScore.current}
-            maxScore={100}
-            title={`ציון איכות (יעד: ${report.operations.qualityScore.target}, דירוג #${report.operations.qualityScore.ranking})`}
-          />
-          <OperationsStatsCard operations={report.operations} />
-        </div>
-      </div>
-
-      {/* HR + Monthly Operations + Compliance */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <StaffingSection hr={report.hr} />
-        <div className="space-y-6">
-          <ComplianceCards compliance={report.compliance} />
-          <MonthlyOpsGrid data={report.monthly} />
-        </div>
-      </div>
-
-      {/* Expense Summary */}
-      <ExpenseSummary expenses={report.expenses} />
-
-      {/* Competitor Comparison */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.9 }}
-      >
-        <Card className="border-0 shadow-md">
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center">
-                <MessageSquare className="w-4 h-4 text-white" />
-              </div>
-              השוואת מתחרים
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b">
-                    <th className="px-4 py-2 text-right font-medium text-muted-foreground">מתחרה</th>
-                    <th className="px-4 py-2 text-right font-medium text-muted-foreground">סל ממוצע</th>
-                    <th className="px-4 py-2 text-right font-medium text-muted-foreground">ציון איכות</th>
-                    <th className="px-4 py-2 text-right font-medium text-muted-foreground">מדד מחירים</th>
-                    <th className="px-4 py-2 text-right font-medium text-muted-foreground">נתח שוק</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="border-b bg-blue-50/50 font-medium">
-                    <td className="px-4 py-2.5">
-                      <span className="flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-blue-500" />
-                        רמי לוי (אנחנו)
-                      </span>
-                    </td>
-                    <td className="px-4 py-2.5" dir="ltr">₪{report.sales.avgBasket.current}</td>
-                    <td className="px-4 py-2.5" dir="ltr">{report.operations.qualityScore.current}</td>
-                    <td className="px-4 py-2.5" dir="ltr">96</td>
-                    <td className="px-4 py-2.5" dir="ltr">18%</td>
-                  </tr>
-                  {COMPETITORS.map(c => (
-                    <tr key={c.id} className="border-b hover:bg-accent/50 transition-colors">
-                      <td className="px-4 py-2.5">{c.name}</td>
-                      <td className="px-4 py-2.5" dir="ltr">₪{c.avgBasket}</td>
-                      <td className="px-4 py-2.5" dir="ltr">{c.qualityScore}</td>
-                      <td className="px-4 py-2.5" dir="ltr">{c.priceIndex}</td>
-                      <td className="px-4 py-2.5" dir="ltr">{c.marketShare}%</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
+      {/* View Content */}
+      {renderView()}
     </PageContainer>
   )
 }
 
 export const Route = createFileRoute('/store-manager/')({
   component: StoreManagerPage,
+  validateSearch: (search: Record<string, unknown>) => ({
+    view: (search.view as string) || 'overview',
+  }),
 })

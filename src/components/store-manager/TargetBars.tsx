@@ -90,6 +90,34 @@ export function TargetBars({ sales }: { sales: SalesData }) {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-5">
+          {/* Legend */}
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[11px] text-muted-foreground pb-2 border-b border-dashed border-gray-200">
+            <span className="flex items-center gap-1.5">
+              <span className="w-3 h-2 rounded-sm bg-gradient-to-l from-emerald-500 to-teal-400" />
+              עמד ביעד (≥95%)
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-3 h-2 rounded-sm bg-gradient-to-l from-amber-500 to-orange-400" />
+              קרוב ליעד (85-95%)
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-3 h-2 rounded-sm bg-gradient-to-l from-red-500 to-rose-400" />
+              מתחת ליעד (&lt;85%)
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 font-medium">#N</span>
+              דירוג ברשת
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="font-semibold text-foreground">X ₪ / Y ₪</span>
+              בפועל / יעד חודשי
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="font-bold text-red-500">-N%</span>
+              סטייה מהיעד
+            </span>
+          </div>
+
           <TargetBar
             label='סה"כ מכירות'
             actual={sales.total.current}

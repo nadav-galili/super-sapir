@@ -1,4 +1,6 @@
 @import '@fontsource-variable/noto-sans-hebrew';
+@import '@fontsource/cousine/400.css';
+@import '@fontsource/cousine/700.css';
 
 @tailwind base;
 @tailwind components;
@@ -48,6 +50,50 @@
 .leaflet-control-attribution {
   left: 0 !important;
   right: auto !important;
+}
+
+/* Dashboard background — dot grid + gradient orbs */
+.dashboard-bg {
+  position: relative;
+  background-color: #f7f8fb;
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(100, 116, 139, 0.28) 1px, transparent 0);
+  background-size: 28px 28px;
+}
+
+.dashboard-bg::before,
+.dashboard-bg::after {
+  content: '';
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(90px);
+  z-index: 0;
+  animation: float-orb 25s ease-in-out infinite;
+}
+
+.dashboard-bg::before {
+  width: 700px;
+  height: 700px;
+  top: -100px;
+  right: 5%;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.18) 0%, rgba(139, 92, 246, 0.10) 40%, transparent 70%);
+}
+
+.dashboard-bg::after {
+  width: 800px;
+  height: 800px;
+  bottom: -150px;
+  left: 0;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.14) 0%, rgba(14, 165, 233, 0.08) 40%, transparent 70%);
+  animation-delay: -12s;
+  animation-direction: reverse;
+}
+
+@keyframes float-orb {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(40px, -25px) scale(1.08); }
+  66% { transform: translate(-30px, 20px) scale(0.92); }
 }
 
 /* Scrollbar styling */

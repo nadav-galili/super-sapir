@@ -19,9 +19,9 @@ function RootLayout() {
 
   return (
     <DirectionProvider dir="rtl">
-      <div className="min-h-screen bg-gray-50/50">
+      <div className="min-h-screen dashboard-bg">
         <Sidebar />
-        <div className="me-[280px] transition-all duration-300">
+        <div className="ms-[280px] transition-all duration-300 relative z-[1]">
           <Header title={title} />
           <main>
             <AnimatePresence mode="wait">

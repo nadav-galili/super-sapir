@@ -13,6 +13,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ['"Noto Sans Hebrew Variable"', 'sans-serif'],
+        mono: ['Cousine', '"Noto Sans Hebrew Variable"', 'monospace'],
       },
       colors: {
         border: 'hsl(var(--border))',
