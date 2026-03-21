@@ -20,7 +20,6 @@ export interface BranchInfo {
   name: string
   manager: string
   divisionManager: string
-  hasInternet: boolean
   grade: string
   sellingArea: number // sqm, no warehouse
   revenuePerMeter: number
@@ -28,7 +27,6 @@ export interface BranchInfo {
 
 export interface SalesData {
   network: { current: number; lastYear: number; target: number; monthlyAvg2025: number; ranking: number; yoyChange: number; vsTarget: number }
-  internet: { current: number; lastYear: number; target: number; monthlyAvg2025: number; ranking: number; yoyChange: number; vsTarget: number }
   total: { current: number; lastYear: number; target: number; monthlyAvg2025: number; yoyChange: number; vsTarget: number }
   avgBasket: { current: number; change: number; ranking: number }
   customers: { current: number; target: number; change: number; ranking: number }
@@ -45,7 +43,6 @@ export interface OperationsData {
   qualityScore: { current: number; target: number; ranking: number }
   freshQualityScore: { current: number }
   supplyRate: { current: number; shopperPercent: number; ranking: number }
-  internetSupplyProducts: { ordered: number; actualPercent: number }
   meatWaste: number
   fishWaste: number
   customerComplaints: { current: number; target: number }
@@ -130,7 +127,6 @@ export const haderaFullReport: BranchFullReport = {
     name: 'חדרה',
     manager: 'מרטין רוח',
     divisionManager: 'גיא רייף',
-    hasInternet: true,
     grade: 'A',
     sellingArea: 3080,
     revenuePerMeter: 5090,
@@ -145,15 +141,6 @@ export const haderaFullReport: BranchFullReport = {
       ranking: 25,
       yoyChange: 5.8,
       vsTarget: -0.2,
-    },
-    internet: {
-      current: 5_314_914,
-      lastYear: 6_314_014,
-      target: 6_510_000,
-      monthlyAvg2025: 4_845_615,
-      ranking: 2,
-      yoyChange: -15.8,
-      vsTarget: -18.4,
     },
     total: {
       current: 15_218_076,
@@ -178,7 +165,6 @@ export const haderaFullReport: BranchFullReport = {
     qualityScore: { current: 70, target: 85, ranking: 45 },
     freshQualityScore: { current: 88 },
     supplyRate: { current: 96, shopperPercent: 89, ranking: 8 },
-    internetSupplyProducts: { ordered: 0, actualPercent: 38.6 },
     meatWaste: 7.1,
     fishWaste: 0,
     customerComplaints: { current: 2, target: 2 },
@@ -289,6 +275,5 @@ export const privateLabelData = {
 // 3-year revenue comparison
 export const threeYearRevenue = {
   network: { y2025: 9_804_904, y2024: 10_005_532, y2023: 10_187_228 },
-  internet: { y2025: 4_845_615, y2024: 5_173_198, y2023: 5_460_350 },
-  total: { y2025: 14_650_519, y2024: 15_178_729, y2023: 15_647_578 },
+  total: { y2025: 9_804_904, y2024: 10_005_532, y2023: 10_187_228 },
 }

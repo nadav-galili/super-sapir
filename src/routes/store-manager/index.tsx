@@ -442,14 +442,12 @@ function branchToFullReport(branch: typeof allBranches[0]): typeof haderaFullRep
       name: branch.name,
       manager: 'מנהל סניף',
       divisionManager: 'מנהל אזור',
-      hasInternet: true,
       grade: m.qualityScore >= 80 ? 'A' : m.qualityScore >= 60 ? 'B' : 'C',
       sellingArea: seededInt(seed, 1, 2500, 4000),
       revenuePerMeter: Math.round(m.totalSales / 3000),
     },
     sales: {
       network: { current: m.networkSales, lastYear: Math.round(m.networkSales * 0.95), target: Math.round(m.networkSales * 1.05), monthlyAvg2025: m.networkSales, ranking: seededInt(seed, 2, 20, 50), yoyChange: m.yoyGrowth, vsTarget: +(m.yoyGrowth - 5).toFixed(1) },
-      internet: { current: m.internetSales, lastYear: Math.round(m.internetSales * 1.1), target: Math.round(m.internetSales * 1.08), monthlyAvg2025: m.internetSales, ranking: seededInt(seed, 3, 5, 20), yoyChange: seededFloat(seed, 4, -12, 3), vsTarget: seededFloat(seed, 5, -12, -2) },
       total: { current: m.totalSales, lastYear: Math.round(m.totalSales * 0.97), target: Math.round(m.totalSales * 1.05), monthlyAvg2025: m.totalSales, yoyChange: m.yoyGrowth, vsTarget: +(m.yoyGrowth - 5).toFixed(1) },
       avgBasket: { current: m.avgBasket, change: seededFloat(seed, 6, -2, 8), ranking: seededInt(seed, 7, 8, 24) },
       customers: { current: m.customersPerDay * 26, target: m.customersPerDay * 25, change: seededFloat(seed, 8, -3, 5), ranking: seededInt(seed, 9, 18, 34) },
@@ -460,7 +458,6 @@ function branchToFullReport(branch: typeof allBranches[0]): typeof haderaFullRep
       qualityScore: { current: m.qualityScore, target: 85, ranking: seededInt(seed, 12, 30, 50) },
       freshQualityScore: { current: seededInt(seed, 13, 85, 100) },
       supplyRate: { current: m.supplyRate, shopperPercent: 88, ranking: 10 },
-      internetSupplyProducts: { ordered: 0, actualPercent: 40 },
       meatWaste: m.meatWastePercent,
       fishWaste: 0,
       customerComplaints: { current: m.complaints, target: 5 },
@@ -538,22 +535,304 @@ const branchOptions = allBranches.map(b => ({
 // ─── View-specific content renderers ─────────────────────────────
 type Report = typeof haderaFullReport
 
+// ─── Overview: Branch Performance Card ──────────────────────────
+function BranchPerformanceCard({ report }: { report: Report }) {
+  const items = [
+    { label: 'אחוז אספקה', value: `${report.operations.supplyRate.current}%`, change: -6, sub: 'כולל חלופיים' },
+    { label: 'ציון בקרת איכות', value: String(report.operations.qualityScore.current), change: -17.6, sub: 'מתוך 100' },
+    { label: 'הכנסות למ"ר', value: `₪${report.info.revenuePerMeter.toLocaleString()}`, change: null, sub: `שטח: ${report.info.sellingArea.toLocaleString()} מ"ר` },
+    { label: 'אחוז עלות שכר', value: `${report.hr.salaryCostPercent}%`, change: -0.7, sub: `יעד: ${report.hr.salaryTarget}%` },
+  ]
+  return (
+    <Card className="border-warm-border rounded-[16px]">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base text-[#2D3748]">ביצועי סניף</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-2 gap-3">
+          {items.map(item => (
+            <div key={item.label} className="rounded-xl bg-[#FDF8F6] p-4 text-center">
+              <p className="text-xs text-[#A0AEC0] mb-1.5">{item.label}</p>
+              <div className="flex items-center justify-center gap-1.5">
+                <span className="text-2xl font-bold text-[#2D3748] font-mono" dir="ltr">{item.value}</span>
+                {item.change !== null && (
+                  <span className={`text-xs font-semibold ${item.change >= 0 ? 'text-[#2EC4D5]' : 'text-[#DC4E59]'}`} dir="ltr">
+                    {item.change > 0 ? '▲' : '▼'}{Math.abs(item.change)}%
+                  </span>
+                )}
+              </div>
+              <p className="text-[11px] text-[#A0AEC0] mt-1">{item.sub}</p>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+// ─── Overview: Expense Table ────────────────────────────────────
+function OverviewExpenseTable({ expenses, totalRevenue }: { expenses: typeof haderaFullReport.expenses; totalRevenue: number }) {
+  const sorted = [...expenses].sort((a, b) => b.currentMonth - a.currentMonth).slice(0, 7)
+  const totalExpenses = expenses.reduce((s, e) => s + e.currentMonth, 0)
+  const barColors = ['#DC4E59', '#6C5CE7', '#F6B93B', '#2EC4D5', '#42a5f5', '#DC4E59', '#A0AEC0']
+
+  return (
+    <Card className="border-warm-border rounded-[16px]">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base text-[#2D3748]">הוצאות תפעוליות (ממוצע חודשי)</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-warm-divider">
+              <th className="text-right text-xs font-medium text-[#A0AEC0] py-2.5 px-1">סעיף</th>
+              <th className="text-right text-xs font-medium text-[#A0AEC0] py-2.5 px-1">סכום (₪)</th>
+              <th className="text-right text-xs font-medium text-[#A0AEC0] py-2.5 px-1">% מהכנסות</th>
+              <th className="text-right text-xs font-medium text-[#A0AEC0] py-2.5 px-1">שינוי</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sorted.map((exp, i) => {
+              const pctChange = exp.monthlyAvg2024 > 0 ? Math.round(((exp.currentMonth - exp.monthlyAvg2024) / exp.monthlyAvg2024) * 100) : 0
+              return (
+                <tr key={i} className="border-b border-warm-divider hover:bg-[#FDF8F6]">
+                  <td className="py-2.5 px-1 text-[#4A5568] text-xs">{exp.name}</td>
+                  <td className="py-2.5 px-1 font-semibold text-xs tabular-nums" dir="ltr">{exp.currentMonth.toLocaleString()}</td>
+                  <td className="py-2.5 px-1 text-xs">
+                    <div className="flex items-center gap-1.5">
+                      <span className="tabular-nums" dir="ltr">{exp.percentOfRevenue}%</span>
+                      <div className="h-1.5 bg-[#FDF8F6] rounded-full w-16 overflow-hidden border border-warm-border">
+                        <div className="h-full rounded-full" style={{ width: `${Math.min(exp.percentOfRevenue * 10, 100)}%`, background: barColors[i] }} />
+                      </div>
+                    </div>
+                  </td>
+                  <td className="py-2.5 px-1">
+                    {pctChange !== 0 ? (
+                      <span className={`inline-block text-[10px] font-medium px-2 py-0.5 rounded-[12px] ${
+                        pctChange > 0 ? 'bg-[#DC4E59]/10 text-[#DC4E59]' : 'bg-[#2EC4D5]/10 text-[#2EC4D5]'
+                      }`} dir="ltr">
+                        {pctChange > 0 ? '+' : ''}{pctChange}%
+                      </span>
+                    ) : (
+                      <span className="inline-block text-[10px] font-medium px-2 py-0.5 rounded-[12px] bg-[#2EC4D5]/10 text-[#2EC4D5]">קבוע</span>
+                    )}
+                  </td>
+                </tr>
+              )
+            })}
+            <tr className="border-t-2 border-warm-separator font-bold">
+              <td className="py-2.5 px-1 text-[#2D3748] text-xs">סה״כ</td>
+              <td className="py-2.5 px-1 text-xs tabular-nums" dir="ltr">{totalExpenses.toLocaleString()}</td>
+              <td className="py-2.5 px-1 text-xs tabular-nums" dir="ltr">{((totalExpenses / totalRevenue) * 100).toFixed(0)}%</td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+      </CardContent>
+    </Card>
+  )
+}
+
+// ─── Overview: Department Bars ──────────────────────────────────
+const DEPT_BAR_COLORS = [
+  'linear-gradient(90deg, #DC4E59, #E8777F)',
+  'linear-gradient(90deg, #6C5CE7, #8B7FED)',
+  'linear-gradient(90deg, #2EC4D5, #5DD8E3)',
+  'linear-gradient(90deg, #42a5f5, #90caf9)',
+  'linear-gradient(90deg, #F6B93B, #F8CB6B)',
+  'linear-gradient(90deg, #2EC4D5, #80cbc4)',
+  'linear-gradient(90deg, #A0AEC0, #b0bec5)',
+  'linear-gradient(90deg, #DC4E59, #ef9a9a)',
+]
+
+function OverviewDepartmentBars({ departments }: { departments: DepartmentSales[] }) {
+  const sorted = [...departments].sort((a, b) => b.sharePercent - a.sharePercent).slice(0, 8)
+  return (
+    <Card className="border-warm-border rounded-[16px]">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base text-[#2D3748]">נתח מכירות לפי מחלקה</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        {sorted.map((dept, i) => (
+          <div key={dept.id} className="flex items-center gap-2.5">
+            <span className="text-xs w-16 text-right shrink-0 text-[#4A5568]">{dept.name}</span>
+            <div className="flex-1 h-[18px] bg-[#FDF8F6] rounded-[9px] overflow-hidden border border-warm-border">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${dept.sharePercent * 3.5}%` }}
+                transition={{ delay: 0.3 + i * 0.05, duration: 0.8 }}
+                className="h-full rounded-[9px]"
+                style={{ background: DEPT_BAR_COLORS[i] }}
+              />
+            </div>
+            <span className="text-xs font-semibold text-[#2D3748] w-12 text-left tabular-nums font-mono" dir="ltr">{dept.sharePercent}%</span>
+            <span className={`text-[11px] w-14 text-left tabular-nums ${dept.yoyChangePercent >= 0 ? 'text-[#2EC4D5]' : 'text-[#DC4E59]'}`} dir="ltr">
+              {dept.yoyChangePercent > 0 ? '▲' : '▼'} {Math.abs(dept.yoyChangePercent)}%
+            </span>
+          </div>
+        ))}
+      </CardContent>
+    </Card>
+  )
+}
+
+// ─── Overview: Alerts & Targets ─────────────────────────────────
+function AlertsTargetsCard({ report }: { report: Report }) {
+  const alerts = [
+    { label: `מלאי גבוה (${report.compliance.highInventory.actual} פריטים, יעד ${report.compliance.highInventory.target})`, met: report.compliance.highInventory.met },
+    { label: `חותמות אדומות (${report.compliance.redAlerts.redSubscriptions}, יעד ${report.compliance.redAlerts.target})`, met: report.compliance.redAlerts.met },
+    { label: `חסרי פעילות (${report.compliance.missingActivities.actual} פריטים, יעד ${report.compliance.missingActivities.fixedTarget})`, met: report.compliance.missingActivities.met },
+    { label: `חזרות (${report.compliance.returns.actual}, יעד ${report.compliance.returns.target})`, met: report.compliance.returns.met },
+    { label: `ציון בקרת איכות (${report.operations.qualityScore.current}, יעד ${report.operations.qualityScore.target})`, met: report.operations.qualityScore.current >= report.operations.qualityScore.target },
+    { label: `אחוז עלות שכר (${report.hr.salaryCostPercent}%, יעד ${report.hr.salaryTarget}%)`, met: report.hr.salaryCostPercent <= report.hr.salaryTarget },
+    { label: `פחת בשר (${report.operations.meatWaste}%)`, met: report.operations.meatWaste <= 5 },
+    { label: `תלונות לקוח (${report.operations.customerComplaints.current} החודש)`, met: report.operations.customerComplaints.current <= report.operations.customerComplaints.target },
+  ]
+
+  return (
+    <Card className="border-warm-border rounded-[16px]">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base text-[#2D3748]">התראות ויעדים</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-0">
+        {alerts.map((alert, i) => (
+          <div key={i} className="flex items-center justify-between py-2.5 border-b border-warm-divider last:border-b-0">
+            <span className="text-xs text-[#4A5568]">{alert.label}</span>
+            <span className="flex items-center gap-1.5 text-xs font-semibold shrink-0">
+              <span className={`w-2.5 h-2.5 rounded-full ${alert.met ? 'bg-[#2EC4D5]' : 'bg-[#DC4E59]'}`} />
+              {alert.met ? 'עמד' : 'לא עמד'}
+            </span>
+          </div>
+        ))}
+      </CardContent>
+    </Card>
+  )
+}
+
+// ─── Overview: HR & Staffing Card ───────────────────────────────
+function OverviewStaffingCard({ hr, monthly }: { hr: Report['hr']; monthly: MonthlyDetail[] }) {
+  return (
+    <Card className="border-warm-border rounded-[16px]">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base text-[#2D3748]">כוח אדם ותחלופה</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-4 gap-2.5 mb-5">
+          {[
+            { label: 'תקן', value: hr.authorized },
+            { label: 'מצבה רישומית', value: hr.actual },
+            { label: 'משרות בפועל', value: hr.actual },
+            { label: 'שעות נוספות', value: hr.salaryExpense.current > 0 ? '2,394' : '0' },
+          ].map(item => (
+            <div key={item.label} className="text-center p-3 rounded-xl bg-[#FDF8F6]">
+              <p className="text-[11px] text-[#A0AEC0] mb-1.5">{item.label}</p>
+              <p className="text-xl font-bold text-[#2D3748] tabular-nums" dir="ltr">{item.value}</p>
+            </div>
+          ))}
+        </div>
+        <div>
+          <p className="text-sm font-semibold text-[#2D3748] mb-3">תחלופת עובדים (שנתי)</p>
+          <div dir="ltr" className="h-[160px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <ReBarChart
+                data={[
+                  { year: '2023', rate: 81.6, monthly: 7.8 },
+                  { year: '2024', rate: 81.6, monthly: 6.7 },
+                  { year: '2025', rate: hr.turnoverRate, monthly: 6.7 },
+                ]}
+                barGap={4}
+              >
+                <XAxis dataKey="year" tick={{ fontSize: 11 }} />
+                <YAxis tick={{ fontSize: 10 }} tickFormatter={(v: number) => `${v}%`} />
+                <Tooltip
+                  formatter={(value, name) => [`${value}%`, name === 'rate' ? 'שיעור תחלופה שנתי' : 'עזיבה חודשית ממוצעת']}
+                  contentStyle={{ direction: 'rtl', borderRadius: '10px', border: '1px solid #FFE8DE', fontSize: 12 }}
+                />
+                <Bar dataKey="rate" radius={[6, 6, 0, 0]} barSize={28}>
+                  <Cell fill="rgba(108, 92, 231, 0.2)" stroke="#6C5CE7" strokeWidth={2} />
+                  <Cell fill="rgba(108, 92, 231, 0.3)" stroke="#6C5CE7" strokeWidth={2} />
+                  <Cell fill="rgba(220, 78, 89, 0.4)" stroke="#DC4E59" strokeWidth={2} />
+                </Bar>
+                <Line type="monotone" dataKey="monthly" stroke="#42a5f5" strokeWidth={2} dot={{ r: 4, fill: '#42a5f5' }} />
+              </ReBarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+// ─── Overview: Quality Trends Chart ─────────────────────────────
+function QualityTrendsChart({ data }: { data: MonthlyDetail[] }) {
+  return (
+    <Card className="border-warm-border rounded-[16px]">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base text-[#2D3748]">מגמות חודשיות — ציוני איכות ואספקה</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div dir="ltr" className="h-[220px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.04)" />
+              <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#4A5568' }} />
+              <YAxis domain={[60, 100]} tick={{ fontSize: 11, fill: '#A0AEC0' }} />
+              <Tooltip
+                formatter={(value, name) => {
+                  const labels: Record<string, string> = { qualityScore: 'ציון בקרת איכות', supplyRate: 'אחוז אספקה', salaryCostPercent: 'אחוז עלות שכר (x10)' }
+                  return [value, labels[name as string] ?? name]
+                }}
+                contentStyle={{ direction: 'rtl', borderRadius: '10px', border: '1px solid #FFE8DE', fontSize: 12 }}
+              />
+              <Legend formatter={(v: string) => {
+                const labels: Record<string, string> = { qualityScore: 'ציון בקרת איכות', supplyRate: 'אחוז אספקה', salaryCostPercent: 'אחוז עלות שכר (x10)' }
+                return labels[v] ?? v
+              }} />
+              <Line type="monotone" dataKey="qualityScore" stroke="#DC4E59" strokeWidth={2.5} dot={{ r: 4, fill: '#DC4E59' }} fill="rgba(220,78,89,0.08)" />
+              <Line type="monotone" dataKey="supplyRate" stroke="#42a5f5" strokeWidth={2.5} dot={{ r: 4, fill: '#42a5f5' }} />
+              <Line type="monotone" dataKey="salaryCostPercent" stroke="#F6B93B" strokeWidth={2} strokeDasharray="5 5" dot={{ r: 3, fill: '#F6B93B' }} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
 function OverviewView({ report }: { report: Report }) {
   const s = report.sales
   const kpis: KPICardData[] = [
-    { label: 'סה"כ מכירות', value: s.total.current, format: 'currencyShort', trend: s.total.yoyChange, trendLabel: 'שנתי', gradient: 'green' },
-    { label: 'מכירות רשת', value: s.network.current, format: 'currencyShort', trend: s.network.yoyChange, trendLabel: 'שנתי', gradient: 'blue' },
-    { label: 'מכירות אינטרנט', value: s.internet.current, format: 'currencyShort', trend: s.internet.yoyChange, trendLabel: 'שנתי', gradient: 'purple' },
-    { label: 'סל ממוצע (ללא מע"מ)', value: s.avgBasket.current, format: 'currency', trend: s.avgBasket.change, trendLabel: 'שנתי', gradient: 'teal' },
-    { label: 'ציון איכות', value: report.operations.qualityScore.current, format: 'number', trend: -17.6, trendLabel: 'יעד: 85', gradient: 'orange' },
-    { label: 'עלות שכר %', value: Math.round(report.hr.salaryCostPercent), format: 'number', trend: 0.9, trendLabel: 'יעד: 7.5%', gradient: 'pink' },
+    { label: 'מכירות רשת', value: s.network.current, format: 'currencyShort', trend: s.network.yoyChange, trendLabel: 'חודש מקביל', gradient: 'blue' },
+    { label: 'סה"כ הכנסות', value: s.total.current, format: 'currencyShort', trend: s.total.yoyChange, trendLabel: 'חודש קודם', gradient: 'green' },
+    { label: 'לקוחות', value: s.customers.current, format: 'number', trend: s.customers.change, trendLabel: `סל ממוצע: ₪${s.avgBasket.current.toLocaleString()}`, gradient: 'pink' },
+    { label: 'סל ממוצע', value: s.avgBasket.current, format: 'currency', trend: s.avgBasket.change, trendLabel: 'שנתי', gradient: 'teal' },
   ]
   return (
-    <>
-      <KPIGrid items={kpis} columns={6} />
-      <TargetBars sales={report.sales} />
-      <MonthlyComparisonChart data={report.monthly} />
-    </>
+    <div className="space-y-5">
+      {/* KPI Cards */}
+      <KPIGrid items={kpis} columns={4} />
+
+      {/* Sales Trends + Branch Performance */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-5">
+        <MonthlyComparisonChart data={report.monthly} />
+        <BranchPerformanceCard report={report} />
+      </div>
+
+      {/* Expenses + Department Breakdown */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-5">
+        <OverviewExpenseTable expenses={report.expenses} totalRevenue={s.total.current} />
+        <OverviewDepartmentBars departments={report.departments} />
+      </div>
+
+      {/* Alerts + HR Staffing */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-5">
+        <AlertsTargetsCard report={report} />
+        <OverviewStaffingCard hr={report.hr} monthly={report.monthly} />
+      </div>
+
+      {/* Quality Trends - Full Width */}
+      <QualityTrendsChart data={report.monthly} />
+    </div>
   )
 }
 
@@ -563,7 +842,6 @@ function InventoryView({ report }: { report: Report }) {
     { label: 'אחוז אספקה', value: ops.supplyRate.current, format: 'number', trend: 1.0, trendLabel: 'שנתי', gradient: 'green' },
     { label: 'פריטי מלאי גבוה', value: report.compliance.highInventory.actual, format: 'number', trend: report.compliance.highInventory.met ? 0 : -11.7, trendLabel: `יעד: ${report.compliance.highInventory.target}`, gradient: 'orange' },
     { label: 'חסרי פעילות', value: report.compliance.missingActivities.actual, format: 'number', trend: -report.compliance.missingActivities.deviation, trendLabel: `יעד: ${report.compliance.missingActivities.timeTarget}`, gradient: 'red' },
-    { label: 'אספקת אינטרנט %', value: Math.round(ops.internetSupplyProducts.actualPercent), format: 'number', trend: ops.internetSupplyProducts.actualPercent, trendLabel: '% מוצרים', gradient: 'blue' },
   ]
   return (
     <>

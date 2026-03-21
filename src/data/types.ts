@@ -13,7 +13,6 @@ export interface Branch {
 export interface BranchMetrics {
   totalSales: number
   networkSales: number
-  internetSales: number
   avgBasket: number
   customersPerDay: number
   qualityScore: number
@@ -43,7 +42,6 @@ export interface MonthlyTrend {
   monthNum: number
   totalSales: number
   networkSales: number
-  internetSales: number
   customers: number
   avgBasket: number
 }

@@ -19,7 +19,7 @@ function BranchDrillDown() {
 
   const kpis: KPICardData[] = [
     { label: 'מכירות כוללות', value: m.totalSales, format: 'currencyShort', trend: m.yoyGrowth, trendLabel: 'שנתי', gradient: 'green' },
-    { label: 'מכירות אינטרנט', value: m.internetSales, format: 'currencyShort', trend: 12.5, trendLabel: 'שנתי', gradient: 'blue' },
+    { label: 'מכירות רשת', value: m.networkSales, format: 'currencyShort', trend: 5.8, trendLabel: 'שנתי', gradient: 'blue' },
     { label: 'סל ממוצע', value: m.avgBasket, format: 'currency', trend: 3.2, trendLabel: 'שנתי', gradient: 'teal' },
     { label: 'לקוחות/יום', value: m.customersPerDay, format: 'number', trend: 1.8, trendLabel: 'שנתי', gradient: 'orange' },
   ]

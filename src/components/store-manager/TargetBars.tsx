@@ -114,7 +114,6 @@ export function TargetBars({ sales }: { sales: SalesData }) {
 
           <TargetBar label='סה"כ מכירות' actual={sales.total.current} target={sales.total.target} vsTarget={sales.total.vsTarget} delay={0} />
           <TargetBar label="מכירות רשת" actual={sales.network.current} target={sales.network.target} vsTarget={sales.network.vsTarget} ranking={sales.network.ranking} delay={120} />
-          <TargetBar label="מכירות אינטרנט" actual={sales.internet.current} target={sales.internet.target} vsTarget={sales.internet.vsTarget} ranking={sales.internet.ranking} delay={240} />
         </CardContent>
       </Card>
     </motion.div>
