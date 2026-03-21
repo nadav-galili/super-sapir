@@ -43,6 +43,7 @@ export interface OperationsData {
   qualityScore: { current: number; target: number; ranking: number }
   freshQualityScore: { current: number }
   supplyRate: { current: number; shopperPercent: number; ranking: number }
+  avgDaysOfInventory: { current: number; target: number }
   meatWaste: number
   fishWaste: number
   customerComplaints: { current: number; target: number }
@@ -90,6 +91,7 @@ export interface DepartmentSales {
   sharePercent: number
   targetSharePercent: number
   shareChangePercent: number
+  avgDaysOfInventory: number
 }
 
 export interface MonthlyDetail {
@@ -165,6 +167,7 @@ export const haderaFullReport: BranchFullReport = {
     qualityScore: { current: 70, target: 85, ranking: 45 },
     freshQualityScore: { current: 88 },
     supplyRate: { current: 96, shopperPercent: 89, ranking: 8 },
+    avgDaysOfInventory: { current: 16, target: 14 },
     meatWaste: 7.1,
     fishWaste: 0,
     customerComplaints: { current: 2, target: 2 },
@@ -214,23 +217,23 @@ export const haderaFullReport: BranchFullReport = {
   },
 
   departments: [
-    // טרי (Fresh)
-    { id: 'vegetables', name: 'ירקות', category: 'fresh', currentMonth: 1_445_717, yearToDate: 1_505_767, yoyChangePercent: 4.2, sharePercent: 15.4, targetSharePercent: 16.0, shareChangePercent: -1.3 },
-    { id: 'fresh-meat', name: 'בשר טרי', category: 'fresh', currentMonth: 229_475, yearToDate: 180_313, yoyChangePercent: -21.4, sharePercent: 2.4, targetSharePercent: 2.7, shareChangePercent: -25.6 },
-    { id: 'fresh-fish', name: 'דגים טריים', category: 'fresh', currentMonth: 71_680, yearToDate: 77_330, yoyChangePercent: 7.9, sharePercent: 0.8, targetSharePercent: 0.8, shareChangePercent: 2.2 },
-    { id: 'deli', name: 'גבינת מעדניה', category: 'fresh', currentMonth: 138_891, yearToDate: 129_129, yoyChangePercent: -7.0, sharePercent: 1.5, targetSharePercent: 1.5, shareChangePercent: -11.9 },
-    { id: 'pastries', name: 'מאפים', category: 'fresh', currentMonth: 139_603, yearToDate: 142_634, yoyChangePercent: 2.2, sharePercent: 1.5, targetSharePercent: 1.5, shareChangePercent: -3.2 },
-    // מזון (Food)
-    { id: 'bread', name: 'לחם ומאפים', category: 'food', currentMonth: 204_117, yearToDate: 233_962, yoyChangePercent: 14.6, sharePercent: 2.2, targetSharePercent: 2.4, shareChangePercent: 8.6 },
-    { id: 'grocery', name: 'מכולת', category: 'food', currentMonth: 2_026_339, yearToDate: 2_103_981, yoyChangePercent: 3.8, sharePercent: 21.6, targetSharePercent: 21.3, shareChangePercent: -1.6 },
-    { id: 'drinks', name: 'שתיה', category: 'food', currentMonth: 878_077, yearToDate: 939_201, yoyChangePercent: 7.0, sharePercent: 9.4, targetSharePercent: 9.5, shareChangePercent: 1.3 },
-    { id: 'frozen', name: 'קפואים', category: 'food', currentMonth: 856_002, yearToDate: 870_403, yoyChangePercent: 1.7, sharePercent: 9.1, targetSharePercent: 8.8, shareChangePercent: -3.7 },
-    { id: 'dairy', name: 'מוצרי חלב', category: 'food', currentMonth: 1_325_976, yearToDate: 1_479_980, yoyChangePercent: 11.6, sharePercent: 14.1, targetSharePercent: 14.9, shareChangePercent: 5.7 },
-    { id: 'organic', name: 'אורגני ובריאות', category: 'food', currentMonth: 84_806, yearToDate: 87_485, yoyChangePercent: 3.2, sharePercent: 0.9, targetSharePercent: 0.9, shareChangePercent: -2.3 },
-    // נון-פוד (Non-Food)
-    { id: 'home-products', name: 'בן-פוד', category: 'nonfood', currentMonth: 962_978, yearToDate: 1_007_346, yoyChangePercent: 4.6, sharePercent: 10.3, targetSharePercent: 10.2, shareChangePercent: -0.9 },
-    { id: 'household', name: 'מוצרים לבית', category: 'nonfood', currentMonth: 330_683, yearToDate: 537_273, yoyChangePercent: 62.5, sharePercent: 3.5, targetSharePercent: 5.4, shareChangePercent: 53.9 },
-    { id: 'baby', name: 'תינוקות', category: 'nonfood', currentMonth: 163_196, yearToDate: 198_797, yoyChangePercent: 21.8, sharePercent: 1.7, targetSharePercent: 2.0, shareChangePercent: 15.4 },
+    // טרי (Fresh) — lower inventory days (perishable)
+    { id: 'vegetables', name: 'ירקות', category: 'fresh', currentMonth: 1_445_717, yearToDate: 1_505_767, yoyChangePercent: 4.2, sharePercent: 15.4, targetSharePercent: 16.0, shareChangePercent: -1.3, avgDaysOfInventory: 4 },
+    { id: 'fresh-meat', name: 'בשר טרי', category: 'fresh', currentMonth: 229_475, yearToDate: 180_313, yoyChangePercent: -21.4, sharePercent: 2.4, targetSharePercent: 2.7, shareChangePercent: -25.6, avgDaysOfInventory: 3 },
+    { id: 'fresh-fish', name: 'דגים טריים', category: 'fresh', currentMonth: 71_680, yearToDate: 77_330, yoyChangePercent: 7.9, sharePercent: 0.8, targetSharePercent: 0.8, shareChangePercent: 2.2, avgDaysOfInventory: 2 },
+    { id: 'deli', name: 'גבינת מעדניה', category: 'fresh', currentMonth: 138_891, yearToDate: 129_129, yoyChangePercent: -7.0, sharePercent: 1.5, targetSharePercent: 1.5, shareChangePercent: -11.9, avgDaysOfInventory: 5 },
+    { id: 'pastries', name: 'מאפים', category: 'fresh', currentMonth: 139_603, yearToDate: 142_634, yoyChangePercent: 2.2, sharePercent: 1.5, targetSharePercent: 1.5, shareChangePercent: -3.2, avgDaysOfInventory: 2 },
+    // מזון (Food) — mid-range
+    { id: 'bread', name: 'לחם ומאפים', category: 'food', currentMonth: 204_117, yearToDate: 233_962, yoyChangePercent: 14.6, sharePercent: 2.2, targetSharePercent: 2.4, shareChangePercent: 8.6, avgDaysOfInventory: 3 },
+    { id: 'grocery', name: 'מכולת', category: 'food', currentMonth: 2_026_339, yearToDate: 2_103_981, yoyChangePercent: 3.8, sharePercent: 21.6, targetSharePercent: 21.3, shareChangePercent: -1.6, avgDaysOfInventory: 18 },
+    { id: 'drinks', name: 'שתיה', category: 'food', currentMonth: 878_077, yearToDate: 939_201, yoyChangePercent: 7.0, sharePercent: 9.4, targetSharePercent: 9.5, shareChangePercent: 1.3, avgDaysOfInventory: 21 },
+    { id: 'frozen', name: 'קפואים', category: 'food', currentMonth: 856_002, yearToDate: 870_403, yoyChangePercent: 1.7, sharePercent: 9.1, targetSharePercent: 8.8, shareChangePercent: -3.7, avgDaysOfInventory: 25 },
+    { id: 'dairy', name: 'מוצרי חלב', category: 'food', currentMonth: 1_325_976, yearToDate: 1_479_980, yoyChangePercent: 11.6, sharePercent: 14.1, targetSharePercent: 14.9, shareChangePercent: 5.7, avgDaysOfInventory: 8 },
+    { id: 'organic', name: 'אורגני ובריאות', category: 'food', currentMonth: 84_806, yearToDate: 87_485, yoyChangePercent: 3.2, sharePercent: 0.9, targetSharePercent: 0.9, shareChangePercent: -2.3, avgDaysOfInventory: 15 },
+    // נון-פוד (Non-Food) — higher inventory days
+    { id: 'home-products', name: 'נון-פוד', category: 'nonfood', currentMonth: 962_978, yearToDate: 1_007_346, yoyChangePercent: 4.6, sharePercent: 10.3, targetSharePercent: 10.2, shareChangePercent: -0.9, avgDaysOfInventory: 28 },
+    { id: 'household', name: 'מוצרים לבית', category: 'nonfood', currentMonth: 330_683, yearToDate: 537_273, yoyChangePercent: 62.5, sharePercent: 3.5, targetSharePercent: 5.4, shareChangePercent: 53.9, avgDaysOfInventory: 32 },
+    { id: 'baby', name: 'תינוקות', category: 'nonfood', currentMonth: 163_196, yearToDate: 198_797, yoyChangePercent: 21.8, sharePercent: 1.7, targetSharePercent: 2.0, shareChangePercent: 15.4, avgDaysOfInventory: 30 },
   ],
 
   monthly: [

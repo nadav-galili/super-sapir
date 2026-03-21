@@ -29,7 +29,7 @@ export const haderaBranch: Branch = {
     { id: 'vegetables', name: 'ירקות', sales: 1_445_717, sharePercent: 15.4, targetShare: 16.0, yoyChange: 4.2, isPrivateLabel: false },
     { id: 'grocery', name: 'מכולת', sales: 2_026_339, sharePercent: 21.6, targetShare: 21.3, yoyChange: 3.8, isPrivateLabel: false },
     { id: 'dairy', name: 'מוצרי חלב', sales: 1_325_976, sharePercent: 14.1, targetShare: 14.9, yoyChange: 11.6, isPrivateLabel: false },
-    { id: 'home-products', name: 'בן-פוד', sales: 962_978, sharePercent: 10.3, targetShare: 10.2, yoyChange: 4.6, isPrivateLabel: false },
+    { id: 'home-products', name: 'נון-פוד', sales: 962_978, sharePercent: 10.3, targetShare: 10.2, yoyChange: 4.6, isPrivateLabel: false },
     { id: 'drinks', name: 'שתיה', sales: 878_077, sharePercent: 9.4, targetShare: 9.5, yoyChange: 7.0, isPrivateLabel: false },
     { id: 'frozen', name: 'קפואים', sales: 856_002, sharePercent: 9.1, targetShare: 8.8, yoyChange: 1.7, isPrivateLabel: false },
     { id: 'household', name: 'מוצרים לבית', sales: 330_683, sharePercent: 3.5, targetShare: 5.4, yoyChange: 62.5, isPrivateLabel: false },

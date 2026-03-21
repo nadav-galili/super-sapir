@@ -498,6 +498,7 @@ function branchToFullReport(branch: typeof allBranches[0]): typeof haderaFullRep
       qualityScore: { current: m.qualityScore, target: 85, ranking: seededInt(seed, 12, 30, 50) },
       freshQualityScore: { current: seededInt(seed, 13, 85, 100) },
       supplyRate: { current: m.supplyRate, shopperPercent: 88, ranking: 10 },
+      avgDaysOfInventory: { current: seededInt(seed, 50, 10, 22), target: 14 },
       meatWaste: m.meatWastePercent,
       fishWaste: 0,
       customerComplaints: { current: m.complaints, target: 5 },
@@ -531,17 +532,22 @@ function branchToFullReport(branch: typeof allBranches[0]): typeof haderaFullRep
         { role: 'קופה/ית', authorized: 10, actual: 9, gap: -1 },
       ],
     },
-    departments: branch.departments.map(d => ({
-      id: d.id,
-      name: d.name,
-      category: (['vegetables', 'fresh-meat', 'fresh-fish', 'deli', 'pastries'].includes(d.id) ? 'fresh' : ['grocery', 'bread', 'drinks', 'frozen', 'dairy', 'organic'].includes(d.id) ? 'food' : 'nonfood') as 'fresh' | 'food' | 'nonfood',
-      currentMonth: d.sales,
-      yearToDate: Math.round(d.sales * 1.05),
-      yoyChangePercent: d.yoyChange,
-      sharePercent: d.sharePercent,
-      targetSharePercent: d.targetShare,
-      shareChangePercent: +(d.sharePercent - d.targetShare).toFixed(1),
-    })),
+    departments: branch.departments.map((d, i) => {
+      const cat = (['vegetables', 'fresh-meat', 'fresh-fish', 'deli', 'pastries'].includes(d.id) ? 'fresh' : ['grocery', 'bread', 'drinks', 'frozen', 'dairy', 'organic'].includes(d.id) ? 'food' : 'nonfood') as 'fresh' | 'food' | 'nonfood'
+      const daysBase = cat === 'fresh' ? 3 : cat === 'food' ? 14 : 25
+      return {
+        id: d.id,
+        name: d.name,
+        category: cat,
+        currentMonth: d.sales,
+        yearToDate: Math.round(d.sales * 1.05),
+        yoyChangePercent: d.yoyChange,
+        sharePercent: d.sharePercent,
+        targetSharePercent: d.targetShare,
+        shareChangePercent: +(d.sharePercent - d.targetShare).toFixed(1),
+        avgDaysOfInventory: seededInt(seed, 60 + i, Math.max(1, daysBase - 4), daysBase + 8),
+      }
+    }),
     monthly: branch.monthlyTrends.map(t => ({
       month: t.month,
       monthNum: t.monthNum,
@@ -834,14 +840,72 @@ function OverviewView({ report }: { report: Report }) {
 function InventoryView({ report }: { report: Report }) {
   const ops = report.operations
   const kpis: KPICardData[] = [
-    { label: 'אחוז אספקה', value: ops.supplyRate.current, format: 'number', trend: 1.0, trendLabel: 'שנתי', gradient: 'green' },
+    { label: 'ימי מלאי ממוצע', value: ops.avgDaysOfInventory.current, format: 'number', trend: ops.avgDaysOfInventory.current <= ops.avgDaysOfInventory.target ? 0 : -Math.round(((ops.avgDaysOfInventory.current - ops.avgDaysOfInventory.target) / ops.avgDaysOfInventory.target) * 100), trendLabel: `יעד: ${ops.avgDaysOfInventory.target} ימים`, gradient: ops.avgDaysOfInventory.current <= ops.avgDaysOfInventory.target ? 'green' : 'red' },
     { label: 'פריטי מלאי גבוה', value: report.compliance.highInventory.actual, format: 'number', trend: report.compliance.highInventory.met ? 0 : -11.7, trendLabel: `יעד: ${report.compliance.highInventory.target}`, gradient: 'orange' },
     { label: 'חסרי פעילות', value: report.compliance.missingActivities.actual, format: 'number', trend: -report.compliance.missingActivities.deviation, trendLabel: `יעד: ${report.compliance.missingActivities.timeTarget}`, gradient: 'red' },
   ]
+  const target = ops.avgDaysOfInventory.target
+  const sorted = [...report.departments].sort((a, b) => b.avgDaysOfInventory - a.avgDaysOfInventory)
+  const maxDays = Math.max(...sorted.map(d => d.avgDaysOfInventory))
+
   return (
     <>
       <KPIGrid items={kpis} />
-      <ComplianceCards compliance={report.compliance} />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <Card className="border-warm-border rounded-[16px]">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base text-[#2D3748]">ימי מלאי ממוצע לפי מחלקה</CardTitle>
+              <Badge variant="secondary" className="text-xs">יעד: {target} ימים</Badge>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {sorted.map(dept => {
+                const overTarget = dept.avgDaysOfInventory > target
+                const barPct = (dept.avgDaysOfInventory / maxDays) * 100
+                const targetPct = (target / maxDays) * 100
+                return (
+                  <div key={dept.id} className="flex items-center gap-2.5">
+                    <span className="text-xs w-24 text-right shrink-0 text-[#4A5568] truncate">{dept.name}</span>
+                    <div className="flex-1 relative h-5 bg-[#FDF8F6] rounded-[4px] overflow-hidden border border-warm-border">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${barPct}%` }}
+                        transition={{ duration: 0.8 }}
+                        className="absolute inset-y-0 right-0 rounded-[4px]"
+                        style={{ background: overTarget ? '#DC4E59' : '#2EC4D5', opacity: 0.7 }}
+                      />
+                      <div
+                        className="absolute top-0 bottom-0 w-px border-r-2 border-dashed border-[#F6B93B]"
+                        style={{ right: `${targetPct}%` }}
+                      />
+                    </div>
+                    <span className={`text-xs font-bold w-12 text-left tabular-nums font-mono ${overTarget ? 'text-[#DC4E59]' : 'text-[#2EC4D5]'}`} dir="ltr">
+                      {dept.avgDaysOfInventory}d
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
+            <div className="flex items-center gap-4 mt-4 pt-3 border-t border-warm-divider text-[11px] text-[#A0AEC0]">
+              <span className="flex items-center gap-1.5">
+                <span className="w-3 h-2 rounded-sm bg-[#2EC4D5]" />
+                תקין (≤{target} ימים)
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-3 h-2 rounded-sm bg-[#DC4E59]" />
+                מעל יעד (&gt;{target} ימים)
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-px h-3 border-r-2 border-dashed border-[#F6B93B]" />
+                קו יעד
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+        <ComplianceCards compliance={report.compliance} />
+      </div>
     </>
   )
 }
@@ -929,7 +993,7 @@ function ReportsView({ report }: { report: Report }) {
 function AlertsView({ report }: { report: Report }) {
   const kpis: KPICardData[] = [
     { label: 'התראות אדומות', value: report.compliance.redAlerts.actual, format: 'number', trend: -10, trendLabel: `יעד: ${report.compliance.redAlerts.target}`, gradient: 'red' },
-    { label: 'מנויים אדומים', value: report.compliance.redAlerts.redSubscriptions, format: 'number', trend: -report.compliance.redAlerts.rate, trendLabel: '', gradient: 'orange' },
+    { label: 'חותמות אדומות', value: report.compliance.redAlerts.redSubscriptions, format: 'number', trend: -report.compliance.redAlerts.rate, trendLabel: '', gradient: 'orange' },
     { label: 'דיווחי מוקד', value: report.operations.focusReports.current, format: 'number', trend: -50, trendLabel: `יעד: ${report.operations.focusReports.target}`, gradient: 'purple' },
   ]
   return (
