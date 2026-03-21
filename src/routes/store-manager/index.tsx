@@ -134,7 +134,7 @@ function DepartmentBreakdown({ departments, anomalies = [] }: { departments: Dep
       <Card className="border-warm-border rounded-[16px]">
         <CardHeader className="pb-3">
           <CardTitle className="text-base text-[#2D3748]">
-            מכירות מחלקות — {MONTHS_HE[REPORT_MONTH - 1]} מול {MONTHS_HE[REPORT_MONTH - 2]} {REPORT_YEAR}
+            מכירות מחלקות — חודשי מול מצטבר {REPORT_YEAR}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -178,8 +178,8 @@ function DepartmentBreakdown({ departments, anomalies = [] }: { departments: Dep
                       <div className="bg-white rounded-[10px] border border-warm-border shadow-lg p-3 text-xs min-w-[180px]" style={{ direction: 'rtl' }}>
                         <p className="font-bold text-[#2D3748] mb-1.5">{dept.name}</p>
                         <div className="space-y-1 text-[#4A5568]">
-                          <div className="flex justify-between"><span>{MONTHS_HE[REPORT_MONTH - 1]}:</span><span className="font-mono font-semibold" dir="ltr">{formatCurrencyShort(dept.currentMonth)}</span></div>
-                          <div className="flex justify-between"><span>{MONTHS_HE[REPORT_MONTH - 2]}:</span><span className="font-mono font-semibold" dir="ltr">{formatCurrencyShort(dept.yearToDate)}</span></div>
+                          <div className="flex justify-between"><span>חודשי:</span><span className="font-mono font-semibold" dir="ltr">{formatCurrencyShort(dept.currentMonth)}</span></div>
+                          <div className="flex justify-between"><span>מצטבר:</span><span className="font-mono font-semibold" dir="ltr">{formatCurrencyShort(dept.yearToDate)}</span></div>
                           <div className="flex justify-between"><span>שינוי שנתי:</span><span className={`font-semibold ${isPositive ? 'text-[#2e7d32]' : 'text-[#c62828]'}`} dir="ltr">{isPositive ? '+' : ''}{dept.yoyChangePercent}%</span></div>
                           <div className="flex justify-between"><span>נתח:</span><span className="font-semibold" dir="ltr">{dept.sharePercent}%</span></div>
                         </div>
@@ -204,11 +204,11 @@ function DepartmentBreakdown({ departments, anomalies = [] }: { departments: Dep
           <div className="flex items-center gap-6 mt-5 pt-3 border-t border-warm-divider text-[11px] text-[#A0AEC0]">
             <span className="flex items-center gap-1.5">
               <span className="w-4 h-3 rounded-sm bg-[#1976d2]" />
-              {MONTHS_HE[REPORT_MONTH - 1]}
+              חודשי
             </span>
             <span className="flex items-center gap-1.5">
               <span className="w-4 h-3 rounded-sm bg-[#1976d2] opacity-30" />
-              {MONTHS_HE[REPORT_MONTH - 2]}
+              מצטבר
             </span>
           </div>
         </CardContent>

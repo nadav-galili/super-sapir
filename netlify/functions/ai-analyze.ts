@@ -47,13 +47,19 @@ export default async (req: Request, _context: Context) => {
     })
   }
 
-  let payload: unknown
+  let body: Record<string, unknown>
   try {
-    const body = await req.json()
-    payload = body.payload
-    if (!payload) throw new Error('Missing payload')
+    body = await req.json()
   } catch {
-    return new Response(JSON.stringify({ error: 'Invalid request body' }), {
+    return new Response(JSON.stringify({ error: 'Request body is not valid JSON' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
+
+  const payload = body.payload
+  if (!payload) {
+    return new Response(JSON.stringify({ error: 'Missing required field: payload' }), {
       status: 400,
       headers: { 'Content-Type': 'application/json' },
     })
@@ -79,14 +85,28 @@ export default async (req: Request, _context: Context) => {
 
     if (!response.ok) {
       const errorText = await response.text()
-      return new Response(JSON.stringify({ error: `Anthropic API error: ${response.status}`, details: errorText }), {
-        status: response.status === 429 ? 429 : 502,
+      console.error(`Anthropic API error ${response.status}: ${errorText}`)
+      const status = response.status === 429 ? 429 : 502
+      const message = response.status === 429
+        ? 'שירות AI עמוס כרגע, נסה שוב בעוד מספר שניות'
+        : `שגיאת שירות AI (${response.status})`
+      return new Response(JSON.stringify({ error: message }), {
+        status,
         headers: { 'Content-Type': 'application/json' },
       })
     }
 
     const data = await response.json()
-    const text = data.content?.[0]?.text ?? ''
+    const textBlock = data.content?.[0]
+    if (!textBlock || textBlock.type !== 'text' || typeof textBlock.text !== 'string' || textBlock.text.trim() === '') {
+      console.error('Unexpected AI response structure:', JSON.stringify(data.content?.map((b: { type: string }) => b.type) ?? 'no content'))
+      return new Response(JSON.stringify({ error: 'תגובת AI לא צפויה' }), {
+        status: 502,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    }
+
+    const text = textBlock.text
 
     // Parse JSON from response (handle possible markdown wrapping)
     let result
@@ -95,10 +115,25 @@ export default async (req: Request, _context: Context) => {
     } catch {
       const match = text.match(/```(?:json)?\s*([\s\S]*?)```/)
       if (match?.[1]) {
-        result = JSON.parse(match[1].trim())
+        try {
+          result = JSON.parse(match[1].trim())
+        } catch (innerErr) {
+          console.error('Failed to parse extracted JSON:', match[1].trim().slice(0, 300))
+          throw innerErr
+        }
       } else {
+        console.error('AI response is not JSON:', text.slice(0, 300))
         throw new Error('Failed to parse AI response')
       }
+    }
+
+    // Validate response schema
+    if (!Array.isArray(result.briefing) || !Array.isArray(result.recommendations)) {
+      console.error('AI response does not match schema:', JSON.stringify({ briefing: typeof result.briefing, recommendations: typeof result.recommendations }))
+      return new Response(JSON.stringify({ error: 'תגובת AI לא תקינה' }), {
+        status: 502,
+        headers: { 'Content-Type': 'application/json' },
+      })
     }
 
     return new Response(JSON.stringify(result), {
@@ -106,7 +141,8 @@ export default async (req: Request, _context: Context) => {
       headers: { 'Content-Type': 'application/json' },
     })
   } catch (err) {
-    return new Response(JSON.stringify({ error: 'AI analysis failed', details: String(err) }), {
+    console.error('AI analysis failed:', err)
+    return new Response(JSON.stringify({ error: 'ניתוח AI נכשל' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     })
