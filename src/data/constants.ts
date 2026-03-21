@@ -51,6 +51,11 @@ export const MONTHS_HE = [
   'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר',
 ]
 
+export function currentMonthYear(): string {
+  const now = new Date()
+  return `${MONTHS_HE[now.getMonth()]} ${now.getFullYear()}`
+}
+
 export const PERFORMANCE_THRESHOLDS = {
   quality: { good: 75, fair: 60, poor: 45 },
   salaryCost: { good: 8.0, fair: 9.0, poor: 10.0 },

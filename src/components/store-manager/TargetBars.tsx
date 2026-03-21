@@ -1,5 +1,6 @@
 import { motion } from 'motion/react'
 import { Target } from 'lucide-react'
+import { currentMonthYear } from '@/data/constants'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatCurrencyShort } from '@/lib/format'
 import type { SalesData } from '@/data/hadera-real'
@@ -80,7 +81,7 @@ export function TargetBars({ sales }: { sales: SalesData }) {
             <div className="w-7 h-7 rounded-[10px] flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #6C5CE7, #8B7FED)' }}>
               <Target className="w-4 h-4 text-white" />
             </div>
-            עמידה ביעדים — דצמבר 2025
+            עמידה ביעדים — {currentMonthYear()}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-5">

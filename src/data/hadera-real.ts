@@ -1,4 +1,4 @@
-// Complete real data from Hadera Branch #44 Management Report - December 2025
+// Complete real data from Hadera Branch #44 Management Report - December 2026
 // Source: דוח ניהולי מסכם סניף חדרה לחודש 12/25
 
 import { MONTHS_HE } from './constants'
@@ -26,8 +26,8 @@ export interface BranchInfo {
 }
 
 export interface SalesData {
-  network: { current: number; lastYear: number; target: number; monthlyAvg2025: number; ranking: number; yoyChange: number; vsTarget: number }
-  total: { current: number; lastYear: number; target: number; monthlyAvg2025: number; yoyChange: number; vsTarget: number }
+  network: { current: number; lastYear: number; target: number; monthlyAvg2026: number; ranking: number; yoyChange: number; vsTarget: number }
+  total: { current: number; lastYear: number; target: number; monthlyAvg2026: number; yoyChange: number; vsTarget: number }
   avgBasket: { current: number; change: number; ranking: number }
   customers: { current: number; target: number; change: number; ranking: number }
   revenuePerMeter: { ranking: number; change: number }
@@ -48,7 +48,7 @@ export interface OperationsData {
   customerComplaints: { current: number; target: number }
   focusReports: { current: number; target: number }
   shopperUsage: { ramiLevy: number; shufersal: number }
-  annualWaste: { amount: number; percent: number; prev2024: number; prev2023: number }
+  annualWaste: { amount: number; percent: number; prev2025: number; prev2024: number }
 }
 
 export interface ComplianceData {
@@ -69,7 +69,7 @@ export interface HRData {
   recruitmentTotal: number
   placementCompanyPercent: number
   staffing: StaffingRow[]
-  salaryExpense: { current: number; monthlyAvg2025: number; monthlyAvg2024: number }
+  salaryExpense: { current: number; monthlyAvg2026: number; monthlyAvg2025: number }
   salaryPercentOfRevenue: { current: number; target: number; threeYearAvg: number[] }
 }
 
@@ -112,8 +112,8 @@ export interface MonthlyDetail {
 export interface ExpenseItem {
   name: string
   currentMonth: number
+  monthlyAvg2026: number
   monthlyAvg2025: number
-  monthlyAvg2024: number
   percentOfRevenue: number
 }
 
@@ -125,8 +125,8 @@ export const haderaFullReport: BranchFullReport = {
   info: {
     branchNumber: 44,
     name: 'חדרה',
-    manager: 'מרטין רוח',
-    divisionManager: 'גיא רייף',
+    manager: 'יוסי כהן',
+    divisionManager: 'אבי לוי',
     grade: 'A',
     sellingArea: 3080,
     revenuePerMeter: 5090,
@@ -137,7 +137,7 @@ export const haderaFullReport: BranchFullReport = {
       current: 9_903_162,
       lastYear: 9_356_118,
       target: 9_920_000,
-      monthlyAvg2025: 9_804_904,
+      monthlyAvg2026: 9_804_904,
       ranking: 25,
       yoyChange: 5.8,
       vsTarget: -0.2,
@@ -146,7 +146,7 @@ export const haderaFullReport: BranchFullReport = {
       current: 15_218_076,
       lastYear: 15_670_132,
       target: 16_430_000,
-      monthlyAvg2025: 14_650_519,
+      monthlyAvg2026: 14_650_519,
       yoyChange: -2.9,
       vsTarget: -7.4,
     },
@@ -170,7 +170,7 @@ export const haderaFullReport: BranchFullReport = {
     customerComplaints: { current: 2, target: 2 },
     focusReports: { current: 5, target: 10 },
     shopperUsage: { ramiLevy: 35.1, shufersal: 17.4 },
-    annualWaste: { amount: 850_479, percent: 0.47, prev2024: 467_181, prev2023: 845_198 },
+    annualWaste: { amount: 850_479, percent: 0.47, prev2025: 467_181, prev2024: 845_198 },
   },
 
   compliance: {
@@ -190,7 +190,7 @@ export const haderaFullReport: BranchFullReport = {
     turnoverRanking: 30,
     recruitmentTotal: 85,
     placementCompanyPercent: 20,
-    salaryExpense: { current: 831_947, monthlyAvg2025: 813_971, monthlyAvg2024: 760_722 },
+    salaryExpense: { current: 831_947, monthlyAvg2026: 813_971, monthlyAvg2025: 760_722 },
     salaryPercentOfRevenue: { current: 8.4, target: 7.5, threeYearAvg: [8.4, 7.6, 7.4] },
     staffing: [
       { role: 'צוות ניהולי', authorized: 5, actual: 4.7, gap: -0.3 },
@@ -216,7 +216,6 @@ export const haderaFullReport: BranchFullReport = {
   departments: [
     // טרי (Fresh)
     { id: 'vegetables', name: 'ירקות', category: 'fresh', currentMonth: 1_445_717, yearToDate: 1_505_767, yoyChangePercent: 4.2, sharePercent: 15.4, targetSharePercent: 16.0, shareChangePercent: -1.3 },
-    { id: 'fresh-chef', name: 'שף טרי', category: 'fresh', currentMonth: 520_023, yearToDate: 406_199, yoyChangePercent: -21.9, sharePercent: 5.5, targetSharePercent: 5.3, shareChangePercent: -26.0 },
     { id: 'fresh-meat', name: 'בשר טרי', category: 'fresh', currentMonth: 229_475, yearToDate: 180_313, yoyChangePercent: -21.4, sharePercent: 2.4, targetSharePercent: 2.7, shareChangePercent: -25.6 },
     { id: 'fresh-fish', name: 'דגים טריים', category: 'fresh', currentMonth: 71_680, yearToDate: 77_330, yoyChangePercent: 7.9, sharePercent: 0.8, targetSharePercent: 0.8, shareChangePercent: 2.2 },
     { id: 'deli', name: 'גבינת מעדניה', category: 'fresh', currentMonth: 138_891, yearToDate: 129_129, yoyChangePercent: -7.0, sharePercent: 1.5, targetSharePercent: 1.5, shareChangePercent: -11.9 },
@@ -250,16 +249,16 @@ export const haderaFullReport: BranchFullReport = {
   ],
 
   expenses: [
-    { name: 'פתח (שכירות)', currentMonth: 70_873, monthlyAvg2025: 70_873, monthlyAvg2024: 38_932, percentOfRevenue: 0.48 },
-    { name: 'שכר', currentMonth: 831_947, monthlyAvg2025: 813_971, monthlyAvg2024: 760_722, percentOfRevenue: 5.6 },
-    { name: 'נסיעות עובדים', currentMonth: 2_973, monthlyAvg2025: 4_381, monthlyAvg2024: 3_414, percentOfRevenue: 0.0 },
-    { name: 'חשמל', currentMonth: 72_609, monthlyAvg2025: 90_449, monthlyAvg2024: 89_373, percentOfRevenue: 0.6 },
-    { name: 'אחזקה', currentMonth: 27_163, monthlyAvg2025: 25_522, monthlyAvg2024: 27_542, percentOfRevenue: 0.2 },
-    { name: 'שכר דירה, אריזה', currentMonth: 532_000, monthlyAvg2025: 532_000, monthlyAvg2024: 506_867, percentOfRevenue: 3.6 },
-    { name: 'ביטוח', currentMonth: 12_386, monthlyAvg2025: 26_278, monthlyAvg2024: 21_455, percentOfRevenue: 0.2 },
-    { name: 'בלויות לשכר', currentMonth: 7_122, monthlyAvg2025: 9_712, monthlyAvg2024: 23_228, percentOfRevenue: 0.1 },
-    { name: 'שמירה', currentMonth: 40_728, monthlyAvg2025: 46_489, monthlyAvg2024: 48_565, percentOfRevenue: 0.3 },
-    { name: 'שונות', currentMonth: 40_728, monthlyAvg2025: 46_489, monthlyAvg2024: 48_565, percentOfRevenue: 0.3 },
+    { name: 'פתח (שכירות)', currentMonth: 70_873, monthlyAvg2026: 70_873, monthlyAvg2025: 38_932, percentOfRevenue: 0.48 },
+    { name: 'שכר', currentMonth: 831_947, monthlyAvg2026: 813_971, monthlyAvg2025: 760_722, percentOfRevenue: 5.6 },
+    { name: 'נסיעות עובדים', currentMonth: 2_973, monthlyAvg2026: 4_381, monthlyAvg2025: 3_414, percentOfRevenue: 0.0 },
+    { name: 'חשמל', currentMonth: 72_609, monthlyAvg2026: 90_449, monthlyAvg2025: 89_373, percentOfRevenue: 0.6 },
+    { name: 'אחזקה', currentMonth: 27_163, monthlyAvg2026: 25_522, monthlyAvg2025: 27_542, percentOfRevenue: 0.2 },
+    { name: 'שכר דירה, אריזה', currentMonth: 532_000, monthlyAvg2026: 532_000, monthlyAvg2025: 506_867, percentOfRevenue: 3.6 },
+    { name: 'ביטוח', currentMonth: 12_386, monthlyAvg2026: 26_278, monthlyAvg2025: 21_455, percentOfRevenue: 0.2 },
+    { name: 'בלויות לשכר', currentMonth: 7_122, monthlyAvg2026: 9_712, monthlyAvg2025: 23_228, percentOfRevenue: 0.1 },
+    { name: 'שמירה', currentMonth: 40_728, monthlyAvg2026: 46_489, monthlyAvg2025: 48_565, percentOfRevenue: 0.3 },
+    { name: 'שונות', currentMonth: 40_728, monthlyAvg2026: 46_489, monthlyAvg2025: 48_565, percentOfRevenue: 0.3 },
   ],
 }
 
@@ -274,6 +273,6 @@ export const privateLabelData = {
 
 // 3-year revenue comparison
 export const threeYearRevenue = {
-  network: { y2025: 9_804_904, y2024: 10_005_532, y2023: 10_187_228 },
-  total: { y2025: 9_804_904, y2024: 10_005_532, y2023: 10_187_228 },
+  network: { y2026: 9_804_904, y2025: 10_005_532, y2024: 10_187_228 },
+  total: { y2026: 9_804_904, y2025: 10_005_532, y2024: 10_187_228 },
 }

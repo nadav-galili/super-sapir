@@ -14,7 +14,7 @@ import { PageContainer } from '@/components/layout/PageContainer'
 import { KPIGrid } from '@/components/dashboard/KPIGrid'
 import { QualityGauge } from '@/components/charts/QualityGauge'
 import { StatBadge } from '@/components/dashboard/StatBadge'
-import { Select } from '@/components/ui/select'
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
@@ -22,6 +22,7 @@ import { BranchInfoBar } from '@/components/store-manager/BranchInfoBar'
 import { TargetBars } from '@/components/store-manager/TargetBars'
 import { ComplianceCards } from '@/components/store-manager/ComplianceCards'
 import { haderaFullReport, type DepartmentSales, type MonthlyDetail } from '@/data/hadera-real'
+import { currentMonthYear } from '@/data/constants'
 import { allBranches } from '@/data/mock-branches'
 import { formatCurrencyShort } from '@/lib/format'
 import { CHART_COLORS } from '@/lib/colors'
@@ -29,6 +30,12 @@ import type { KPICardData } from '@/data/types'
 
 // ─── Monthly Sales Comparison Chart ──────────────────────────────
 function MonthlyComparisonChart({ data }: { data: MonthlyDetail[] }) {
+  const chartData = data.map(d => ({
+    month: d.month,
+    current: Math.round(d.currentSales / 1000),
+    lastYear: Math.round(d.lastYearSales / 1000),
+  }))
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -37,43 +44,57 @@ function MonthlyComparisonChart({ data }: { data: MonthlyDetail[] }) {
     >
       <Card className="border-warm-border rounded-[16px]">
         <CardHeader className="pb-2">
-          <CardTitle className="text-base flex items-center gap-2 text-[#2D3748]">
-            <div className="w-7 h-7 rounded-[10px] flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #2EC4D5, #5DD8E3)' }}>
-              <TrendingUp className="w-4 h-4 text-white" />
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-base text-[#2D3748]">מגמת מכירות</CardTitle>
+            <div className="flex items-center gap-2">
+              <button className="px-3 py-1.5 border border-warm-border rounded-[8px] text-xs text-[#4A5568] bg-white hover:bg-[#FDF8F6]">◀</button>
+              <span className="text-sm font-semibold text-[#2D3748] px-2">2026</span>
+              <button className="px-3 py-1.5 border border-warm-border rounded-[8px] text-xs text-[#4A5568] bg-white hover:bg-[#FDF8F6]">▶</button>
             </div>
-            מגמת מכירות חודשית — 2025 מול 2024
-          </CardTitle>
+          </div>
         </CardHeader>
         <CardContent>
-          <div dir="ltr" className="h-[260px] sm:h-[320px] lg:h-[380px]">
+          <div dir="ltr" className="h-[260px]">
             <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="gradCurrent" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#DC4E59" stopOpacity={0.18} />
-                    <stop offset="100%" stopColor="#DC4E59" stopOpacity={0.02} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#FFF0EA" />
+              <ComposedChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.04)" />
                 <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#4A5568' }} />
-                <YAxis tickFormatter={(v: number) => formatCurrencyShort(v)} tick={{ fontSize: 10, fill: '#A0AEC0' }} width={60} />
-                <YAxis yAxisId="pct" orientation="right" tickFormatter={(v: number) => `${v}%`} tick={{ fontSize: 10, fill: '#A0AEC0' }} width={40} domain={[-15, 10]} />
-                <Tooltip
-                  formatter={(value, name) => {
-                    if (name === 'currentSales') return [formatCurrencyShort(value as number), '2025']
-                    if (name === 'lastYearSales') return [formatCurrencyShort(value as number), '2024']
-                    return [`${value}%`, 'שינוי שנתי']
-                  }}
-                  contentStyle={{ direction: 'rtl', borderRadius: '10px', border: '1px solid #FFE8DE', boxShadow: 'rgba(220,78,89,0.08) 0 4px 20px' }}
+                <YAxis
+                  tickFormatter={(v: number) => `${(v / 1000).toFixed(1)}M`}
+                  tick={{ fontSize: 11, fill: '#A0AEC0' }}
+                  domain={[7000, 'auto']}
+                  width={50}
                 />
-                <Legend formatter={(v: string) => v === 'currentSales' ? '2025' : v === 'lastYearSales' ? '2024' : 'שינוי %'} />
-                <Area type="monotone" dataKey="currentSales" stroke="#DC4E59" strokeWidth={2.5} fill="url(#gradCurrent)" animationDuration={1500} />
-                <Line type="monotone" dataKey="lastYearSales" stroke="#A0AEC0" strokeWidth={1.5} strokeDasharray="6 3" dot={false} animationDuration={1500} animationBegin={300} />
-                <Bar yAxisId="pct" dataKey="yoyChange" barSize={16} radius={[4, 4, 0, 0]} animationDuration={1200} animationBegin={600}>
-                  {data.map((entry, i) => (
-                    <Cell key={i} fill={entry.yoyChange >= 0 ? '#2EC4D5' : '#DC4E59'} opacity={0.7} />
-                  ))}
-                </Bar>
+                <Tooltip
+                  formatter={(value: number, name: string) => [
+                    `₪${value.toLocaleString()}K`,
+                    name === 'current' ? '2026' : '2025',
+                  ]}
+                  contentStyle={{ direction: 'rtl', borderRadius: '10px', border: '1px solid #FFE8DE', fontSize: 12 }}
+                />
+                <Legend
+                  formatter={(v: string) => v === 'current' ? '2026' : '2025'}
+                  iconType="plainline"
+                  wrapperStyle={{ fontSize: 12, paddingTop: 8 }}
+                />
+                <Bar
+                  dataKey="current"
+                  fill="rgba(220, 78, 89, 0.15)"
+                  stroke="#DC4E59"
+                  strokeWidth={2}
+                  radius={[6, 6, 0, 0]}
+                  animationDuration={1200}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="lastYear"
+                  stroke="#42a5f5"
+                  strokeWidth={1.5}
+                  strokeDasharray="4 4"
+                  dot={{ r: 3, fill: '#42a5f5' }}
+                  animationDuration={1500}
+                  animationBegin={300}
+                />
               </ComposedChart>
             </ResponsiveContainer>
           </div>
@@ -431,6 +452,24 @@ function seededBool(seed: number, offset: number, threshold = 0.5) {
   return seededValue(seed, offset) > threshold
 }
 
+// ─── Mock Hebrew names for generated branches ────────────────────
+const MOCK_FIRST_NAMES = ['דני', 'רונן', 'שירה', 'נועה', 'עמית', 'אורן', 'מיכל', 'תמר', 'אלון', 'יעל', 'גלעד', 'ליאור']
+const MOCK_LAST_NAMES = ['פרץ', 'מזרחי', 'אברהם', 'דוד', 'ביטון', 'שלום', 'חדד', 'עמר', 'נחום', 'אוחיון', 'ברק', 'סויסה']
+const MOCK_DIV_FIRST = ['רונית', 'אייל', 'חנה', 'משה', 'דנה', 'עידו', 'סיגל', 'בועז', 'קרן', 'אסף', 'הדר', 'נדב']
+const MOCK_DIV_LAST = ['גולן', 'שפירא', 'יוסף', 'רוזן', 'קפלן', 'אלוני', 'הררי', 'טל', 'ניסים', 'בן דוד', 'זמיר', 'עוז']
+
+function mockManagerName(seed: number): string {
+  const fi = Math.abs(Math.round(Math.sin(seed * 5.731) * 1000)) % MOCK_FIRST_NAMES.length
+  const li = Math.abs(Math.round(Math.sin(seed * 3.917) * 1000)) % MOCK_LAST_NAMES.length
+  return `${MOCK_FIRST_NAMES[fi]} ${MOCK_LAST_NAMES[li]}`
+}
+
+function mockDivisionManagerName(seed: number): string {
+  const fi = Math.abs(Math.round(Math.sin(seed * 7.213) * 1000)) % MOCK_DIV_FIRST.length
+  const li = Math.abs(Math.round(Math.sin(seed * 2.549) * 1000)) % MOCK_DIV_LAST.length
+  return `${MOCK_DIV_FIRST[fi]} ${MOCK_DIV_LAST[li]}`
+}
+
 // ─── Adapt a generic Branch into the full report shape ────────────
 function branchToFullReport(branch: typeof allBranches[0]): typeof haderaFullReport {
   const m = branch.metrics
@@ -440,16 +479,16 @@ function branchToFullReport(branch: typeof allBranches[0]): typeof haderaFullRep
     info: {
       branchNumber: branch.branchNumber,
       name: branch.name,
-      manager: 'מנהל סניף',
-      divisionManager: 'מנהל אזור',
+      manager: mockManagerName(seed),
+      divisionManager: mockDivisionManagerName(seed),
       grade: m.qualityScore >= 80 ? 'A' : m.qualityScore >= 60 ? 'B' : 'C',
       sellingArea: seededInt(seed, 1, 2500, 4000),
       revenuePerMeter: Math.round(m.totalSales / 3000),
     },
     sales: {
-      network: { current: m.networkSales, lastYear: Math.round(m.networkSales * 0.95), target: Math.round(m.networkSales * 1.05), monthlyAvg2025: m.networkSales, ranking: seededInt(seed, 2, 20, 50), yoyChange: m.yoyGrowth, vsTarget: +(m.yoyGrowth - 5).toFixed(1) },
-      total: { current: m.totalSales, lastYear: Math.round(m.totalSales * 0.97), target: Math.round(m.totalSales * 1.05), monthlyAvg2025: m.totalSales, yoyChange: m.yoyGrowth, vsTarget: +(m.yoyGrowth - 5).toFixed(1) },
-      avgBasket: { current: m.avgBasket, change: seededFloat(seed, 6, -2, 8), ranking: seededInt(seed, 7, 8, 24) },
+      network: { current: m.networkSales, lastYear: Math.round(m.networkSales * 0.95), target: Math.round(m.networkSales * 1.05), monthlyAvg2026: m.networkSales, ranking: seededInt(seed, 2, 20, 50), yoyChange: m.yoyGrowth, vsTarget: +(m.yoyGrowth - 5).toFixed(1) },
+      total: { current: m.totalSales, lastYear: Math.round(m.totalSales * 0.97), target: Math.round(m.totalSales * 1.05), monthlyAvg2026: m.totalSales, yoyChange: m.yoyGrowth, vsTarget: +(m.yoyGrowth - 5).toFixed(1) },
+      avgBasket: { current: Math.round(m.totalSales / (m.customersPerDay * 26)), change: seededFloat(seed, 6, -2, 8), ranking: seededInt(seed, 7, 8, 24) },
       customers: { current: m.customersPerDay * 26, target: m.customersPerDay * 25, change: seededFloat(seed, 8, -3, 5), ranking: seededInt(seed, 9, 18, 34) },
       revenuePerMeter: { ranking: seededInt(seed, 10, 18, 42), change: seededFloat(seed, 11, -8, 4) },
     },
@@ -463,7 +502,7 @@ function branchToFullReport(branch: typeof allBranches[0]): typeof haderaFullRep
       customerComplaints: { current: m.complaints, target: 5 },
       focusReports: { current: 4, target: 10 },
       shopperUsage: { ramiLevy: 33, shufersal: 18 },
-      annualWaste: { amount: Math.round(m.totalSales * 0.004), percent: 0.4, prev2024: Math.round(m.totalSales * 0.003), prev2023: Math.round(m.totalSales * 0.005) },
+      annualWaste: { amount: Math.round(m.totalSales * 0.004), percent: 0.4, prev2025: Math.round(m.totalSales * 0.003), prev2024: Math.round(m.totalSales * 0.005) },
     },
     compliance: {
       highInventory: { target: 60, actual: seededInt(seed, 14, 55, 75), met: seededBool(seed, 15), ranking: seededInt(seed, 16, 20, 50) },
@@ -481,7 +520,7 @@ function branchToFullReport(branch: typeof allBranches[0]): typeof haderaFullRep
       turnoverRanking: seededInt(seed, 32, 20, 45),
       recruitmentTotal: seededInt(seed, 33, 50, 90),
       placementCompanyPercent: seededInt(seed, 34, 15, 25),
-      salaryExpense: { current: Math.round(m.totalSales * m.salaryCostPercent / 100), monthlyAvg2025: Math.round(m.totalSales * 0.08), monthlyAvg2024: Math.round(m.totalSales * 0.075) },
+      salaryExpense: { current: Math.round(m.totalSales * m.salaryCostPercent / 100), monthlyAvg2026: Math.round(m.totalSales * 0.08), monthlyAvg2025: Math.round(m.totalSales * 0.075) },
       salaryPercentOfRevenue: { current: m.salaryCostPercent, target: 7.5, threeYearAvg: [m.salaryCostPercent, 7.8, 7.5] },
       staffing: [
         { role: 'צוות ניהולי', authorized: 5, actual: 4.5, gap: -0.5 },
@@ -494,7 +533,7 @@ function branchToFullReport(branch: typeof allBranches[0]): typeof haderaFullRep
     departments: branch.departments.map(d => ({
       id: d.id,
       name: d.name,
-      category: (['vegetables', 'fresh-chef', 'fresh-meat', 'fresh-fish', 'deli', 'pastries'].includes(d.id) ? 'fresh' : ['grocery', 'bread', 'drinks', 'frozen', 'dairy', 'organic'].includes(d.id) ? 'food' : 'nonfood') as 'fresh' | 'food' | 'nonfood',
+      category: (['vegetables', 'fresh-meat', 'fresh-fish', 'deli', 'pastries'].includes(d.id) ? 'fresh' : ['grocery', 'bread', 'drinks', 'frozen', 'dairy', 'organic'].includes(d.id) ? 'food' : 'nonfood') as 'fresh' | 'food' | 'nonfood',
       currentMonth: d.sales,
       yearToDate: Math.round(d.sales * 1.05),
       yoyChangePercent: d.yoyChange,
@@ -519,10 +558,10 @@ function branchToFullReport(branch: typeof allBranches[0]): typeof haderaFullRep
       meatWastePercent: seededFloat(seed + t.monthNum, 44, 0, 8),
     })),
     expenses: [
-      { name: 'שכר', currentMonth: Math.round(m.totalSales * m.salaryCostPercent / 100), monthlyAvg2025: Math.round(m.totalSales * 0.08), monthlyAvg2024: Math.round(m.totalSales * 0.075), percentOfRevenue: m.salaryCostPercent },
-      { name: 'שכר דירה, אריזה', currentMonth: Math.round(m.totalSales * 0.035), monthlyAvg2025: Math.round(m.totalSales * 0.035), monthlyAvg2024: Math.round(m.totalSales * 0.033), percentOfRevenue: 3.5 },
-      { name: 'חשמל', currentMonth: Math.round(m.totalSales * 0.006), monthlyAvg2025: Math.round(m.totalSales * 0.006), monthlyAvg2024: Math.round(m.totalSales * 0.006), percentOfRevenue: 0.6 },
-      { name: 'שמירה', currentMonth: Math.round(m.totalSales * 0.003), monthlyAvg2025: Math.round(m.totalSales * 0.003), monthlyAvg2024: Math.round(m.totalSales * 0.003), percentOfRevenue: 0.3 },
+      { name: 'שכר', currentMonth: Math.round(m.totalSales * m.salaryCostPercent / 100), monthlyAvg2026: Math.round(m.totalSales * 0.08), monthlyAvg2025: Math.round(m.totalSales * 0.075), percentOfRevenue: m.salaryCostPercent },
+      { name: 'שכר דירה, אריזה', currentMonth: Math.round(m.totalSales * 0.035), monthlyAvg2026: Math.round(m.totalSales * 0.035), monthlyAvg2025: Math.round(m.totalSales * 0.033), percentOfRevenue: 3.5 },
+      { name: 'חשמל', currentMonth: Math.round(m.totalSales * 0.006), monthlyAvg2026: Math.round(m.totalSales * 0.006), monthlyAvg2025: Math.round(m.totalSales * 0.006), percentOfRevenue: 0.6 },
+      { name: 'שמירה', currentMonth: Math.round(m.totalSales * 0.003), monthlyAvg2026: Math.round(m.totalSales * 0.003), monthlyAvg2025: Math.round(m.totalSales * 0.003), percentOfRevenue: 0.3 },
     ],
   }
 }
@@ -582,31 +621,31 @@ function OverviewExpenseTable({ expenses, totalRevenue }: { expenses: typeof had
         <CardTitle className="text-base text-[#2D3748]">הוצאות תפעוליות (ממוצע חודשי)</CardTitle>
       </CardHeader>
       <CardContent>
-        <table className="w-full text-sm">
+        <table className="w-full border-collapse" style={{ direction: 'rtl' }}>
           <thead>
             <tr className="border-b border-warm-divider">
-              <th className="text-right text-xs font-medium text-[#A0AEC0] py-2.5 px-1">סעיף</th>
-              <th className="text-right text-xs font-medium text-[#A0AEC0] py-2.5 px-1">סכום (₪)</th>
-              <th className="text-right text-xs font-medium text-[#A0AEC0] py-2.5 px-1">% מהכנסות</th>
-              <th className="text-right text-xs font-medium text-[#A0AEC0] py-2.5 px-1">שינוי</th>
+              <th style={{ width: '30%' }} className="text-right text-xs font-medium text-[#A0AEC0] py-2.5 px-2">סעיף</th>
+              <th style={{ width: '20%' }} className="text-right text-xs font-medium text-[#A0AEC0] py-2.5 px-2">סכום (₪)</th>
+              <th style={{ width: '35%' }} className="text-right text-xs font-medium text-[#A0AEC0] py-2.5 px-2">% מהכנסות</th>
+              <th style={{ width: '15%' }} className="text-center text-xs font-medium text-[#A0AEC0] py-2.5 px-2">שינוי</th>
             </tr>
           </thead>
           <tbody>
             {sorted.map((exp, i) => {
-              const pctChange = exp.monthlyAvg2024 > 0 ? Math.round(((exp.currentMonth - exp.monthlyAvg2024) / exp.monthlyAvg2024) * 100) : 0
+              const pctChange = exp.monthlyAvg2025 > 0 ? Math.round(((exp.currentMonth - exp.monthlyAvg2025) / exp.monthlyAvg2025) * 100) : 0
               return (
                 <tr key={i} className="border-b border-warm-divider hover:bg-[#FDF8F6]">
-                  <td className="py-2.5 px-1 text-[#4A5568] text-xs">{exp.name}</td>
-                  <td className="py-2.5 px-1 font-semibold text-xs tabular-nums" dir="ltr">{exp.currentMonth.toLocaleString()}</td>
-                  <td className="py-2.5 px-1 text-xs">
-                    <div className="flex items-center gap-1.5">
-                      <span className="tabular-nums" dir="ltr">{exp.percentOfRevenue}%</span>
-                      <div className="h-1.5 bg-[#FDF8F6] rounded-full w-16 overflow-hidden border border-warm-border">
+                  <td className="text-right text-xs text-[#4A5568] py-3 px-2">{exp.name}</td>
+                  <td className="text-right text-xs font-semibold tabular-nums font-mono text-[#2D3748] py-3 px-2">{exp.currentMonth.toLocaleString()}</td>
+                  <td className="py-3 px-2">
+                    <div className="flex items-center gap-2" style={{ direction: 'ltr' }}>
+                      <span className="tabular-nums font-mono text-xs shrink-0 w-10 text-right">{exp.percentOfRevenue}%</span>
+                      <div className="h-1.5 bg-[#FDF8F6] rounded-full flex-1 overflow-hidden border border-warm-border">
                         <div className="h-full rounded-full" style={{ width: `${Math.min(exp.percentOfRevenue * 10, 100)}%`, background: barColors[i] }} />
                       </div>
                     </div>
                   </td>
-                  <td className="py-2.5 px-1">
+                  <td className="text-center py-3 px-2">
                     {pctChange !== 0 ? (
                       <span className={`inline-block text-[10px] font-medium px-2 py-0.5 rounded-[12px] ${
                         pctChange > 0 ? 'bg-[#DC4E59]/10 text-[#DC4E59]' : 'bg-[#2EC4D5]/10 text-[#2EC4D5]'
@@ -620,10 +659,10 @@ function OverviewExpenseTable({ expenses, totalRevenue }: { expenses: typeof had
                 </tr>
               )
             })}
-            <tr className="border-t-2 border-warm-separator font-bold">
-              <td className="py-2.5 px-1 text-[#2D3748] text-xs">סה״כ</td>
-              <td className="py-2.5 px-1 text-xs tabular-nums" dir="ltr">{totalExpenses.toLocaleString()}</td>
-              <td className="py-2.5 px-1 text-xs tabular-nums" dir="ltr">{((totalExpenses / totalRevenue) * 100).toFixed(0)}%</td>
+            <tr className="font-bold" style={{ borderTop: '2px solid #F5E6DE' }}>
+              <td className="text-right text-xs text-[#2D3748] py-3 px-2">סה״כ</td>
+              <td className="text-right text-xs tabular-nums font-mono text-[#2D3748] py-3 px-2">{totalExpenses.toLocaleString()}</td>
+              <td className="text-right text-xs tabular-nums font-mono text-[#2D3748] py-3 px-2">{((totalExpenses / totalRevenue) * 100).toFixed(0)}%</td>
               <td></td>
             </tr>
           </tbody>
@@ -737,8 +776,8 @@ function OverviewStaffingCard({ hr, monthly }: { hr: Report['hr']; monthly: Mont
               <ReBarChart
                 data={[
                   { year: '2023', rate: 81.6, monthly: 7.8 },
-                  { year: '2024', rate: 81.6, monthly: 6.7 },
-                  { year: '2025', rate: hr.turnoverRate, monthly: 6.7 },
+                  { year: '2025', rate: 81.6, monthly: 6.7 },
+                  { year: '2026', rate: hr.turnoverRate, monthly: 6.7 },
                 ]}
                 barGap={4}
               >
@@ -802,8 +841,7 @@ function QualityTrendsChart({ data }: { data: MonthlyDetail[] }) {
 function OverviewView({ report }: { report: Report }) {
   const s = report.sales
   const kpis: KPICardData[] = [
-    { label: 'מכירות רשת', value: s.network.current, format: 'currencyShort', trend: s.network.yoyChange, trendLabel: 'חודש מקביל', gradient: 'blue' },
-    { label: 'סה"כ הכנסות', value: s.total.current, format: 'currencyShort', trend: s.total.yoyChange, trendLabel: 'חודש קודם', gradient: 'green' },
+    { label: 'מכירות סניף', value: s.total.current, format: 'currencyShort', trend: s.total.yoyChange, trendLabel: 'חודש מקביל', gradient: 'blue' },
     { label: 'לקוחות', value: s.customers.current, format: 'number', trend: s.customers.change, trendLabel: `סל ממוצע: ₪${s.avgBasket.current.toLocaleString()}`, gradient: 'pink' },
     { label: 'סל ממוצע', value: s.avgBasket.current, format: 'currency', trend: s.avgBasket.change, trendLabel: 'שנתי', gradient: 'teal' },
   ]
@@ -985,13 +1023,19 @@ function StoreManagerPage() {
       {/* Branch Selector */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-          <Select
-            options={branchOptions}
-            value={selectedBranchId}
-            onChange={e => setSelectedBranchId(e.target.value)}
-            className="w-full sm:w-64"
-          />
-          <Badge variant="outline" className="text-xs w-fit">דצמבר 2025</Badge>
+          <Select value={selectedBranchId} onValueChange={setSelectedBranchId} dir="rtl">
+            <SelectTrigger className="w-full sm:w-64">
+              <SelectValue placeholder="בחר סניף" />
+            </SelectTrigger>
+            <SelectContent>
+              {branchOptions.map(opt => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Badge variant="outline" className="text-xs w-fit">{currentMonthYear()}</Badge>
         </div>
         {view !== 'overview' && (
           <h2 className="text-lg font-bold text-[#2D3748]">{VIEW_TITLES[view] ?? ''}</h2>

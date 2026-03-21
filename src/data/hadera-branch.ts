@@ -1,7 +1,7 @@
 import type { Branch } from './types'
 import { MONTHS_HE } from './constants'
 
-// Real data from Hadera #44 management report - December 2025
+// Real data from Hadera #44 management report - December 2026
 export const haderaBranch: Branch = {
   id: 'hadera-44',
   name: 'חדרה',
@@ -32,7 +32,6 @@ export const haderaBranch: Branch = {
     { id: 'home-products', name: 'בן-פוד', sales: 962_978, sharePercent: 10.3, targetShare: 10.2, yoyChange: 4.6, isPrivateLabel: false },
     { id: 'drinks', name: 'שתיה', sales: 878_077, sharePercent: 9.4, targetShare: 9.5, yoyChange: 7.0, isPrivateLabel: false },
     { id: 'frozen', name: 'קפואים', sales: 856_002, sharePercent: 9.1, targetShare: 8.8, yoyChange: 1.7, isPrivateLabel: false },
-    { id: 'fresh-chef', name: 'שף טרי', sales: 520_023, sharePercent: 5.5, targetShare: 5.3, yoyChange: -21.9, isPrivateLabel: false },
     { id: 'household', name: 'מוצרים לבית', sales: 330_683, sharePercent: 3.5, targetShare: 5.4, yoyChange: 62.5, isPrivateLabel: false },
     { id: 'fresh-meat', name: 'בשר טרי', sales: 229_475, sharePercent: 2.4, targetShare: 2.7, yoyChange: -21.4, isPrivateLabel: false },
     { id: 'bread', name: 'לחם ומאפים', sales: 204_117, sharePercent: 2.2, targetShare: 2.4, yoyChange: 14.6, isPrivateLabel: false },
