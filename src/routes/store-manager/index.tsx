@@ -21,7 +21,7 @@ import { Separator } from '@/components/ui/separator'
 import { BranchInfoBar } from '@/components/store-manager/BranchInfoBar'
 import { ComplianceCards } from '@/components/store-manager/ComplianceCards'
 import { haderaFullReport, type DepartmentSales, type MonthlyDetail } from '@/data/hadera-real'
-import { currentMonthYear, REPORT_MONTH, REPORT_YEAR, WORKING_DAYS_PER_MONTH } from '@/data/constants'
+import { currentMonthYear, REPORT_MONTH, REPORT_YEAR, WORKING_DAYS_PER_MONTH, MONTHS_HE } from '@/data/constants'
 import { allBranches } from '@/data/mock-branches'
 import { formatCurrencyShort } from '@/lib/format'
 import { CHART_COLORS } from '@/lib/colors'
@@ -106,14 +106,26 @@ function MonthlyComparisonChart({ data }: { data: MonthlyDetail[] }) {
 }
 
 // ─── Department Breakdown ────────────────────────────────────────
-const CATEGORIES = [
-  { key: 'fresh' as const, name: 'טרי', color: '#DC4E59', bgClass: 'bg-[#DC4E59]/8 border-[#DC4E59]/20 text-[#DC4E59]' },
-  { key: 'food' as const, name: 'מזון', color: '#2EC4D5', bgClass: 'bg-[#2EC4D5]/8 border-[#2EC4D5]/20 text-[#2EC4D5]' },
-  { key: 'nonfood' as const, name: 'נון-פוד', color: '#6C5CE7', bgClass: 'bg-[#6C5CE7]/8 border-[#6C5CE7]/20 text-[#6C5CE7]' },
-]
+const DEPT_COLORS: Record<string, string> = {
+  grocery: '#1976d2',
+  dairy: '#0097a7',
+  vegetables: '#2e7d32',
+  'home-products': '#6C5CE7',
+  drinks: '#0288d1',
+  frozen: '#00897b',
+  household: '#e65100',
+  bread: '#ef6c00',
+  baby: '#2e7d32',
+  'fresh-meat': '#c62828',
+  deli: '#7b1fa2',
+  pastries: '#ef6c00',
+  'fresh-fish': '#c62828',
+  organic: '#388e3c',
+}
 
 function DepartmentBreakdown({ departments }: { departments: DepartmentSales[] }) {
-  const maxSales = Math.max(...departments.map(d => d.currentMonth))
+  const sorted = [...departments].sort((a, b) => b.yearToDate - a.yearToDate)
+  const maxYtd = Math.max(...sorted.map(d => d.yearToDate))
 
   return (
     <motion.div
@@ -121,64 +133,78 @@ function DepartmentBreakdown({ departments }: { departments: DepartmentSales[] }
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.5, duration: 0.5 }}
     >
-      <Card className="border-warm-border rounded-[16px] h-full">
+      <Card className="border-warm-border rounded-[16px]">
         <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <div className="w-7 h-7 rounded-[10px] flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #DC4E59, #E8777F)' }}>
-              <CartIcon className="w-4 h-4 text-white" />
-            </div>
-            פילוח מכירות לפי מחלקה
+          <CardTitle className="text-base text-[#2D3748]">
+            מכירות מחלקות — {MONTHS_HE[REPORT_MONTH - 1]} מול {MONTHS_HE[REPORT_MONTH - 2]} {REPORT_YEAR}
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {CATEGORIES.map(cat => {
-            const depts = departments.filter(d => d.category === cat.key)
-            return (
-              <div key={cat.key}>
-                <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-xs font-bold mb-2 ${cat.bgClass}`}>
-                  <div className="w-2 h-2 rounded-full" style={{ background: cat.color }} />
-                  {cat.name}
-                </div>
-                <div className="space-y-1.5">
-                  {depts.map((dept, i) => {
-                    const barPct = (dept.currentMonth / maxSales) * 100
-                    return (
+        <CardContent>
+          <div className="space-y-4">
+            {sorted.map((dept, i) => {
+              const color = DEPT_COLORS[dept.id] ?? CHART_COLORS[i % CHART_COLORS.length]
+              const currentPct = (dept.currentMonth / maxYtd) * 100
+              const ytdPct = (dept.yearToDate / maxYtd) * 100
+              const isPositive = dept.yoyChangePercent >= 0
+              return (
+                <div key={dept.id} className="group relative flex items-center gap-3">
+                  <span className="text-xs w-20 text-right shrink-0 text-[#4A5568] font-medium truncate">{dept.name}</span>
+                  <div className="flex-1 space-y-1 cursor-pointer">
+                    <div className="relative h-4 bg-[#e8eaf6] rounded-[3px] overflow-hidden">
                       <motion.div
-                        key={dept.id}
-                        initial={{ opacity: 0, x: 10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.6 + i * 0.04 }}
-                        className="flex items-center gap-2"
-                      >
-                        <span className="text-xs w-16 sm:w-24 text-right shrink-0 text-muted-foreground truncate">{dept.name}</span>
-                        <div className="flex-1 relative h-5 bg-[#FDF8F6] rounded-[4px] overflow-hidden border border-warm-border">
-                          <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${barPct}%` }}
-                            transition={{ delay: 0.8 + i * 0.04, duration: 0.8 }}
-                            className="absolute inset-y-0 right-0 rounded"
-                            style={{ background: cat.color, opacity: 0.75 }}
-                          />
-                          <span className="absolute left-1.5 top-1/2 -translate-y-1/2 text-[10px] font-semibold text-[#4A5568] tabular-nums" dir="ltr">
-                            {formatCurrencyShort(dept.currentMonth)}
-                          </span>
+                        initial={{ width: 0 }}
+                        animate={{ width: `${currentPct}%` }}
+                        transition={{ delay: 0.3 + i * 0.04, duration: 0.8 }}
+                        className="absolute inset-y-0 right-0 rounded-[3px]"
+                        style={{ background: color }}
+                      />
+                    </div>
+                    <div className="relative h-4 bg-[#e8eaf6] rounded-[3px] overflow-hidden">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${ytdPct}%` }}
+                        transition={{ delay: 0.4 + i * 0.04, duration: 0.8 }}
+                        className="absolute inset-y-0 right-0 rounded-[3px]"
+                        style={{ background: color, opacity: 0.3 }}
+                      />
+                    </div>
+                    <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block z-20 pointer-events-none">
+                      <div className="bg-white rounded-[10px] border border-warm-border shadow-lg p-3 text-xs min-w-[180px]" style={{ direction: 'rtl' }}>
+                        <p className="font-bold text-[#2D3748] mb-1.5">{dept.name}</p>
+                        <div className="space-y-1 text-[#4A5568]">
+                          <div className="flex justify-between"><span>{MONTHS_HE[REPORT_MONTH - 1]}:</span><span className="font-mono font-semibold" dir="ltr">{formatCurrencyShort(dept.currentMonth)}</span></div>
+                          <div className="flex justify-between"><span>{MONTHS_HE[REPORT_MONTH - 2]}:</span><span className="font-mono font-semibold" dir="ltr">{formatCurrencyShort(dept.yearToDate)}</span></div>
+                          <div className="flex justify-between"><span>שינוי שנתי:</span><span className={`font-semibold ${isPositive ? 'text-[#2e7d32]' : 'text-[#c62828]'}`} dir="ltr">{isPositive ? '+' : ''}{dept.yoyChangePercent}%</span></div>
+                          <div className="flex justify-between"><span>נתח:</span><span className="font-semibold" dir="ltr">{dept.sharePercent}%</span></div>
                         </div>
-                        <span className="text-[10px] text-muted-foreground w-8 text-center tabular-nums" dir="ltr">
-                          {dept.sharePercent}%
-                        </span>
-                        <span
-                          className={`text-[10px] font-bold w-10 text-left tabular-nums ${dept.yoyChangePercent >= 0 ? 'text-[#2EC4D5]' : 'text-[#DC4E59]'}`}
-                          dir="ltr"
-                        >
-                          {dept.yoyChangePercent > 0 ? '+' : ''}{dept.yoyChangePercent}%
-                        </span>
-                      </motion.div>
-                    )
-                  })}
+                      </div>
+                    </div>
+                  </div>
+                  <span className="text-xs font-bold tabular-nums font-mono w-14 text-left text-[#2D3748]" dir="ltr">
+                    {formatCurrencyShort(dept.yearToDate)}
+                  </span>
+                  <span className={`text-[11px] font-semibold tabular-nums px-2 py-0.5 rounded-[4px] w-16 text-center ${
+                    isPositive ? 'bg-[#e8f5e9] text-[#2e7d32]' : 'bg-[#ffebee] text-[#c62828]'
+                  }`} dir="ltr">
+                    {isPositive ? '+' : ''}{dept.yoyChangePercent}%
+                  </span>
+                  <span className="text-xs tabular-nums text-[#A0AEC0] w-10 text-left" dir="ltr">
+                    {dept.sharePercent}%
+                  </span>
                 </div>
-              </div>
-            )
-          })}
+              )
+            })}
+          </div>
+          <div className="flex items-center gap-6 mt-5 pt-3 border-t border-warm-divider text-[11px] text-[#A0AEC0]">
+            <span className="flex items-center gap-1.5">
+              <span className="w-4 h-3 rounded-sm bg-[#1976d2]" />
+              {MONTHS_HE[REPORT_MONTH - 1]}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-4 h-3 rounded-sm bg-[#1976d2] opacity-30" />
+              {MONTHS_HE[REPORT_MONTH - 2]}
+            </span>
+          </div>
         </CardContent>
       </Card>
     </motion.div>
@@ -934,10 +960,54 @@ function DepartmentsView({ report }: { report: Report }) {
     { label: `מוביל: ${bestDept.name}`, value: Math.round(bestDept.yoyChangePercent), format: 'number', trend: bestDept.yoyChangePercent, trendLabel: 'צמיחה', gradient: 'green' },
     { label: `נחלש: ${worstDept.name}`, value: Math.abs(Math.round(worstDept.yoyChangePercent)), format: 'number', trend: worstDept.yoyChangePercent, trendLabel: 'ירידה', gradient: 'red' },
   ]
+  const growers = [...report.departments].filter(d => d.yoyChangePercent > 0).sort((a, b) => b.yoyChangePercent - a.yoyChangePercent).slice(0, 4)
+  const decliners = [...report.departments].filter(d => d.yoyChangePercent < 0).sort((a, b) => a.yoyChangePercent - b.yoyChangePercent).slice(0, 4)
+  const maxRows = Math.max(growers.length, decliners.length)
+
   return (
     <>
       <KPIGrid items={kpis} columns={3} />
       <DepartmentBreakdown departments={report.departments} />
+
+      <Card className="border-warm-border rounded-[16px]">
+        <CardHeader className="pb-3">
+          <div className="flex items-center gap-2">
+            <div className="w-1 h-5 rounded-full bg-[#2e7d32]" />
+            <CardTitle className="text-base text-[#2D3748]">
+              {MONTHS_HE[REPORT_MONTH - 1]} {REPORT_YEAR} — מחלקות בולטות
+            </CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-6">
+            <div>
+              <p className="text-xs font-semibold text-[#c62828] mb-2">▼ ירידה</p>
+              <div className="space-y-2">
+                {decliners.map(dept => (
+                  <div key={dept.id} className="flex items-center justify-between bg-[#ffebee] rounded-[8px] px-3 py-2.5">
+                    <span className="text-xs text-[#c62828] font-medium">{dept.name}</span>
+                    <span className="text-xs font-bold text-[#c62828] tabular-nums font-mono" dir="ltr">{dept.yoyChangePercent}%</span>
+                  </div>
+                ))}
+                {Array.from({ length: maxRows - decliners.length }).map((_, i) => (
+                  <div key={`empty-d-${i}`} className="h-[38px]" />
+                ))}
+              </div>
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-[#2e7d32] mb-2">▲ צמיחה</p>
+              <div className="space-y-2">
+                {growers.map(dept => (
+                  <div key={dept.id} className="flex items-center justify-between bg-[#e8f5e9] rounded-[8px] px-3 py-2.5">
+                    <span className="text-xs text-[#2e7d32] font-medium">{dept.name}</span>
+                    <span className="text-xs font-bold text-[#2e7d32] tabular-nums font-mono" dir="ltr">+{dept.yoyChangePercent}%</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </>
   )
 }
@@ -954,38 +1024,6 @@ function CostsView({ report }: { report: Report }) {
     <>
       <KPIGrid items={kpis} />
       <ExpenseSummary expenses={report.expenses} />
-    </>
-  )
-}
-
-function QualityView({ report }: { report: Report }) {
-  const ops = report.operations
-  const kpis: KPICardData[] = [
-    { label: 'ציון איכות', value: ops.qualityScore.current, format: 'number', trend: -17.6, trendLabel: `יעד: ${ops.qualityScore.target}`, gradient: 'orange' },
-    { label: 'איכות טרי', value: ops.freshQualityScore.current, format: 'number', trend: 3.4, trendLabel: '', gradient: 'green' },
-    { label: 'פחת בשר %', value: Math.round(ops.meatWaste * 10), format: 'number', trend: -2.1, trendLabel: '', gradient: 'red' },
-    { label: 'תלונות לקוחות', value: ops.customerComplaints.current, format: 'number', trend: 0, trendLabel: `יעד: ${ops.customerComplaints.target}`, gradient: 'teal' },
-  ]
-  return (
-    <>
-      <KPIGrid items={kpis} />
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <QualityGauge
-          score={ops.qualityScore.current}
-          maxScore={100}
-          title={`ציון איכות (דירוג #${ops.qualityScore.ranking})`}
-        />
-        <OperationsStatsCard operations={ops} />
-      </div>
-    </>
-  )
-}
-
-function ReportsView({ report }: { report: Report }) {
-  return (
-    <>
-      <MonthlyComparisonChart data={report.monthly} />
-      <MonthlyOpsGrid data={report.monthly} />
     </>
   )
 }
@@ -1010,8 +1048,6 @@ const VIEW_TITLES: Record<string, string> = {
   hr: 'כח אדם',
   departments: 'מחלקות',
   costs: 'הוצאות ועלויות',
-  quality: 'בקרת איכות',
-  reports: 'דוחות',
   alerts: 'התראות',
 }
 
@@ -1035,8 +1071,6 @@ function StoreManagerPage() {
       case 'hr': return <HRView report={report} />
       case 'departments': return <DepartmentsView report={report} />
       case 'costs': return <CostsView report={report} />
-      case 'quality': return <QualityView report={report} />
-      case 'reports': return <ReportsView report={report} />
       case 'alerts': return <AlertsView report={report} />
       default: return <OverviewView report={report} />
     }

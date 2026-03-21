@@ -33,8 +33,6 @@ const storeCategories = [
   { view: 'hr', label: 'כח אדם', icon: Users },
   { view: 'departments', label: 'מחלקות', icon: LayoutGrid },
   { view: 'costs', label: 'הוצאות ועלויות', icon: Receipt },
-  { view: 'quality', label: 'בקרת איכות', icon: ShieldCheck },
-  { view: 'reports', label: 'דוחות', icon: BarChart3 },
   { view: 'alerts', label: 'התראות', icon: Bell },
 ] as const
 
