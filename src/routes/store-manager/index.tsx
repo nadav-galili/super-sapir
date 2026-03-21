@@ -297,7 +297,7 @@ function StaffingSection({ hr }: { hr: typeof haderaFullReport.hr }) {
           {/* Salary info */}
           <div className="mt-3 pt-3 border-t space-y-1">
             <StatBadge label="עלות שכר חודשית" value={formatCurrencyShort(hr.salaryExpense.current)} />
-            <StatBadge label="אחוז שכר מהכנסות" value={`${hr.salaryCostPercent}%`} delta={-1.1} />
+            <StatBadge label="אחוז שכר מהכנסות" value={`${hr.salaryCostPercent.toFixed(2)}%`} delta={-1.1} />
             <StatBadge label="יעד אחוז שכר" value={`${hr.salaryTarget}%`} />
           </div>
         </CardContent>
@@ -914,8 +914,8 @@ function HRView({ report }: { report: Report }) {
   const hr = report.hr
   const kpis: KPICardData[] = [
     { label: 'תקן עובדים', value: hr.authorized, format: 'number', trend: 0, trendLabel: '', gradient: 'blue' },
-    { label: 'עובדים בפועל', value: hr.actual, format: 'number', trend: ((hr.actual - hr.authorized) / hr.authorized) * 100, trendLabel: 'מעל תקן', gradient: 'green' },
-    { label: 'עלות שכר %', value: Math.round(hr.salaryCostPercent), format: 'number', trend: 0.9, trendLabel: `יעד: ${hr.salaryTarget}%`, gradient: 'pink' },
+    { label: 'עובדים בפועל', value: hr.actual, format: 'number', trend: +((( hr.actual - hr.authorized) / hr.authorized) * 100).toFixed(2), trendLabel: 'מעל תקן', gradient: 'green' },
+    { label: 'עלות שכר', value: +hr.salaryCostPercent.toFixed(2), format: 'percent', trend: 0.9, trendLabel: `יעד: ${hr.salaryTarget}%`, gradient: 'pink' },
     { label: 'תחלופה שנתית', value: Math.round(hr.turnoverRate), format: 'number', trend: -2.3, trendLabel: `דירוג #${hr.turnoverRanking}`, gradient: 'orange' },
   ]
   return (
@@ -1061,10 +1061,10 @@ function StoreManagerPage() {
           </Select>
           <Badge variant="outline" className="text-xs w-fit">{currentMonthYear()}</Badge>
         </div>
-        {view !== 'overview' && (
-          <h2 className="text-lg font-bold text-[#2D3748]">{VIEW_TITLES[view] ?? ''}</h2>
-        )}
       </div>
+      {view !== 'overview' && (
+        <h2 className="text-lg font-bold text-[#2D3748] text-center">{VIEW_TITLES[view] ?? ''}</h2>
+      )}
 
       {/* Branch Info Header */}
       <BranchInfoBar info={report.info} />
