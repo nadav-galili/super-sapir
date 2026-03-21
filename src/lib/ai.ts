@@ -121,7 +121,7 @@ export function buildPromptPayload(report: BranchFullReport) {
       missingActivities: `${c.missingActivities.actual}/${c.missingActivities.fixedTarget} (${c.missingActivities.met ? 'עמד' : 'לא עמד'})`,
       returns: `${c.returns.actual}/${c.returns.target} (${c.returns.met ? 'עמד' : 'לא עמד'})`,
     },
-    anomalies: anomalies.map(a => `${a.departmentName}: ${a.deviation > 0 ? '+' : ''}${a.deviation.toFixed(1)}pp (${a.severity})`),
+    anomalies: anomalies.map(a => `${a.departmentName}: סטייה של ${Math.abs(a.deviation).toFixed(1)} נקודות אחוז ${a.deviation > 0 ? 'מעל' : 'מתחת'} לממוצע הסניף (${a.severity === 'critical' ? 'קריטי' : 'אזהרה'})`),
     recentTrend: recentMonths,
     topDepartments: topDepts,
     expenses,
