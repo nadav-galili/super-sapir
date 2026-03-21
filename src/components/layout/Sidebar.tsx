@@ -2,7 +2,7 @@ import { Link, useMatchRoute, useLocation, useNavigate } from '@tanstack/react-r
 import { currentMonthYear } from '@/data/constants'
 import {
   LayoutDashboard, Store, Map, ShoppingCart,
-  Package, Users, LayoutGrid, Receipt, ShieldCheck, BarChart3, Bell,
+  Package, Users, LayoutGrid, Receipt, Bell,
 } from 'lucide-react'
 import {
   Sidebar as SidebarRoot,

@@ -2,23 +2,25 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState, useMemo } from 'react'
 import { motion } from 'motion/react'
 import {
-  ComposedChart, Area, Line, Bar, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, Legend, Cell, LineChart,
+  ComposedChart, Line, Bar, XAxis, YAxis, CartesianGrid,
+  Tooltip, ResponsiveContainer, Legend, Cell,
   BarChart as ReBarChart,
 } from 'recharts'
 import {
-  ShieldCheck, TrendingUp, TrendingDown, Beef, Eye,
-  ShoppingCart as CartIcon, Users, UserCheck, Percent,
+  TrendingUp, TrendingDown, Beef,
+  Users, UserCheck, Percent, AlertTriangle,
 } from 'lucide-react'
+import { detectAnomalies, type AnomalyResult } from '@/lib/ai'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { KPIGrid } from '@/components/dashboard/KPIGrid'
-import { QualityGauge } from '@/components/charts/QualityGauge'
 import { StatBadge } from '@/components/dashboard/StatBadge'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
 import { BranchInfoBar } from '@/components/store-manager/BranchInfoBar'
+import { AIBriefingCard } from '@/components/store-manager/AIBriefingCard'
+import { AIRecommendations } from '@/components/store-manager/AIRecommendations'
+import { useAIAnalysis } from '@/hooks/useAIAnalysis'
 import { ComplianceCards } from '@/components/store-manager/ComplianceCards'
 import { haderaFullReport, type DepartmentSales, type MonthlyDetail } from '@/data/hadera-real'
 import { currentMonthYear, REPORT_MONTH, REPORT_YEAR, WORKING_DAYS_PER_MONTH, MONTHS_HE } from '@/data/constants'
@@ -47,11 +49,7 @@ function MonthlyComparisonChart({ data }: { data: MonthlyDetail[] }) {
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <CardTitle className="text-base text-[#2D3748]">מגמת מכירות</CardTitle>
-            <div className="flex items-center gap-2">
-              <button className="px-3 py-1.5 border border-warm-border rounded-[8px] text-xs text-[#4A5568] bg-white hover:bg-[#FDF8F6]">◀</button>
-              <span className="text-sm font-semibold text-[#2D3748] px-2">{REPORT_YEAR}</span>
-              <button className="px-3 py-1.5 border border-warm-border rounded-[8px] text-xs text-[#4A5568] bg-white hover:bg-[#FDF8F6]">▶</button>
-            </div>
+            <Badge variant="secondary" className="text-xs">{REPORT_YEAR}</Badge>
           </div>
         </CardHeader>
         <CardContent>
@@ -67,8 +65,8 @@ function MonthlyComparisonChart({ data }: { data: MonthlyDetail[] }) {
                   width={50}
                 />
                 <Tooltip
-                  formatter={(value: number, name: string) => [
-                    `₪${value.toLocaleString()}K`,
+                  formatter={(value, name) => [
+                    `₪${Number(value).toLocaleString()}K`,
                     name === 'current' ? String(REPORT_YEAR) : String(REPORT_YEAR - 1),
                   ]}
                   contentStyle={{ direction: 'rtl', borderRadius: '10px', border: '1px solid #FFE8DE', fontSize: 12 }}
@@ -123,7 +121,7 @@ const DEPT_COLORS: Record<string, string> = {
   organic: '#388e3c',
 }
 
-function DepartmentBreakdown({ departments }: { departments: DepartmentSales[] }) {
+function DepartmentBreakdown({ departments, anomalies = [] }: { departments: DepartmentSales[]; anomalies?: AnomalyResult[] }) {
   const sorted = [...departments].sort((a, b) => b.yearToDate - a.yearToDate)
   const maxYtd = Math.max(...sorted.map(d => d.yearToDate))
 
@@ -146,9 +144,17 @@ function DepartmentBreakdown({ departments }: { departments: DepartmentSales[] }
               const currentPct = (dept.currentMonth / maxYtd) * 100
               const ytdPct = (dept.yearToDate / maxYtd) * 100
               const isPositive = dept.yoyChangePercent >= 0
+              const anomaly = anomalies.find(a => a.departmentId === dept.id)
               return (
                 <div key={dept.id} className="group relative flex items-center gap-3">
-                  <span className="text-xs w-20 text-right shrink-0 text-[#4A5568] font-medium truncate">{dept.name}</span>
+                  <span className="text-xs w-20 text-right shrink-0 text-[#4A5568] font-medium truncate flex items-center gap-1">
+                    {anomaly && (
+                      <span title={anomaly.tooltipText}>
+                        <AlertTriangle className="w-3.5 h-3.5 shrink-0" style={{ color: anomaly.severity === 'critical' ? '#DC4E59' : '#F6B93B' }} />
+                      </span>
+                    )}
+                    {dept.name}
+                  </span>
                   <div className="flex-1 space-y-1 cursor-pointer">
                     <div className="relative h-4 bg-[#e8eaf6] rounded-[3px] overflow-hidden">
                       <motion.div
@@ -208,43 +214,6 @@ function DepartmentBreakdown({ departments }: { departments: DepartmentSales[] }
         </CardContent>
       </Card>
     </motion.div>
-  )
-}
-
-// ─── Operations Stats Card ───────────────────────────────────────
-function OperationsStatsCard({ operations }: { operations: typeof haderaFullReport.operations }) {
-  return (
-    <Card className="border-warm-border rounded-[16px]">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base flex items-center gap-2">
-          <div className="w-7 h-7 rounded-[10px] flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #2EC4D5, #5DD8E3)' }}>
-            <ShieldCheck className="w-4 h-4 text-white" />
-          </div>
-          תפעול ואיכות
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-1">
-        <StatBadge label="אחוז אספקה מוצרים" value={`${operations.supplyRate.current}%`} delta={1.0} />
-        <Separator />
-        <StatBadge label="שימוש בשופר" value={`${operations.shopperUsage.ramiLevy}%`} />
-        <Separator />
-        <StatBadge label="שופרסל (מתחרה)" value={`${operations.shopperUsage.shufersal}%`} />
-        <Separator />
-        <StatBadge label="פחת בשר" value={`${operations.meatWaste}%`} delta={-2.1} />
-        <Separator />
-        <StatBadge label="תלונות לקוחות" value={`${operations.customerComplaints.current}`} />
-        <Separator />
-        <StatBadge label="דיווחי מוקד רואה" value={`${operations.focusReports.current} / ${operations.focusReports.target}`} delta={-50} />
-        <Separator />
-        <div className="flex items-center justify-between py-2">
-          <span className="text-sm text-muted-foreground">פחת שנתי</span>
-          <div className="text-right">
-            <span className="font-semibold text-sm" dir="ltr">{formatCurrencyShort(operations.annualWaste.amount)}</span>
-            <span className="text-xs text-muted-foreground mr-1">({operations.annualWaste.percent}%)</span>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
   )
 }
 
@@ -325,80 +294,6 @@ function StaffingSection({ hr }: { hr: typeof haderaFullReport.hr }) {
             <StatBadge label="עלות שכר חודשית" value={formatCurrencyShort(hr.salaryExpense.current)} />
             <StatBadge label="אחוז שכר מהכנסות" value={`${hr.salaryCostPercent.toFixed(2)}%`} delta={-1.1} />
             <StatBadge label="יעד אחוז שכר" value={`${hr.salaryTarget}%`} />
-          </div>
-        </CardContent>
-      </Card>
-    </motion.div>
-  )
-}
-
-// ─── Monthly Operations Mini Charts ──────────────────────────────
-function MiniSparkline({ data, dataKey, color, label, currentValue, suffix = '' }: {
-  data: MonthlyDetail[]
-  dataKey: keyof MonthlyDetail
-  color: string
-  label: string
-  currentValue: string
-  suffix?: string
-}) {
-  return (
-    <div className="p-3 rounded-xl bg-[#FDF8F6] border border-warm-border">
-      <div className="flex items-baseline justify-between mb-1">
-        <span className="text-xs text-muted-foreground">{label}</span>
-        <span className="text-sm font-bold tabular-nums" style={{ color }} dir="ltr">{currentValue}{suffix}</span>
-      </div>
-      <div dir="ltr" className="h-[50px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data}>
-            <Line type="monotone" dataKey={dataKey} stroke={color} strokeWidth={2} dot={false} />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
-  )
-}
-
-function MonthlyOpsGrid({ data }: { data: MonthlyDetail[] }) {
-  const last = data[data.length - 1]
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.7, duration: 0.5 }}
-    >
-      <Card className="border-warm-border rounded-[16px] h-full">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <div className="w-7 h-7 rounded-[10px] flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #2EC4D5, #5DD8E3)' }}>
-              <Eye className="w-4 h-4 text-white" />
-            </div>
-            מגמות תפעוליות — 12 חודשים
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <MiniSparkline data={data} dataKey="qualityScore" color="#0891b2" label="ציון איכות" currentValue={String(last.qualityScore)} />
-            <MiniSparkline data={data} dataKey="salaryCostPercent" color="#be185d" label="עלות שכר %" currentValue={String(last.salaryCostPercent)} suffix="%" />
-            <MiniSparkline data={data} dataKey="supplyRate" color="#059669" label="אחוז אספקה" currentValue={String(last.supplyRate)} suffix="%" />
-            <MiniSparkline data={data} dataKey="meatWastePercent" color="#dc2626" label="פחת בשר %" currentValue={String(last.meatWastePercent)} suffix="%" />
-          </div>
-
-          {/* Complaints & Focus Reports mini bars */}
-          <div className="mt-4 pt-3 border-t">
-            <p className="text-xs font-medium text-muted-foreground mb-2">תלונות לקוחות ודיווחי מוקד — חודשי</p>
-            <div dir="ltr" className="h-[80px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <ReBarChart data={data} barGap={1}>
-                  <XAxis dataKey="monthNum" tick={{ fontSize: 9 }} />
-                  <Tooltip
-                    formatter={(value, name) => [value, name === 'customerComplaints' ? 'תלונות' : 'דיווחים']}
-                    contentStyle={{ direction: 'rtl', borderRadius: '8px', fontSize: 11, border: 'none', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}
-                  />
-                  <Bar dataKey="customerComplaints" fill="#f59e0b" radius={[2, 2, 0, 0]} barSize={8} />
-                  <Bar dataKey="focusReports" fill="#ef4444" radius={[2, 2, 0, 0]} barSize={8} />
-                </ReBarChart>
-              </ResponsiveContainer>
-            </div>
           </div>
         </CardContent>
       </Card>
@@ -529,7 +424,7 @@ function branchToFullReport(branch: typeof allBranches[0]): typeof haderaFullRep
       fishWaste: 0,
       customerComplaints: { current: m.complaints, target: 5 },
       focusReports: { current: 4, target: 10 },
-      shopperUsage: { ramiLevy: 33, shufersal: 18 },
+      shopperUsage: { superSapir: 33, shufersal: 18 },
       annualWaste: { amount: Math.round(m.totalSales * 0.004), percent: 0.4, prev2024: Math.round(m.totalSales * 0.003), prev2023: Math.round(m.totalSales * 0.005) },
     },
     compliance: {
@@ -833,7 +728,8 @@ function OverviewStaffingCard({ hr }: { hr: Report['hr'] }) {
   )
 }
 
-function OverviewView({ report }: { report: Report }) {
+function OverviewView({ report, branchId }: { report: Report; branchId: string }) {
+  const { briefing, recommendations, isLoading, error, retry } = useAIAnalysis(branchId, report)
   const s = report.sales
   const kpis: KPICardData[] = [
     { label: 'מכירות סניף', value: s.total.current, format: 'currencyShort', trend: s.total.vsTarget, trendLabel: `יעד: ${formatCurrencyShort(s.total.target)}`, gradient: s.total.vsTarget >= 0 ? 'blue' : 'red' },
@@ -843,7 +739,11 @@ function OverviewView({ report }: { report: Report }) {
   ]
   return (
     <div className="space-y-5">
+      <AIBriefingCard briefing={briefing} isLoading={isLoading} error={error} onRetry={retry} />
+
       <KPIGrid items={kpis} columns={4} />
+
+      <AIRecommendations recommendations={recommendations} isLoading={isLoading} />
 
       <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-5">
         <MonthlyComparisonChart data={report.monthly} />
@@ -967,7 +867,7 @@ function DepartmentsView({ report }: { report: Report }) {
   return (
     <>
       <KPIGrid items={kpis} columns={3} />
-      <DepartmentBreakdown departments={report.departments} />
+      <DepartmentBreakdown departments={report.departments} anomalies={detectAnomalies(report.departments, report.sales.total.yoyChange)} />
 
       <Card className="border-warm-border rounded-[16px]">
         <CardHeader className="pb-3">
@@ -1043,7 +943,6 @@ function AlertsView({ report }: { report: Report }) {
 }
 
 const VIEW_TITLES: Record<string, string> = {
-  overview: 'סקירה כללית',
   inventory: 'מלאי',
   hr: 'כח אדם',
   departments: 'מחלקות',
@@ -1058,12 +957,11 @@ function StoreManagerPage() {
   const { view } = Route.useSearch()
   const [selectedBranchId, setSelectedBranchId] = useState('hadera-44')
 
-  const isHadera = selectedBranchId === 'hadera-44'
-  const branch = allBranches.find(b => b.id === selectedBranchId) ?? allBranches[0]
-  const report = useMemo(
-    () => isHadera ? haderaFullReport : branchToFullReport(branch),
-    [selectedBranchId],
-  )
+  const report = useMemo(() => {
+    if (selectedBranchId === 'hadera-44') return haderaFullReport
+    const branch = allBranches.find(b => b.id === selectedBranchId) ?? allBranches[0]
+    return branchToFullReport(branch)
+  }, [selectedBranchId])
 
   const renderView = () => {
     switch (view) {
@@ -1072,7 +970,7 @@ function StoreManagerPage() {
       case 'departments': return <DepartmentsView report={report} />
       case 'costs': return <CostsView report={report} />
       case 'alerts': return <AlertsView report={report} />
-      default: return <OverviewView report={report} />
+      default: return <OverviewView report={report} branchId={selectedBranchId} />
     }
   }
 

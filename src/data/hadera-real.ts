@@ -48,7 +48,7 @@ export interface OperationsData {
   fishWaste: number
   customerComplaints: { current: number; target: number }
   focusReports: { current: number; target: number }
-  shopperUsage: { ramiLevy: number; shufersal: number }
+  shopperUsage: { superSapir: number; shufersal: number }
   annualWaste: { amount: number; percent: number; prev2024: number; prev2023: number }
 }
 
@@ -172,7 +172,7 @@ export const haderaFullReport: BranchFullReport = {
     fishWaste: 0,
     customerComplaints: { current: 2, target: 2 },
     focusReports: { current: 5, target: 10 },
-    shopperUsage: { ramiLevy: 35.1, shufersal: 17.4 },
+    shopperUsage: { superSapir: 35.1, shufersal: 17.4 },
     annualWaste: { amount: 850_479, percent: 0.47, prev2024: 467_181, prev2023: 845_198 },
   },
 
@@ -260,19 +260,4 @@ export const haderaFullReport: BranchFullReport = {
     { name: 'נלוות לשכר', currentMonth: 12_386, monthlyAvg2025: 12_386, monthlyAvg2024: 12_386, percentOfRevenue: 0.2 },
     { name: 'שמירה', currentMonth: 7_122, monthlyAvg2025: 9_712, monthlyAvg2024: 7_122, percentOfRevenue: 0.1 },
   ],
-}
-
-// Private label data
-export const privateLabelData = {
-  targetPercent: 27.9,
-  actualPercent: 28.0,
-  totalSales: 2_768_015,
-  currentMonthSales: 2_525_584,
-  yoyChangePercent: 9.6,
-}
-
-// 3-year revenue comparison
-export const threeYearRevenue = {
-  network: { y2025: 9_804_904, y2024: 10_005_532, y2023: 10_187_228 },
-  total: { y2025: 9_804_904, y2024: 10_005_532, y2023: 10_187_228 },
 }
