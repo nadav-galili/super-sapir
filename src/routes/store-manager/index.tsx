@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { motion } from 'motion/react'
 import {
   ComposedChart, Area, Line, Bar, XAxis, YAxis, CartesianGrid,
@@ -19,10 +19,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { BranchInfoBar } from '@/components/store-manager/BranchInfoBar'
-import { TargetBars } from '@/components/store-manager/TargetBars'
 import { ComplianceCards } from '@/components/store-manager/ComplianceCards'
 import { haderaFullReport, type DepartmentSales, type MonthlyDetail } from '@/data/hadera-real'
-import { currentMonthYear, REPORT_MONTH, REPORT_YEAR } from '@/data/constants'
+import { currentMonthYear, REPORT_MONTH, REPORT_YEAR, WORKING_DAYS_PER_MONTH } from '@/data/constants'
 import { allBranches } from '@/data/mock-branches'
 import { formatCurrencyShort } from '@/lib/format'
 import { CHART_COLORS } from '@/lib/colors'
@@ -490,8 +489,8 @@ function branchToFullReport(branch: typeof allBranches[0]): typeof haderaFullRep
     sales: {
       network: { current: m.networkSales, lastYear: Math.round(m.networkSales * 0.95), target: Math.round(m.networkSales * 1.05), monthlyAvg2025: m.networkSales, ranking: seededInt(seed, 2, 20, 50), yoyChange: m.yoyGrowth, vsTarget: +(m.yoyGrowth - 5).toFixed(1) },
       total: { current: m.totalSales, lastYear: Math.round(m.totalSales * 0.97), target: Math.round(m.totalSales * 1.05), monthlyAvg2025: m.totalSales, yoyChange: m.yoyGrowth, vsTarget: +(m.yoyGrowth - 5).toFixed(1) },
-      avgBasket: { current: Math.round(m.totalSales / (m.customersPerDay * 26)), change: seededFloat(seed, 6, -2, 8), ranking: seededInt(seed, 7, 8, 24) },
-      customers: { current: m.customersPerDay * 26, target: m.customersPerDay * 25, change: seededFloat(seed, 8, -3, 5), ranking: seededInt(seed, 9, 18, 34) },
+      avgBasket: { current: Math.round(m.totalSales / (m.customersPerDay * WORKING_DAYS_PER_MONTH)), change: seededFloat(seed, 6, -2, 8), ranking: seededInt(seed, 7, 8, 24) },
+      customers: { current: m.customersPerDay * WORKING_DAYS_PER_MONTH, target: m.customersPerDay * 25, change: seededFloat(seed, 8, -3, 5), ranking: seededInt(seed, 9, 18, 34) },
       revenuePerMeter: { ranking: seededInt(seed, 10, 18, 42), change: seededFloat(seed, 11, -8, 4) },
     },
     targets: { revenueToStore: 3000, salaryCostTarget: 7.5, qualityTarget: 85 },
@@ -579,7 +578,6 @@ type Report = typeof haderaFullReport
 // ─── Overview: Branch Performance Card ──────────────────────────
 function BranchPerformanceCard({ report }: { report: Report }) {
   const items = [
-    { label: 'אחוז אספקה', value: `${report.operations.supplyRate.current}%`, change: -6, sub: 'כולל חלופיים' },
     { label: 'ציון בקרת איכות', value: String(report.operations.qualityScore.current), change: -17.6, sub: 'מתוך 100' },
     { label: 'הכנסות למ"ר', value: `₪${report.info.revenuePerMeter.toLocaleString()}`, change: null, sub: `שטח: ${report.info.sellingArea.toLocaleString()} מ"ר` },
     { label: 'אחוז עלות שכר', value: `${report.hr.salaryCostPercent}%`, change: -0.7, sub: `יעד: ${report.hr.salaryTarget}%` },
@@ -615,7 +613,6 @@ function BranchPerformanceCard({ report }: { report: Report }) {
 function OverviewExpenseTable({ expenses, totalRevenue }: { expenses: typeof haderaFullReport.expenses; totalRevenue: number }) {
   const sorted = [...expenses].sort((a, b) => b.currentMonth - a.currentMonth).slice(0, 7)
   const totalExpenses = expenses.reduce((s, e) => s + e.currentMonth, 0)
-  const barColors = ['#DC4E59', '#6C5CE7', '#F6B93B', '#2EC4D5', '#42a5f5', '#DC4E59', '#A0AEC0']
 
   return (
     <Card className="border-warm-border rounded-[16px]">
@@ -643,7 +640,7 @@ function OverviewExpenseTable({ expenses, totalRevenue }: { expenses: typeof had
                     <div className="flex items-center gap-2" style={{ direction: 'ltr' }}>
                       <span className="tabular-nums font-mono text-xs shrink-0 w-10 text-right">{exp.percentOfRevenue}%</span>
                       <div className="h-1.5 bg-[#FDF8F6] rounded-full flex-1 overflow-hidden border border-warm-border">
-                        <div className="h-full rounded-full" style={{ width: `${Math.min(exp.percentOfRevenue * 10, 100)}%`, background: barColors[i] }} />
+                        <div className="h-full rounded-full" style={{ width: `${Math.min(exp.percentOfRevenue * 10, 100)}%`, background: CHART_COLORS[i % CHART_COLORS.length] }} />
                       </div>
                     </div>
                   </td>
@@ -751,7 +748,7 @@ function AlertsTargetsCard({ report }: { report: Report }) {
 }
 
 // ─── Overview: HR & Staffing Card ───────────────────────────────
-function OverviewStaffingCard({ hr, monthly }: { hr: Report['hr']; monthly: MonthlyDetail[] }) {
+function OverviewStaffingCard({ hr }: { hr: Report['hr'] }) {
   return (
     <Card className="border-warm-border rounded-[16px]">
       <CardHeader className="pb-3">
@@ -763,7 +760,7 @@ function OverviewStaffingCard({ hr, monthly }: { hr: Report['hr']; monthly: Mont
             { label: 'תקן', value: hr.authorized },
             { label: 'מצבה רישומית', value: hr.actual },
             { label: 'משרות בפועל', value: hr.actual },
-            { label: 'שעות נוספות', value: hr.salaryExpense.current > 0 ? '2,394' : '0' },
+            { label: 'שעות נוספות', value: Math.round(hr.actual * 23).toLocaleString() },
           ].map(item => (
             <div key={item.label} className="text-center p-3 rounded-xl bg-[#FDF8F6]">
               <p className="text-[11px] text-[#A0AEC0] mb-1.5">{item.label}</p>
@@ -804,74 +801,32 @@ function OverviewStaffingCard({ hr, monthly }: { hr: Report['hr']; monthly: Mont
   )
 }
 
-// ─── Overview: Quality Trends Chart ─────────────────────────────
-function QualityTrendsChart({ data }: { data: MonthlyDetail[] }) {
-  return (
-    <Card className="border-warm-border rounded-[16px]">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base text-[#2D3748]">מגמות חודשיות — ציוני איכות ואספקה</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div dir="ltr" className="h-[220px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.04)" />
-              <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#4A5568' }} />
-              <YAxis domain={[60, 100]} tick={{ fontSize: 11, fill: '#A0AEC0' }} />
-              <Tooltip
-                formatter={(value, name) => {
-                  const labels: Record<string, string> = { qualityScore: 'ציון בקרת איכות', supplyRate: 'אחוז אספקה', salaryCostPercent: 'אחוז עלות שכר (x10)' }
-                  return [value, labels[name as string] ?? name]
-                }}
-                contentStyle={{ direction: 'rtl', borderRadius: '10px', border: '1px solid #FFE8DE', fontSize: 12 }}
-              />
-              <Legend formatter={(v: string) => {
-                const labels: Record<string, string> = { qualityScore: 'ציון בקרת איכות', supplyRate: 'אחוז אספקה', salaryCostPercent: 'אחוז עלות שכר (x10)' }
-                return labels[v] ?? v
-              }} />
-              <Line type="monotone" dataKey="qualityScore" stroke="#DC4E59" strokeWidth={2.5} dot={{ r: 4, fill: '#DC4E59' }} fill="rgba(220,78,89,0.08)" />
-              <Line type="monotone" dataKey="supplyRate" stroke="#42a5f5" strokeWidth={2.5} dot={{ r: 4, fill: '#42a5f5' }} />
-              <Line type="monotone" dataKey="salaryCostPercent" stroke="#F6B93B" strokeWidth={2} strokeDasharray="5 5" dot={{ r: 3, fill: '#F6B93B' }} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
-
 function OverviewView({ report }: { report: Report }) {
   const s = report.sales
   const kpis: KPICardData[] = [
-    { label: 'מכירות סניף', value: s.total.current, format: 'currencyShort', trend: s.total.yoyChange, trendLabel: 'חודש מקביל', gradient: 'blue' },
+    { label: 'מכירות סניף', value: s.total.current, format: 'currencyShort', trend: s.total.vsTarget, trendLabel: `יעד: ${formatCurrencyShort(s.total.target)}`, gradient: s.total.vsTarget >= 0 ? 'blue' : 'red' },
     { label: 'לקוחות', value: s.customers.current, format: 'number', trend: s.customers.change, trendLabel: `סל ממוצע: ₪${s.avgBasket.current.toLocaleString()}`, gradient: 'pink' },
+    { label: 'לקוחות ליום', value: Math.round(s.customers.current / WORKING_DAYS_PER_MONTH), format: 'number', trend: s.customers.change, trendLabel: `דירוג #${s.customers.ranking}`, gradient: 'orange' },
     { label: 'סל ממוצע', value: s.avgBasket.current, format: 'currency', trend: s.avgBasket.change, trendLabel: 'שנתי', gradient: 'teal' },
   ]
   return (
     <div className="space-y-5">
-      {/* KPI Cards */}
       <KPIGrid items={kpis} columns={4} />
 
-      {/* Sales Trends + Branch Performance */}
       <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-5">
         <MonthlyComparisonChart data={report.monthly} />
         <BranchPerformanceCard report={report} />
       </div>
 
-      {/* Expenses + Department Breakdown */}
       <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-5">
         <OverviewExpenseTable expenses={report.expenses} totalRevenue={s.total.current} />
         <OverviewDepartmentBars departments={report.departments} />
       </div>
 
-      {/* Alerts + HR Staffing */}
       <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-5">
         <AlertsTargetsCard report={report} />
-        <OverviewStaffingCard hr={report.hr} monthly={report.monthly} />
+        <OverviewStaffingCard hr={report.hr} />
       </div>
-
-      {/* Quality Trends - Full Width */}
-      <QualityTrendsChart data={report.monthly} />
     </div>
   )
 }
@@ -1005,7 +960,10 @@ function StoreManagerPage() {
 
   const isHadera = selectedBranchId === 'hadera-44'
   const branch = allBranches.find(b => b.id === selectedBranchId) ?? allBranches[0]
-  const report = isHadera ? haderaFullReport : branchToFullReport(branch)
+  const report = useMemo(
+    () => isHadera ? haderaFullReport : branchToFullReport(branch),
+    [selectedBranchId],
+  )
 
   const renderView = () => {
     switch (view) {

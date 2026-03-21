@@ -25,8 +25,7 @@ export function Header({ title }: HeaderProps) {
       </div>
       <div className="flex items-center gap-2 text-sm text-[#A0AEC0]">
         <Calendar className="w-4 h-4" />
-        <span className="hidden sm:inline">{currentMonthYear()}</span>
-        <span className="sm:hidden text-xs">{currentMonthYear()}</span>
+        <span className="text-xs sm:text-sm">{currentMonthYear()}</span>
       </div>
     </header>
   )

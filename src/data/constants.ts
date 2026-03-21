@@ -53,6 +53,7 @@ export const MONTHS_HE = [
 
 export const REPORT_MONTH = 11 // November (1-indexed)
 export const REPORT_YEAR = 2025
+export const WORKING_DAYS_PER_MONTH = 26
 
 export function currentMonthYear(): string {
   return `${MONTHS_HE[REPORT_MONTH - 1]} ${REPORT_YEAR}`

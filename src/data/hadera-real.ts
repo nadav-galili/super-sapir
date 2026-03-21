@@ -69,7 +69,7 @@ export interface HRData {
   recruitmentTotal: number
   placementCompanyPercent: number
   staffing: StaffingRow[]
-  salaryExpense: { current: number; monthlyAvg2025: number; monthlyAvg2025: number }
+  salaryExpense: { current: number; monthlyAvg2025: number; monthlyAvg2024: number }
   salaryPercentOfRevenue: { current: number; target: number; threeYearAvg: number[] }
 }
 
@@ -113,7 +113,7 @@ export interface ExpenseItem {
   name: string
   currentMonth: number
   monthlyAvg2025: number
-  monthlyAvg2025: number
+  monthlyAvg2024: number
   percentOfRevenue: number
 }
 
@@ -190,7 +190,7 @@ export const haderaFullReport: BranchFullReport = {
     turnoverRanking: 30,
     recruitmentTotal: 85,
     placementCompanyPercent: 20,
-    salaryExpense: { current: 831_947, monthlyAvg2025: 813_971, monthlyAvg2025: 760_722 },
+    salaryExpense: { current: 831_947, monthlyAvg2025: 813_971, monthlyAvg2024: 760_722 },
     salaryPercentOfRevenue: { current: 8.4, target: 7.5, threeYearAvg: [8.4, 7.6, 7.4] },
     staffing: [
       { role: 'צוות ניהולי', authorized: 5, actual: 4.7, gap: -0.3 },
