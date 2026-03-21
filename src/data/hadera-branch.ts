@@ -1,7 +1,7 @@
 import type { Branch } from './types'
 import { MONTHS_HE } from './constants'
 
-// Real data from Hadera #44 management report - December 2026
+// Real data from Hadera #44 management report - November 2025
 export const haderaBranch: Branch = {
   id: 'hadera-44',
   name: 'חדרה',

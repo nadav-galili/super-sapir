@@ -22,7 +22,7 @@ import { BranchInfoBar } from '@/components/store-manager/BranchInfoBar'
 import { TargetBars } from '@/components/store-manager/TargetBars'
 import { ComplianceCards } from '@/components/store-manager/ComplianceCards'
 import { haderaFullReport, type DepartmentSales, type MonthlyDetail } from '@/data/hadera-real'
-import { currentMonthYear } from '@/data/constants'
+import { currentMonthYear, REPORT_MONTH, REPORT_YEAR } from '@/data/constants'
 import { allBranches } from '@/data/mock-branches'
 import { formatCurrencyShort } from '@/lib/format'
 import { CHART_COLORS } from '@/lib/colors'
@@ -30,11 +30,13 @@ import type { KPICardData } from '@/data/types'
 
 // ─── Monthly Sales Comparison Chart ──────────────────────────────
 function MonthlyComparisonChart({ data }: { data: MonthlyDetail[] }) {
-  const chartData = data.map(d => ({
-    month: d.month,
-    current: Math.round(d.currentSales / 1000),
-    lastYear: Math.round(d.lastYearSales / 1000),
-  }))
+  const chartData = data
+    .filter(d => d.monthNum <= REPORT_MONTH)
+    .map(d => ({
+      month: d.month,
+      current: Math.round(d.currentSales / 1000),
+      lastYear: Math.round(d.lastYearSales / 1000),
+    }))
 
   return (
     <motion.div
@@ -48,7 +50,7 @@ function MonthlyComparisonChart({ data }: { data: MonthlyDetail[] }) {
             <CardTitle className="text-base text-[#2D3748]">מגמת מכירות</CardTitle>
             <div className="flex items-center gap-2">
               <button className="px-3 py-1.5 border border-warm-border rounded-[8px] text-xs text-[#4A5568] bg-white hover:bg-[#FDF8F6]">◀</button>
-              <span className="text-sm font-semibold text-[#2D3748] px-2">2026</span>
+              <span className="text-sm font-semibold text-[#2D3748] px-2">{REPORT_YEAR}</span>
               <button className="px-3 py-1.5 border border-warm-border rounded-[8px] text-xs text-[#4A5568] bg-white hover:bg-[#FDF8F6]">▶</button>
             </div>
           </div>
@@ -68,12 +70,12 @@ function MonthlyComparisonChart({ data }: { data: MonthlyDetail[] }) {
                 <Tooltip
                   formatter={(value: number, name: string) => [
                     `₪${value.toLocaleString()}K`,
-                    name === 'current' ? '2026' : '2025',
+                    name === 'current' ? String(REPORT_YEAR) : String(REPORT_YEAR - 1),
                   ]}
                   contentStyle={{ direction: 'rtl', borderRadius: '10px', border: '1px solid #FFE8DE', fontSize: 12 }}
                 />
                 <Legend
-                  formatter={(v: string) => v === 'current' ? '2026' : '2025'}
+                  formatter={(v: string) => v === 'current' ? String(REPORT_YEAR) : String(REPORT_YEAR - 1)}
                   iconType="plainline"
                   wrapperStyle={{ fontSize: 12, paddingTop: 8 }}
                 />
@@ -486,8 +488,8 @@ function branchToFullReport(branch: typeof allBranches[0]): typeof haderaFullRep
       revenuePerMeter: Math.round(m.totalSales / 3000),
     },
     sales: {
-      network: { current: m.networkSales, lastYear: Math.round(m.networkSales * 0.95), target: Math.round(m.networkSales * 1.05), monthlyAvg2026: m.networkSales, ranking: seededInt(seed, 2, 20, 50), yoyChange: m.yoyGrowth, vsTarget: +(m.yoyGrowth - 5).toFixed(1) },
-      total: { current: m.totalSales, lastYear: Math.round(m.totalSales * 0.97), target: Math.round(m.totalSales * 1.05), monthlyAvg2026: m.totalSales, yoyChange: m.yoyGrowth, vsTarget: +(m.yoyGrowth - 5).toFixed(1) },
+      network: { current: m.networkSales, lastYear: Math.round(m.networkSales * 0.95), target: Math.round(m.networkSales * 1.05), monthlyAvg2025: m.networkSales, ranking: seededInt(seed, 2, 20, 50), yoyChange: m.yoyGrowth, vsTarget: +(m.yoyGrowth - 5).toFixed(1) },
+      total: { current: m.totalSales, lastYear: Math.round(m.totalSales * 0.97), target: Math.round(m.totalSales * 1.05), monthlyAvg2025: m.totalSales, yoyChange: m.yoyGrowth, vsTarget: +(m.yoyGrowth - 5).toFixed(1) },
       avgBasket: { current: Math.round(m.totalSales / (m.customersPerDay * 26)), change: seededFloat(seed, 6, -2, 8), ranking: seededInt(seed, 7, 8, 24) },
       customers: { current: m.customersPerDay * 26, target: m.customersPerDay * 25, change: seededFloat(seed, 8, -3, 5), ranking: seededInt(seed, 9, 18, 34) },
       revenuePerMeter: { ranking: seededInt(seed, 10, 18, 42), change: seededFloat(seed, 11, -8, 4) },
@@ -502,7 +504,7 @@ function branchToFullReport(branch: typeof allBranches[0]): typeof haderaFullRep
       customerComplaints: { current: m.complaints, target: 5 },
       focusReports: { current: 4, target: 10 },
       shopperUsage: { ramiLevy: 33, shufersal: 18 },
-      annualWaste: { amount: Math.round(m.totalSales * 0.004), percent: 0.4, prev2025: Math.round(m.totalSales * 0.003), prev2024: Math.round(m.totalSales * 0.005) },
+      annualWaste: { amount: Math.round(m.totalSales * 0.004), percent: 0.4, prev2024: Math.round(m.totalSales * 0.003), prev2023: Math.round(m.totalSales * 0.005) },
     },
     compliance: {
       highInventory: { target: 60, actual: seededInt(seed, 14, 55, 75), met: seededBool(seed, 15), ranking: seededInt(seed, 16, 20, 50) },
@@ -520,7 +522,7 @@ function branchToFullReport(branch: typeof allBranches[0]): typeof haderaFullRep
       turnoverRanking: seededInt(seed, 32, 20, 45),
       recruitmentTotal: seededInt(seed, 33, 50, 90),
       placementCompanyPercent: seededInt(seed, 34, 15, 25),
-      salaryExpense: { current: Math.round(m.totalSales * m.salaryCostPercent / 100), monthlyAvg2026: Math.round(m.totalSales * 0.08), monthlyAvg2025: Math.round(m.totalSales * 0.075) },
+      salaryExpense: { current: Math.round(m.totalSales * m.salaryCostPercent / 100), monthlyAvg2025: Math.round(m.totalSales * 0.08), monthlyAvg2024: Math.round(m.totalSales * 0.075) },
       salaryPercentOfRevenue: { current: m.salaryCostPercent, target: 7.5, threeYearAvg: [m.salaryCostPercent, 7.8, 7.5] },
       staffing: [
         { role: 'צוות ניהולי', authorized: 5, actual: 4.5, gap: -0.5 },
@@ -558,10 +560,10 @@ function branchToFullReport(branch: typeof allBranches[0]): typeof haderaFullRep
       meatWastePercent: seededFloat(seed + t.monthNum, 44, 0, 8),
     })),
     expenses: [
-      { name: 'שכר', currentMonth: Math.round(m.totalSales * m.salaryCostPercent / 100), monthlyAvg2026: Math.round(m.totalSales * 0.08), monthlyAvg2025: Math.round(m.totalSales * 0.075), percentOfRevenue: m.salaryCostPercent },
-      { name: 'שכר דירה, אריזה', currentMonth: Math.round(m.totalSales * 0.035), monthlyAvg2026: Math.round(m.totalSales * 0.035), monthlyAvg2025: Math.round(m.totalSales * 0.033), percentOfRevenue: 3.5 },
-      { name: 'חשמל', currentMonth: Math.round(m.totalSales * 0.006), monthlyAvg2026: Math.round(m.totalSales * 0.006), monthlyAvg2025: Math.round(m.totalSales * 0.006), percentOfRevenue: 0.6 },
-      { name: 'שמירה', currentMonth: Math.round(m.totalSales * 0.003), monthlyAvg2026: Math.round(m.totalSales * 0.003), monthlyAvg2025: Math.round(m.totalSales * 0.003), percentOfRevenue: 0.3 },
+      { name: 'שכר', currentMonth: Math.round(m.totalSales * m.salaryCostPercent / 100), monthlyAvg2025: Math.round(m.totalSales * 0.08), monthlyAvg2024: Math.round(m.totalSales * 0.075), percentOfRevenue: m.salaryCostPercent },
+      { name: 'שכר דירה, אריזה', currentMonth: Math.round(m.totalSales * 0.035), monthlyAvg2025: Math.round(m.totalSales * 0.035), monthlyAvg2024: Math.round(m.totalSales * 0.033), percentOfRevenue: 3.5 },
+      { name: 'חשמל', currentMonth: Math.round(m.totalSales * 0.006), monthlyAvg2025: Math.round(m.totalSales * 0.006), monthlyAvg2024: Math.round(m.totalSales * 0.006), percentOfRevenue: 0.6 },
+      { name: 'שמירה', currentMonth: Math.round(m.totalSales * 0.003), monthlyAvg2025: Math.round(m.totalSales * 0.003), monthlyAvg2024: Math.round(m.totalSales * 0.003), percentOfRevenue: 0.3 },
     ],
   }
 }
@@ -632,7 +634,7 @@ function OverviewExpenseTable({ expenses, totalRevenue }: { expenses: typeof had
           </thead>
           <tbody>
             {sorted.map((exp, i) => {
-              const pctChange = exp.monthlyAvg2025 > 0 ? Math.round(((exp.currentMonth - exp.monthlyAvg2025) / exp.monthlyAvg2025) * 100) : 0
+              const pctChange = exp.monthlyAvg2024 > 0 ? Math.round(((exp.currentMonth - exp.monthlyAvg2024) / exp.monthlyAvg2024) * 100) : 0
               return (
                 <tr key={i} className="border-b border-warm-divider hover:bg-[#FDF8F6]">
                   <td className="text-right text-xs text-[#4A5568] py-3 px-2">{exp.name}</td>
@@ -775,9 +777,9 @@ function OverviewStaffingCard({ hr, monthly }: { hr: Report['hr']; monthly: Mont
             <ResponsiveContainer width="100%" height="100%">
               <ReBarChart
                 data={[
-                  { year: '2023', rate: 81.6, monthly: 7.8 },
-                  { year: '2025', rate: 81.6, monthly: 6.7 },
-                  { year: '2026', rate: hr.turnoverRate, monthly: 6.7 },
+                  { year: String(REPORT_YEAR - 2), rate: 81.6, monthly: 7.8 },
+                  { year: String(REPORT_YEAR - 1), rate: 81.6, monthly: 6.7 },
+                  { year: String(REPORT_YEAR), rate: hr.turnoverRate, monthly: 6.7 },
                 ]}
                 barGap={4}
               >
