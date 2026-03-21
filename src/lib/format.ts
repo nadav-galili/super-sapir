@@ -8,8 +8,8 @@ const numberFormatter = new Intl.NumberFormat('he-IL')
 
 const percentFormatter = new Intl.NumberFormat('he-IL', {
   style: 'percent',
-  minimumFractionDigits: 1,
-  maximumFractionDigits: 1,
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
 })
 
 const compactFormatter = new Intl.NumberFormat('he-IL', {

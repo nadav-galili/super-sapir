@@ -13,11 +13,9 @@ function clamp(val: number, min: number, max: number): number {
 function generateMetrics(scale: number): BranchMetrics {
   const base = haderaBranch.metrics
   const totalSales = randomVariance(base.totalSales * scale, 0.15)
-  const netRatio = 0.6 + Math.random() * 0.15
   return {
     totalSales,
-    networkSales: Math.round(totalSales * netRatio),
-    internetSales: Math.round(totalSales * (1 - netRatio)),
+    networkSales: totalSales,
     avgBasket: randomVariance(base.avgBasket, 0.2),
     customersPerDay: randomVariance(base.customersPerDay * scale, 0.15),
     qualityScore: clamp(randomVariance(base.qualityScore, 0.15), 40, 95),
@@ -46,13 +44,11 @@ function generateMonthlyTrends(totalSales: number): MonthlyTrend[] {
   const seasonality = [0.85, 0.82, 0.95, 1.02, 1.05, 1.08, 1.0, 0.98, 1.15, 1.02, 0.95, 1.13]
   return MONTHS_HE.map((month, i) => {
     const total = Math.round(baseMonthly * seasonality[i] * (0.95 + Math.random() * 0.1))
-    const netRatio = 0.6 + Math.random() * 0.1
     return {
       month,
       monthNum: i + 1,
       totalSales: total,
-      networkSales: Math.round(total * netRatio),
-      internetSales: Math.round(total * (1 - netRatio)),
+      networkSales: total,
       customers: Math.round((total / 37_000) * (0.9 + Math.random() * 0.2)),
       avgBasket: randomVariance(37_506, 0.15),
     }

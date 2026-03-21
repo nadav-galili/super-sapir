@@ -42,10 +42,7 @@ export function KPICard({ label, value, format, trend, trendLabel, gradient, del
       whileHover={{ y: -2, boxShadow: 'rgba(220, 78, 89, 0.08) 0px 8px 24px' }}
       className="relative overflow-hidden rounded-[16px] bg-white border border-warm-border cursor-default"
     >
-      {/* Right accent border (RTL) */}
-      <div className="absolute top-0 right-0 w-1 h-full" style={{ background: accent.border }} />
-
-      <div className="p-4 pr-5">
+      <div className="p-4">
         <p className="text-xs font-medium text-warm-muted mb-1">{label}</p>
         <p className="text-2xl font-bold font-mono tabular-nums" style={{ color: accent.text }} dir="ltr">
           {formatValue(animatedValue, format)}

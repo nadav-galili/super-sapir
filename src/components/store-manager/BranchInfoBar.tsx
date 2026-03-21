@@ -1,5 +1,5 @@
 import { motion } from 'motion/react'
-import { MapPin, User, Award, Wifi, Ruler, Users } from 'lucide-react'
+import { MapPin, User, Award, Ruler, Users } from 'lucide-react'
 import type { BranchInfo } from '@/data/hadera-real'
 
 interface BranchInfoBarProps {
@@ -42,12 +42,6 @@ export function BranchInfoBar({ info }: BranchInfoBarProps) {
             <Award className="w-4 h-4" />
             <span className="text-sm font-bold">דירוג {info.grade}</span>
           </div>
-          {info.hasInternet && (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-[20px] bg-[#2EC4D5]/10 border border-[#2EC4D5]/20 text-[#2EC4D5]">
-              <Wifi className="w-4 h-4" />
-              <span className="text-sm font-medium">אינטרנט פעיל</span>
-            </div>
-          )}
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-[20px] bg-[#FDF8F6] border border-warm-border text-[#4A5568]">
             <Ruler className="w-4 h-4" />
             <span className="text-sm" dir="ltr">{info.sellingArea.toLocaleString()} מ"ר</span>

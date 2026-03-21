@@ -51,6 +51,14 @@ export const MONTHS_HE = [
   'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר',
 ]
 
+export const REPORT_MONTH = 11 // November (1-indexed)
+export const REPORT_YEAR = 2025
+export const WORKING_DAYS_PER_MONTH = 26
+
+export function currentMonthYear(): string {
+  return `${MONTHS_HE[REPORT_MONTH - 1]} ${REPORT_YEAR}`
+}
+
 export const PERFORMANCE_THRESHOLDS = {
   quality: { good: 75, fair: 60, poor: 45 },
   salaryCost: { good: 8.0, fair: 9.0, poor: 10.0 },

@@ -1,7 +1,7 @@
 import type { Branch } from './types'
 import { MONTHS_HE } from './constants'
 
-// Real data from Hadera #44 management report - December 2025
+// Real data from Hadera #44 management report - November 2025
 export const haderaBranch: Branch = {
   id: 'hadera-44',
   name: 'חדרה',
@@ -10,9 +10,8 @@ export const haderaBranch: Branch = {
   lat: 32.4340,
   lng: 34.9196,
   metrics: {
-    totalSales: 15_218_076,
+    totalSales: 9_903_162,
     networkSales: 9_903_162,
-    internetSales: 5_314_914,
     avgBasket: 257,
     customersPerDay: Math.round(38_643 / 26), // ~1486 per day based on ~26 working days
     qualityScore: 70,
@@ -30,10 +29,9 @@ export const haderaBranch: Branch = {
     { id: 'vegetables', name: 'ירקות', sales: 1_445_717, sharePercent: 15.4, targetShare: 16.0, yoyChange: 4.2, isPrivateLabel: false },
     { id: 'grocery', name: 'מכולת', sales: 2_026_339, sharePercent: 21.6, targetShare: 21.3, yoyChange: 3.8, isPrivateLabel: false },
     { id: 'dairy', name: 'מוצרי חלב', sales: 1_325_976, sharePercent: 14.1, targetShare: 14.9, yoyChange: 11.6, isPrivateLabel: false },
-    { id: 'home-products', name: 'בן-פוד', sales: 962_978, sharePercent: 10.3, targetShare: 10.2, yoyChange: 4.6, isPrivateLabel: false },
+    { id: 'home-products', name: 'נון-פוד', sales: 962_978, sharePercent: 10.3, targetShare: 10.2, yoyChange: 4.6, isPrivateLabel: false },
     { id: 'drinks', name: 'שתיה', sales: 878_077, sharePercent: 9.4, targetShare: 9.5, yoyChange: 7.0, isPrivateLabel: false },
     { id: 'frozen', name: 'קפואים', sales: 856_002, sharePercent: 9.1, targetShare: 8.8, yoyChange: 1.7, isPrivateLabel: false },
-    { id: 'fresh-chef', name: 'שף טרי', sales: 520_023, sharePercent: 5.5, targetShare: 5.3, yoyChange: -21.9, isPrivateLabel: false },
     { id: 'household', name: 'מוצרים לבית', sales: 330_683, sharePercent: 3.5, targetShare: 5.4, yoyChange: 62.5, isPrivateLabel: false },
     { id: 'fresh-meat', name: 'בשר טרי', sales: 229_475, sharePercent: 2.4, targetShare: 2.7, yoyChange: -21.4, isPrivateLabel: false },
     { id: 'bread', name: 'לחם ומאפים', sales: 204_117, sharePercent: 2.2, targetShare: 2.4, yoyChange: 14.6, isPrivateLabel: false },
@@ -44,17 +42,17 @@ export const haderaBranch: Branch = {
     { id: 'fresh-fish', name: 'דגים טריים', sales: 71_680, sharePercent: 0.8, targetShare: 0.8, yoyChange: 7.9, isPrivateLabel: false },
   ],
   monthlyTrends: [
-    { month: MONTHS_HE[0], monthNum: 1, totalSales: 9_069_933, networkSales: 5_895_457, internetSales: 3_174_476, customers: 35_271, avgBasket: 257 },
-    { month: MONTHS_HE[1], monthNum: 2, totalSales: 8_178_761, networkSales: 5_316_194, internetSales: 2_862_567, customers: 31_806, avgBasket: 257 },
-    { month: MONTHS_HE[2], monthNum: 3, totalSales: 9_389_274, networkSales: 6_103_028, internetSales: 3_286_246, customers: 36_514, avgBasket: 257 },
-    { month: MONTHS_HE[3], monthNum: 4, totalSales: 11_168_947, networkSales: 7_259_816, internetSales: 3_909_131, customers: 43_426, avgBasket: 257 },
-    { month: MONTHS_HE[4], monthNum: 5, totalSales: 10_109_075, networkSales: 6_570_899, internetSales: 3_538_176, customers: 39_308, avgBasket: 257 },
-    { month: MONTHS_HE[5], monthNum: 6, totalSales: 9_606_749, networkSales: 6_244_387, internetSales: 3_362_362, customers: 37_355, avgBasket: 257 },
-    { month: MONTHS_HE[6], monthNum: 7, totalSales: 10_143_356, networkSales: 6_593_182, internetSales: 3_550_174, customers: 39_441, avgBasket: 257 },
-    { month: MONTHS_HE[7], monthNum: 8, totalSales: 9_850_473, networkSales: 6_402_807, internetSales: 3_447_666, customers: 38_302, avgBasket: 257 },
-    { month: MONTHS_HE[8], monthNum: 9, totalSales: 11_241_167, networkSales: 7_306_758, internetSales: 3_934_408, customers: 43_707, avgBasket: 257 },
-    { month: MONTHS_HE[9], monthNum: 10, totalSales: 10_135_494, networkSales: 6_588_071, internetSales: 3_547_423, customers: 39_413, avgBasket: 257 },
-    { month: MONTHS_HE[10], monthNum: 11, totalSales: 8_862_436, networkSales: 5_760_583, internetSales: 3_101_853, customers: 34_465, avgBasket: 257 },
-    { month: MONTHS_HE[11], monthNum: 12, totalSales: 9_903_162, networkSales: 9_903_162, internetSales: 5_314_914, customers: 38_643, avgBasket: 257 },
+    { month: MONTHS_HE[0], monthNum: 1, totalSales: 9_069_933, networkSales: 5_895_457, customers: 35_271, avgBasket: 257 },
+    { month: MONTHS_HE[1], monthNum: 2, totalSales: 8_178_761, networkSales: 5_316_194, customers: 31_806, avgBasket: 257 },
+    { month: MONTHS_HE[2], monthNum: 3, totalSales: 9_389_274, networkSales: 6_103_028, customers: 36_514, avgBasket: 257 },
+    { month: MONTHS_HE[3], monthNum: 4, totalSales: 11_168_947, networkSales: 7_259_816, customers: 43_426, avgBasket: 257 },
+    { month: MONTHS_HE[4], monthNum: 5, totalSales: 10_109_075, networkSales: 6_570_899, customers: 39_308, avgBasket: 257 },
+    { month: MONTHS_HE[5], monthNum: 6, totalSales: 9_606_749, networkSales: 6_244_387, customers: 37_355, avgBasket: 257 },
+    { month: MONTHS_HE[6], monthNum: 7, totalSales: 10_143_356, networkSales: 6_593_182, customers: 39_441, avgBasket: 257 },
+    { month: MONTHS_HE[7], monthNum: 8, totalSales: 9_850_473, networkSales: 6_402_807, customers: 38_302, avgBasket: 257 },
+    { month: MONTHS_HE[8], monthNum: 9, totalSales: 11_241_167, networkSales: 7_306_758, customers: 43_707, avgBasket: 257 },
+    { month: MONTHS_HE[9], monthNum: 10, totalSales: 10_135_494, networkSales: 6_588_071, customers: 39_413, avgBasket: 257 },
+    { month: MONTHS_HE[10], monthNum: 11, totalSales: 8_862_436, networkSales: 5_760_583, customers: 34_465, avgBasket: 257 },
+    { month: MONTHS_HE[11], monthNum: 12, totalSales: 9_903_162, networkSales: 9_903_162, customers: 38_643, avgBasket: 257 },
   ],
 }

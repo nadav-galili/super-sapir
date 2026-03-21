@@ -1,7 +1,8 @@
 import { Link, useMatchRoute, useLocation, useNavigate } from '@tanstack/react-router'
+import { currentMonthYear } from '@/data/constants'
 import {
   LayoutDashboard, Store, Map, ShoppingCart,
-  Package, Users, LayoutGrid, Receipt, ShieldCheck, BarChart3, Bell,
+  Package, Users, LayoutGrid, Receipt, Bell,
 } from 'lucide-react'
 import {
   Sidebar as SidebarRoot,
@@ -32,8 +33,6 @@ const storeCategories = [
   { view: 'hr', label: 'כח אדם', icon: Users },
   { view: 'departments', label: 'מחלקות', icon: LayoutGrid },
   { view: 'costs', label: 'הוצאות ועלויות', icon: Receipt },
-  { view: 'quality', label: 'בקרת איכות', icon: ShieldCheck },
-  { view: 'reports', label: 'דוחות', icon: BarChart3 },
   { view: 'alerts', label: 'התראות', icon: Bell },
 ] as const
 
@@ -165,7 +164,7 @@ export function AppSidebar() {
 
       <SidebarFooter className="p-3 border-t border-warm-border">
         {expanded && (
-          <p className="text-[11px] text-[#A0AEC0] text-center">דצמבר 2025</p>
+          <p className="text-[11px] text-[#A0AEC0] text-center">{currentMonthYear()}</p>
         )}
       </SidebarFooter>
     </SidebarRoot>

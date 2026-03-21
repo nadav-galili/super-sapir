@@ -27,49 +27,33 @@ export function MonthlyTrendChart({ data, title = 'מגמת מכירות חוד�
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                 <defs>
-                  <linearGradient id="colorNetwork" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="colorInternet" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                  <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#DC4E59" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#DC4E59" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                 <XAxis dataKey="month" tick={{ fontSize: 12 }} />
                 <YAxis tickFormatter={(v: number) => formatCurrencyShort(v)} tick={{ fontSize: 12 }} />
                 <Tooltip
-                  formatter={(value, name) => [
+                  formatter={(value) => [
                     formatCurrencyShort(value as number),
-                    name === 'networkSales' ? 'מכירות רשת' : 'מכירות אינטרנט',
+                    'מכירות',
                   ]}
                   labelFormatter={(label) => String(label)}
                   contentStyle={{ direction: 'rtl', borderRadius: '8px' }}
                 />
                 <Legend
-                  formatter={(value: string) =>
-                    value === 'networkSales' ? 'מכירות רשת' : 'מכירות אינטרנט'
-                  }
+                  formatter={() => 'מכירות'}
                 />
                 <Area
                   type="monotone"
-                  dataKey="networkSales"
-                  stroke="#3b82f6"
+                  dataKey="totalSales"
+                  stroke="#DC4E59"
                   strokeWidth={2}
                   fillOpacity={1}
-                  fill="url(#colorNetwork)"
+                  fill="url(#colorTotal)"
                   animationDuration={1500}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="internetSales"
-                  stroke="#10b981"
-                  strokeWidth={2}
-                  fillOpacity={1}
-                  fill="url(#colorInternet)"
-                  animationDuration={1500}
-                  animationBegin={300}
                 />
               </AreaChart>
             </ResponsiveContainer>

@@ -1,4 +1,4 @@
-// Complete real data from Hadera Branch #44 Management Report - December 2025
+// Complete real data from Hadera Branch #44 Management Report - November 2025
 // Source: דוח ניהולי מסכם סניף חדרה לחודש 12/25
 
 import { MONTHS_HE } from './constants'
@@ -20,7 +20,6 @@ export interface BranchInfo {
   name: string
   manager: string
   divisionManager: string
-  hasInternet: boolean
   grade: string
   sellingArea: number // sqm, no warehouse
   revenuePerMeter: number
@@ -28,7 +27,6 @@ export interface BranchInfo {
 
 export interface SalesData {
   network: { current: number; lastYear: number; target: number; monthlyAvg2025: number; ranking: number; yoyChange: number; vsTarget: number }
-  internet: { current: number; lastYear: number; target: number; monthlyAvg2025: number; ranking: number; yoyChange: number; vsTarget: number }
   total: { current: number; lastYear: number; target: number; monthlyAvg2025: number; yoyChange: number; vsTarget: number }
   avgBasket: { current: number; change: number; ranking: number }
   customers: { current: number; target: number; change: number; ranking: number }
@@ -45,12 +43,12 @@ export interface OperationsData {
   qualityScore: { current: number; target: number; ranking: number }
   freshQualityScore: { current: number }
   supplyRate: { current: number; shopperPercent: number; ranking: number }
-  internetSupplyProducts: { ordered: number; actualPercent: number }
+  avgDaysOfInventory: { current: number; target: number }
   meatWaste: number
   fishWaste: number
   customerComplaints: { current: number; target: number }
   focusReports: { current: number; target: number }
-  shopperUsage: { ramiLevy: number; shufersal: number }
+  shopperUsage: { superSapir: number; shufersal: number }
   annualWaste: { amount: number; percent: number; prev2024: number; prev2023: number }
 }
 
@@ -93,6 +91,7 @@ export interface DepartmentSales {
   sharePercent: number
   targetSharePercent: number
   shareChangePercent: number
+  avgDaysOfInventory: number
 }
 
 export interface MonthlyDetail {
@@ -128,9 +127,8 @@ export const haderaFullReport: BranchFullReport = {
   info: {
     branchNumber: 44,
     name: 'חדרה',
-    manager: 'מרטין רוח',
-    divisionManager: 'גיא רייף',
-    hasInternet: true,
+    manager: 'יוסי כהן',
+    divisionManager: 'אבי לוי',
     grade: 'A',
     sellingArea: 3080,
     revenuePerMeter: 5090,
@@ -146,22 +144,13 @@ export const haderaFullReport: BranchFullReport = {
       yoyChange: 5.8,
       vsTarget: -0.2,
     },
-    internet: {
-      current: 5_314_914,
-      lastYear: 6_314_014,
-      target: 6_510_000,
-      monthlyAvg2025: 4_845_615,
-      ranking: 2,
-      yoyChange: -15.8,
-      vsTarget: -18.4,
-    },
     total: {
-      current: 15_218_076,
-      lastYear: 15_670_132,
-      target: 16_430_000,
-      monthlyAvg2025: 14_650_519,
-      yoyChange: -2.9,
-      vsTarget: -7.4,
+      current: 9_903_162,
+      lastYear: 9_356_118,
+      target: 9_920_000,
+      monthlyAvg2025: 9_804_904,
+      yoyChange: 5.8,
+      vsTarget: -0.2,
     },
     avgBasket: { current: 257, change: 8.2, ranking: 13 },
     customers: { current: 38_643, target: 37_506, change: -5.0, ranking: 35 },
@@ -178,12 +167,12 @@ export const haderaFullReport: BranchFullReport = {
     qualityScore: { current: 70, target: 85, ranking: 45 },
     freshQualityScore: { current: 88 },
     supplyRate: { current: 96, shopperPercent: 89, ranking: 8 },
-    internetSupplyProducts: { ordered: 0, actualPercent: 38.6 },
+    avgDaysOfInventory: { current: 16, target: 14 },
     meatWaste: 7.1,
     fishWaste: 0,
     customerComplaints: { current: 2, target: 2 },
     focusReports: { current: 5, target: 10 },
-    shopperUsage: { ramiLevy: 35.1, shufersal: 17.4 },
+    shopperUsage: { superSapir: 35.1, shufersal: 17.4 },
     annualWaste: { amount: 850_479, percent: 0.47, prev2024: 467_181, prev2023: 845_198 },
   },
 
@@ -228,24 +217,23 @@ export const haderaFullReport: BranchFullReport = {
   },
 
   departments: [
-    // טרי (Fresh)
-    { id: 'vegetables', name: 'ירקות', category: 'fresh', currentMonth: 1_445_717, yearToDate: 1_505_767, yoyChangePercent: 4.2, sharePercent: 15.4, targetSharePercent: 16.0, shareChangePercent: -1.3 },
-    { id: 'fresh-chef', name: 'שף טרי', category: 'fresh', currentMonth: 520_023, yearToDate: 406_199, yoyChangePercent: -21.9, sharePercent: 5.5, targetSharePercent: 5.3, shareChangePercent: -26.0 },
-    { id: 'fresh-meat', name: 'בשר טרי', category: 'fresh', currentMonth: 229_475, yearToDate: 180_313, yoyChangePercent: -21.4, sharePercent: 2.4, targetSharePercent: 2.7, shareChangePercent: -25.6 },
-    { id: 'fresh-fish', name: 'דגים טריים', category: 'fresh', currentMonth: 71_680, yearToDate: 77_330, yoyChangePercent: 7.9, sharePercent: 0.8, targetSharePercent: 0.8, shareChangePercent: 2.2 },
-    { id: 'deli', name: 'גבינת מעדניה', category: 'fresh', currentMonth: 138_891, yearToDate: 129_129, yoyChangePercent: -7.0, sharePercent: 1.5, targetSharePercent: 1.5, shareChangePercent: -11.9 },
-    { id: 'pastries', name: 'מאפים', category: 'fresh', currentMonth: 139_603, yearToDate: 142_634, yoyChangePercent: 2.2, sharePercent: 1.5, targetSharePercent: 1.5, shareChangePercent: -3.2 },
-    // מזון (Food)
-    { id: 'bread', name: 'לחם ומאפים', category: 'food', currentMonth: 204_117, yearToDate: 233_962, yoyChangePercent: 14.6, sharePercent: 2.2, targetSharePercent: 2.4, shareChangePercent: 8.6 },
-    { id: 'grocery', name: 'מכולת', category: 'food', currentMonth: 2_026_339, yearToDate: 2_103_981, yoyChangePercent: 3.8, sharePercent: 21.6, targetSharePercent: 21.3, shareChangePercent: -1.6 },
-    { id: 'drinks', name: 'שתיה', category: 'food', currentMonth: 878_077, yearToDate: 939_201, yoyChangePercent: 7.0, sharePercent: 9.4, targetSharePercent: 9.5, shareChangePercent: 1.3 },
-    { id: 'frozen', name: 'קפואים', category: 'food', currentMonth: 856_002, yearToDate: 870_403, yoyChangePercent: 1.7, sharePercent: 9.1, targetSharePercent: 8.8, shareChangePercent: -3.7 },
-    { id: 'dairy', name: 'מוצרי חלב', category: 'food', currentMonth: 1_325_976, yearToDate: 1_479_980, yoyChangePercent: 11.6, sharePercent: 14.1, targetSharePercent: 14.9, shareChangePercent: 5.7 },
-    { id: 'organic', name: 'אורגני ובריאות', category: 'food', currentMonth: 84_806, yearToDate: 87_485, yoyChangePercent: 3.2, sharePercent: 0.9, targetSharePercent: 0.9, shareChangePercent: -2.3 },
-    // נון-פוד (Non-Food)
-    { id: 'home-products', name: 'בן-פוד', category: 'nonfood', currentMonth: 962_978, yearToDate: 1_007_346, yoyChangePercent: 4.6, sharePercent: 10.3, targetSharePercent: 10.2, shareChangePercent: -0.9 },
-    { id: 'household', name: 'מוצרים לבית', category: 'nonfood', currentMonth: 330_683, yearToDate: 537_273, yoyChangePercent: 62.5, sharePercent: 3.5, targetSharePercent: 5.4, shareChangePercent: 53.9 },
-    { id: 'baby', name: 'תינוקות', category: 'nonfood', currentMonth: 163_196, yearToDate: 198_797, yoyChangePercent: 21.8, sharePercent: 1.7, targetSharePercent: 2.0, shareChangePercent: 15.4 },
+    // טרי (Fresh) — lower inventory days (perishable)
+    { id: 'vegetables', name: 'ירקות', category: 'fresh', currentMonth: 1_445_717, yearToDate: 1_505_767, yoyChangePercent: 4.2, sharePercent: 15.4, targetSharePercent: 16.0, shareChangePercent: -1.3, avgDaysOfInventory: 4 },
+    { id: 'fresh-meat', name: 'בשר טרי', category: 'fresh', currentMonth: 229_475, yearToDate: 180_313, yoyChangePercent: -21.4, sharePercent: 2.4, targetSharePercent: 2.7, shareChangePercent: -25.6, avgDaysOfInventory: 3 },
+    { id: 'fresh-fish', name: 'דגים טריים', category: 'fresh', currentMonth: 71_680, yearToDate: 77_330, yoyChangePercent: 7.9, sharePercent: 0.8, targetSharePercent: 0.8, shareChangePercent: 2.2, avgDaysOfInventory: 2 },
+    { id: 'deli', name: 'גבינת מעדניה', category: 'fresh', currentMonth: 138_891, yearToDate: 129_129, yoyChangePercent: -7.0, sharePercent: 1.5, targetSharePercent: 1.5, shareChangePercent: -11.9, avgDaysOfInventory: 5 },
+    { id: 'pastries', name: 'מאפים', category: 'fresh', currentMonth: 139_603, yearToDate: 142_634, yoyChangePercent: 2.2, sharePercent: 1.5, targetSharePercent: 1.5, shareChangePercent: -3.2, avgDaysOfInventory: 2 },
+    // מזון (Food) — mid-range
+    { id: 'bread', name: 'לחם ומאפים', category: 'food', currentMonth: 204_117, yearToDate: 233_962, yoyChangePercent: 14.6, sharePercent: 2.2, targetSharePercent: 2.4, shareChangePercent: 8.6, avgDaysOfInventory: 3 },
+    { id: 'grocery', name: 'מכולת', category: 'food', currentMonth: 2_026_339, yearToDate: 2_103_981, yoyChangePercent: 3.8, sharePercent: 21.6, targetSharePercent: 21.3, shareChangePercent: -1.6, avgDaysOfInventory: 18 },
+    { id: 'drinks', name: 'שתיה', category: 'food', currentMonth: 878_077, yearToDate: 939_201, yoyChangePercent: 7.0, sharePercent: 9.4, targetSharePercent: 9.5, shareChangePercent: 1.3, avgDaysOfInventory: 21 },
+    { id: 'frozen', name: 'קפואים', category: 'food', currentMonth: 856_002, yearToDate: 870_403, yoyChangePercent: 1.7, sharePercent: 9.1, targetSharePercent: 8.8, shareChangePercent: -3.7, avgDaysOfInventory: 25 },
+    { id: 'dairy', name: 'מוצרי חלב', category: 'food', currentMonth: 1_325_976, yearToDate: 1_479_980, yoyChangePercent: 11.6, sharePercent: 14.1, targetSharePercent: 14.9, shareChangePercent: 5.7, avgDaysOfInventory: 8 },
+    { id: 'organic', name: 'אורגני ובריאות', category: 'food', currentMonth: 84_806, yearToDate: 87_485, yoyChangePercent: 3.2, sharePercent: 0.9, targetSharePercent: 0.9, shareChangePercent: -2.3, avgDaysOfInventory: 15 },
+    // נון-פוד (Non-Food) — higher inventory days
+    { id: 'home-products', name: 'נון-פוד', category: 'nonfood', currentMonth: 962_978, yearToDate: 1_007_346, yoyChangePercent: 4.6, sharePercent: 10.3, targetSharePercent: 10.2, shareChangePercent: -0.9, avgDaysOfInventory: 28 },
+    { id: 'household', name: 'מוצרים לבית', category: 'nonfood', currentMonth: 330_683, yearToDate: 537_273, yoyChangePercent: 62.5, sharePercent: 3.5, targetSharePercent: 5.4, shareChangePercent: 53.9, avgDaysOfInventory: 32 },
+    { id: 'baby', name: 'תינוקות', category: 'nonfood', currentMonth: 163_196, yearToDate: 198_797, yoyChangePercent: 21.8, sharePercent: 1.7, targetSharePercent: 2.0, shareChangePercent: 15.4, avgDaysOfInventory: 30 },
   ],
 
   monthly: [
@@ -264,31 +252,12 @@ export const haderaFullReport: BranchFullReport = {
   ],
 
   expenses: [
-    { name: 'פתח (שכירות)', currentMonth: 70_873, monthlyAvg2025: 70_873, monthlyAvg2024: 38_932, percentOfRevenue: 0.48 },
-    { name: 'שכר', currentMonth: 831_947, monthlyAvg2025: 813_971, monthlyAvg2024: 760_722, percentOfRevenue: 5.6 },
-    { name: 'נסיעות עובדים', currentMonth: 2_973, monthlyAvg2025: 4_381, monthlyAvg2024: 3_414, percentOfRevenue: 0.0 },
-    { name: 'חשמל', currentMonth: 72_609, monthlyAvg2025: 90_449, monthlyAvg2024: 89_373, percentOfRevenue: 0.6 },
-    { name: 'אחזקה', currentMonth: 27_163, monthlyAvg2025: 25_522, monthlyAvg2024: 27_542, percentOfRevenue: 0.2 },
-    { name: 'שכר דירה, אריזה', currentMonth: 532_000, monthlyAvg2025: 532_000, monthlyAvg2024: 506_867, percentOfRevenue: 3.6 },
-    { name: 'ביטוח', currentMonth: 12_386, monthlyAvg2025: 26_278, monthlyAvg2024: 21_455, percentOfRevenue: 0.2 },
-    { name: 'בלויות לשכר', currentMonth: 7_122, monthlyAvg2025: 9_712, monthlyAvg2024: 23_228, percentOfRevenue: 0.1 },
-    { name: 'שמירה', currentMonth: 40_728, monthlyAvg2025: 46_489, monthlyAvg2024: 48_565, percentOfRevenue: 0.3 },
-    { name: 'שונות', currentMonth: 40_728, monthlyAvg2025: 46_489, monthlyAvg2024: 48_565, percentOfRevenue: 0.3 },
+    { name: 'שכר', currentMonth: 831_947, monthlyAvg2025: 813_971, monthlyAvg2024: 742_000, percentOfRevenue: 5.6 },
+    { name: 'שכ״ד, ארנונה וניהול', currentMonth: 532_000, monthlyAvg2025: 532_000, monthlyAvg2024: 506_867, percentOfRevenue: 3.6 },
+    { name: 'חשמל', currentMonth: 72_609, monthlyAvg2025: 90_449, monthlyAvg2024: 44_273, percentOfRevenue: 0.6 },
+    { name: 'שונות', currentMonth: 40_728, monthlyAvg2025: 46_489, monthlyAvg2024: 40_728, percentOfRevenue: 0.3 },
+    { name: 'אחזקה', currentMonth: 27_163, monthlyAvg2025: 25_522, monthlyAvg2024: 27_163, percentOfRevenue: 0.2 },
+    { name: 'נלוות לשכר', currentMonth: 12_386, monthlyAvg2025: 12_386, monthlyAvg2024: 12_386, percentOfRevenue: 0.2 },
+    { name: 'שמירה', currentMonth: 7_122, monthlyAvg2025: 9_712, monthlyAvg2024: 7_122, percentOfRevenue: 0.1 },
   ],
-}
-
-// Private label data
-export const privateLabelData = {
-  targetPercent: 27.9,
-  actualPercent: 28.0,
-  totalSales: 2_768_015,
-  currentMonthSales: 2_525_584,
-  yoyChangePercent: 9.6,
-}
-
-// 3-year revenue comparison
-export const threeYearRevenue = {
-  network: { y2025: 9_804_904, y2024: 10_005_532, y2023: 10_187_228 },
-  internet: { y2025: 4_845_615, y2024: 5_173_198, y2023: 5_460_350 },
-  total: { y2025: 14_650_519, y2024: 15_178_729, y2023: 15_647_578 },
 }

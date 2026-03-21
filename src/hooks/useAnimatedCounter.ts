@@ -21,7 +21,9 @@ export function useAnimatedCounter(
         const elapsed = time - startTime.current
         const progress = Math.min(elapsed / duration, 1)
         const eased = easeOutCubic(progress)
-        setCurrent(Math.round(eased * target))
+        const decimals = String(target).includes('.') ? (String(target).split('.')[1]?.length ?? 0) : 0
+        const raw = eased * target
+        setCurrent(decimals > 0 ? +raw.toFixed(decimals) : Math.round(raw))
 
         if (progress < 1) {
           rafId.current = requestAnimationFrame(animate)
