@@ -1,4 +1,4 @@
-import { motion } from 'motion/react'
+import { motion, AnimatePresence } from 'motion/react'
 import { ShoppingCart, Settings, Users, Shield } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -29,14 +29,19 @@ export function AIRecommendations({ recommendations, isLoading }: AIRecommendati
     return (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {[...Array(3)].map((_, i) => (
-          <Card key={i} className="border-warm-border rounded-[16px]">
+          <Card key={i} className="border-warm-border rounded-[16px] overflow-hidden">
+            <div className="h-0.5 w-full ai-shimmer-border" />
             <CardContent className="p-5 space-y-3">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-[10px] bg-[#FDF8F6] animate-pulse" />
-                <div className="h-4 bg-[#FDF8F6] rounded animate-pulse flex-1" />
+                <div className="w-8 h-8 rounded-[10px] ai-shimmer" />
+                <div className="h-4 ai-shimmer rounded flex-1" style={{ animationDelay: `${i * 0.2}s` }} />
               </div>
-              <div className="h-3 bg-[#FDF8F6] rounded animate-pulse w-[90%]" />
-              <div className="h-3 bg-[#FDF8F6] rounded animate-pulse w-[70%]" />
+              <div className="h-3 ai-shimmer rounded" style={{ width: '90%', animationDelay: `${i * 0.2 + 0.1}s` }} />
+              <div className="h-3 ai-shimmer rounded" style={{ width: '70%', animationDelay: `${i * 0.2 + 0.2}s` }} />
+              <div className="flex items-center justify-between pt-1">
+                <div className="h-5 w-20 ai-shimmer rounded-full" style={{ animationDelay: `${i * 0.2 + 0.3}s` }} />
+                <div className="h-3 w-16 ai-shimmer rounded" style={{ animationDelay: `${i * 0.2 + 0.3}s` }} />
+              </div>
             </CardContent>
           </Card>
         ))}
@@ -48,36 +53,39 @@ export function AIRecommendations({ recommendations, isLoading }: AIRecommendati
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-      {recommendations.map((rec, i) => {
-        const config = CATEGORY_CONFIG[rec.category] ?? CATEGORY_CONFIG.operations
-        const Icon = config.icon
-        return (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 + i * 0.1 }}
-          >
-            <Card className="border-warm-border rounded-[16px] h-full">
-              <CardContent className="p-5 space-y-3">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-[10px] flex items-center justify-center" style={{ background: `${config.bg}15` }}>
-                    <Icon className="w-4 h-4" style={{ color: config.color }} />
+      <AnimatePresence mode="popLayout">
+        {recommendations.map((rec, i) => {
+          const config = CATEGORY_CONFIG[rec.category] ?? CATEGORY_CONFIG.operations
+          const Icon = config.icon
+          return (
+            <motion.div
+              key={`${rec.category}-${i}`}
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.4, ease: 'easeOut' }}
+            >
+              <Card className="border-warm-border rounded-[16px] h-full overflow-hidden">
+                <div className="h-0.5 w-full" style={{ background: config.color }} />
+                <CardContent className="p-5 space-y-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-[10px] flex items-center justify-center" style={{ background: `${config.bg}15` }}>
+                      <Icon className="w-4 h-4" style={{ color: config.color }} />
+                    </div>
+                    <h4 className="text-sm font-bold text-[#2D3748] flex-1">{rec.title}</h4>
                   </div>
-                  <h4 className="text-sm font-bold text-[#2D3748] flex-1">{rec.title}</h4>
-                </div>
-                <p className="text-xs text-[#4A5568] leading-relaxed">{rec.description}</p>
-                <div className="flex items-center justify-between pt-1">
-                  <Badge className={`text-[10px] ${IMPACT_COLORS[rec.impact]}`}>
-                    {IMPACT_LABELS[rec.impact]}
-                  </Badge>
-                  <span className="text-[10px] text-[#A0AEC0]">{rec.estimatedEffect}</span>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        )
-      })}
+                  <p className="text-xs text-[#4A5568] leading-relaxed">{rec.description}</p>
+                  <div className="flex items-center justify-between pt-1">
+                    <Badge className={`text-[10px] ${IMPACT_COLORS[rec.impact]}`}>
+                      {IMPACT_LABELS[rec.impact]}
+                    </Badge>
+                    <span className="text-[10px] text-[#A0AEC0]">{rec.estimatedEffect}</span>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )
+        })}
+      </AnimatePresence>
     </div>
   )
 }

@@ -70,6 +70,36 @@
   background: #A0AEC0;
 }
 
+/* AI shimmer loading effect */
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.ai-shimmer {
+  background: linear-gradient(
+    90deg,
+    #FDF8F6 25%,
+    #e8e0fa 37%,
+    #FDF8F6 63%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+.ai-shimmer-border {
+  background: linear-gradient(
+    90deg,
+    #FFE8DE 0%,
+    #c4b5fd 25%,
+    #8B7FED 50%,
+    #c4b5fd 75%,
+    #FFE8DE 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2.5s ease-in-out infinite;
+}
+
 /* Phone mockup scan line animation */
 @keyframes scanLine {
   0% { top: 10%; opacity: 0; }

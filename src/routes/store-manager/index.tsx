@@ -729,7 +729,7 @@ function OverviewStaffingCard({ hr }: { hr: Report['hr'] }) {
 }
 
 function OverviewView({ report, branchId }: { report: Report; branchId: string }) {
-  const { briefing, recommendations, isLoading, error, retry } = useAIAnalysis(branchId, report)
+  const { briefing, recommendations, isLoading, isStreaming, error, retry } = useAIAnalysis(branchId, report)
   const s = report.sales
   const kpis: KPICardData[] = [
     { label: 'מכירות סניף', value: s.total.current, format: 'currencyShort', trend: s.total.vsTarget, trendLabel: `יעד: ${formatCurrencyShort(s.total.target)}`, gradient: s.total.vsTarget >= 0 ? 'blue' : 'red' },
@@ -739,7 +739,7 @@ function OverviewView({ report, branchId }: { report: Report; branchId: string }
   ]
   return (
     <div className="space-y-5">
-      <AIBriefingCard briefing={briefing} isLoading={isLoading} error={error} onRetry={retry} />
+      <AIBriefingCard briefing={briefing} isLoading={isLoading} isStreaming={isStreaming} error={error} onRetry={retry} />
 
       <KPIGrid items={kpis} columns={4} />
 

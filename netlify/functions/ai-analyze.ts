@@ -65,6 +65,7 @@ export default async (req: Request, _context: Context) => {
     })
   }
 
+  const useStream = body.stream === true
   const userPrompt = `נתח את הדוח הניהולי הבא של סניף ותן תדריך בוקר עם פריטים ממוקדי פעולה, והמלצות אסטרטגיות. התייחס לחריגות, יעדים שלא הושגו, ומגמות.\n\n${JSON.stringify(payload, null, 2)}`
 
   try {
@@ -80,6 +81,7 @@ export default async (req: Request, _context: Context) => {
         max_tokens: 2048,
         system: SYSTEM_PROMPT,
         messages: [{ role: 'user', content: userPrompt }],
+        stream: true,
       }),
     })
 
@@ -96,24 +98,42 @@ export default async (req: Request, _context: Context) => {
       })
     }
 
-    const data = await response.json()
-    const textBlock = data.content?.[0]
-    if (!textBlock || textBlock.type !== 'text' || typeof textBlock.text !== 'string' || textBlock.text.trim() === '') {
-      console.error('Unexpected AI response structure:', JSON.stringify(data.content?.map((b: { type: string }) => b.type) ?? 'no content'))
-      return new Response(JSON.stringify({ error: 'תגובת AI לא צפויה' }), {
+    // Accumulate streamed text from Anthropic
+    let fullText = ''
+    const reader = response.body!.getReader()
+    const decoder = new TextDecoder()
+
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      const chunk = decoder.decode(value, { stream: true })
+      for (const line of chunk.split('\n')) {
+        if (!line.startsWith('data: ')) continue
+        const data = line.slice(6)
+        if (data === '[DONE]') continue
+        try {
+          const event = JSON.parse(data)
+          if (event.type === 'content_block_delta' && event.delta?.text) {
+            fullText += event.delta.text
+          }
+        } catch { /* skip malformed SSE lines */ }
+      }
+    }
+
+    if (!fullText.trim()) {
+      console.error('AI returned empty response after streaming')
+      return new Response(JSON.stringify({ error: 'תגובת AI ריקה' }), {
         status: 502,
         headers: { 'Content-Type': 'application/json' },
       })
     }
 
-    const text = textBlock.text
-
-    // Parse JSON from response (handle possible markdown wrapping)
+    // Parse the accumulated JSON
     let result
     try {
-      result = JSON.parse(text)
+      result = JSON.parse(fullText)
     } catch {
-      const match = text.match(/```(?:json)?\s*([\s\S]*?)```/)
+      const match = fullText.match(/```(?:json)?\s*([\s\S]*?)```/)
       if (match?.[1]) {
         try {
           result = JSON.parse(match[1].trim())
@@ -122,7 +142,7 @@ export default async (req: Request, _context: Context) => {
           throw innerErr
         }
       } else {
-        console.error('AI response is not JSON:', text.slice(0, 300))
+        console.error('AI response is not JSON:', fullText.slice(0, 300))
         throw new Error('Failed to parse AI response')
       }
     }
@@ -136,6 +156,36 @@ export default async (req: Request, _context: Context) => {
       })
     }
 
+    // If client requested streaming, send items as SSE events
+    if (useStream) {
+      const items = [
+        ...result.briefing.sort((a: { priority: number }, b: { priority: number }) => a.priority - b.priority).map((item: unknown) => ({ type: 'briefing', data: item })),
+        ...result.recommendations.map((item: unknown) => ({ type: 'recommendation', data: item })),
+      ]
+
+      const stream = new ReadableStream({
+        async start(controller) {
+          const encoder = new TextEncoder()
+          for (const item of items) {
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify(item)}\n\n`))
+            await new Promise(resolve => setTimeout(resolve, 300))
+          }
+          controller.enqueue(encoder.encode('data: [DONE]\n\n'))
+          controller.close()
+        },
+      })
+
+      return new Response(stream, {
+        status: 200,
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive',
+        },
+      })
+    }
+
+    // Non-streaming: return full result
     return new Response(JSON.stringify(result), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
