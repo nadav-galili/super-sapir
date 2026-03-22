@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Is
 
-Sapir Analytics — a B2B SaaS retail management dashboard MVP built for pitching to Rami Levy (Israeli food retailer). Hebrew RTL interface showing real data from a Hadera branch #44 management report (Dec 2025) combined with simulated multi-branch data.
+Sapir Analytics — a B2B SaaS retail management dashboard MVP built for pitching to Super Sapir (Israeli food retailer). Hebrew RTL interface showing real data from a Hadera branch #44 management report (Dec 2025) combined with simulated multi-branch data.
 
 ## Commands
 

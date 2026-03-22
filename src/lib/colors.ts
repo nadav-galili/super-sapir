@@ -30,6 +30,16 @@ export function getTrendColor(isPositive: boolean): string {
   return isPositive ? PALETTE.cyan : PALETTE.red
 }
 
+export function getTargetColor(achievementPercent: number): string {
+  if (achievementPercent < 90) return PALETTE.red
+  if (achievementPercent < 100) return PALETTE.amber
+  return PALETTE.cyan
+}
+
+export function getMarginColor(marginPercent: number): string {
+  return marginPercent < 20 ? PALETTE.red : PALETTE.heading
+}
+
 // Ordered chart colors for multi-series
 export const CHART_COLORS = [
   '#DC4E59', // primary metric
