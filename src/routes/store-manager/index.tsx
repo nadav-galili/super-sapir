@@ -739,11 +739,7 @@ function OverviewView({ report, branchId }: { report: Report; branchId: string }
   ]
   return (
     <div className="space-y-5">
-      <AIBriefingCard briefing={briefing} isLoading={isLoading} isStreaming={isStreaming} error={error} onRetry={retry} />
-
       <KPIGrid items={kpis} columns={4} />
-
-      <AIRecommendations recommendations={recommendations} isLoading={isLoading} />
 
       <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-5">
         <MonthlyComparisonChart data={report.monthly} />
@@ -759,6 +755,9 @@ function OverviewView({ report, branchId }: { report: Report; branchId: string }
         <AlertsTargetsCard report={report} />
         <OverviewStaffingCard hr={report.hr} />
       </div>
+
+      <AIBriefingCard briefing={briefing} isLoading={isLoading} isStreaming={isStreaming} error={error} onRetry={retry} />
+      <AIRecommendations recommendations={recommendations} isLoading={isLoading} />
     </div>
   )
 }
