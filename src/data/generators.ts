@@ -47,7 +47,7 @@ function generatePromotions(categoryName: string): Promotion[] {
     const actualSales = Math.round(baselineSales * (1 + uplift / 100))
     const tradeSpend = Math.round(baselineSales * (0.03 + Math.random() * 0.07))
     const profit = (actualSales - baselineSales) * 0.25 - tradeSpend
-    const roi = Math.round((profit / tradeSpend) * 100)
+    const roi = tradeSpend > 0 ? +((profit / tradeSpend) + 1).toFixed(1) : 0 // Multiplier scale (2-5x) matching Hadera data
     const monthIdx = Math.max(0, 10 - i * 2)
     const startDay = 1 + Math.floor(Math.random() * 14)
     const endDay = startDay + 10 + Math.floor(Math.random() * 7)
@@ -67,8 +67,11 @@ function generateDepartments(totalSales: number): DepartmentMetrics[] {
   return haderaBranch.departments.map(dept => {
     const sales = Math.round(totalSales * (dept.sharePercent / 100) * (0.85 + Math.random() * 0.3))
     const yoyChange = +(dept.yoyChange + (Math.random() * 6 - 3)).toFixed(1)
-    const lastYearSales = Math.round(sales / (1 + yoyChange / 100))
-    const targetSales = Math.round(sales * (dept.targetShare / dept.sharePercent))
+    const divisor = 1 + yoyChange / 100
+    const lastYearSales = divisor > 0.01 ? Math.round(sales / divisor) : sales
+    const targetSales = dept.sharePercent > 0
+      ? Math.round(sales * (dept.targetShare / dept.sharePercent))
+      : sales
 
     return {
       id: dept.id,

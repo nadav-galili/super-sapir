@@ -82,25 +82,30 @@ export function getCategorySummaries(): CategorySummary[] {
 
   return Array.from(deptMap.entries()).map(([id, data]) => {
     const sorted = [...data.branches].sort((a, b) => b.sales - a.sales)
-    const avg = (arr: number[]) => +(arr.reduce((s, c) => s + c, 0) / arr.length).toFixed(1)
+    const avg = (arr: number[]) => arr.length > 0
+      ? +(arr.reduce((s, c) => s + c, 0) / arr.length).toFixed(1)
+      : 0
 
     const avgMonthlyTrend = Array.from({ length: 12 }, (_, i) =>
       data.monthlyTrends.reduce((sum, trend) => sum + (trend[i] ?? 0), 0)
     )
 
-    const base = allBranches[0].departments.find(d => d.id === id)!
+    const base = allBranches[0].departments.find(d => d.id === id)
+    if (!base) return null
 
     return {
       id,
       name: base.name,
       sales: data.sales,
-      sharePercent: +((data.sales / totalAllSales) * 100).toFixed(1),
+      sharePercent: totalAllSales > 0 ? +((data.sales / totalAllSales) * 100).toFixed(1) : 0,
       targetShare: base.targetShare,
       yoyChange: avg(data.yoyChanges),
       grossMarginPercent: avg(data.margins),
       inventoryTurnover: avg(data.turnovers),
       stockoutRate: avg(data.stockouts),
-      inventoryDays: Math.round(data.inventoryDaysList.reduce((s, c) => s + c, 0) / data.inventoryDaysList.length),
+      inventoryDays: data.inventoryDaysList.length > 0
+        ? Math.round(data.inventoryDaysList.reduce((s, c) => s + c, 0) / data.inventoryDaysList.length)
+        : 0,
       targetSales: data.targetSales,
       lastYearSales: data.lastYearSales,
       branchCount: data.branches.length,
@@ -110,5 +115,5 @@ export function getCategorySummaries(): CategorySummary[] {
       allPromotions: data.promotions.slice(0, 5),
       branches: sorted,
     }
-  }).sort((a, b) => b.sales - a.sales)
+  }).filter(Boolean).sort((a, b) => b!.sales - a!.sales) as CategorySummary[]
 }

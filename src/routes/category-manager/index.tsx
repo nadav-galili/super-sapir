@@ -44,8 +44,12 @@ function CategoryManagerPage() {
         const pct = totalLastYear > 0 ? ((totalSales - totalLastYear) / totalLastYear) * 100 : 0
         return { trend: +pct.toFixed(1), label: 'מול שנה קודמת' }
       }
-      case 'vs-last-month':
-        return { trend: -1.5, label: 'מול חודש קודם' }
+      case 'vs-last-month': {
+        const lastMonth = categories.reduce((s, c) => s + (c.avgMonthlyTrend[11] ?? 0), 0)
+        const prevMonth = categories.reduce((s, c) => s + (c.avgMonthlyTrend[10] ?? 0), 0)
+        const pct = prevMonth > 0 ? ((lastMonth - prevMonth) / prevMonth) * 100 : 0
+        return { trend: +pct.toFixed(1), label: 'מול חודש קודם' }
+      }
     }
   }
 

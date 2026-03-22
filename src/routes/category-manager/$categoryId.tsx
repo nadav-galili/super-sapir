@@ -80,6 +80,18 @@ function CategoryDrillDown() {
 
   const { rows: branchData, totalSales, avgMargin, avgTurnover, avgStockout, targetAchievement, monthlyTrend, promotions } = derived
 
+  if (branchData.length === 0) {
+    return (
+      <PageContainer>
+        <Breadcrumbs items={[{ label: 'מנהל קטגוריה', to: '/category-manager' }]} />
+        <div className="text-center py-16">
+          <h2 className="text-xl font-bold text-[#2D3748]">הקטגוריה לא נמצאה</h2>
+          <p className="text-[#4A5568] mt-2">הקטגוריה &quot;{categoryId}&quot; לא קיימת במערכת</p>
+        </div>
+      </PageContainer>
+    )
+  }
+
   const kpis: KPICardData[] = [
     {
       label: 'מכירות כוללות',
