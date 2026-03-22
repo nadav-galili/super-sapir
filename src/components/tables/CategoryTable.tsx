@@ -7,76 +7,144 @@ import { Link } from '@tanstack/react-router'
 import { motion } from 'motion/react'
 import { ExternalLink } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 import { SortHeader } from '@/components/tables/SortHeader'
-import { formatCurrencyShort, formatPercent } from '@/lib/format'
-import { getGrowthColor, getTargetColor, getMarginColor } from '@/lib/colors'
-import type { CategorySummary } from '@/data/mock-categories'
+import { formatCurrencyShort } from '@/lib/format'
+import type { CategorySnapshot } from '@/lib/category-manager'
 
 interface CategoryTableProps {
-  data: CategorySummary[]
+  data: CategorySnapshot[]
 }
 
 export function CategoryTable({ data }: CategoryTableProps) {
-  const [sorting, setSorting] = useState<SortingState>([{ id: 'sales', desc: true }])
+  const [sorting, setSorting] = useState<SortingState>([{ id: 'downsideEstimate', desc: true }])
 
-  const columns = useMemo<ColumnDef<CategorySummary>[]>(() => [
+  const columns = useMemo<ColumnDef<CategorySnapshot>[]>(() => [
     {
-      accessorKey: 'name',
+      accessorKey: 'category.name',
       header: 'קטגוריה',
-      cell: ({ row }) => <span className="font-medium">{row.original.name}</span>,
-    },
-    {
-      accessorKey: 'sales',
-      header: ({ column }) => <SortHeader column={column} label="מכירות" />,
-      cell: ({ getValue }) => (
-        <span className="font-semibold font-mono" dir="ltr">{formatCurrencyShort(getValue() as number)}</span>
+      cell: ({ row }) => (
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <span className="font-medium text-[#2D3748]">{row.original.category.name}</span>
+            <Badge
+              variant={
+                row.original.status === 'danger'
+                  ? 'destructive'
+                  : row.original.status === 'opportunity'
+                    ? 'success'
+                    : 'warning'
+              }
+            >
+              {row.original.status === 'danger'
+                ? 'טיפול מיידי'
+                : row.original.status === 'opportunity'
+                  ? 'פוטנציאל'
+                  : 'מעקב'}
+            </Badge>
+          </div>
+          <p className="text-xs text-[#A0AEC0]">{row.original.focusAction}</p>
+        </div>
       ),
     },
     {
-      accessorKey: 'grossMarginPercent',
-      header: ({ column }) => <SortHeader column={column} label="רווח גולמי %" />,
-      cell: ({ getValue }) => {
-        const val = getValue() as number
-        return <span className="font-mono" dir="ltr" style={{ color: getMarginColor(val) }}>{val.toFixed(1)}%</span>
-      },
+      accessorKey: 'comparisonChange',
+      header: ({ column }) => <SortHeader column={column} label="ביצוע" />,
+      cell: ({ getValue }) => (
+        <span
+          className="font-semibold font-mono"
+          dir="ltr"
+          style={{ color: (getValue() as number) >= 0 ? '#2EC4D5' : '#DC4E59' }}
+        >
+          {(getValue() as number) > 0 ? '+' : ''}{(getValue() as number).toFixed(1)}%
+        </span>
+      ),
     },
     {
-      id: 'targetAchievement',
-      header: ({ column }) => <SortHeader column={column} label="עמידה ביעד" />,
-      accessorFn: (row) => row.targetSales > 0 ? (row.sales / row.targetSales) * 100 : 100,
+      accessorKey: 'shareGap',
+      header: ({ column }) => <SortHeader column={column} label="פער נתח" />,
       cell: ({ getValue }) => {
         const val = getValue() as number
         return (
-          <span className="font-mono" dir="ltr" style={{ color: getTargetColor(val) }}>
-            {val.toFixed(0)}%
+          <span className="font-mono" dir="ltr" style={{ color: val >= 0 ? '#2EC4D5' : '#DC4E59' }}>
+            {val > 0 ? '+' : ''}{val.toFixed(1)}%
           </span>
         )
       },
     },
     {
-      accessorKey: 'inventoryDays',
-      header: ({ column }) => <SortHeader column={column} label="ימי מלאי" />,
-      cell: ({ getValue }) => <span className="font-mono" dir="ltr">{getValue() as number}</span>,
-    },
-    {
-      accessorKey: 'yoyChange',
-      header: ({ column }) => <SortHeader column={column} label="שינוי שנתי" />,
+      accessorKey: 'category.grossMarginPercent',
+      header: ({ column }) => <SortHeader column={column} label='רווח גולמי' />,
       cell: ({ getValue }) => {
-        const change = getValue() as number
+        const val = getValue() as number
         return (
-          <span style={{ color: getGrowthColor(change) }} className="font-semibold font-mono" dir="ltr">
-            {change > 0 ? '+' : ''}{formatPercent(change)}
+          <span className="font-mono" dir="ltr" style={{ color: val >= 20 ? '#2D3748' : '#DC4E59' }}>
+            {val.toFixed(1)}%
           </span>
         )
       },
     },
     {
-      id: 'actions',
-      header: '',
+      accessorKey: 'stockoutExposure',
+      header: ({ column }) => <SortHeader column={column} label="חשיפת חוסרים" />,
+      cell: ({ getValue }) => <span className="font-semibold font-mono" dir="ltr">{formatCurrencyShort(getValue() as number)}</span>,
+    },
+    {
+      accessorKey: 'avgPromoRoi',
+      header: ({ column }) => <SortHeader column={column} label='ROI מבצעים' />,
+      cell: ({ row, getValue }) => {
+        const value = getValue() as number
+        return (
+          <div className="space-y-0.5">
+            <p className="font-mono font-semibold text-[#2EC4D5]" dir="ltr">{value.toFixed(2)}x</p>
+            <p className="text-[11px] text-[#A0AEC0]" dir="ltr">uplift {row.original.avgPromoUplift.toFixed(1)}%</p>
+          </div>
+        )
+      },
+    },
+    {
+      accessorKey: 'weakBranchCount',
+      header: ({ column }) => <SortHeader column={column} label="פער סניפים" />,
+      cell: ({ row }) => (
+        <div className="space-y-0.5 text-xs text-[#4A5568]">
+          <p>{row.original.weakBranchCount} סניפים חלשים</p>
+          <p className="text-[#A0AEC0]">
+            {row.original.topBranchName} מול {row.original.weakestBranchName}
+          </p>
+        </div>
+      ),
+    },
+    {
+      accessorKey: 'downsideEstimate',
+      header: ({ column }) => <SortHeader column={column} label="השפעה" />,
+      cell: ({ row }) => {
+        const impact = row.original.status === 'opportunity'
+          ? row.original.upsideEstimate
+          : row.original.downsideEstimate
+
+        return (
+          <div className="space-y-0.5">
+            <p
+              className="font-semibold font-mono"
+              dir="ltr"
+              style={{ color: row.original.status === 'opportunity' ? '#2EC4D5' : '#DC4E59' }}
+            >
+              {formatCurrencyShort(impact)}
+            </p>
+            <p className="text-[11px] text-[#A0AEC0]">
+              {row.original.status === 'opportunity' ? 'פוטנציאל' : 'סיכון'} מוערך
+            </p>
+          </div>
+        )
+      },
+    },
+    {
+      id: 'action',
+      header: 'קפיצה',
       cell: ({ row }) => (
         <Link
           to="/category-manager/$categoryId"
-          params={{ categoryId: row.original.id }}
+          params={{ categoryId: row.original.category.id }}
           className="text-[#DC4E59] hover:text-[#E8777F] transition-colors"
         >
           <ExternalLink className="w-4 h-4" />
@@ -103,7 +171,7 @@ export function CategoryTable({ data }: CategoryTableProps) {
     >
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">טבלת קטגוריות מפורטת</CardTitle>
+          <CardTitle className="text-lg text-[#2D3748]">לוח פעולה לפי קטגוריה</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-auto">
