@@ -17,6 +17,17 @@ function RootLayout() {
   const currentPath = matches[matches.length - 1]?.pathname ?? '/'
   const basePath = '/' + (currentPath.split('/')[1] ?? '')
   const title = pageTitles[basePath] ?? 'Sapir Analytics'
+  const isHome = currentPath === '/'
+
+  if (isHome) {
+    return (
+      <DirectionProvider dir="rtl">
+        <AnimatePresence mode="wait">
+          <Outlet />
+        </AnimatePresence>
+      </DirectionProvider>
+    )
+  }
 
   return (
     <DirectionProvider dir="rtl">
