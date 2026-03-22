@@ -22,21 +22,20 @@ export const REGIONS: Region[] = [
 ]
 
 export const DEPARTMENT_NAMES: Record<string, string> = {
-  fruits: 'פירות וירקות',
+  vegetables: 'ירקות',
+  grocery: 'מכולת',
   dairy: 'מוצרי חלב',
-  meat: 'בשר ועוף',
-  bakery: 'מאפייה',
-  deli: 'מעדניה',
+  'home-products': 'נון-פוד',
+  drinks: 'שתיה',
   frozen: 'קפואים',
-  drinks: 'משקאות',
-  snacks: 'חטיפים וממתקים',
-  cleaning: 'ניקיון',
-  hygiene: 'היגיינה וטיפוח',
+  household: 'מוצרים לבית',
+  'fresh-meat': 'בשר טרי',
+  bread: 'לחם ומאפים',
   baby: 'תינוקות',
-  pets: 'בעלי חיים',
+  pastries: 'מאפים',
+  deli: 'גבינת מעדניה',
   organic: 'אורגני ובריאות',
-  wine: 'יינות ואלכוהול',
-  general: 'מכולת כללית',
+  'fresh-fish': 'דגים טריים',
 }
 
 export const COMPETITORS: CompetitorData[] = [

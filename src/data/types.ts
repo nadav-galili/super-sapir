@@ -27,6 +27,30 @@ export interface BranchMetrics {
   yoyGrowth: number
 }
 
+export interface Promotion {
+  name: string
+  period: string
+  baselineSales: number
+  actualSales: number
+  upliftPercent: number
+  roi: number
+  hasCannibalization: boolean
+}
+
+export type AlertSeverity = 'high' | 'medium' | 'low'
+export type AlertType = 'target-miss' | 'margin-erosion' | 'stockout-risk' | 'declining-sales' | 'low-turnover'
+
+export interface CategoryAlert {
+  categoryId: string
+  categoryName: string
+  type: AlertType
+  severity: AlertSeverity
+  label: string
+  value: string
+}
+
+export type ComparisonMode = 'vs-target' | 'vs-last-year' | 'vs-last-month'
+
 export interface DepartmentMetrics {
   id: string
   name: string
@@ -34,7 +58,14 @@ export interface DepartmentMetrics {
   sharePercent: number
   targetShare: number
   yoyChange: number
-  isPrivateLabel: boolean
+  grossMarginPercent: number
+  inventoryTurnover: number
+  stockoutRate: number
+  inventoryDays: number
+  targetSales: number
+  lastYearSales: number
+  monthlyTrend: number[]
+  promotions: Promotion[]
 }
 
 export interface MonthlyTrend {

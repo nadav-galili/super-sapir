@@ -1,18 +1,15 @@
 import { useMemo, useState } from 'react'
 import {
-  useReactTable,
-  getCoreRowModel,
-  getSortedRowModel,
-  flexRender,
-  type SortingState,
-  type ColumnDef,
+  useReactTable, getCoreRowModel, getSortedRowModel, flexRender,
+  type SortingState, type ColumnDef,
 } from '@tanstack/react-table'
 import { Link } from '@tanstack/react-router'
 import { motion } from 'motion/react'
-import { ArrowUpDown, ExternalLink } from 'lucide-react'
+import { ExternalLink } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { SortHeader } from '@/components/tables/SortHeader'
 import { formatCurrencyShort, formatPercent } from '@/lib/format'
-import { getGrowthColor } from '@/lib/colors'
+import { getGrowthColor, getTargetColor, getMarginColor } from '@/lib/colors'
 import type { CategorySummary } from '@/data/mock-categories'
 
 interface CategoryTableProps {
@@ -30,49 +27,48 @@ export function CategoryTable({ data }: CategoryTableProps) {
     },
     {
       accessorKey: 'sales',
-      header: ({ column }) => (
-        <button className="flex items-center gap-1" onClick={() => column.toggleSorting()}>
-          מכירות <ArrowUpDown className="w-3 h-3" />
-        </button>
-      ),
+      header: ({ column }) => <SortHeader column={column} label="מכירות" />,
       cell: ({ getValue }) => (
-        <span className="font-semibold" dir="ltr">{formatCurrencyShort(getValue() as number)}</span>
+        <span className="font-semibold font-mono" dir="ltr">{formatCurrencyShort(getValue() as number)}</span>
       ),
     },
     {
-      accessorKey: 'sharePercent',
-      header: ({ column }) => (
-        <button className="flex items-center gap-1" onClick={() => column.toggleSorting()}>
-          נתח % <ArrowUpDown className="w-3 h-3" />
-        </button>
-      ),
-      cell: ({ getValue }) => <span dir="ltr">{(getValue() as number).toFixed(1)}%</span>,
-    },
-    {
-      accessorKey: 'targetShare',
-      header: 'יעד %',
-      cell: ({ getValue }) => <span className="text-muted-foreground" dir="ltr">{(getValue() as number).toFixed(1)}%</span>,
-    },
-    {
-      accessorKey: 'yoyChange',
-      header: ({ column }) => (
-        <button className="flex items-center gap-1" onClick={() => column.toggleSorting()}>
-          שינוי שנתי <ArrowUpDown className="w-3 h-3" />
-        </button>
-      ),
+      accessorKey: 'grossMarginPercent',
+      header: ({ column }) => <SortHeader column={column} label="רווח גולמי %" />,
       cell: ({ getValue }) => {
-        const change = getValue() as number
+        const val = getValue() as number
+        return <span className="font-mono" dir="ltr" style={{ color: getMarginColor(val) }}>{val.toFixed(1)}%</span>
+      },
+    },
+    {
+      id: 'targetAchievement',
+      header: ({ column }) => <SortHeader column={column} label="עמידה ביעד" />,
+      accessorFn: (row) => row.targetSales > 0 ? (row.sales / row.targetSales) * 100 : 100,
+      cell: ({ getValue }) => {
+        const val = getValue() as number
         return (
-          <span style={{ color: getGrowthColor(change) }} className="font-semibold" dir="ltr">
-            {change > 0 ? '+' : ''}{formatPercent(change)}
+          <span className="font-mono" dir="ltr" style={{ color: getTargetColor(val) }}>
+            {val.toFixed(0)}%
           </span>
         )
       },
     },
     {
-      accessorKey: 'bestBranch',
-      header: 'סניף מוביל',
-      cell: ({ getValue }) => <span className="text-sm">{getValue() as string}</span>,
+      accessorKey: 'inventoryDays',
+      header: ({ column }) => <SortHeader column={column} label="ימי מלאי" />,
+      cell: ({ getValue }) => <span className="font-mono" dir="ltr">{getValue() as number}</span>,
+    },
+    {
+      accessorKey: 'yoyChange',
+      header: ({ column }) => <SortHeader column={column} label="שינוי שנתי" />,
+      cell: ({ getValue }) => {
+        const change = getValue() as number
+        return (
+          <span style={{ color: getGrowthColor(change) }} className="font-semibold font-mono" dir="ltr">
+            {change > 0 ? '+' : ''}{formatPercent(change)}
+          </span>
+        )
+      },
     },
     {
       id: 'actions',
@@ -81,7 +77,7 @@ export function CategoryTable({ data }: CategoryTableProps) {
         <Link
           to="/category-manager/$categoryId"
           params={{ categoryId: row.original.id }}
-          className="text-blue-500 hover:text-blue-700"
+          className="text-[#DC4E59] hover:text-[#E8777F] transition-colors"
         >
           <ExternalLink className="w-4 h-4" />
         </Link>
@@ -103,7 +99,7 @@ export function CategoryTable({ data }: CategoryTableProps) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.4, duration: 0.5 }}
+      transition={{ delay: 0.35, duration: 0.5 }}
     >
       <Card>
         <CardHeader>
@@ -114,9 +110,9 @@ export function CategoryTable({ data }: CategoryTableProps) {
             <table className="w-full text-sm">
               <thead>
                 {table.getHeaderGroups().map(hg => (
-                  <tr key={hg.id} className="border-b">
+                  <tr key={hg.id} className="border-b border-[#FFF0EA]">
                     {hg.headers.map(header => (
-                      <th key={header.id} className="px-3 py-2 text-right font-medium text-muted-foreground">
+                      <th key={header.id} className="px-3 py-2 text-right font-medium text-[#A0AEC0]">
                         {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                       </th>
                     ))}
@@ -130,7 +126,7 @@ export function CategoryTable({ data }: CategoryTableProps) {
                     initial={{ opacity: 0, x: 10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: i * 0.03 }}
-                    className="border-b hover:bg-accent/50 transition-colors"
+                    className="border-b border-[#FFF0EA] hover:bg-[#FDF8F6] transition-colors"
                   >
                     {row.getVisibleCells().map(cell => (
                       <td key={cell.id} className="px-3 py-2.5">
