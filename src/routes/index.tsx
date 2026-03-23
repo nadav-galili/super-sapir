@@ -5,6 +5,8 @@ import {
 import { motion, useScroll, useTransform } from 'motion/react'
 import { useRef } from 'react'
 import { PhoneMockup } from '@/components/home/PhoneMockup'
+import { APP_NAME } from '@/lib/branding'
+import { BrandLogo } from '@/components/branding/BrandLogo'
 
 // ─── Stagger animation variants ─────────────────────────────────
 const containerVariants = {
@@ -61,10 +63,13 @@ function HeroSection() {
           className="space-y-8"
         >
           <motion.div variants={itemVariants}>
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold border" style={{ background: '#6C5CE7' + '12', color: '#6C5CE7', borderColor: '#6C5CE7' + '30' }}>
-              <Sparkles className="w-3.5 h-3.5" />
-              מונע בינה מלאכותית
-            </span>
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold border" style={{ background: '#6C5CE7' + '12', color: '#6C5CE7', borderColor: '#6C5CE7' + '30' }}>
+                <Sparkles className="w-3.5 h-3.5" />
+                מונע בינה מלאכותית
+              </span>
+              <BrandLogo size={42} compact />
+            </div>
           </motion.div>
 
           <motion.h1
@@ -249,7 +254,7 @@ function CTASection() {
             מוכנים לשדרג את ניהול הרשת?
           </h2>
           <p className="text-base text-white/60 max-w-md mx-auto">
-            התחילו עם הדמו האינטראקטיבי וראו איך Sapir Analytics יכול לחסוך לכם זמן ולהגדיל רווחים.
+            התחילו עם הדמו האינטראקטיבי וראו איך {APP_NAME} יכול לחסוך לכם זמן ולהגדיל רווחים.
           </p>
           <Link
             to="/store-manager"
@@ -296,7 +301,9 @@ function HomePage() {
 
       {/* Footer */}
       <footer className="py-10 px-4 text-center space-y-2" style={{ borderTop: '1px solid #F5E6DE' }}>
-        <p className="font-semibold text-sm" style={{ color: '#2D3748' }}>Sapir Analytics</p>
+        <div className="flex justify-center">
+          <BrandLogo size={42} compact />
+        </div>
         <p className="text-xs" style={{ color: '#A0AEC0' }}>
           © {new Date().getFullYear()} Nadav Galili. כל הזכויות שמורות.
         </p>
