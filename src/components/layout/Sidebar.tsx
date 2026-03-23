@@ -2,7 +2,7 @@ import { Link, useMatchRoute, useLocation, useNavigate } from '@tanstack/react-r
 import { currentMonthYear } from '@/data/constants'
 import {
   LayoutDashboard, Store, Map, ShoppingCart,
-  Package, Users, LayoutGrid, Receipt, Bell,
+  Package, Users, LayoutGrid, Bell, Sparkles,
 } from 'lucide-react'
 import {
   Sidebar as SidebarRoot,
@@ -33,8 +33,9 @@ const storeCategories = [
   { view: 'inventory', label: 'מלאי', icon: Package },
   { view: 'hr', label: 'כח אדם', icon: Users },
   { view: 'departments', label: 'מחלקות', icon: LayoutGrid },
-  { view: 'costs', label: 'הוצאות ועלויות', icon: Receipt },
+
   { view: 'alerts', label: 'התראות', icon: Bell },
+  { view: 'ai', label: 'ניתוח AI', icon: Sparkles },
 ] as const
 
 function SidebarLogo() {

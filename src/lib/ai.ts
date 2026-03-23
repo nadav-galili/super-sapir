@@ -1,5 +1,5 @@
 import type { BranchFullReport, DepartmentSales } from '@/data/hadera-real'
-import { MONTHS_HE, REPORT_MONTH, REPORT_YEAR } from '@/data/constants'
+import { MONTHS_HE, REPORT_MONTH, REPORT_YEAR, WORKING_DAYS_PER_MONTH } from '@/data/constants'
 import { formatCurrencyShort } from '@/lib/format'
 
 // ─── Types ──────────────────────────────────────────────────────
@@ -69,6 +69,8 @@ export function buildPromptPayload(report: BranchFullReport) {
   const hr = report.hr
   const c = report.compliance
 
+  const WORKING_DAYS = WORKING_DAYS_PER_MONTH
+
   const anomalies = detectAnomalies(report.departments, s.total.yoyChange)
 
   const recentMonths = report.monthly
@@ -76,16 +78,29 @@ export function buildPromptPayload(report: BranchFullReport) {
     .slice(-3)
     .map(m => ({ month: m.month, yoyChange: m.yoyChange, sales: formatCurrencyShort(m.currentSales) }))
 
-  const topDepts = [...report.departments]
-    .sort((a, b) => b.currentMonth - a.currentMonth)
-    .slice(0, 5)
+  // Send all departments sorted by share (matches the bar chart display)
+  const deptsByShare = [...report.departments]
+    .sort((a, b) => b.sharePercent - a.sharePercent)
+    .slice(0, 8)
     .map(d => ({ name: d.name, sales: formatCurrencyShort(d.currentMonth), yoy: d.yoyChangePercent, share: d.sharePercent }))
 
-  const expenses = report.expenses.map(e => ({
-    name: e.name,
-    amount: formatCurrencyShort(e.currentMonth),
-    pctRevenue: e.percentOfRevenue,
-  }))
+  // Send top 7 expenses sorted by amount (matches the bar chart display)
+  const sortedExpenses = [...report.expenses]
+    .sort((a, b) => b.currentMonth - a.currentMonth)
+    .slice(0, 7)
+    .map(e => {
+      const yoyChange = e.monthlyAvg2024 > 0 ? Math.round(((e.currentMonth - e.monthlyAvg2024) / e.monthlyAvg2024) * 100) : 0
+      return {
+        name: e.name,
+        amount: formatCurrencyShort(e.currentMonth),
+        pctRevenue: e.percentOfRevenue,
+        yoyChange: `${yoyChange}%`,
+      }
+    })
+
+  // Productivity per work hour (matches the branch performance card)
+  const totalWorkHours = hr.actual * WORKING_DAYS * 8
+  const productivityPerHour = totalWorkHours > 0 ? Math.round(s.total.current / totalWorkHours) : 0
 
   return {
     branch: {
@@ -98,33 +113,37 @@ export function buildPromptPayload(report: BranchFullReport) {
     period: `${MONTHS_HE[REPORT_MONTH - 1]} ${REPORT_YEAR}`,
     sales: {
       total: formatCurrencyShort(s.total.current),
+      target: formatCurrencyShort(s.total.target),
       vsTarget: `${s.total.vsTarget}%`,
       yoyChange: `${s.total.yoyChange}%`,
       avgBasket: s.avgBasket.current,
-      customers: s.customers.current,
+      avgBasketChange: `${s.avgBasket.change}%`,
+      customersMonthly: s.customers.current,
+      customersPerDay: Math.round(s.customers.current / WORKING_DAYS),
       customersChange: `${s.customers.change}%`,
     },
     operations: {
-      qualityScore: `${ops.qualityScore.current}/${ops.qualityScore.target}`,
+      eyedoScore: `${ops.qualityScore.current}/${ops.qualityScore.target} (${ops.qualityScore.current >= ops.qualityScore.target ? 'עמד' : 'לא עמד'})`,
       inventoryDays: `${ops.avgDaysOfInventory.current}/${ops.avgDaysOfInventory.target}`,
-      meatWaste: `${ops.meatWaste}%`,
-      complaints: `${ops.customerComplaints.current}/${ops.customerComplaints.target}`,
+      meatWaste: `${ops.meatWaste}% (יעד: 5%)`,
+      complaints: `${ops.customerComplaints.current}/${ops.customerComplaints.target} (${ops.customerComplaints.current <= ops.customerComplaints.target ? 'עמד' : 'לא עמד'})`,
     },
     hr: {
-      salaryCost: `${hr.salaryCostPercent}% (יעד: ${hr.salaryTarget}%)`,
-      staffing: `${hr.actual} מתוך ${hr.authorized} תקן`,
+      salaryCost: `${hr.salaryCostPercent}% (יעד: ${hr.salaryTarget}%, ${hr.salaryCostPercent <= hr.salaryTarget ? 'עמד' : 'לא עמד'})`,
+      staffing: `${hr.actual} בפועל מתוך ${hr.authorized} תקן`,
       turnover: `${hr.turnoverRate}%`,
+      productivityPerHour: `₪${productivityPerHour}`,
     },
     compliance: {
       highInventory: `${c.highInventory.actual}/${c.highInventory.target} (${c.highInventory.met ? 'עמד' : 'לא עמד'})`,
-      redAlerts: `${c.redAlerts.actual}/${c.redAlerts.target} (${c.redAlerts.met ? 'עמד' : 'לא עמד'})`,
+      redAlerts: `${c.redAlerts.redSubscriptions}/${c.redAlerts.target} (${c.redAlerts.met ? 'עמד' : 'לא עמד'})`,
       missingActivities: `${c.missingActivities.actual}/${c.missingActivities.fixedTarget} (${c.missingActivities.met ? 'עמד' : 'לא עמד'})`,
       returns: `${c.returns.actual}/${c.returns.target} (${c.returns.met ? 'עמד' : 'לא עמד'})`,
     },
     anomalies: anomalies.map(a => `${a.departmentName}: סטייה של ${Math.abs(a.deviation).toFixed(1)} נקודות אחוז ${a.deviation > 0 ? 'מעל' : 'מתחת'} לממוצע הסניף (${a.severity === 'critical' ? 'קריטי' : 'אזהרה'})`),
     recentTrend: recentMonths,
-    topDepartments: topDepts,
-    expenses,
+    departments: deptsByShare,
+    expenses: sortedExpenses,
   }
 }
 
