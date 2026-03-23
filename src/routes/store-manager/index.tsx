@@ -13,7 +13,7 @@ import {
 import { detectAnomalies, type AnomalyResult } from '@/lib/ai'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { KPIGrid } from '@/components/dashboard/KPIGrid'
-import { StatBadge } from '@/components/dashboard/StatBadge'
+
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -447,9 +447,9 @@ function BranchPerformanceCard({ report }: { report: Report }) {
   const productivityChange = +(((productivityPerHour - PRODUCTIVITY_BASELINE) / PRODUCTIVITY_BASELINE) * 100).toFixed(1)
 
   const items = [
-    { label: '% יישום משימות בEyedo', value: String(report.operations.qualityScore.current), change: -17.6, sub: 'מתוך 100' },
+    { label: '% יישום משימות בEyedo', value: String(report.operations.qualityScore.current), change: report.operations.qualityScore.current >= report.operations.qualityScore.target ? 0 : -Math.round(((report.operations.qualityScore.target - report.operations.qualityScore.current) / report.operations.qualityScore.target) * 100), sub: 'מתוך 100' },
     { label: 'הכנסות למ"ר', value: `₪${report.info.revenuePerMeter.toLocaleString()}`, change: null, sub: `שטח: ${report.info.sellingArea.toLocaleString()} מ"ר` },
-    { label: 'אחוז עלות שכר', value: `${report.hr.salaryCostPercent}%`, change: -0.7, sub: `יעד: ${report.hr.salaryTarget}%` },
+    { label: 'אחוז עלות שכר', value: `${report.hr.salaryCostPercent}%`, change: +(report.hr.salaryTarget - report.hr.salaryCostPercent).toFixed(1), sub: `יעד: ${report.hr.salaryTarget}%` },
     { label: 'פריון לשעת עבודה', value: `₪${productivityPerHour.toLocaleString()}`, change: productivityChange, sub: `${report.hr.actual} משרות` },
   ]
   return (
@@ -491,9 +491,9 @@ const BAR_GRADIENTS = [
   'linear-gradient(90deg, #DC4E59, #ef9a9a)',
 ]
 
-function OverviewExpenseTable({ expenses, totalRevenue }: { expenses: typeof haderaFullReport.expenses; totalRevenue: number }) {
+function OverviewExpenseTable({ expenses }: { expenses: typeof haderaFullReport.expenses }) {
   const sorted = [...expenses].sort((a, b) => b.currentMonth - a.currentMonth).slice(0, 7)
-  const maxPct = Math.max(...sorted.map(e => e.percentOfRevenue))
+  const maxPct = sorted.length > 0 ? Math.max(...sorted.map(e => e.percentOfRevenue)) : 1
 
   return (
     <Card className="border-warm-border rounded-[16px]">
@@ -552,8 +552,8 @@ function OverviewDepartmentBars({ departments }: { departments: DepartmentSales[
               />
             </div>
             <span className="text-xs font-semibold text-[#2D3748] w-12 text-left tabular-nums font-mono" dir="ltr">{dept.sharePercent}%</span>
-            <span className={`text-[11px] w-14 text-left tabular-nums ${dept.yoyChangePercent >= 0 ? 'text-[#2EC4D5]' : 'text-[#DC4E59]'}`} dir="ltr">
-              {dept.yoyChangePercent > 0 ? '▲' : '▼'} {Math.abs(dept.yoyChangePercent)}%
+            <span className={`text-[11px] w-14 text-left tabular-nums ${dept.yoyChangePercent > 0 ? 'text-[#2EC4D5]' : dept.yoyChangePercent < 0 ? 'text-[#DC4E59]' : 'text-[#A0AEC0]'}`} dir="ltr">
+              {dept.yoyChangePercent > 0 ? '▲' : dept.yoyChangePercent < 0 ? '▼' : '—'} {Math.abs(dept.yoyChangePercent)}%
             </span>
           </div>
         ))}
@@ -589,7 +589,8 @@ function AlertsTargetsCard({ report }: { report: Report }) {
       <CardContent className="space-y-3">
         {kpis.map((kpi, i) => {
           const met = kpi.lowerIsBetter ? kpi.actual <= kpi.target : kpi.actual >= kpi.target
-          const maxVal = Math.max(kpi.actual, kpi.target) * 1.15
+          const rawMax = Math.max(kpi.actual, kpi.target)
+          const maxVal = rawMax > 0 ? rawMax * 1.15 : 1
           const actualPct = (kpi.actual / maxVal) * 100
           const targetPct = (kpi.target / maxVal) * 100
 
@@ -712,7 +713,7 @@ function OverviewView({ report }: { report: Report }) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-5">
-        <OverviewExpenseTable expenses={report.expenses} totalRevenue={s.total.current} />
+        <OverviewExpenseTable expenses={report.expenses} />
         <OverviewDepartmentBars departments={report.departments} />
       </div>
 
@@ -802,9 +803,9 @@ function HRView({ report }: { report: Report }) {
   const hr = report.hr
   const kpis: KPICardData[] = [
     { label: 'תקן עובדים', value: hr.authorized, format: 'number', trend: 0, trendLabel: '', gradient: 'blue' },
-    { label: 'עובדים בפועל', value: hr.actual, format: 'number', trend: +((( hr.actual - hr.authorized) / hr.authorized) * 100).toFixed(2), trendLabel: 'מעל תקן', gradient: 'green' },
+    { label: 'עובדים בפועל', value: hr.actual, format: 'number', trend: hr.authorized > 0 ? +(((hr.actual - hr.authorized) / hr.authorized) * 100).toFixed(2) : 0, trendLabel: 'מעל תקן', gradient: 'green' },
     { label: 'עלות שכר', value: +hr.salaryCostPercent.toFixed(2), format: 'percent', trend: 0.9, trendLabel: `יעד: ${hr.salaryTarget}%`, gradient: 'pink' },
-    { label: 'עלות שכר בש״ח', value: hr.salaryExpense.current, format: 'currencyShort', trend: +((hr.salaryExpense.current - hr.salaryExpense.monthlyAvg2024) / hr.salaryExpense.monthlyAvg2024 * 100).toFixed(1), trendLabel: '', gradient: 'purple' },
+    { label: 'עלות שכר בש״ח', value: hr.salaryExpense.current, format: 'currencyShort', trend: hr.salaryExpense.monthlyAvg2024 > 0 ? +((hr.salaryExpense.current - hr.salaryExpense.monthlyAvg2024) / hr.salaryExpense.monthlyAvg2024 * 100).toFixed(1) : 0, trendLabel: '', gradient: 'purple' },
     { label: 'תחלופה שנתית', value: Math.round(hr.turnoverRate), format: 'number', trend: -2.3, trendLabel: `דירוג #${hr.turnoverRanking}`, gradient: 'orange' },
   ]
   return (
