@@ -40,8 +40,8 @@ function clamp(value: number, min: number, max: number): number {
 function normalizeGrossMarginPercent(rawGrossMarginPercent: number, networkAverageGrossMargin: number): number {
   return +clamp(
     CATEGORY_MANAGER_MARGIN_BASELINE + (rawGrossMarginPercent - networkAverageGrossMargin) * 0.35,
-    17.5,
-    22.5,
+    CATEGORY_MANAGER_MARGIN_BASELINE - 2.5,
+    CATEGORY_MANAGER_MARGIN_BASELINE + 2.5,
   ).toFixed(1)
 }
 
@@ -102,7 +102,7 @@ export function deriveCategorySnapshots(
     const targetAchievement = category.targetSales > 0 ? (category.sales / category.targetSales) * 100 : 100
     const shareGap = +(category.sharePercent - category.targetShare).toFixed(1)
     const normalizedGrossMarginPercent = normalizeGrossMarginPercent(category.grossMarginPercent, networkAverageGrossMargin)
-    const grossProfit = category.sales * (normalizedGrossMarginPercent / 100)
+    const grossProfit = category.sales * (category.grossMarginPercent / 100)
     const avgPromoRoi = +average(category.allPromotions.map((promo) => promo.roi)).toFixed(2)
     const avgPromoUplift = +average(category.allPromotions.map((promo) => promo.upliftPercent)).toFixed(1)
 

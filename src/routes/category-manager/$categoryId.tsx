@@ -41,7 +41,7 @@ function CategoryDrillDown() {
   // Single pass over allBranches to collect everything
   const derived = useMemo(() => {
     const rows: BranchCategoryRow[] = []
-    let totalTurnover = 0
+    let totalInventoryDays = 0
     let totalStockout = 0
     const monthlyTrend = new Array(12).fill(0)
     const monthlyTarget = new Array(12).fill(0)
@@ -66,7 +66,7 @@ function CategoryDrillDown() {
         yoyChange: dept.yoyChange,
       })
 
-      totalTurnover += dept.inventoryTurnover
+      totalInventoryDays += dept.inventoryDays
       totalStockout += dept.stockoutRate
       for (let i = 0; i < 12; i++) {
         monthlyTrend[i] += dept.monthlyTrend[i] ?? 0
@@ -81,17 +81,23 @@ function CategoryDrillDown() {
     const totalSales = rows.reduce((s, b) => s + b.sales, 0)
     const totalTarget = rows.reduce((s, b) => s + b.targetSales, 0)
     const avgMargin = +(rows.reduce((s, b) => s + b.grossMarginPercent, 0) / count).toFixed(1)
-    const avgTurnover = +(totalTurnover / count).toFixed(1)
+    const avgInventoryDays = Math.round(totalInventoryDays / count)
     const avgStockout = +(totalStockout / count).toFixed(1)
     const targetAchievement = totalTarget > 0 ? ((totalSales - totalTarget) / totalTarget) * 100 : 0
 
+    const chartData = monthlyTrend.map((sales, i) => ({
+      month: MONTHS_HE[i],
+      sales: Math.round(sales / 1000),
+      target: Math.round(monthlyTarget[i] / 1000),
+    }))
+
     return {
-      rows, totalSales, avgMargin, avgTurnover, avgStockout,
-      targetAchievement, monthlyTrend, monthlyTarget, promotions: promotions.slice(0, 3),
+      rows, totalSales, avgMargin, avgInventoryDays, avgStockout,
+      targetAchievement, chartData, promotions: promotions.slice(0, 3),
     }
   }, [categoryId])
 
-  const { rows: branchData, totalSales, avgMargin, avgTurnover, avgStockout, targetAchievement, monthlyTrend, monthlyTarget, promotions } = derived
+  const { rows: branchData, totalSales, avgMargin, avgInventoryDays, avgStockout, targetAchievement, chartData, promotions } = derived
 
   if (branchData.length === 0) {
     return (
@@ -124,7 +130,7 @@ function CategoryDrillDown() {
     },
     {
       label: 'ממוצע ימי מלאי',
-      value: avgTurnover,
+      value: avgInventoryDays,
       format: 'number',
       trend: 1.2,
       trendLabel: 'שנתי',
@@ -227,11 +233,7 @@ function CategoryDrillDown() {
             <div dir="ltr" className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart
-                  data={monthlyTrend.map((sales, i) => ({
-                    month: MONTHS_HE[i],
-                    sales: Math.round(sales / 1000),
-                    target: Math.round(monthlyTarget[i] / 1000),
-                  }))}
+                  data={chartData}
                   margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.04)" />

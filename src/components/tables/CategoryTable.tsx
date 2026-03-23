@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { ComparisonToggle } from '@/components/dashboard/ComparisonToggle'
 import { SortHeader } from '@/components/tables/SortHeader'
 import { formatCurrencyShort } from '@/lib/format'
-import { CATEGORY_MANAGER_INVENTORY_DAYS_GOAL, getComparisonLabel, type CategorySnapshot } from '@/lib/category-manager'
+import { CATEGORY_MANAGER_INVENTORY_DAYS_GOAL, CATEGORY_MANAGER_MARGIN_BASELINE, getComparisonLabel, type CategorySnapshot } from '@/lib/category-manager'
 import type { ComparisonMode } from '@/data/types'
 
 interface CategoryTableProps {
@@ -89,7 +89,7 @@ export function CategoryTable({ data, comparisonMode, onComparisonChange }: Cate
       cell: ({ getValue }) => {
         const val = getValue() as number
         return (
-          <span className="font-mono" dir="ltr" style={{ color: val >= 20 ? '#2D3748' : '#DC4E59' }}>
+          <span className="font-mono" dir="ltr" style={{ color: val >= CATEGORY_MANAGER_MARGIN_BASELINE ? '#2D3748' : '#DC4E59' }}>
             {val.toFixed(1)}%
           </span>
         )
