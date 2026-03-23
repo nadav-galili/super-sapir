@@ -71,7 +71,7 @@ export function SidebarProvider({
             '--sidebar-width-icon': SIDEBAR_WIDTH_ICON,
           } as React.CSSProperties
         }
-        className={cn('group/sidebar-wrapper flex min-h-svh w-full', props.className)}
+        className={cn('group/sidebar-wrapper flex min-h-svh w-full overflow-x-hidden', props.className)}
         {...props}
       >
         {children}
@@ -173,7 +173,7 @@ export function SidebarInset({ className, ...props }: React.ComponentProps<'main
   return (
     <main
       className={cn(
-        'relative flex min-h-svh flex-1 flex-col bg-[#FDF8F6]',
+        'relative flex min-h-svh flex-1 flex-col bg-[#FDF8F6] overflow-x-hidden',
         className
       )}
       {...props}

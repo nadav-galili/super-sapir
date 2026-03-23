@@ -145,8 +145,8 @@ function CategoryManagerPage() {
     <PageContainer>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#2D3748]">מנהל קטגוריה</h1>
-          <p className="mt-1 text-sm text-[#4A5568]">
+          <h1 className="text-xl sm:text-2xl font-bold text-[#2D3748]">מנהל קטגוריה</h1>
+          <p className="mt-1 text-xs sm:text-sm text-[#4A5568]">
             לוח פעולה לזיהוי מהיר של קטגוריות בסיכון, הזדמנויות צמיחה ופערי ביצוע בין סניפים
           </p>
         </div>
@@ -154,19 +154,19 @@ function CategoryManagerPage() {
       </div>
 
       <Card className="overflow-hidden border-[#FFE8DE] bg-white">
-        <CardContent className="grid gap-4 p-5 lg:grid-cols-[1.1fr_1.1fr_0.8fr]">
+        <CardContent className="grid gap-4 p-4 sm:p-5 sm:grid-cols-2 lg:grid-cols-[1.1fr_1.1fr_0.8fr]">
           <div className="rounded-[16px] bg-[#DC4E59]/6 p-4">
             <div className="flex items-center gap-2">
               <ShieldAlert className="h-4 w-4 text-[#DC4E59]" />
               <p className="text-sm font-semibold text-[#2D3748]">הסיכון המרכזי</p>
             </div>
-            <p className="mt-3 text-lg font-semibold text-[#2D3748]">{topDanger?.category.name}</p>
-            <p className="mt-1 text-sm text-[#4A5568]">
+            <p className="mt-2 sm:mt-3 text-base sm:text-lg font-semibold text-[#2D3748]">{topDanger?.category.name}</p>
+            <p className="mt-1 text-xs sm:text-sm text-[#4A5568]">
               {topDanger
                 ? `${topDanger.weakBranchCount} סניפים חלשים וחשיפה של ${formatCurrencyShort(topDanger.downsideEstimate)}`
                 : 'אין קטגוריה חריגה כרגע'}
             </p>
-            {topDanger && <p className="mt-2 text-xs text-[#A0AEC0]">{topDanger.focusAction}</p>}
+            {topDanger && <p className="mt-1.5 sm:mt-2 text-[11px] sm:text-xs text-[#A0AEC0]">{topDanger.focusAction}</p>}
           </div>
 
           <div className="rounded-[16px] bg-[#2EC4D5]/8 p-4">
@@ -174,16 +174,16 @@ function CategoryManagerPage() {
               <ArrowUpRight className="h-4 w-4 text-[#2EC4D5]" />
               <p className="text-sm font-semibold text-[#2D3748]">ההזדמנות המרכזית</p>
             </div>
-            <p className="mt-3 text-lg font-semibold text-[#2D3748]">{topOpportunity?.category.name}</p>
-            <p className="mt-1 text-sm text-[#4A5568]">
+            <p className="mt-2 sm:mt-3 text-base sm:text-lg font-semibold text-[#2D3748]">{topOpportunity?.category.name}</p>
+            <p className="mt-1 text-xs sm:text-sm text-[#4A5568]">
               {topOpportunity
                 ? `פוטנציאל של ${formatCurrencyShort(topOpportunity.upsideEstimate)} עם ${topOpportunity.avgPromoRoi.toFixed(2)}x ROI מבצעים`
                 : 'אין הזדמנות בולטת כרגע'}
             </p>
-            {topOpportunity && <p className="mt-2 text-xs text-[#A0AEC0]">{topOpportunity.focusAction}</p>}
+            {topOpportunity && <p className="mt-1.5 sm:mt-2 text-[11px] sm:text-xs text-[#A0AEC0]">{topOpportunity.focusAction}</p>}
           </div>
 
-          <div className="rounded-[16px] border border-[#FFE8DE] bg-[#FDF8F6] p-4">
+          <div className="rounded-[16px] border border-[#FFE8DE] bg-[#FDF8F6] p-4 sm:col-span-2 lg:col-span-1">
             <div className="flex items-center gap-2">
               <Store className="h-4 w-4 text-[#F6B93B]" />
               <p className="text-sm font-semibold text-[#2D3748]">מבט רשת</p>

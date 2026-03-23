@@ -225,9 +225,9 @@ export function CategoryPriorityMatrix({ data }: CategoryPriorityMatrixProps) {
               <span>להגן על רווח</span>
             </div>
 
-            <div dir="ltr" className="h-[420px]">
+            <div dir="ltr" className="h-[300px] sm:h-[420px]">
               <ResponsiveContainer width="100%" height="100%">
-                <ScatterChart margin={{ top: 56, right: 24, bottom: 16, left: 16 }}>
+                <ScatterChart margin={{ top: 40, right: 12, bottom: 12, left: 4 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#F5E6DE" />
                   <XAxis
                     type="number"
@@ -243,7 +243,7 @@ export function CategoryPriorityMatrix({ data }: CategoryPriorityMatrixProps) {
                     unit="%"
                     tick={{ fontSize: 11 }}
                   />
-                  <ZAxis type="number" dataKey="z" range={[600, 3200]} />
+                  <ZAxis type="number" dataKey="z" range={[300, 2000]} />
                   <ReferenceLine x={0} stroke="#A0AEC0" strokeDasharray="4 4" />
                   <ReferenceLine y={averageMargin} stroke="#A0AEC0" strokeDasharray="4 4" />
                   <Tooltip content={<MatrixTooltip />} />

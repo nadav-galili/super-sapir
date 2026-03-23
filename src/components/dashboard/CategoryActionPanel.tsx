@@ -44,34 +44,34 @@ export function CategoryActionPanel({ title, tone, items }: CategoryActionPanelP
                 params={{ categoryId: item.category.id }}
                 className="block rounded-[16px] border border-[#FFE8DE] bg-[#FDF8F6] p-4 transition-all hover:-translate-y-0.5 hover:shadow-sm"
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-3">
+                  <div className="space-y-1.5 sm:space-y-2 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
                       <p className="font-semibold text-[#2D3748]">{item.category.name}</p>
                       <Badge variant={badgeVariant}>{label}</Badge>
                     </div>
-                    <p className="text-sm text-[#4A5568]">
+                    <p className="text-xs sm:text-sm text-[#4A5568]">
                       {tone === 'danger'
                         ? `${item.weakBranchCount} סניפים חלשים, ${item.category.stockoutRate.toFixed(1)}% חוסרים, ${item.normalizedGrossMarginPercent.toFixed(1)}% רווחיות`
                         : `${item.avgPromoRoi.toFixed(2)}x ROI, ${item.shareGap.toFixed(1)}% פער נתח, ${item.normalizedGrossMarginPercent.toFixed(1)}% רווחיות`}
                     </p>
-                    <p className="text-sm text-[#A0AEC0]">{item.focusAction}</p>
+                    <p className="text-xs sm:text-sm text-[#A0AEC0]">{item.focusAction}</p>
                   </div>
 
-                  <div className="text-left shrink-0" dir="ltr">
-                    <p className={`text-lg font-bold font-mono ${accentClass}`}>{formatCurrencyShort(impact)}</p>
+                  <div className="text-right sm:text-left shrink-0" dir="ltr">
+                    <p className={`text-base sm:text-lg font-bold font-mono ${accentClass}`}>{formatCurrencyShort(impact)}</p>
                     <p className="text-[11px] text-[#A0AEC0]">{label}</p>
                   </div>
                 </div>
 
-                <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-[#4A5568]">
+                <div className="mt-3 flex flex-wrap items-center gap-2 sm:gap-3 text-[11px] sm:text-xs text-[#4A5568]">
                   <span className="inline-flex items-center gap-1">
-                    <AlertTriangle className="w-3.5 h-3.5 text-[#F6B93B]" />
+                    <AlertTriangle className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#F6B93B] shrink-0" />
                     {item.comparisonChange > 0 ? '+' : ''}{item.comparisonChange}% {item.comparisonLabel}
                   </span>
                   <span className="inline-flex items-center gap-1">
-                    <Store className="w-3.5 h-3.5 text-[#2EC4D5]" />
-                    מוביל: {item.topBranchName} | חלש: {item.weakestBranchName}
+                    <Store className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#2EC4D5] shrink-0" />
+                    <span className="truncate">מוביל: {item.topBranchName} | חלש: {item.weakestBranchName}</span>
                   </span>
                 </div>
               </Link>

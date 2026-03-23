@@ -210,16 +210,16 @@ export function CategoryTable({ data, comparisonMode, onComparisonChange }: Cate
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <CardTitle className="text-lg text-[#2D3748]">לוח פעולה לפי קטגוריה</CardTitle>
-              <p className="mt-1 text-sm text-[#4A5568]">
-                מכירות, ביצוע ורווחיות: 12 חודשים אחרונים | ימי מלאי: תמונת מצב נוכחית | השוואה פעילה: {comparisonLabel} | יעד ימי מלאי: {CATEGORY_MANAGER_INVENTORY_DAYS_GOAL}
+              <p className="mt-1 text-xs sm:text-sm text-[#4A5568]">
+                השוואה פעילה: {comparisonLabel} | יעד ימי מלאי: {CATEGORY_MANAGER_INVENTORY_DAYS_GOAL}
               </p>
             </div>
             <ComparisonToggle value={comparisonMode} onChange={onComparisonChange} />
           </div>
         </CardHeader>
         <CardContent>
-          <div className="overflow-auto">
-            <table className="w-full text-sm">
+          <div className="overflow-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+            <table className="w-full min-w-[800px] text-sm">
               <thead>
                 {table.getHeaderGroups().map(hg => (
                   <tr key={hg.id} className="border-b border-[#FFF0EA]">

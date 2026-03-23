@@ -42,19 +42,19 @@ export function KPICard({ label, value, format, trend, trendLabel, gradient, del
       whileHover={{ y: -2, boxShadow: 'rgba(220, 78, 89, 0.08) 0px 8px 24px' }}
       className="relative overflow-hidden rounded-[16px] bg-white border border-warm-border cursor-default"
     >
-      <div className="p-4 text-center">
-        <p className="text-base font-semibold text-[#2D3748] mb-1">{label}</p>
-        <p className="text-2xl font-bold font-mono tabular-nums" style={{ color: accent.text }} dir="ltr">
+      <div className="p-3 sm:p-4 text-center">
+        <p className="text-sm sm:text-base font-semibold text-[#2D3748] mb-1 truncate">{label}</p>
+        <p className="text-xl sm:text-2xl font-bold font-mono tabular-nums" style={{ color: accent.text }} dir="ltr">
           {formatValue(animatedValue, format)}
         </p>
-        <div className="flex items-center justify-center gap-1.5 mt-2">
-          <span className={`inline-flex items-center gap-1 text-xs font-semibold px-1.5 py-0.5 rounded-[20px] ${
+        <div className="flex items-center justify-center gap-1 sm:gap-1.5 mt-1.5 sm:mt-2">
+          <span className={`inline-flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-xs font-semibold px-1 sm:px-1.5 py-0.5 rounded-[20px] ${
             isPositive ? 'bg-[#2EC4D5]/10 text-[#2EC4D5]' : 'bg-[#DC4E59]/10 text-[#DC4E59]'
           }`} dir="ltr">
             {isPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
             {isPositive ? '+' : ''}{trend}%
           </span>
-          <span className="text-[11px] text-warm-muted">{trendLabel}</span>
+          <span className="text-[10px] sm:text-[11px] text-warm-muted truncate">{trendLabel}</span>
         </div>
       </div>
     </motion.div>

@@ -13,12 +13,12 @@ const OPTIONS: { value: ComparisonMode; label: string }[] = [
 
 export function ComparisonToggle({ value, onChange }: ComparisonToggleProps) {
   return (
-    <div className="inline-flex rounded-[10px] border border-[#FFE8DE] bg-white p-1 gap-1">
+    <div className="inline-flex flex-wrap rounded-[10px] border border-[#FFE8DE] bg-white p-1 gap-1">
       {OPTIONS.map(opt => (
         <button
           key={opt.value}
           onClick={() => opt.value !== value && onChange(opt.value)}
-          className={`px-4 py-2 text-sm font-medium rounded-[8px] transition-all ${
+          className={`px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium rounded-[8px] transition-all ${
             value === opt.value
               ? 'bg-[#DC4E59] text-white shadow-sm'
               : 'text-[#4A5568] hover:bg-[#FDF8F6]'
