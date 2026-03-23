@@ -13,7 +13,7 @@ import {
 import { motion } from 'motion/react'
 import { Link } from '@tanstack/react-router'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { formatCurrencyShort } from '@/lib/format'
+import { PALETTE } from '@/lib/colors'
 import type { CategorySnapshot } from '@/lib/category-manager'
 
 interface CategoryPriorityMatrixProps {
@@ -22,7 +22,148 @@ interface CategoryPriorityMatrixProps {
 
 interface MatrixTooltipProps {
   active?: boolean
-  payload?: Array<{ payload: CategorySnapshot & { x: number; y: number; z: number; fill: string } }>
+  payload?: Array<{ payload: MatrixChartPoint }>
+}
+
+type MatrixLabelAnchor = 'start' | 'middle' | 'end'
+
+interface MatrixChartPoint extends CategorySnapshot {
+  plotX: number
+  plotY: number
+  z: number
+  fill: string
+  labelDx: number
+  labelDy: number
+  labelAnchor: MatrixLabelAnchor
+  labelLines: string[]
+  labelWidth: number
+  labelHeight: number
+}
+
+const LABEL_PLACEMENTS: Array<{ dx: number; dy: number; anchor: MatrixLabelAnchor }> = [
+  { dx: 0, dy: -18, anchor: 'middle' },
+  { dx: -18, dy: -28, anchor: 'end' },
+  { dx: 18, dy: -28, anchor: 'start' },
+  { dx: -24, dy: -10, anchor: 'end' },
+  { dx: 24, dy: -10, anchor: 'start' },
+  { dx: -14, dy: -42, anchor: 'end' },
+  { dx: 14, dy: -42, anchor: 'start' },
+]
+
+const BUBBLE_OFFSETS = [
+  { dx: 0, dy: 0 },
+  { dx: -0.45, dy: 0.28 },
+  { dx: 0.45, dy: -0.24 },
+  { dx: -0.8, dy: 0.58 },
+  { dx: 0.8, dy: -0.5 },
+  { dx: -1.15, dy: -0.08 },
+  { dx: 1.15, dy: 0.1 },
+]
+
+function splitLabel(name: string): string[] {
+  const words = name.split(' ')
+  if (name.length <= 10 || words.length === 1) return [name]
+
+  const lines: string[] = []
+  let currentLine = ''
+
+  for (const word of words) {
+    const candidate = currentLine ? `${currentLine} ${word}` : word
+    if (candidate.length <= 10 || currentLine.length === 0) {
+      currentLine = candidate
+      continue
+    }
+
+    lines.push(currentLine)
+    currentLine = word
+  }
+
+  if (currentLine) lines.push(currentLine)
+  if (lines.length <= 2) return lines
+
+  return [lines[0], lines.slice(1).join(' ')]
+}
+
+function getNearbyPoints(points: MatrixChartPoint[], point: MatrixChartPoint) {
+  return points.filter((candidate) => (
+    candidate.category.id !== point.category.id
+    && Math.abs(candidate.comparisonChange - point.comparisonChange) <= 1.8
+    && Math.abs(candidate.normalizedGrossMarginPercent - point.normalizedGrossMarginPercent) <= 1.2
+  ))
+}
+
+function getConflictingPoints(points: MatrixChartPoint[], point: MatrixChartPoint) {
+  return points.filter((candidate) => (
+    candidate.category.id !== point.category.id
+    && Math.abs(candidate.plotX - point.plotX) <= 2.3
+    && Math.abs(candidate.plotY - point.plotY) <= 1.5
+  ))
+}
+
+function buildChartData(data: CategorySnapshot[]): MatrixChartPoint[] {
+  const LINE_HEIGHT = 12
+  const basePoints: MatrixChartPoint[] = data.map((item) => {
+    const labelLines = splitLabel(item.category.name)
+    return {
+      ...item,
+      plotX: item.comparisonChange,
+      plotY: item.normalizedGrossMarginPercent,
+      z: Math.max(item.category.sharePercent * 70, 500),
+      fill: item.status === 'danger'
+        ? PALETTE.red
+        : item.status === 'opportunity'
+          ? PALETTE.cyan
+          : PALETTE.amber,
+      labelDx: 0,
+      labelDy: -18,
+      labelAnchor: 'middle',
+      labelLines,
+      labelWidth: Math.max(...labelLines.map((l) => l.length), 4) * 7 + 10,
+      labelHeight: labelLines.length * LINE_HEIGHT + 6,
+    }
+  })
+
+  const sortedPoints = [...basePoints].sort((a, b) => {
+    if (a.comparisonChange !== b.comparisonChange) return a.comparisonChange - b.comparisonChange
+    return b.normalizedGrossMarginPercent - a.normalizedGrossMarginPercent
+  })
+
+  for (const point of sortedPoints) {
+    const nearbyPoints = getNearbyPoints(sortedPoints, point)
+    const usedOffsets = new Set(
+      nearbyPoints
+        .filter((candidate) => candidate.plotX !== candidate.comparisonChange || candidate.plotY !== candidate.normalizedGrossMarginPercent)
+        .map((candidate) => `${(candidate.plotX - candidate.comparisonChange).toFixed(2)}:${(candidate.plotY - candidate.normalizedGrossMarginPercent).toFixed(2)}`),
+    )
+
+    const preferredOffset = BUBBLE_OFFSETS.find((offset) => {
+      const key = `${offset.dx.toFixed(2)}:${offset.dy.toFixed(2)}`
+      return !usedOffsets.has(key)
+    }) ?? BUBBLE_OFFSETS[nearbyPoints.length % BUBBLE_OFFSETS.length]
+
+    point.plotX = +(point.comparisonChange + preferredOffset.dx).toFixed(2)
+    point.plotY = +(point.normalizedGrossMarginPercent + preferredOffset.dy).toFixed(2)
+  }
+
+  for (const point of sortedPoints) {
+    const conflictingPoints = getConflictingPoints(sortedPoints, point)
+    const usedPlacements = new Set(
+      conflictingPoints
+        .filter((candidate) => candidate.labelDy !== -18 || candidate.labelDx !== 0)
+        .map((candidate) => `${candidate.labelDx}:${candidate.labelDy}:${candidate.labelAnchor}`),
+    )
+
+    const preferredPlacement = LABEL_PLACEMENTS.find((placement) => {
+      const key = `${placement.dx}:${placement.dy}:${placement.anchor}`
+      return !usedPlacements.has(key)
+    }) ?? LABEL_PLACEMENTS[conflictingPoints.length % LABEL_PLACEMENTS.length]
+
+    point.labelDx = preferredPlacement.dx
+    point.labelDy = preferredPlacement.dy
+    point.labelAnchor = preferredPlacement.anchor
+  }
+
+  return basePoints
 }
 
 function MatrixTooltip({ active, payload }: MatrixTooltipProps) {
@@ -34,13 +175,10 @@ function MatrixTooltip({ active, payload }: MatrixTooltipProps) {
     <div className="rounded-[12px] border border-[#FFE8DE] bg-white p-3 shadow-sm" dir="rtl">
       <p className="mb-1 font-semibold text-[#2D3748]">{item.category.name}</p>
       <p className="text-sm text-[#4A5568]">
-        ביצוע: <span className="font-mono" dir="ltr">{item.x > 0 ? '+' : ''}{item.x.toFixed(1)}%</span>
+        ביצוע: <span className="font-mono" dir="ltr">{item.comparisonChange > 0 ? '+' : ''}{item.comparisonChange.toFixed(1)}%</span>
       </p>
       <p className="text-sm text-[#4A5568]">
-        רווח גולמי: <span className="font-mono" dir="ltr">{item.y.toFixed(1)}%</span>
-      </p>
-      <p className="text-sm text-[#4A5568]">
-        חשיפת חוסרים: <span className="font-mono" dir="ltr">{formatCurrencyShort(item.stockoutExposure)}</span>
+        רווח גולמי: <span className="font-mono" dir="ltr">{item.normalizedGrossMarginPercent.toFixed(1)}%</span>
       </p>
       <p className="mt-1 text-xs text-[#A0AEC0]">{item.focusAction}</p>
     </div>
@@ -49,20 +187,10 @@ function MatrixTooltip({ active, payload }: MatrixTooltipProps) {
 
 export function CategoryPriorityMatrix({ data }: CategoryPriorityMatrixProps) {
   const averageMargin = data.length > 0
-    ? data.reduce((sum, item) => sum + item.category.grossMarginPercent, 0) / data.length
+    ? data.reduce((sum, item) => sum + item.normalizedGrossMarginPercent, 0) / data.length
     : 0
 
-  const chartData = data.map((item) => ({
-    ...item,
-    x: item.comparisonChange,
-    y: item.category.grossMarginPercent,
-    z: Math.max(item.category.sharePercent * 35, 220),
-    fill: item.status === 'danger'
-      ? '#DC4E59'
-      : item.status === 'opportunity'
-        ? '#2EC4D5'
-        : '#F6B93B',
-  }))
+  const chartData = buildChartData(data)
 
   return (
     <motion.div
@@ -99,27 +227,83 @@ export function CategoryPriorityMatrix({ data }: CategoryPriorityMatrixProps) {
 
             <div dir="ltr" className="h-[420px]">
               <ResponsiveContainer width="100%" height="100%">
-                <ScatterChart margin={{ top: 24, right: 16, bottom: 16, left: 16 }}>
+                <ScatterChart margin={{ top: 56, right: 24, bottom: 16, left: 16 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#F5E6DE" />
                   <XAxis
                     type="number"
-                    dataKey="x"
+                    dataKey="plotX"
                     name="ביצוע"
                     unit="%"
                     tick={{ fontSize: 11 }}
                   />
                   <YAxis
                     type="number"
-                    dataKey="y"
+                    dataKey="plotY"
                     name="רווח גולמי"
                     unit="%"
                     tick={{ fontSize: 11 }}
                   />
-                  <ZAxis type="number" dataKey="z" range={[240, 1800]} />
+                  <ZAxis type="number" dataKey="z" range={[600, 3200]} />
                   <ReferenceLine x={0} stroke="#A0AEC0" strokeDasharray="4 4" />
                   <ReferenceLine y={averageMargin} stroke="#A0AEC0" strokeDasharray="4 4" />
                   <Tooltip content={<MatrixTooltip />} />
-                  <Scatter data={chartData}>
+                  <Scatter
+                    data={chartData}
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    shape={(props: any) => {
+                      const { cx, cy, fill, payload } = props as { cx: number; cy: number; fill: string; payload: MatrixChartPoint }
+                      const r = Math.sqrt(payload.z) / 1.5
+                      const labelX = cx + payload.labelDx
+                      const labelY = cy + payload.labelDy
+                      const { labelWidth: width, labelHeight: height } = payload
+                      const boxX = payload.labelAnchor === 'middle'
+                        ? labelX - width / 2
+                        : payload.labelAnchor === 'start'
+                          ? labelX - 4
+                          : labelX - width + 4
+                      const boxY = labelY - height + 2
+
+                      return (
+                        <g>
+                          <circle cx={cx} cy={cy} r={r} fill={fill} fillOpacity={0.78} stroke={fill} strokeWidth={1.5} />
+                          {(payload.labelDx !== 0 || payload.labelDy < -22) && (
+                            <line
+                              x1={cx}
+                              y1={cy - 4}
+                              x2={labelX}
+                              y2={labelY - 4}
+                              stroke="#D9C7BE"
+                              strokeWidth={1}
+                              strokeDasharray="2 2"
+                            />
+                          )}
+                          <rect
+                            x={boxX}
+                            y={boxY}
+                            width={width}
+                            height={height}
+                            rx={6}
+                            fill="rgba(253, 248, 246, 0.92)"
+                          />
+                          <text
+                            x={labelX}
+                            y={labelY - (payload.labelLines.length - 1) * 6}
+                            textAnchor={payload.labelAnchor}
+                            fontSize={11}
+                            fontWeight={500}
+                            fill="#4A5568"
+                            direction="rtl"
+                          >
+                            {payload.labelLines.map((line: string, index: number) => (
+                              <tspan key={`${payload.category.id}-${line}`} x={labelX} dy={index === 0 ? 0 : 12}>
+                                {line}
+                              </tspan>
+                            ))}
+                          </text>
+                        </g>
+                      )
+                    }}
+                  >
                     {chartData.map((item) => (
                       <Cell
                         key={item.category.id}

@@ -210,7 +210,7 @@ function CategoryManagerPage() {
       </div>
 
       <CategoryPriorityMatrix data={snapshots} />
-      <CategoryTable data={snapshots} />
+      <CategoryTable data={snapshots} comparisonMode={comparisonMode} onComparisonChange={setComparisonMode} />
     </PageContainer>
   )
 }

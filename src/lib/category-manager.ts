@@ -7,7 +7,9 @@ export interface CategorySnapshot {
   comparisonLabel: string
   targetAchievement: number
   shareGap: number
+  normalizedGrossMarginPercent: number
   grossProfit: number
+  inventoryDays: number
   avgPromoRoi: number
   avgPromoUplift: number
   weakBranchCount: number
@@ -23,9 +25,24 @@ export interface CategorySnapshot {
   status: 'danger' | 'opportunity' | 'monitor'
 }
 
+export const CATEGORY_MANAGER_MARGIN_BASELINE = 20
+export const CATEGORY_MANAGER_INVENTORY_DAYS_GOAL = 14
+
 function average(values: number[]): number {
   if (values.length === 0) return 0
   return values.reduce((sum, value) => sum + value, 0) / values.length
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value))
+}
+
+function normalizeGrossMarginPercent(rawGrossMarginPercent: number, networkAverageGrossMargin: number): number {
+  return +clamp(
+    CATEGORY_MANAGER_MARGIN_BASELINE + (rawGrossMarginPercent - networkAverageGrossMargin) * 0.35,
+    17.5,
+    22.5,
+  ).toFixed(1)
 }
 
 export function getComparisonLabel(mode: ComparisonMode): string {
@@ -59,9 +76,14 @@ export function getCategoryComparison(category: CategorySummary, mode: Compariso
   }
 }
 
-function getFocusAction(category: CategorySummary, shareGap: number, avgPromoRoi: number): string {
+function getFocusAction(
+  category: CategorySummary,
+  shareGap: number,
+  avgPromoRoi: number,
+  normalizedGrossMarginPercent: number,
+): string {
   if (category.stockoutRate >= 4) return 'לייצב זמינות בסניפים חלשים'
-  if (category.grossMarginPercent < 20) return 'לבחון מחיר, הנחה ותמהיל'
+  if (normalizedGrossMarginPercent < CATEGORY_MANAGER_MARGIN_BASELINE) return 'לבחון מחיר, הנחה ותמהיל'
   if (category.inventoryTurnover < 8) return 'לצמצם מלאי איטי'
   if (shareGap < 0) return 'להרחיב נתח מדף והפצה'
   if (avgPromoRoi >= 1.8) return 'להרחיב מבצע מנצח'
@@ -73,12 +95,14 @@ export function deriveCategorySnapshots(
   comparisonMode: ComparisonMode,
 ): CategorySnapshot[] {
   const comparisonLabel = getComparisonLabel(comparisonMode)
+  const networkAverageGrossMargin = average(categories.map((category) => category.grossMarginPercent))
 
   return categories.map((category) => {
     const comparisonChange = getCategoryComparison(category, comparisonMode)
     const targetAchievement = category.targetSales > 0 ? (category.sales / category.targetSales) * 100 : 100
     const shareGap = +(category.sharePercent - category.targetShare).toFixed(1)
-    const grossProfit = category.sales * (category.grossMarginPercent / 100)
+    const normalizedGrossMarginPercent = normalizeGrossMarginPercent(category.grossMarginPercent, networkAverageGrossMargin)
+    const grossProfit = category.sales * (normalizedGrossMarginPercent / 100)
     const avgPromoRoi = +average(category.allPromotions.map((promo) => promo.roi)).toFixed(2)
     const avgPromoUplift = +average(category.allPromotions.map((promo) => promo.upliftPercent)).toFixed(1)
 
@@ -97,8 +121,8 @@ export function deriveCategorySnapshots(
       : 0
 
     const stockoutExposure = category.sales * (category.stockoutRate / 100) * 0.65
-    const marginPressure = category.grossMarginPercent < 20
-      ? category.sales * ((20 - category.grossMarginPercent) / 100) * 0.6
+    const marginPressure = normalizedGrossMarginPercent < CATEGORY_MANAGER_MARGIN_BASELINE
+      ? category.sales * ((CATEGORY_MANAGER_MARGIN_BASELINE - normalizedGrossMarginPercent) / 100) * 0.6
       : 0
     const turnoverPressure = category.inventoryTurnover < 8
       ? category.sales * ((8 - category.inventoryTurnover) / 8) * 0.06
@@ -111,14 +135,14 @@ export function deriveCategorySnapshots(
 
     const dangerScore = (
       Math.max(0, -comparisonChange) * 2
-      + Math.max(0, 20 - category.grossMarginPercent) * 3
+      + Math.max(0, CATEGORY_MANAGER_MARGIN_BASELINE - normalizedGrossMarginPercent) * 3
       + category.stockoutRate * 2.5
       + Math.max(0, 8 - category.inventoryTurnover) * 2
       + weakBranchCount * 1.5
     )
     const opportunityScore = (
       Math.max(0, comparisonChange) * 1.4
-      + Math.max(0, category.grossMarginPercent - 22) * 2
+      + Math.max(0, normalizedGrossMarginPercent - (CATEGORY_MANAGER_MARGIN_BASELINE + 2)) * 2
       + Math.max(0, -shareGap) * 2.5
       + Math.max(0, avgPromoRoi - 1.1) * 8
       + Math.max(0, 4 - category.stockoutRate) * 1.5
@@ -136,7 +160,9 @@ export function deriveCategorySnapshots(
       comparisonLabel,
       targetAchievement: +targetAchievement.toFixed(1),
       shareGap,
+      normalizedGrossMarginPercent,
       grossProfit: Math.round(grossProfit),
+      inventoryDays: category.inventoryDays,
       avgPromoRoi,
       avgPromoUplift,
       weakBranchCount,
@@ -148,7 +174,7 @@ export function deriveCategorySnapshots(
       upsideEstimate: Math.round(upsideEstimate),
       dangerScore: +dangerScore.toFixed(1),
       opportunityScore: +opportunityScore.toFixed(1),
-      focusAction: getFocusAction(category, shareGap, avgPromoRoi),
+      focusAction: getFocusAction(category, shareGap, avgPromoRoi, normalizedGrossMarginPercent),
       status,
     }
   })

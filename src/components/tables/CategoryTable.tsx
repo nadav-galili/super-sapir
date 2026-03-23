@@ -8,15 +8,26 @@ import { motion } from 'motion/react'
 import { ExternalLink } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { ComparisonToggle } from '@/components/dashboard/ComparisonToggle'
 import { SortHeader } from '@/components/tables/SortHeader'
 import { formatCurrencyShort } from '@/lib/format'
-import type { CategorySnapshot } from '@/lib/category-manager'
+import { CATEGORY_MANAGER_INVENTORY_DAYS_GOAL, getComparisonLabel, type CategorySnapshot } from '@/lib/category-manager'
+import type { ComparisonMode } from '@/data/types'
 
 interface CategoryTableProps {
   data: CategorySnapshot[]
+  comparisonMode: ComparisonMode
+  onComparisonChange: (mode: ComparisonMode) => void
 }
 
-export function CategoryTable({ data }: CategoryTableProps) {
+function getInventoryDaysColor(inventoryDays: number): string {
+  if (inventoryDays > CATEGORY_MANAGER_INVENTORY_DAYS_GOAL) return '#DC4E59'
+  if (inventoryDays >= CATEGORY_MANAGER_INVENTORY_DAYS_GOAL - 1) return '#F6B93B'
+  return '#2EC4D5'
+}
+
+export function CategoryTable({ data, comparisonMode, onComparisonChange }: CategoryTableProps) {
+  const comparisonLabel = getComparisonLabel(comparisonMode)
   const [sorting, setSorting] = useState<SortingState>([{ id: 'downsideEstimate', desc: true }])
 
   const columns = useMemo<ColumnDef<CategorySnapshot>[]>(() => [
@@ -73,7 +84,7 @@ export function CategoryTable({ data }: CategoryTableProps) {
       },
     },
     {
-      accessorKey: 'category.grossMarginPercent',
+      accessorKey: 'normalizedGrossMarginPercent',
       header: ({ column }) => <SortHeader column={column} label='רווח גולמי' />,
       cell: ({ getValue }) => {
         const val = getValue() as number
@@ -85,8 +96,32 @@ export function CategoryTable({ data }: CategoryTableProps) {
       },
     },
     {
+      accessorKey: 'inventoryDays',
+      header: ({ column }) => <SortHeader column={column} label="ימי מלאי" />,
+      cell: ({ getValue }) => {
+        const inventoryDays = getValue() as number
+        const delta = inventoryDays - CATEGORY_MANAGER_INVENTORY_DAYS_GOAL
+
+        return (
+          <div className="space-y-0.5">
+            <p>
+              <span
+                className="font-mono font-semibold tabular-nums"
+                style={{ color: getInventoryDaysColor(inventoryDays) }}
+              >
+                {inventoryDays}
+              </span>
+            </p>
+            <p className="whitespace-nowrap text-[11px] text-[#A0AEC0]">
+              {delta > 0 ? `${delta}+ מעל היעד` : delta < 0 ? `${Math.abs(delta)} מתחת ליעד` : 'בדיוק ביעד'}
+            </p>
+          </div>
+        )
+      },
+    },
+    {
       accessorKey: 'stockoutExposure',
-      header: ({ column }) => <SortHeader column={column} label="חשיפת חוסרים" />,
+      header: ({ column }) => <SortHeader column={column} label="פדיון בסיכון" />,
       cell: ({ getValue }) => <span className="font-semibold font-mono" dir="ltr">{formatCurrencyShort(getValue() as number)}</span>,
     },
     {
@@ -95,9 +130,9 @@ export function CategoryTable({ data }: CategoryTableProps) {
       cell: ({ row, getValue }) => {
         const value = getValue() as number
         return (
-          <div className="space-y-0.5">
-            <p className="font-mono font-semibold text-[#2EC4D5]" dir="ltr">{value.toFixed(2)}x</p>
-            <p className="text-[11px] text-[#A0AEC0]" dir="ltr">uplift {row.original.avgPromoUplift.toFixed(1)}%</p>
+          <div className="space-y-0.5 whitespace-nowrap">
+            <p><span className="font-mono font-semibold text-[#2EC4D5]">{value.toFixed(2)}x</span></p>
+            <p className="text-[11px] text-[#A0AEC0]">uplift {row.original.avgPromoUplift.toFixed(1)}%</p>
           </div>
         )
       },
@@ -123,13 +158,14 @@ export function CategoryTable({ data }: CategoryTableProps) {
           : row.original.downsideEstimate
 
         return (
-          <div className="space-y-0.5">
-            <p
-              className="font-semibold font-mono"
-              dir="ltr"
-              style={{ color: row.original.status === 'opportunity' ? '#2EC4D5' : '#DC4E59' }}
-            >
-              {formatCurrencyShort(impact)}
+          <div className="space-y-0.5 whitespace-nowrap">
+            <p>
+              <span
+                className="font-semibold font-mono"
+                style={{ color: row.original.status === 'opportunity' ? '#2EC4D5' : '#DC4E59' }}
+              >
+                {formatCurrencyShort(impact)}
+              </span>
             </p>
             <p className="text-[11px] text-[#A0AEC0]">
               {row.original.status === 'opportunity' ? 'פוטנציאל' : 'סיכון'} מוערך
@@ -171,7 +207,15 @@ export function CategoryTable({ data }: CategoryTableProps) {
     >
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg text-[#2D3748]">לוח פעולה לפי קטגוריה</CardTitle>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <CardTitle className="text-lg text-[#2D3748]">לוח פעולה לפי קטגוריה</CardTitle>
+              <p className="mt-1 text-sm text-[#4A5568]">
+                מכירות, ביצוע ורווחיות: 12 חודשים אחרונים | ימי מלאי: תמונת מצב נוכחית | השוואה פעילה: {comparisonLabel} | יעד ימי מלאי: {CATEGORY_MANAGER_INVENTORY_DAYS_GOAL}
+              </p>
+            </div>
+            <ComparisonToggle value={comparisonMode} onChange={onComparisonChange} />
+          </div>
         </CardHeader>
         <CardContent>
           <div className="overflow-auto">

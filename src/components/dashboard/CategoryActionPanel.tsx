@@ -52,8 +52,8 @@ export function CategoryActionPanel({ title, tone, items }: CategoryActionPanelP
                     </div>
                     <p className="text-sm text-[#4A5568]">
                       {tone === 'danger'
-                        ? `${item.weakBranchCount} סניפים חלשים, ${item.category.stockoutRate.toFixed(1)}% חוסרים, ${item.category.grossMarginPercent.toFixed(1)}% רווחיות`
-                        : `${item.avgPromoRoi.toFixed(2)}x ROI, ${item.shareGap.toFixed(1)}% פער נתח, ${item.category.grossMarginPercent.toFixed(1)}% רווחיות`}
+                        ? `${item.weakBranchCount} סניפים חלשים, ${item.category.stockoutRate.toFixed(1)}% חוסרים, ${item.normalizedGrossMarginPercent.toFixed(1)}% רווחיות`
+                        : `${item.avgPromoRoi.toFixed(2)}x ROI, ${item.shareGap.toFixed(1)}% פער נתח, ${item.normalizedGrossMarginPercent.toFixed(1)}% רווחיות`}
                     </p>
                     <p className="text-sm text-[#A0AEC0]">{item.focusAction}</p>
                   </div>

@@ -7,7 +7,8 @@
       "mcp__plugin_compound-engineering_pw__browser_evaluate",
       "Bash(bun add:*)",
       "Bash(npx tsc:*)",
-      "mcp__plugin_compound-engineering_pw__browser_take_screenshot"
+      "mcp__plugin_compound-engineering_pw__browser_take_screenshot",
+      "mcp__plugin_compound-engineering_pw__browser_navigate"
     ]
   }
 }
