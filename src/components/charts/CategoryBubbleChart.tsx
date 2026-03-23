@@ -88,6 +88,26 @@ export function CategoryBubbleChart({ data }: CategoryBubbleChartProps) {
                     }
                   }}
                   cursor="pointer"
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  shape={(props: any) => {
+                    const { cx, cy, fill, payload } = props
+                    const r = Math.sqrt(payload.z) / 2
+                    return (
+                      <g>
+                        <circle cx={cx} cy={cy} r={r} fill={fill} fillOpacity={0.7} stroke={fill} strokeWidth={1} />
+                        <text
+                          x={cx}
+                          y={cy - r - 6}
+                          textAnchor="middle"
+                          fill="#2D3748"
+                          fontSize={11}
+                          fontWeight={500}
+                        >
+                          {payload.name}
+                        </text>
+                      </g>
+                    )
+                  }}
                 >
                   {chartData.map((entry) => (
                     <Cell

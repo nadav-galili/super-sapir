@@ -4,6 +4,7 @@ import { AnimatePresence } from 'motion/react'
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar'
 import { AppSidebar } from '@/components/layout/Sidebar'
 import { Header } from '@/components/layout/Header'
+import { APP_NAME } from '@/lib/branding'
 
 const pageTitles: Record<string, string> = {
   '/': 'סקירה כללית',
@@ -16,7 +17,7 @@ function RootLayout() {
   const matches = useMatches()
   const currentPath = matches[matches.length - 1]?.pathname ?? '/'
   const basePath = '/' + (currentPath.split('/')[1] ?? '')
-  const title = pageTitles[basePath] ?? 'Sapir Analytics'
+  const title = pageTitles[basePath] ?? APP_NAME
   const isHome = currentPath === '/'
 
   if (isHome) {

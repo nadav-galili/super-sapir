@@ -1,9 +1,12 @@
 import { useMemo, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
+import {
+  ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid,
+  Tooltip, ResponsiveContainer, Legend,
+} from 'recharts'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs'
 import { KPIGrid } from '@/components/dashboard/KPIGrid'
-import { TrendLineChart } from '@/components/charts/TrendLineChart'
 import { PromotionCard } from '@/components/dashboard/PromotionCard'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -13,7 +16,7 @@ import {
 import { motion } from 'motion/react'
 import { SortHeader } from '@/components/tables/SortHeader'
 import { allBranches } from '@/data/mock-branches'
-import { DEPARTMENT_NAMES } from '@/data/constants'
+import { DEPARTMENT_NAMES, MONTHS_HE } from '@/data/constants'
 import { formatCurrencyShort, formatPercent } from '@/lib/format'
 import { getGrowthColor, getTargetColor, getMarginColor } from '@/lib/colors'
 import type { KPICardData, Promotion } from '@/data/types'
@@ -28,6 +31,9 @@ interface BranchCategoryRow {
   yoyChange: number
 }
 
+// Seasonal weights for monthly target distribution: higher in holiday/summer months
+const SEASONAL_WEIGHTS = [0.88, 0.85, 0.95, 1.08, 1.02, 1.05, 1.04, 1.00, 1.10, 1.06, 0.98, 0.99]
+
 function CategoryDrillDown() {
   const { categoryId } = Route.useParams()
   const categoryName = DEPARTMENT_NAMES[categoryId] ?? categoryId
@@ -35,29 +41,36 @@ function CategoryDrillDown() {
   // Single pass over allBranches to collect everything
   const derived = useMemo(() => {
     const rows: BranchCategoryRow[] = []
-    let totalTurnover = 0
+    let totalInventoryDays = 0
     let totalStockout = 0
     const monthlyTrend = new Array(12).fill(0)
+    const monthlyTarget = new Array(12).fill(0)
     const promotions: Promotion[] = []
 
-    for (const branch of allBranches) {
+    for (let bi = 0; bi < allBranches.length; bi++) {
+      const branch = allBranches[bi]
       const dept = branch.departments.find(d => d.id === categoryId)
       if (!dept) continue
+
+      const seed = (bi * 7 + categoryId.length * 13) % 17
+      const targetVariation = 0.92 + (seed / 17) * 0.16
+      const adjustedTarget = dept.targetSales * targetVariation
 
       rows.push({
         branchName: branch.name,
         sales: dept.sales,
-        targetSales: dept.targetSales,
-        targetAchievement: dept.targetSales > 0 ? (dept.sales / dept.targetSales) * 100 : 100,
+        targetSales: adjustedTarget,
+        targetAchievement: adjustedTarget > 0 ? (dept.sales / adjustedTarget) * 100 : 100,
         grossMarginPercent: dept.grossMarginPercent,
         inventoryDays: dept.inventoryDays,
         yoyChange: dept.yoyChange,
       })
 
-      totalTurnover += dept.inventoryTurnover
+      totalInventoryDays += dept.inventoryDays
       totalStockout += dept.stockoutRate
       for (let i = 0; i < 12; i++) {
         monthlyTrend[i] += dept.monthlyTrend[i] ?? 0
+        monthlyTarget[i] += (dept.targetSales / 12) * SEASONAL_WEIGHTS[i]
       }
       promotions.push(...dept.promotions)
     }
@@ -68,17 +81,23 @@ function CategoryDrillDown() {
     const totalSales = rows.reduce((s, b) => s + b.sales, 0)
     const totalTarget = rows.reduce((s, b) => s + b.targetSales, 0)
     const avgMargin = +(rows.reduce((s, b) => s + b.grossMarginPercent, 0) / count).toFixed(1)
-    const avgTurnover = +(totalTurnover / count).toFixed(1)
+    const avgInventoryDays = Math.round(totalInventoryDays / count)
     const avgStockout = +(totalStockout / count).toFixed(1)
     const targetAchievement = totalTarget > 0 ? ((totalSales - totalTarget) / totalTarget) * 100 : 0
 
+    const chartData = monthlyTrend.map((sales, i) => ({
+      month: MONTHS_HE[i],
+      sales: Math.round(sales / 1000),
+      target: Math.round(monthlyTarget[i] / 1000),
+    }))
+
     return {
-      rows, totalSales, avgMargin, avgTurnover, avgStockout,
-      targetAchievement, monthlyTrend, promotions: promotions.slice(0, 3),
+      rows, totalSales, avgMargin, avgInventoryDays, avgStockout,
+      targetAchievement, chartData, promotions: promotions.slice(0, 3),
     }
   }, [categoryId])
 
-  const { rows: branchData, totalSales, avgMargin, avgTurnover, avgStockout, targetAchievement, monthlyTrend, promotions } = derived
+  const { rows: branchData, totalSales, avgMargin, avgInventoryDays, avgStockout, targetAchievement, chartData, promotions } = derived
 
   if (branchData.length === 0) {
     return (
@@ -110,8 +129,8 @@ function CategoryDrillDown() {
       gradient: avgMargin >= 20 ? 'purple' : 'red',
     },
     {
-      label: 'מחזור מלאי',
-      value: avgTurnover,
+      label: 'ממוצע ימי מלאי',
+      value: avgInventoryDays,
       format: 'number',
       trend: 1.2,
       trendLabel: 'שנתי',
@@ -201,7 +220,67 @@ function CategoryDrillDown() {
 
       <KPIGrid items={kpis} />
 
-      <TrendLineChart data={monthlyTrend} title={`מגמת מכירות — ${categoryName} (12 חודשים)`} />
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.25, duration: 0.5 }}
+      >
+        <Card className="border-warm-border rounded-[16px]">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base text-[#2D3748]">מגמת מכירות — {categoryName} (12 חודשים)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div dir="ltr" className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <ComposedChart
+                  data={chartData}
+                  margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.04)" />
+                  <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#4A5568' }} />
+                  <YAxis
+                    tickFormatter={(v: number) => formatCurrencyShort(v * 1000)}
+                    tick={{ fontSize: 11, fill: '#A0AEC0' }}
+                    width={50}
+                  />
+                  <Tooltip
+                    formatter={(value, name) => [
+                      `₪${Number(value).toLocaleString()}K`,
+                      name === 'sales' ? 'מכירות' : 'יעד',
+                    ]}
+                    contentStyle={{ direction: 'rtl', borderRadius: '10px', border: '1px solid #FFE8DE', fontSize: 12, color: '#2D3748' }}
+                    itemStyle={{ color: '#4A5568' }}
+                    labelStyle={{ color: '#2D3748', fontWeight: 600 }}
+                  />
+                  <Legend
+                    formatter={(v: string) => <span style={{ color: '#4A5568' }}>{v === 'sales' ? 'מכירות' : 'יעד'}</span>}
+                    iconType="plainline"
+                    wrapperStyle={{ fontSize: 12, paddingTop: 8 }}
+                  />
+                  <Bar
+                    dataKey="sales"
+                    fill="rgba(220, 78, 89, 0.15)"
+                    stroke="#DC4E59"
+                    strokeWidth={2}
+                    radius={[6, 6, 0, 0]}
+                    animationDuration={1200}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="target"
+                    stroke="#F6B93B"
+                    strokeWidth={1.5}
+                    strokeDasharray="4 4"
+                    dot={{ r: 3, fill: '#F6B93B' }}
+                    animationDuration={1500}
+                    animationBegin={300}
+                  />
+                </ComposedChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}

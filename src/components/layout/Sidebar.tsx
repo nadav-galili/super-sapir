@@ -19,6 +19,7 @@ import {
   SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar'
+import { BrandLogo } from '@/components/branding/BrandLogo'
 
 const generalNavItems = [
   { to: '/', label: 'סקירה כללית', icon: LayoutDashboard },
@@ -40,21 +41,7 @@ function SidebarLogo() {
   const { state } = useSidebar()
   const expanded = state === 'expanded'
 
-  return (
-    <div className="flex items-center gap-2 overflow-hidden">
-      <div
-        className="w-8 h-8 rounded-[10px] flex items-center justify-center shrink-0"
-        style={{ background: 'linear-gradient(135deg, #DC4E59, #E8777F)' }}
-      >
-        <span className="text-white font-bold text-sm">S</span>
-      </div>
-      {expanded && (
-        <span className="font-bold text-base text-[#2D3748] whitespace-nowrap">
-          Sapir Analytics
-        </span>
-      )}
-    </div>
-  )
+  return <BrandLogo size={36} showName={expanded} compact />
 }
 
 export function AppSidebar() {
