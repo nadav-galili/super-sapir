@@ -300,9 +300,16 @@ function HomePage() {
       <CTASection />
 
       {/* Footer */}
-      <footer className="py-10 px-4 text-center space-y-2" style={{ borderTop: '1px solid #F5E6DE' }}>
+      <footer className="py-10 px-4 text-center space-y-3" style={{ borderTop: '1px solid #F5E6DE' }}>
         <div className="flex justify-center">
           <BrandLogo size={42} compact />
+        </div>
+        <div className="flex items-center justify-center gap-4 text-sm" style={{ color: '#4A5568' }}>
+          <span>Nadav Galili</span>
+          <span style={{ color: '#A0AEC0' }}>|</span>
+          <a href="mailto:nadavg@retailskillz.online" className="hover:underline" style={{ color: '#DC4E59' }}>nadavg@retailskillz.online</a>
+          <span style={{ color: '#A0AEC0' }}>|</span>
+          <a href="tel:052-4417944" dir="ltr" className="hover:underline" style={{ color: '#DC4E59' }}>052-4417944</a>
         </div>
         <p className="text-xs" style={{ color: '#A0AEC0' }}>
           © {new Date().getFullYear()} Nadav Galili. כל הזכויות שמורות.
