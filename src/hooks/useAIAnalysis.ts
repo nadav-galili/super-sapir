@@ -61,21 +61,35 @@ export function useAIAnalysis(branchId: string, report: BranchFullReport) {
           const data = line.slice(6)
           if (data === '[DONE]') continue
 
+          let item
           try {
-            const item = JSON.parse(data)
-            if (item.type === 'briefing') {
-              collectedBriefing.push(item.data)
-              setBriefing([...collectedBriefing])
-            } else if (item.type === 'recommendation') {
-              collectedRecs.push(item.data)
-              setRecommendations([...collectedRecs])
-            }
-          } catch { /* skip malformed events */ }
+            item = JSON.parse(data)
+          } catch {
+            continue // skip malformed SSE data
+          }
+
+          if (item.type === 'error') {
+            setError(item.message ?? 'שגיאת AI')
+            break
+          }
+
+          if (item.type === 'briefing' && item.data) {
+            collectedBriefing.push(item.data)
+            setBriefing([...collectedBriefing])
+          } else if (item.type === 'recommendation' && item.data) {
+            collectedRecs.push(item.data)
+            setRecommendations([...collectedRecs])
+          }
         }
       }
 
       if (!signal.aborted) {
-        cache.set(branchId, { briefing: collectedBriefing, recommendations: collectedRecs })
+        // Only cache if we got actual results
+        if (collectedBriefing.length > 0 || collectedRecs.length > 0) {
+          cache.set(branchId, { briefing: collectedBriefing, recommendations: collectedRecs })
+        } else if (!error) {
+          setError('ניתוח AI לא החזיר תוצאות')
+        }
         setIsStreaming(false)
       }
     } catch (err) {

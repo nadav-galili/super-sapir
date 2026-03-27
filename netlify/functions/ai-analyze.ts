@@ -95,9 +95,17 @@ export default async (req: Request, _context: Context) => {
       })
     }
 
+    if (!response.body) {
+      console.error('Anthropic API returned 200 OK but with no response body')
+      return new Response(JSON.stringify({ error: 'תגובת AI ריקה' }), {
+        status: 502,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    }
+
     // Stream items to the client as each JSONL line completes from Anthropic
     const encoder = new TextEncoder()
-    const anthropicReader = response.body!.getReader()
+    const anthropicReader = response.body.getReader()
     const decoder = new TextDecoder()
 
     const stream = new ReadableStream({
@@ -122,30 +130,38 @@ export default async (req: Request, _context: Context) => {
               const data = line.slice(6)
               if (data === '[DONE]') continue
 
+              let event
               try {
-                const event = JSON.parse(data)
-                if (event.type === 'content_block_delta' && event.delta?.text) {
-                  textBuffer += event.delta.text
-                  fullText += event.delta.text
+                event = JSON.parse(data)
+              } catch {
+                continue // genuinely malformed SSE line
+              }
 
-                  // Extract complete JSONL lines and forward immediately
-                  const jsonLines = textBuffer.split('\n')
-                  textBuffer = jsonLines.pop() ?? ''
+              if (event.type === 'content_block_delta' && event.delta?.text) {
+                textBuffer += event.delta.text
+                fullText += event.delta.text
 
-                  for (const jsonLine of jsonLines) {
-                    const trimmed = jsonLine.trim()
-                    if (!trimmed) continue
-                    try {
-                      const item = JSON.parse(trimmed)
-                      const sseEvent = formatSSEItem(item)
-                      if (sseEvent) {
-                        controller.enqueue(encoder.encode(sseEvent))
-                        itemCount++
-                      }
-                    } catch { /* skip incomplete lines */ }
+                // Extract complete JSONL lines and forward immediately
+                const jsonLines = textBuffer.split('\n')
+                textBuffer = jsonLines.pop() ?? ''
+
+                for (const jsonLine of jsonLines) {
+                  const trimmed = jsonLine.trim()
+                  if (!trimmed) continue
+                  try {
+                    const item = JSON.parse(trimmed)
+                    const sseEvent = formatSSEItem(item)
+                    if (sseEvent) {
+                      controller.enqueue(encoder.encode(sseEvent))
+                      itemCount++
+                    }
+                  } catch (parseErr) {
+                    if (!(parseErr instanceof SyntaxError)) {
+                      console.error('Error processing JSONL line:', parseErr, 'Line:', trimmed.slice(0, 200))
+                    }
                   }
                 }
-              } catch { /* skip malformed SSE */ }
+              }
             }
           }
 
@@ -159,17 +175,30 @@ export default async (req: Request, _context: Context) => {
                 controller.enqueue(encoder.encode(sseEvent))
                 itemCount++
               }
-            } catch { /* ignore */ }
+            } catch (err) {
+              console.warn('Failed to parse remaining buffer at end of stream:', remaining.slice(0, 300), err)
+            }
           }
 
           // Fallback: if JSONL parsing found nothing, try as wrapped JSON
           if (itemCount === 0) {
-            for (const ev of tryParseFallbackJSON(fullText)) {
+            console.warn('JSONL streaming produced 0 items, falling back to wrapped JSON parse. fullText length:', fullText.length)
+            const fallbackEvents = tryParseFallbackJSON(fullText)
+            if (fallbackEvents.length === 0) {
+              console.error('Fallback JSON parse also produced 0 items. AI text preview:', fullText.slice(0, 500))
+              controller.enqueue(
+                encoder.encode(`data: ${JSON.stringify({ type: 'error', message: 'AI returned unparseable response' })}\n\n`),
+              )
+            }
+            for (const ev of fallbackEvents) {
               controller.enqueue(encoder.encode(ev))
             }
           }
         } catch (err) {
           console.error('Stream processing error:', err)
+          controller.enqueue(
+            encoder.encode(`data: ${JSON.stringify({ type: 'error', message: 'Stream processing failed' })}\n\n`),
+          )
         }
 
         controller.enqueue(encoder.encode('data: [DONE]\n\n'))
@@ -203,30 +232,39 @@ function formatSSEItem(item: Record<string, unknown>): string | null {
     const { type: _, ...data } = item
     return `data: ${JSON.stringify({ type: 'recommendation', data })}\n\n`
   }
+  console.warn('Unrecognized JSONL item type:', item.type)
   return null
 }
 
 function tryParseFallbackJSON(text: string): string[] {
   const events: string[] = []
+  let parsed
   try {
-    let parsed
-    try { parsed = JSON.parse(text) } catch {
-      const match = text.match(/```(?:json)?\s*([\s\S]*?)```/)
-      if (match?.[1]) parsed = JSON.parse(match[1].trim())
-      else return events
-    }
-    if (Array.isArray(parsed.briefing)) {
-      for (const item of parsed.briefing.sort((a: { priority: number }, b: { priority: number }) => a.priority - b.priority)) {
-        events.push(`data: ${JSON.stringify({ type: 'briefing', data: item })}\n\n`)
+    parsed = JSON.parse(text)
+  } catch {
+    const match = text.match(/```(?:json)?\s*([\s\S]*?)```/)
+    if (match?.[1]) {
+      try {
+        parsed = JSON.parse(match[1].trim())
+      } catch {
+        return events
       }
+    } else {
+      return events
     }
-    if (Array.isArray(parsed.recommendations)) {
-      for (const item of parsed.recommendations) {
-        events.push(`data: ${JSON.stringify({ type: 'recommendation', data: item })}\n\n`)
-      }
+  }
+
+  if (Array.isArray(parsed.briefing)) {
+    for (const item of parsed.briefing.sort((a: { priority: number }, b: { priority: number }) => a.priority - b.priority)) {
+      const ev = formatSSEItem({ type: 'briefing', ...item })
+      if (ev) events.push(ev)
     }
-  } catch (err) {
-    console.error('Fallback JSON parse failed:', err)
+  }
+  if (Array.isArray(parsed.recommendations)) {
+    for (const item of parsed.recommendations) {
+      const ev = formatSSEItem({ type: 'recommendation', ...item })
+      if (ev) events.push(ev)
+    }
   }
   return events
 }

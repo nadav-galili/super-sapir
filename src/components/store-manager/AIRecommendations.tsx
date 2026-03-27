@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { ShoppingCart, Settings, Users, Shield } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { TypingText } from '@/components/ui/typing-text'
 import type { Recommendation } from '@/lib/ai'
 
 const CATEGORY_CONFIG = {
@@ -23,9 +23,10 @@ const IMPACT_LABELS = { high: 'השפעה גבוהה', medium: 'השפעה בי�
 interface AIRecommendationsProps {
   recommendations: Recommendation[] | null
   isLoading: boolean
+  isStreaming: boolean
 }
 
-export function AIRecommendations({ recommendations, isLoading }: AIRecommendationsProps) {
+export function AIRecommendations({ recommendations, isLoading, isStreaming }: AIRecommendationsProps) {
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -73,11 +74,11 @@ export function AIRecommendations({ recommendations, isLoading }: AIRecommendati
                       <Icon className="w-4 h-4" style={{ color: config.color }} />
                     </div>
                     <h4 className="text-sm font-bold text-[#2D3748] flex-1">
-                      <TypingText text={rec.title} speed={10} />
+                      <TypingText text={rec.title} speed={10} animate={isStreaming} />
                     </h4>
                   </div>
                   <p className="text-xs text-[#4A5568] leading-relaxed">
-                    <TypingText text={rec.description} speed={8} />
+                    <TypingText text={rec.description} speed={8} animate={isStreaming} />
                   </p>
                   <div className="flex items-center justify-between pt-1">
                     <Badge className={`text-[10px] ${IMPACT_COLORS[rec.impact]}`}>
@@ -92,33 +93,5 @@ export function AIRecommendations({ recommendations, isLoading }: AIRecommendati
         })}
       </AnimatePresence>
     </div>
-  )
-}
-
-function TypingText({ text, speed = 12 }: { text: string; speed?: number }) {
-  const [length, setLength] = useState(0)
-  const textRef = useRef(text)
-
-  useEffect(() => {
-    textRef.current = text
-    setLength(0)
-    let i = 0
-    const interval = setInterval(() => {
-      i++
-      if (i >= textRef.current.length) {
-        setLength(textRef.current.length)
-        clearInterval(interval)
-      } else {
-        setLength(i)
-      }
-    }, speed)
-    return () => clearInterval(interval)
-  }, [text, speed])
-
-  return (
-    <>
-      {text.slice(0, length)}
-      {length < text.length && <span className="ai-cursor" />}
-    </>
   )
 }
