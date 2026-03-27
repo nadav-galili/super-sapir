@@ -1,3 +1,4 @@
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { ShoppingCart, Settings, Users, Shield } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
@@ -71,9 +72,13 @@ export function AIRecommendations({ recommendations, isLoading }: AIRecommendati
                     <div className="w-8 h-8 rounded-[10px] flex items-center justify-center" style={{ background: `${config.bg}15` }}>
                       <Icon className="w-4 h-4" style={{ color: config.color }} />
                     </div>
-                    <h4 className="text-sm font-bold text-[#2D3748] flex-1">{rec.title}</h4>
+                    <h4 className="text-sm font-bold text-[#2D3748] flex-1">
+                      <TypingText text={rec.title} speed={10} />
+                    </h4>
                   </div>
-                  <p className="text-xs text-[#4A5568] leading-relaxed">{rec.description}</p>
+                  <p className="text-xs text-[#4A5568] leading-relaxed">
+                    <TypingText text={rec.description} speed={8} />
+                  </p>
                   <div className="flex items-center justify-between pt-1">
                     <Badge className={`text-[10px] ${IMPACT_COLORS[rec.impact]}`}>
                       {IMPACT_LABELS[rec.impact]}
@@ -87,5 +92,33 @@ export function AIRecommendations({ recommendations, isLoading }: AIRecommendati
         })}
       </AnimatePresence>
     </div>
+  )
+}
+
+function TypingText({ text, speed = 12 }: { text: string; speed?: number }) {
+  const [length, setLength] = useState(0)
+  const textRef = useRef(text)
+
+  useEffect(() => {
+    textRef.current = text
+    setLength(0)
+    let i = 0
+    const interval = setInterval(() => {
+      i++
+      if (i >= textRef.current.length) {
+        setLength(textRef.current.length)
+        clearInterval(interval)
+      } else {
+        setLength(i)
+      }
+    }, speed)
+    return () => clearInterval(interval)
+  }, [text, speed])
+
+  return (
+    <>
+      {text.slice(0, length)}
+      {length < text.length && <span className="ai-cursor" />}
+    </>
   )
 }

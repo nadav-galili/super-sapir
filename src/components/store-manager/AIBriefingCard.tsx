@@ -1,3 +1,4 @@
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { Sparkles, AlertTriangle, TrendingUp, Target, Users, Shield, RefreshCw, Loader2 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -115,7 +116,9 @@ export function AIBriefingCard({ briefing, isLoading, isStreaming, error, onRetr
                         >
                           <Icon className="w-3.5 h-3.5" style={{ color }} />
                         </div>
-                        <p className="text-sm text-[#4A5568] leading-relaxed">{item.text}</p>
+                        <p className="text-sm text-[#4A5568] leading-relaxed">
+                          <TypingText text={item.text} />
+                        </p>
                       </motion.div>
                     )
                   })}
@@ -140,5 +143,33 @@ export function AIBriefingCard({ briefing, isLoading, isStreaming, error, onRetr
         </CardContent>
       </Card>
     </motion.div>
+  )
+}
+
+function TypingText({ text }: { text: string }) {
+  const [length, setLength] = useState(0)
+  const textRef = useRef(text)
+
+  useEffect(() => {
+    textRef.current = text
+    setLength(0)
+    let i = 0
+    const interval = setInterval(() => {
+      i++
+      if (i >= textRef.current.length) {
+        setLength(textRef.current.length)
+        clearInterval(interval)
+      } else {
+        setLength(i)
+      }
+    }, 12)
+    return () => clearInterval(interval)
+  }, [text])
+
+  return (
+    <>
+      {text.slice(0, length)}
+      {length < text.length && <span className="ai-cursor" />}
+    </>
   )
 }
