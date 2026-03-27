@@ -100,6 +100,22 @@
   animation: shimmer 2.5s ease-in-out infinite;
 }
 
+/* AI streaming cursor */
+@keyframes cursorBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.ai-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: #6C5CE7;
+  margin-inline-start: 2px;
+  vertical-align: text-bottom;
+  animation: cursorBlink 0.8s ease-in-out infinite;
+}
+
 /* Phone mockup scan line animation */
 @keyframes scanLine {
   0% { top: 10%; opacity: 0; }

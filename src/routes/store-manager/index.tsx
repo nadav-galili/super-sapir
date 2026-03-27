@@ -690,7 +690,7 @@ function AIView({ report, branchId }: { report: Report; branchId: string }) {
   return (
     <div className="space-y-5">
       <AIBriefingCard briefing={briefing} isLoading={isLoading} isStreaming={isStreaming} error={error} onRetry={retry} />
-      <AIRecommendations recommendations={recommendations} isLoading={isLoading} />
+      <AIRecommendations recommendations={recommendations} isLoading={isLoading} isStreaming={isStreaming} />
     </div>
   )
 }

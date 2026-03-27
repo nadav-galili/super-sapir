@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'motion/react'
 import { Sparkles, AlertTriangle, TrendingUp, Target, Users, Shield, RefreshCw, Loader2 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { TypingText } from '@/components/ui/typing-text'
 import type { BriefingItem } from '@/lib/ai'
 
 const ICON_MAP = {
@@ -115,7 +116,9 @@ export function AIBriefingCard({ briefing, isLoading, isStreaming, error, onRetr
                         >
                           <Icon className="w-3.5 h-3.5" style={{ color }} />
                         </div>
-                        <p className="text-sm text-[#4A5568] leading-relaxed">{item.text}</p>
+                        <p className="text-sm text-[#4A5568] leading-relaxed">
+                          <TypingText text={item.text} animate={isStreaming} />
+                        </p>
                       </motion.div>
                     )
                   })}

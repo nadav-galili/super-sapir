@@ -2,6 +2,7 @@ import { motion, AnimatePresence } from 'motion/react'
 import { ShoppingCart, Settings, Users, Shield } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { TypingText } from '@/components/ui/typing-text'
 import type { Recommendation } from '@/lib/ai'
 
 const CATEGORY_CONFIG = {
@@ -22,9 +23,10 @@ const IMPACT_LABELS = { high: 'השפעה גבוהה', medium: 'השפעה בי�
 interface AIRecommendationsProps {
   recommendations: Recommendation[] | null
   isLoading: boolean
+  isStreaming: boolean
 }
 
-export function AIRecommendations({ recommendations, isLoading }: AIRecommendationsProps) {
+export function AIRecommendations({ recommendations, isLoading, isStreaming }: AIRecommendationsProps) {
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -71,9 +73,13 @@ export function AIRecommendations({ recommendations, isLoading }: AIRecommendati
                     <div className="w-8 h-8 rounded-[10px] flex items-center justify-center" style={{ background: `${config.bg}15` }}>
                       <Icon className="w-4 h-4" style={{ color: config.color }} />
                     </div>
-                    <h4 className="text-sm font-bold text-[#2D3748] flex-1">{rec.title}</h4>
+                    <h4 className="text-sm font-bold text-[#2D3748] flex-1">
+                      <TypingText text={rec.title} speed={10} animate={isStreaming} />
+                    </h4>
                   </div>
-                  <p className="text-xs text-[#4A5568] leading-relaxed">{rec.description}</p>
+                  <p className="text-xs text-[#4A5568] leading-relaxed">
+                    <TypingText text={rec.description} speed={8} animate={isStreaming} />
+                  </p>
                   <div className="flex items-center justify-between pt-1">
                     <Badge className={`text-[10px] ${IMPACT_COLORS[rec.impact]}`}>
                       {IMPACT_LABELS[rec.impact]}

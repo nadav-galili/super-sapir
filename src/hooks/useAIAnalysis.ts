@@ -24,7 +24,7 @@ export function useAIAnalysis(branchId: string, report: BranchFullReport) {
       const response = await fetch('/.netlify/functions/ai-analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ payload, stream: true }),
+        body: JSON.stringify({ payload }),
         signal,
       })
 
@@ -33,60 +33,64 @@ export function useAIAnalysis(branchId: string, report: BranchFullReport) {
         throw new Error(err.error ?? `HTTP ${response.status}`)
       }
 
-      const contentType = response.headers.get('content-type') ?? ''
+      if (!response.body) {
+        throw new Error('No response body')
+      }
 
-      if (contentType.includes('text/event-stream') && response.body) {
-        // Streaming mode: read items one by one
-        setIsLoading(false)
-        setIsStreaming(true)
+      setIsLoading(false)
+      setIsStreaming(true)
 
-        const reader = response.body.getReader()
-        const decoder = new TextDecoder()
-        let buffer = ''
-        const collectedBriefing: BriefingItem[] = []
-        const collectedRecs: Recommendation[] = []
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ''
+      const collectedBriefing: BriefingItem[] = []
+      const collectedRecs: Recommendation[] = []
 
-        while (true) {
-          const { done, value } = await reader.read()
-          if (done) break
-          if (signal.aborted) break
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        if (signal.aborted) break
 
-          buffer += decoder.decode(value, { stream: true })
-          const lines = buffer.split('\n\n')
-          buffer = lines.pop() ?? ''
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n\n')
+        buffer = lines.pop() ?? ''
 
-          for (const block of lines) {
-            const line = block.trim()
-            if (!line.startsWith('data: ')) continue
-            const data = line.slice(6)
-            if (data === '[DONE]') continue
+        for (const block of lines) {
+          const line = block.trim()
+          if (!line.startsWith('data: ')) continue
+          const data = line.slice(6)
+          if (data === '[DONE]') continue
 
-            try {
-              const item = JSON.parse(data)
-              if (item.type === 'briefing') {
-                collectedBriefing.push(item.data)
-                setBriefing([...collectedBriefing])
-              } else if (item.type === 'recommendation') {
-                collectedRecs.push(item.data)
-                setRecommendations([...collectedRecs])
-              }
-            } catch { /* skip malformed events */ }
+          let item
+          try {
+            item = JSON.parse(data)
+          } catch {
+            continue // skip malformed SSE data
+          }
+
+          if (item.type === 'error') {
+            setError(item.message ?? 'שגיאת AI')
+            break
+          }
+
+          if (item.type === 'briefing' && item.data) {
+            collectedBriefing.push(item.data)
+            setBriefing([...collectedBriefing])
+          } else if (item.type === 'recommendation' && item.data) {
+            collectedRecs.push(item.data)
+            setRecommendations([...collectedRecs])
           }
         }
+      }
 
-        if (!signal.aborted) {
+      if (!signal.aborted) {
+        // Only cache if we got actual results
+        if (collectedBriefing.length > 0 || collectedRecs.length > 0) {
           cache.set(branchId, { briefing: collectedBriefing, recommendations: collectedRecs })
-          setIsStreaming(false)
+        } else if (!error) {
+          setError('ניתוח AI לא החזיר תוצאות')
         }
-      } else {
-        // Fallback: non-streaming JSON response
-        const data: AIAnalysisResult = await response.json()
-        cache.set(branchId, data)
-        if (!signal.aborted) {
-          setBriefing(data.briefing)
-          setRecommendations(data.recommendations)
-          setIsLoading(false)
-        }
+        setIsStreaming(false)
       }
     } catch (err) {
       if (err instanceof Error && err.name === 'AbortError') return
