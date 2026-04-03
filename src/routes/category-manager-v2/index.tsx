@@ -5,6 +5,7 @@ import { KPIGrid } from '@/components/dashboard/KPIGrid'
 import { PromotionDailyChart } from '@/components/charts/PromotionDailyChart'
 import { PromotionsTable } from '@/components/tables/PromotionsTable'
 import { CategoryPerformanceTable } from '@/components/tables/CategoryPerformanceTable'
+import { HeroItemCards } from '@/components/dashboard/HeroItemCards'
 import { allBranches } from '@/data/mock-branches'
 import { getCategorySummaries } from '@/data/mock-categories'
 import { getChainPromotions } from '@/data/mock-chain-promotions'
@@ -110,6 +111,9 @@ function CategoryManagerV2Page() {
       </div>
 
       <KPIGrid items={kpis} columns={6} />
+
+      {/* Hero Item Cards */}
+      <HeroItemCards />
 
       {/* Category Performance Table */}
       <CategoryPerformanceTable snapshots={categorySnapshots} />
