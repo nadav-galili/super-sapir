@@ -4,13 +4,20 @@ import { PageContainer } from '@/components/layout/PageContainer'
 import { KPIGrid } from '@/components/dashboard/KPIGrid'
 import { PromotionDailyChart } from '@/components/charts/PromotionDailyChart'
 import { PromotionsTable } from '@/components/tables/PromotionsTable'
+import { CategoryPerformanceTable } from '@/components/tables/CategoryPerformanceTable'
 import { allBranches } from '@/data/mock-branches'
+import { getCategorySummaries } from '@/data/mock-categories'
 import { getChainPromotions } from '@/data/mock-chain-promotions'
+import { deriveCategorySnapshots } from '@/lib/category-manager'
 import type { KPICardData } from '@/data/types'
 
 function CategoryManagerV2Page() {
   const promotions = useMemo(() => getChainPromotions(), [])
   const [selectedPromo, setSelectedPromo] = useState(promotions[0])
+  const categorySnapshots = useMemo(() => {
+    const cats = getCategorySummaries()
+    return deriveCategorySnapshots(cats, 'vs-last-year')
+  }, [])
 
   const kpis = useMemo<KPICardData[]>(() => {
     const totalSales = allBranches.reduce((sum, b) => sum + b.metrics.totalSales, 0)
@@ -103,6 +110,9 @@ function CategoryManagerV2Page() {
       </div>
 
       <KPIGrid items={kpis} columns={6} />
+
+      {/* Category Performance Table */}
+      <CategoryPerformanceTable snapshots={categorySnapshots} />
 
       {/* Promotion Analysis Section */}
       <div>
