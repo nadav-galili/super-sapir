@@ -11,6 +11,7 @@ const pageTitles: Record<string, string> = {
   '/store-manager': 'לוח בקרה - מנהל סניף',
   '/division-manager': 'לוח בקרה - מנהל אזור',
   '/category-manager': 'לוח בקרה - מנהל קטגוריה',
+  '/category-manager-v2': 'לוח בקרה - מנהל קטגוריה V2',
 }
 
 function RootLayout() {

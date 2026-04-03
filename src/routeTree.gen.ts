@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as StoreManagerIndexRouteImport } from './routes/store-manager/index'
 import { Route as DivisionManagerIndexRouteImport } from './routes/division-manager/index'
 import { Route as CategoryManagerIndexRouteImport } from './routes/category-manager/index'
+import { Route as CategoryManagerV2IndexRouteImport } from './routes/category-manager-v2/index'
 import { Route as StoreManagerBranchIdRouteImport } from './routes/store-manager/$branchId'
 import { Route as DivisionManagerRegionIdRouteImport } from './routes/division-manager/$regionId'
 import { Route as CategoryManagerCategoryIdRouteImport } from './routes/category-manager/$categoryId'
@@ -37,6 +38,11 @@ const CategoryManagerIndexRoute = CategoryManagerIndexRouteImport.update({
   path: '/category-manager/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CategoryManagerV2IndexRoute = CategoryManagerV2IndexRouteImport.update({
+  id: '/category-manager-v2/',
+  path: '/category-manager-v2/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StoreManagerBranchIdRoute = StoreManagerBranchIdRouteImport.update({
   id: '/store-manager/$branchId',
   path: '/store-manager/$branchId',
@@ -59,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/category-manager/$categoryId': typeof CategoryManagerCategoryIdRoute
   '/division-manager/$regionId': typeof DivisionManagerRegionIdRoute
   '/store-manager/$branchId': typeof StoreManagerBranchIdRoute
+  '/category-manager-v2/': typeof CategoryManagerV2IndexRoute
   '/category-manager/': typeof CategoryManagerIndexRoute
   '/division-manager/': typeof DivisionManagerIndexRoute
   '/store-manager/': typeof StoreManagerIndexRoute
@@ -68,6 +75,7 @@ export interface FileRoutesByTo {
   '/category-manager/$categoryId': typeof CategoryManagerCategoryIdRoute
   '/division-manager/$regionId': typeof DivisionManagerRegionIdRoute
   '/store-manager/$branchId': typeof StoreManagerBranchIdRoute
+  '/category-manager-v2': typeof CategoryManagerV2IndexRoute
   '/category-manager': typeof CategoryManagerIndexRoute
   '/division-manager': typeof DivisionManagerIndexRoute
   '/store-manager': typeof StoreManagerIndexRoute
@@ -78,6 +86,7 @@ export interface FileRoutesById {
   '/category-manager/$categoryId': typeof CategoryManagerCategoryIdRoute
   '/division-manager/$regionId': typeof DivisionManagerRegionIdRoute
   '/store-manager/$branchId': typeof StoreManagerBranchIdRoute
+  '/category-manager-v2/': typeof CategoryManagerV2IndexRoute
   '/category-manager/': typeof CategoryManagerIndexRoute
   '/division-manager/': typeof DivisionManagerIndexRoute
   '/store-manager/': typeof StoreManagerIndexRoute
@@ -89,6 +98,7 @@ export interface FileRouteTypes {
     | '/category-manager/$categoryId'
     | '/division-manager/$regionId'
     | '/store-manager/$branchId'
+    | '/category-manager-v2/'
     | '/category-manager/'
     | '/division-manager/'
     | '/store-manager/'
@@ -98,6 +108,7 @@ export interface FileRouteTypes {
     | '/category-manager/$categoryId'
     | '/division-manager/$regionId'
     | '/store-manager/$branchId'
+    | '/category-manager-v2'
     | '/category-manager'
     | '/division-manager'
     | '/store-manager'
@@ -107,6 +118,7 @@ export interface FileRouteTypes {
     | '/category-manager/$categoryId'
     | '/division-manager/$regionId'
     | '/store-manager/$branchId'
+    | '/category-manager-v2/'
     | '/category-manager/'
     | '/division-manager/'
     | '/store-manager/'
@@ -117,6 +129,7 @@ export interface RootRouteChildren {
   CategoryManagerCategoryIdRoute: typeof CategoryManagerCategoryIdRoute
   DivisionManagerRegionIdRoute: typeof DivisionManagerRegionIdRoute
   StoreManagerBranchIdRoute: typeof StoreManagerBranchIdRoute
+  CategoryManagerV2IndexRoute: typeof CategoryManagerV2IndexRoute
   CategoryManagerIndexRoute: typeof CategoryManagerIndexRoute
   DivisionManagerIndexRoute: typeof DivisionManagerIndexRoute
   StoreManagerIndexRoute: typeof StoreManagerIndexRoute
@@ -152,6 +165,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CategoryManagerIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/category-manager-v2/': {
+      id: '/category-manager-v2/'
+      path: '/category-manager-v2'
+      fullPath: '/category-manager-v2/'
+      preLoaderRoute: typeof CategoryManagerV2IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/store-manager/$branchId': {
       id: '/store-manager/$branchId'
       path: '/store-manager/$branchId'
@@ -181,6 +201,7 @@ const rootRouteChildren: RootRouteChildren = {
   CategoryManagerCategoryIdRoute: CategoryManagerCategoryIdRoute,
   DivisionManagerRegionIdRoute: DivisionManagerRegionIdRoute,
   StoreManagerBranchIdRoute: StoreManagerBranchIdRoute,
+  CategoryManagerV2IndexRoute: CategoryManagerV2IndexRoute,
   CategoryManagerIndexRoute: CategoryManagerIndexRoute,
   DivisionManagerIndexRoute: DivisionManagerIndexRoute,
   StoreManagerIndexRoute: StoreManagerIndexRoute,
