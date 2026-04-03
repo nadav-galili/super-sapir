@@ -6,6 +6,7 @@ import { PromotionDailyChart } from '@/components/charts/PromotionDailyChart'
 import { PromotionsTable } from '@/components/tables/PromotionsTable'
 import { CategoryPerformanceTable } from '@/components/tables/CategoryPerformanceTable'
 import { HeroItemCards } from '@/components/dashboard/HeroItemCards'
+import { BranchComparisonChart } from '@/components/charts/BranchComparisonChart'
 import { allBranches } from '@/data/mock-branches'
 import { getCategorySummaries } from '@/data/mock-categories'
 import { getChainPromotions } from '@/data/mock-chain-promotions'
@@ -130,6 +131,9 @@ function CategoryManagerV2Page() {
           />
         </div>
       </div>
+
+      {/* Branch Comparison Chart */}
+      <BranchComparisonChart />
     </PageContainer>
   )
 }
