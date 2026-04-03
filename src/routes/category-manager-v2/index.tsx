@@ -1,11 +1,17 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { KPIGrid } from '@/components/dashboard/KPIGrid'
+import { PromotionDailyChart } from '@/components/charts/PromotionDailyChart'
+import { PromotionsTable } from '@/components/tables/PromotionsTable'
 import { allBranches } from '@/data/mock-branches'
+import { getChainPromotions } from '@/data/mock-chain-promotions'
 import type { KPICardData } from '@/data/types'
 
 function CategoryManagerV2Page() {
+  const promotions = useMemo(() => getChainPromotions(), [])
+  const [selectedPromo, setSelectedPromo] = useState(promotions[0])
+
   const kpis = useMemo<KPICardData[]>(() => {
     const totalSales = allBranches.reduce((sum, b) => sum + b.metrics.totalSales, 0)
     const lastYearTotalSales = allBranches.reduce((sum, b) => {
@@ -97,6 +103,19 @@ function CategoryManagerV2Page() {
       </div>
 
       <KPIGrid items={kpis} columns={6} />
+
+      {/* Promotion Analysis Section */}
+      <div>
+        <h2 className="text-lg font-bold text-[#2D3748] mb-3">ניתוח מבצעים</h2>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <PromotionDailyChart promotion={selectedPromo} />
+          <PromotionsTable
+            promotions={promotions}
+            selectedId={selectedPromo.id}
+            onSelect={setSelectedPromo}
+          />
+        </div>
+      </div>
     </PageContainer>
   )
 }
