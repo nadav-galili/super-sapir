@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { PageContainer } from '@/components/layout/PageContainer'
+import { HeroBanner } from '@/components/dashboard/HeroBanner'
 import { KPIGaugeRow } from '@/components/dashboard/KPIGaugeRow'
 import { PromotionDailyChart } from '@/components/charts/PromotionDailyChart'
 import { PromotionsTable } from '@/components/tables/PromotionsTable'
@@ -20,9 +21,9 @@ function CategoryManagerV2Page() {
     return deriveCategorySnapshots(cats, 'vs-last-year')
   }, [])
 
-  const gaugeKpis = useMemo(() => {
-    const totalSales = allBranches.reduce((sum, b) => sum + b.metrics.totalSales, 0)
-    const totalTargetSales = allBranches.reduce((sum, b) => {
+  const { totalSales, totalTargetSales, gaugeKpis } = useMemo(() => {
+    const sales = allBranches.reduce((sum, b) => sum + b.metrics.totalSales, 0)
+    const target = allBranches.reduce((sum, b) => {
       return sum + b.departments.reduce((ds, d) => ds + d.targetSales, 0)
     }, 0)
 
@@ -33,9 +34,7 @@ function CategoryManagerV2Page() {
     }, 0) / allBranches.length
 
     const avgBasket = allBranches.reduce((sum, b) => sum + b.metrics.avgBasket, 0) / allBranches.length
-
     const avgSupplyRate = allBranches.reduce((sum, b) => sum + b.metrics.supplyRate, 0) / allBranches.length
-
     const avgQuality = allBranches.reduce((sum, b) => sum + b.metrics.qualityScore, 0) / allBranches.length
 
     const totalPromoSales = allBranches.reduce((sum, b) => {
@@ -43,32 +42,35 @@ function CategoryManagerV2Page() {
         return ds + d.promotions.reduce((ps, p) => ps + p.actualSales, 0)
       }, 0)
     }, 0)
-    const promoSalesPercent = totalSales > 0 ? (totalPromoSales / totalSales) * 100 : 0
+    const promoSalesPercent = sales > 0 ? (totalPromoSales / sales) * 100 : 0
 
-    return [
-      { label: 'עמידה ביעד', value: totalSales, target: totalTargetSales, format: 'currency' as const },
-      { label: 'רווח גולמי', value: +avgGrossMargin.toFixed(1), target: 30, format: 'percent' as const },
-      { label: 'סל ממוצע ללקוח', value: Math.round(avgBasket), target: 280, format: 'currency' as const },
-      { label: 'זמינות מדף', value: +avgSupplyRate.toFixed(1), target: 98, format: 'percent' as const },
-      { label: 'ציון איכות', value: +avgQuality.toFixed(0), target: 100, format: 'percent' as const },
-      { label: 'מכירות מבצעים', value: +promoSalesPercent.toFixed(1), target: 15, format: 'percent' as const },
-    ]
+    return {
+      totalSales: sales,
+      totalTargetSales: target,
+      gaugeKpis: [
+        { label: 'רווח גולמי', value: +avgGrossMargin.toFixed(1), target: 30, format: 'percent' as const },
+        { label: 'סל ממוצע ללקוח', value: Math.round(avgBasket), target: 280, format: 'currency' as const },
+        { label: 'זמינות מדף', value: +avgSupplyRate.toFixed(1), target: 98, format: 'percent' as const },
+        { label: 'ציון איכות', value: +avgQuality.toFixed(0), target: 100, format: 'percent' as const },
+        { label: 'מכירות מבצעים', value: +promoSalesPercent.toFixed(1), target: 15, format: 'percent' as const },
+      ],
+    }
   }, [])
 
   return (
     <PageContainer>
-      <div>
-        <h1 className="text-xl sm:text-2xl font-bold text-[#2D3748] mb-1">
-          לוח בקרה — מנהל קטגוריה רשתי
-        </h1>
-        <p className="text-sm text-[#A0AEC0]">
-          סקירת ביצועים כלל-רשתית לכל הקטגוריות והסניפים
-        </p>
-      </div>
+      {/* Hero Banner — big visual with title + main gauge */}
+      <HeroBanner
+        totalSales={totalSales}
+        targetSales={totalTargetSales}
+        branchCount={allBranches.length}
+        categoryCount={categorySnapshots.length}
+      />
 
+      {/* Secondary KPI gauges */}
       <KPIGaugeRow items={gaugeKpis} />
 
-      {/* Category Table + Hero Item Cards side by side */}
+      {/* Category Table + Product Spotlight side by side */}
       <div className="grid grid-cols-1 lg:grid-cols-[1fr,auto] gap-4 items-start">
         <CategoryPerformanceTable snapshots={categorySnapshots} />
         <div className="lg:w-[340px]">
@@ -76,7 +78,7 @@ function CategoryManagerV2Page() {
         </div>
       </div>
 
-      {/* Promotion Analysis Section */}
+      {/* Promotion Analysis */}
       <div>
         <h2 className="text-lg font-bold text-[#2D3748] mb-3">ניתוח מבצעים</h2>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -89,7 +91,7 @@ function CategoryManagerV2Page() {
         </div>
       </div>
 
-      {/* Branch Comparison Chart */}
+      {/* Branch Comparison */}
       <BranchComparisonChart />
     </PageContainer>
   )
