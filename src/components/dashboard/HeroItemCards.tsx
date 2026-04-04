@@ -6,7 +6,11 @@ import { formatCurrencyShort } from '@/lib/format'
 import { getCategorySummaries } from '@/data/mock-categories'
 import { getTopStockoutItem, getTopSalesItem, getTopPromoItem } from '@/data/mock-items'
 
-export function HeroItemCards() {
+interface HeroItemCardsProps {
+  vertical?: boolean
+}
+
+export function HeroItemCards({ vertical }: HeroItemCardsProps) {
   const stockoutItem = useMemo(() => getTopStockoutItem(), [])
   const topSalesItem = useMemo(() => getTopSalesItem(), [])
   const topPromoItem = useMemo(() => getTopPromoItem(), [])
@@ -21,7 +25,7 @@ export function HeroItemCards() {
     : 0
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+    <div className={vertical ? 'flex flex-col gap-4' : 'grid grid-cols-1 lg:grid-cols-3 gap-4'}>
       {/* Stockout loss leader */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}

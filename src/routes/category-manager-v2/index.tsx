@@ -68,11 +68,13 @@ function CategoryManagerV2Page() {
 
       <KPIGaugeRow items={gaugeKpis} />
 
-      {/* Hero Item Cards */}
-      <HeroItemCards />
-
-      {/* Category Performance Table */}
-      <CategoryPerformanceTable snapshots={categorySnapshots} />
+      {/* Category Table + Hero Item Cards side by side */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr,auto] gap-4 items-start">
+        <CategoryPerformanceTable snapshots={categorySnapshots} />
+        <div className="lg:w-[340px]">
+          <HeroItemCards vertical />
+        </div>
+      </div>
 
       {/* Promotion Analysis Section */}
       <div>
