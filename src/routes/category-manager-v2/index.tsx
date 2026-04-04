@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { PageContainer } from '@/components/layout/PageContainer'
-import { KPIGrid } from '@/components/dashboard/KPIGrid'
+import { KPIGaugeRow } from '@/components/dashboard/KPIGaugeRow'
 import { PromotionDailyChart } from '@/components/charts/PromotionDailyChart'
 import { PromotionsTable } from '@/components/tables/PromotionsTable'
 import { CategoryPerformanceTable } from '@/components/tables/CategoryPerformanceTable'
@@ -11,7 +11,6 @@ import { allBranches } from '@/data/mock-branches'
 import { getCategorySummaries } from '@/data/mock-categories'
 import { getChainPromotions } from '@/data/mock-chain-promotions'
 import { deriveCategorySnapshots } from '@/lib/category-manager'
-import type { KPICardData } from '@/data/types'
 
 function CategoryManagerV2Page() {
   const promotions = useMemo(() => getChainPromotions(), [])
@@ -21,15 +20,11 @@ function CategoryManagerV2Page() {
     return deriveCategorySnapshots(cats, 'vs-last-year')
   }, [])
 
-  const kpis = useMemo<KPICardData[]>(() => {
+  const gaugeKpis = useMemo(() => {
     const totalSales = allBranches.reduce((sum, b) => sum + b.metrics.totalSales, 0)
-    const lastYearTotalSales = allBranches.reduce((sum, b) => {
-      const growth = b.metrics.yoyGrowth / 100
-      return sum + b.metrics.totalSales / (1 + growth)
+    const totalTargetSales = allBranches.reduce((sum, b) => {
+      return sum + b.departments.reduce((ds, d) => ds + d.targetSales, 0)
     }, 0)
-    const yoyChange = lastYearTotalSales > 0
-      ? ((totalSales - lastYearTotalSales) / lastYearTotalSales) * 100
-      : 0
 
     const avgGrossMargin = allBranches.reduce((sum, b) => {
       const branchMargin = b.departments.reduce((ds, d) => ds + d.grossMarginPercent * d.sales, 0)
@@ -41,6 +36,8 @@ function CategoryManagerV2Page() {
 
     const avgSupplyRate = allBranches.reduce((sum, b) => sum + b.metrics.supplyRate, 0) / allBranches.length
 
+    const avgQuality = allBranches.reduce((sum, b) => sum + b.metrics.qualityScore, 0) / allBranches.length
+
     const totalPromoSales = allBranches.reduce((sum, b) => {
       return sum + b.departments.reduce((ds, d) => {
         return ds + d.promotions.reduce((ps, p) => ps + p.actualSales, 0)
@@ -49,54 +46,12 @@ function CategoryManagerV2Page() {
     const promoSalesPercent = totalSales > 0 ? (totalPromoSales / totalSales) * 100 : 0
 
     return [
-      {
-        label: 'מכירות רשת',
-        value: totalSales,
-        format: 'currencyShort',
-        trend: +yoyChange.toFixed(1),
-        trendLabel: 'שנה שעברה',
-        gradient: 'pink',
-      },
-      {
-        label: 'שינוי שנתי',
-        value: +yoyChange.toFixed(1),
-        format: 'percent',
-        trend: +yoyChange.toFixed(1),
-        trendLabel: 'YoY',
-        gradient: yoyChange >= 0 ? 'green' : 'red',
-      },
-      {
-        label: 'רווח גולמי',
-        value: +avgGrossMargin.toFixed(1),
-        format: 'percent',
-        trend: +(avgGrossMargin - 25).toFixed(1),
-        trendLabel: 'מול ממוצע ענף',
-        gradient: 'purple',
-      },
-      {
-        label: 'סל ממוצע ללקוח',
-        value: Math.round(avgBasket),
-        format: 'currency',
-        trend: +((avgBasket - 240) / 240 * 100).toFixed(1),
-        trendLabel: 'מול יעד',
-        gradient: 'teal',
-      },
-      {
-        label: 'זמינות מדף',
-        value: +avgSupplyRate.toFixed(1),
-        format: 'percent',
-        trend: +(avgSupplyRate - 95).toFixed(1),
-        trendLabel: 'מול יעד 95%',
-        gradient: avgSupplyRate >= 95 ? 'green' : 'orange',
-      },
-      {
-        label: 'מכירות מבצעים',
-        value: +promoSalesPercent.toFixed(1),
-        format: 'percent',
-        trend: +(promoSalesPercent - 12).toFixed(1),
-        trendLabel: 'מול ממוצע',
-        gradient: 'orange',
-      },
+      { label: 'עמידה ביעד', value: totalSales, target: totalTargetSales, format: 'currency' as const },
+      { label: 'רווח גולמי', value: +avgGrossMargin.toFixed(1), target: 30, format: 'percent' as const },
+      { label: 'סל ממוצע ללקוח', value: Math.round(avgBasket), target: 280, format: 'currency' as const },
+      { label: 'זמינות מדף', value: +avgSupplyRate.toFixed(1), target: 98, format: 'percent' as const },
+      { label: 'ציון איכות', value: +avgQuality.toFixed(0), target: 100, format: 'percent' as const },
+      { label: 'מכירות מבצעים', value: +promoSalesPercent.toFixed(1), target: 15, format: 'percent' as const },
     ]
   }, [])
 
@@ -111,7 +66,7 @@ function CategoryManagerV2Page() {
         </p>
       </div>
 
-      <KPIGrid items={kpis} columns={6} />
+      <KPIGaugeRow items={gaugeKpis} />
 
       {/* Hero Item Cards */}
       <HeroItemCards />
