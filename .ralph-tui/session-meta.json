@@ -1,0 +1,14 @@
+{
+  "id": "18d4d15c-49a4-4d12-808a-6a20072bd90e",
+  "status": "completed",
+  "startedAt": "2026-04-03T17:06:50.709Z",
+  "updatedAt": "2026-04-03T17:06:55.845Z",
+  "agentPlugin": "claude",
+  "trackerPlugin": "json",
+  "currentIteration": 0,
+  "maxIterations": 20,
+  "totalTasks": 0,
+  "tasksCompleted": 0,
+  "cwd": "/Users/nadavgalili/personal_projects/superSapir",
+  "endedAt": "2026-04-03T17:06:55.845Z"
+}
