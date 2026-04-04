@@ -3,9 +3,8 @@ import { useNavigate } from '@tanstack/react-router'
 import { motion } from 'motion/react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatCurrencyShort } from '@/lib/format'
+import { CHART_COLORS } from '@/lib/colors'
 import { allBranches } from '@/data/mock-branches'
-
-const BAR_COLORS = ['#DC4E59', '#2EC4D5', '#6C5CE7', '#F6B93B', '#A0AEC0']
 
 export function BranchPerformanceBars() {
   const navigate = useNavigate()
@@ -31,7 +30,7 @@ export function BranchPerformanceBars() {
         {top5.map((branch, i) => {
           const pct = (branch.metrics.totalSales / maxSales) * 100
           const growth = branch.metrics.yoyGrowth
-          const color = BAR_COLORS[i]
+          const color = CHART_COLORS[i]
 
           return (
             <motion.div

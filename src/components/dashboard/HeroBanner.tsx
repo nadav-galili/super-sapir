@@ -10,10 +10,24 @@ interface HeroBannerProps {
   categoryCount: number
 }
 
+const GAUGE_SIZE = 180
+const GAUGE_STROKE = 14
+const GAUGE_R = (GAUGE_SIZE - GAUGE_STROKE) / 2
+
+const TICK_MARKS = Array.from({ length: 40 }, (_, i) => {
+  const angle = (i / 40) * 360 - 90
+  const rad = (angle * Math.PI) / 180
+  return {
+    x1: GAUGE_SIZE / 2 + (GAUGE_R + 4) * Math.cos(rad),
+    y1: GAUGE_SIZE / 2 + (GAUGE_R + 4) * Math.sin(rad),
+    x2: GAUGE_SIZE / 2 + (GAUGE_R + 8) * Math.cos(rad),
+    y2: GAUGE_SIZE / 2 + (GAUGE_R + 8) * Math.sin(rad),
+  }
+})
+
 function BigGauge({ ratio }: { ratio: number }) {
-  const size = 180
-  const strokeWidth = 14
-  const r = (size - strokeWidth) / 2
+  const size = GAUGE_SIZE
+  const r = GAUGE_R
   const circumference = 2 * Math.PI * r
   const offset = circumference - (Math.min(ratio, 1) * circumference)
   const pct = Math.round(ratio * 100)
@@ -41,28 +55,19 @@ function BigGauge({ ratio }: { ratio: number }) {
         <circle
           cx={size / 2} cy={size / 2} r={r}
           fill="none" stroke="rgba(255,255,255,0.1)"
-          strokeWidth={strokeWidth}
+          strokeWidth={GAUGE_STROKE}
         />
-        {/* Tick marks */}
-        {Array.from({ length: 40 }).map((_, i) => {
-          const angle = (i / 40) * 360 - 90
-          const rad = (angle * Math.PI) / 180
-          const x1 = size / 2 + (r + 4) * Math.cos(rad)
-          const y1 = size / 2 + (r + 4) * Math.sin(rad)
-          const x2 = size / 2 + (r + 8) * Math.cos(rad)
-          const y2 = size / 2 + (r + 8) * Math.sin(rad)
-          return (
-            <line
-              key={i} x1={x1} y1={y1} x2={x2} y2={y2}
-              stroke="rgba(255,255,255,0.08)" strokeWidth={1}
-            />
-          )
-        })}
+        {TICK_MARKS.map((t, i) => (
+          <line
+            key={i} x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2}
+            stroke="rgba(255,255,255,0.08)" strokeWidth={1}
+          />
+        ))}
         {/* Progress */}
         <motion.circle
           cx={size / 2} cy={size / 2} r={r}
           fill="none" stroke={color}
-          strokeWidth={strokeWidth} strokeLinecap="round"
+          strokeWidth={GAUGE_STROKE} strokeLinecap="round"
           strokeDasharray={circumference}
           initial={{ strokeDashoffset: circumference }}
           animate={{ strokeDashoffset: offset }}

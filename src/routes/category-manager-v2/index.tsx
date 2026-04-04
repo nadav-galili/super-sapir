@@ -65,7 +65,6 @@ function CategoryManagerV2Page() {
 
   return (
     <PageContainer>
-      {/* 1. Hero Banner */}
       <HeroBanner
         totalSales={totalSales}
         targetSales={totalTargetSales}
@@ -73,13 +72,10 @@ function CategoryManagerV2Page() {
         categoryCount={categorySnapshots.length}
       />
 
-      {/* 2. Quick stat cards (Sleep/Steps/Food/Heart style) */}
       <QuickStatCards />
 
-      {/* 3. Dark KPI gauge strip */}
       <KPIGaugeRow items={gaugeKpis} />
 
-      {/* 4. Category spotlight photo cards (Popular Trainer style) */}
       <SectionHeader
         title="קטגוריות מובילות"
         subtitle="4 הקטגוריות המובילות במכירות"
@@ -88,7 +84,6 @@ function CategoryManagerV2Page() {
       />
       <CategorySpotlight snapshots={categorySnapshots} />
 
-      {/* 5. Category table + Overview donut + Product Spotlight */}
       <div className="grid grid-cols-1 lg:grid-cols-[1fr,340px] gap-4 items-start">
         <CategoryPerformanceTable snapshots={categorySnapshots} />
         <div className="flex flex-col gap-4">
@@ -97,7 +92,6 @@ function CategoryManagerV2Page() {
         </div>
       </div>
 
-      {/* 6. Promotions */}
       <SectionHeader
         title="ניתוח מבצעים"
         subtitle="מעקב ביצועי מבצעים ברמת הרשת"
@@ -113,7 +107,6 @@ function CategoryManagerV2Page() {
         />
       </div>
 
-      {/* 7. Branch comparison — bars + chart side by side */}
       <SectionHeader
         title="השוואת סניפים"
         subtitle="5 הסניפים המובילים ברשת"

@@ -2,16 +2,15 @@ import { useMemo } from 'react'
 import { motion } from 'motion/react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useAnimatedCounter } from '@/hooks/useAnimatedCounter'
+import { CHART_COLORS } from '@/lib/colors'
 import type { CategorySnapshot } from '@/lib/category-manager'
-
-const SLICE_COLORS = ['#DC4E59', '#2EC4D5', '#6C5CE7', '#F6B93B', '#A0AEC0']
 
 interface CategoryDonutProps {
   snapshots: CategorySnapshot[]
 }
 
 export function CategoryDonut({ snapshots }: CategoryDonutProps) {
-  const { slices, totalYoy } = useMemo(() => {
+  const { slices, segments, totalYoy, size, strokeWidth, r, circumference } = useMemo(() => {
     const sorted = [...snapshots].sort((a, b) => b.category.sales - a.category.sales)
     const totalSales = sorted.reduce((sum, s) => sum + s.category.sales, 0)
     const top4 = sorted.slice(0, 4)
@@ -22,14 +21,14 @@ export function CategoryDonut({ snapshots }: CategoryDonutProps) {
         label: s.category.name,
         value: s.category.sales,
         pct: totalSales > 0 ? (s.category.sales / totalSales) * 100 : 0,
-        color: SLICE_COLORS[i],
+        color: CHART_COLORS[i],
       })),
       ...(otherSales > 0
         ? [{
           label: 'אחרים',
           value: otherSales,
           pct: totalSales > 0 ? (otherSales / totalSales) * 100 : 0,
-          color: SLICE_COLORS[4],
+          color: CHART_COLORS[4],
         }]
         : []),
     ]
@@ -39,26 +38,25 @@ export function CategoryDonut({ snapshots }: CategoryDonutProps) {
       ? sorted.reduce((sum, s) => sum + s.category.yoyChange, 0) / sorted.length
       : 0
 
-    return { slices: items, totalYoy: +avgYoy.toFixed(1) }
+    const donutSize = 140
+    const donutStroke = 18
+    const donutR = (donutSize - donutStroke) / 2
+    const circ = 2 * Math.PI * donutR
+
+    let segOffset = 0
+    const segs = items.map((slice) => {
+      const length = (slice.pct / 100) * circ
+      const gap = 3
+      const seg = { ...slice, dashOffset: segOffset, dashLength: Math.max(length - gap, 1) }
+      segOffset += length
+      return seg
+    })
+
+    return { slices: items, segments: segs, totalYoy: +avgYoy.toFixed(1), size: donutSize, strokeWidth: donutStroke, r: donutR, circumference: circ }
   }, [snapshots])
 
   const animatedYoy = useAnimatedCounter(Math.abs(totalYoy), 1200, 400)
   const yoyPositive = totalYoy >= 0
-
-  // Build donut segments
-  const size = 140
-  const strokeWidth = 18
-  const r = (size - strokeWidth) / 2
-  const circumference = 2 * Math.PI * r
-
-  let offset = 0
-  const segments = slices.map((slice) => {
-    const length = (slice.pct / 100) * circumference
-    const gap = 3
-    const seg = { ...slice, dashOffset: offset, dashLength: Math.max(length - gap, 1) }
-    offset += length
-    return seg
-  })
 
   return (
     <Card>
@@ -73,12 +71,10 @@ export function CategoryDonut({ snapshots }: CategoryDonutProps) {
           {/* Donut */}
           <div className="relative shrink-0" style={{ width: size, height: size }}>
             <svg className="w-full h-full -rotate-90" viewBox={`0 0 ${size} ${size}`}>
-              {/* Background track */}
               <circle
                 cx={size / 2} cy={size / 2} r={r}
                 fill="none" stroke="#FFF0EA" strokeWidth={strokeWidth}
               />
-              {/* Segments */}
               {segments.map((seg, i) => (
                 <motion.circle
                   key={seg.label}
