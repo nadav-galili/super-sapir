@@ -1,13 +1,19 @@
 import { useMemo, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
+import { Megaphone, GitCompare, LayoutGrid } from 'lucide-react'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { HeroBanner } from '@/components/dashboard/HeroBanner'
+import { QuickStatCards } from '@/components/dashboard/QuickStatCards'
 import { KPIGaugeRow } from '@/components/dashboard/KPIGaugeRow'
+import { CategorySpotlight } from '@/components/dashboard/CategorySpotlight'
+import { CategoryDonut } from '@/components/dashboard/CategoryDonut'
 import { PromotionDailyChart } from '@/components/charts/PromotionDailyChart'
 import { PromotionsTable } from '@/components/tables/PromotionsTable'
 import { CategoryPerformanceTable } from '@/components/tables/CategoryPerformanceTable'
 import { HeroItemCards } from '@/components/dashboard/HeroItemCards'
+import { BranchPerformanceBars } from '@/components/dashboard/BranchPerformanceBars'
 import { BranchComparisonChart } from '@/components/charts/BranchComparisonChart'
+import { SectionHeader } from '@/components/dashboard/SectionHeader'
 import { allBranches } from '@/data/mock-branches'
 import { getCategorySummaries } from '@/data/mock-categories'
 import { getChainPromotions } from '@/data/mock-chain-promotions'
@@ -59,7 +65,7 @@ function CategoryManagerV2Page() {
 
   return (
     <PageContainer>
-      {/* Hero Banner — big visual with title + main gauge */}
+      {/* 1. Hero Banner */}
       <HeroBanner
         totalSales={totalSales}
         targetSales={totalTargetSales}
@@ -67,32 +73,57 @@ function CategoryManagerV2Page() {
         categoryCount={categorySnapshots.length}
       />
 
-      {/* Secondary KPI gauges */}
+      {/* 2. Quick stat cards (Sleep/Steps/Food/Heart style) */}
+      <QuickStatCards />
+
+      {/* 3. Dark KPI gauge strip */}
       <KPIGaugeRow items={gaugeKpis} />
 
-      {/* Category Table + Product Spotlight side by side */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr,auto] gap-4 items-start">
+      {/* 4. Category spotlight photo cards (Popular Trainer style) */}
+      <SectionHeader
+        title="קטגוריות מובילות"
+        subtitle="4 הקטגוריות המובילות במכירות"
+        icon={LayoutGrid}
+        accentColor="#6C5CE7"
+      />
+      <CategorySpotlight snapshots={categorySnapshots} />
+
+      {/* 5. Category table + Overview donut + Product Spotlight */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr,340px] gap-4 items-start">
         <CategoryPerformanceTable snapshots={categorySnapshots} />
-        <div className="lg:w-[340px]">
+        <div className="flex flex-col gap-4">
+          <CategoryDonut snapshots={categorySnapshots} />
           <HeroItemCards vertical />
         </div>
       </div>
 
-      {/* Promotion Analysis */}
-      <div>
-        <h2 className="text-lg font-bold text-[#2D3748] mb-3">ניתוח מבצעים</h2>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <PromotionDailyChart promotion={selectedPromo} />
-          <PromotionsTable
-            promotions={promotions}
-            selectedId={selectedPromo.id}
-            onSelect={setSelectedPromo}
-          />
-        </div>
+      {/* 6. Promotions */}
+      <SectionHeader
+        title="ניתוח מבצעים"
+        subtitle="מעקב ביצועי מבצעים ברמת הרשת"
+        icon={Megaphone}
+        accentColor="#DC4E59"
+      />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <PromotionDailyChart promotion={selectedPromo} />
+        <PromotionsTable
+          promotions={promotions}
+          selectedId={selectedPromo.id}
+          onSelect={setSelectedPromo}
+        />
       </div>
 
-      {/* Branch Comparison */}
-      <BranchComparisonChart />
+      {/* 7. Branch comparison — bars + chart side by side */}
+      <SectionHeader
+        title="השוואת סניפים"
+        subtitle="5 הסניפים המובילים ברשת"
+        icon={GitCompare}
+        accentColor="#2EC4D5"
+      />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <BranchPerformanceBars />
+        <BranchComparisonChart />
+      </div>
     </PageContainer>
   )
 }

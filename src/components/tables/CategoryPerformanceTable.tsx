@@ -15,14 +15,16 @@ interface CategoryPerformanceTableProps {
 }
 
 const STATUS_CONFIG = {
-  opportunity: { label: 'ביצוע טוב', color: 'bg-[#2EC4D5]/10 text-[#2EC4D5] border-[#2EC4D5]/20' },
-  danger: { label: 'חריג', color: 'bg-[#DC4E59]/10 text-[#DC4E59] border-[#DC4E59]/20' },
-  monitor: { label: 'עוקב', color: 'bg-[#F6B93B]/10 text-[#F6B93B] border-[#F6B93B]/20' },
+  opportunity: { label: 'ביצוע טוב', color: 'bg-[#2EC4D5]/10 text-[#2EC4D5] border-[#2EC4D5]/20', barColor: '#2EC4D5' },
+  danger: { label: 'חריג', color: 'bg-[#DC4E59]/10 text-[#DC4E59] border-[#DC4E59]/20', barColor: '#DC4E59' },
+  monitor: { label: 'עוקב', color: 'bg-[#F6B93B]/10 text-[#F6B93B] border-[#F6B93B]/20', barColor: '#F6B93B' },
 } as const
 
 export function CategoryPerformanceTable({ snapshots }: CategoryPerformanceTableProps) {
   const navigate = useNavigate()
   const [sorting, setSorting] = useState<SortingState>([{ id: 'sales', desc: true }])
+
+  const maxSales = useMemo(() => Math.max(...snapshots.map(s => s.category.sales)), [snapshots])
 
   const columns = useMemo<ColumnDef<CategorySnapshot>[]>(() => [
     {
@@ -54,9 +56,25 @@ export function CategoryPerformanceTable({ snapshots }: CategoryPerformanceTable
           מכירות ₪ <ArrowUpDown className="w-3 h-3" />
         </button>
       ),
-      cell: ({ getValue }) => (
-        <span className="font-semibold font-mono" dir="ltr">{formatCurrencyShort(getValue() as number)}</span>
-      ),
+      cell: ({ row, getValue }) => {
+        const sales = getValue() as number
+        const pct = maxSales > 0 ? (sales / maxSales) * 100 : 0
+        const barColor = STATUS_CONFIG[row.original.status].barColor
+        return (
+          <div className="min-w-[120px]">
+            <span className="font-semibold font-mono text-[13px]" dir="ltr">{formatCurrencyShort(sales)}</span>
+            <div className="mt-1 h-1.5 w-full bg-[#FFF0EA] rounded-full overflow-hidden">
+              <motion.div
+                className="h-full rounded-full"
+                style={{ backgroundColor: barColor }}
+                initial={{ width: 0 }}
+                animate={{ width: `${pct}%` }}
+                transition={{ duration: 0.8, delay: 0.3, ease: 'easeOut' }}
+              />
+            </div>
+          </div>
+        )
+      },
     },
     {
       id: 'yoyChange',
@@ -124,7 +142,7 @@ export function CategoryPerformanceTable({ snapshots }: CategoryPerformanceTable
       size: 40,
       enableSorting: false,
     },
-  ], [navigate])
+  ], [navigate, maxSales])
 
   const table = useReactTable({
     data: snapshots,
@@ -142,8 +160,11 @@ export function CategoryPerformanceTable({ snapshots }: CategoryPerformanceTable
       transition={{ delay: 0.3, duration: 0.5 }}
     >
       <Card>
-        <CardHeader>
-          <CardTitle className="text-lg text-[#2D3748]">ביצועי קטגוריות</CardTitle>
+        <CardHeader className="pb-3">
+          <div className="flex items-center gap-3">
+            <div className="w-1 h-6 rounded-full bg-[#DC4E59]" />
+            <CardTitle className="text-lg text-[#2D3748]">ביצועי קטגוריות</CardTitle>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="overflow-auto -mx-4 px-4 sm:mx-0 sm:px-0">

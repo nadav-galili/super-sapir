@@ -1,6 +1,7 @@
 import { motion } from 'motion/react'
 import { useAnimatedCounter } from '@/hooks/useAnimatedCounter'
 import { formatCurrencyShort } from '@/lib/format'
+import { Activity } from 'lucide-react'
 
 interface HeroBannerProps {
   totalSales: number
@@ -10,8 +11,8 @@ interface HeroBannerProps {
 }
 
 function BigGauge({ ratio }: { ratio: number }) {
-  const size = 160
-  const strokeWidth = 12
+  const size = 180
+  const strokeWidth = 14
   const r = (size - strokeWidth) / 2
   const circumference = 2 * Math.PI * r
   const offset = circumference - (Math.min(ratio, 1) * circumference)
@@ -22,12 +23,42 @@ function BigGauge({ ratio }: { ratio: number }) {
 
   return (
     <div className="relative" style={{ width: size, height: size }}>
-      <svg className="w-full h-full -rotate-90" viewBox={`0 0 ${size} ${size}`}>
+      {/* Outer pulse ring */}
+      <motion.div
+        className="absolute -inset-3 rounded-full border-2 opacity-0"
+        style={{ borderColor: color }}
+        animate={{ opacity: [0, 0.3, 0], scale: [0.95, 1.05, 0.95] }}
+        transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+      />
+      {/* Glow */}
+      <div
+        className="absolute -inset-4 rounded-full blur-xl opacity-20"
+        style={{ background: color }}
+      />
+
+      <svg className="w-full h-full -rotate-90 relative z-10" viewBox={`0 0 ${size} ${size}`}>
+        {/* Track */}
         <circle
           cx={size / 2} cy={size / 2} r={r}
-          fill="none" stroke="rgba(255,255,255,0.15)"
+          fill="none" stroke="rgba(255,255,255,0.1)"
           strokeWidth={strokeWidth}
         />
+        {/* Tick marks */}
+        {Array.from({ length: 40 }).map((_, i) => {
+          const angle = (i / 40) * 360 - 90
+          const rad = (angle * Math.PI) / 180
+          const x1 = size / 2 + (r + 4) * Math.cos(rad)
+          const y1 = size / 2 + (r + 4) * Math.sin(rad)
+          const x2 = size / 2 + (r + 8) * Math.cos(rad)
+          const y2 = size / 2 + (r + 8) * Math.sin(rad)
+          return (
+            <line
+              key={i} x1={x1} y1={y1} x2={x2} y2={y2}
+              stroke="rgba(255,255,255,0.08)" strokeWidth={1}
+            />
+          )
+        })}
+        {/* Progress */}
         <motion.circle
           cx={size / 2} cy={size / 2} r={r}
           fill="none" stroke={color}
@@ -35,16 +66,39 @@ function BigGauge({ ratio }: { ratio: number }) {
           strokeDasharray={circumference}
           initial={{ strokeDashoffset: circumference }}
           animate={{ strokeDashoffset: offset }}
-          transition={{ duration: 1.6, delay: 0.4, ease: 'easeOut' }}
+          transition={{ duration: 1.8, delay: 0.4, ease: 'easeOut' }}
         />
       </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-4xl font-bold font-mono text-white" dir="ltr">
-          {animatedPct}%
+      <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
+        <span className="text-5xl font-bold font-mono text-white tracking-tight" dir="ltr">
+          {animatedPct}<span className="text-2xl text-white/60">%</span>
         </span>
-        <span className="text-xs text-white/60 mt-0.5">עמידה ביעד</span>
+        <span className="text-xs text-white/50 mt-1 tracking-wide">עמידה ביעד</span>
       </div>
     </div>
+  )
+}
+
+interface StatPillProps {
+  label: string
+  value: string | number
+  delay: number
+  mono?: boolean
+}
+
+function StatPill({ label, value, delay, mono }: StatPillProps) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay }}
+      className="bg-white/[0.07] backdrop-blur-md rounded-[14px] px-5 py-3 border border-white/[0.08] hover:bg-white/[0.12] transition-colors"
+    >
+      <p className="text-[11px] text-white/40 uppercase tracking-wider">{label}</p>
+      <p className={`text-xl font-bold text-white mt-0.5 ${mono ? 'font-mono' : ''}`} dir="ltr">
+        {value}
+      </p>
+    </motion.div>
   )
 }
 
@@ -57,28 +111,47 @@ export function HeroBanner({ totalSales, targetSales, branchCount, categoryCount
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="relative rounded-[20px] overflow-hidden"
+      className="relative rounded-[20px] overflow-hidden shadow-xl"
     >
       {/* Background image */}
       <div className="absolute inset-0">
         <img
           src="/hero/supermarket-banner.jpg"
           alt=""
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover scale-105"
         />
-        {/* Dark gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-l from-black/80 via-black/60 to-black/40" />
+        {/* Multi-layer gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-l from-black/85 via-black/70 to-black/50" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
       </div>
 
       {/* Content */}
-      <div className="relative z-10 p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6 sm:gap-10 min-h-[220px]">
-        {/* Left — Title + stats */}
+      <div className="relative z-10 p-6 sm:p-10 flex flex-col sm:flex-row items-center gap-8 sm:gap-12 min-h-[280px]">
+        {/* Right (RTL) — Title + stats */}
         <div className="flex-1 text-right">
+          {/* Live indicator */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8 }}
+            className="inline-flex items-center gap-2 bg-white/[0.08] backdrop-blur-sm rounded-full px-3 py-1 mb-4 border border-white/[0.08]"
+          >
+            <motion.span
+              className="w-2 h-2 rounded-full bg-[#2EC4D5]"
+              animate={{ opacity: [1, 0.3, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+            <span className="text-[11px] text-white/50 font-medium">
+              <Activity className="w-3 h-3 inline-block me-1" />
+              נתונים בזמן אמת
+            </span>
+          </motion.div>
+
           <motion.h1
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
-            className="text-3xl sm:text-4xl font-bold text-white leading-tight mb-2"
+            transition={{ delay: 0.15, duration: 0.6 }}
+            className="text-4xl sm:text-5xl font-bold text-white leading-[1.15] mb-3"
           >
             מנהל קטגוריה
             <br />
@@ -88,51 +161,25 @@ export function HeroBanner({ totalSales, targetSales, branchCount, categoryCount
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-            className="text-sm text-white/50 mb-5"
+            transition={{ delay: 0.35 }}
+            className="text-sm text-white/40 mb-6 max-w-md"
           >
             סקירת ביצועים כלל-רשתית לכל הקטגוריות והסניפים
           </motion.p>
 
           {/* Stat pills */}
           <div className="flex flex-wrap gap-3">
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              className="bg-white/10 backdrop-blur-sm rounded-[12px] px-4 py-2.5 border border-white/10"
-            >
-              <p className="text-[11px] text-white/50">מכירות רשת</p>
-              <p className="text-lg font-bold font-mono text-white" dir="ltr">
-                {formatCurrencyShort(animatedSales)}
-              </p>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 }}
-              className="bg-white/10 backdrop-blur-sm rounded-[12px] px-4 py-2.5 border border-white/10"
-            >
-              <p className="text-[11px] text-white/50">סניפים</p>
-              <p className="text-lg font-bold text-white">{branchCount}</p>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.7 }}
-              className="bg-white/10 backdrop-blur-sm rounded-[12px] px-4 py-2.5 border border-white/10"
-            >
-              <p className="text-[11px] text-white/50">קטגוריות</p>
-              <p className="text-lg font-bold text-white">{categoryCount}</p>
-            </motion.div>
+            <StatPill label="מכירות רשת" value={formatCurrencyShort(animatedSales)} delay={0.45} mono />
+            <StatPill label="סניפים" value={branchCount} delay={0.55} />
+            <StatPill label="קטגוריות" value={categoryCount} delay={0.65} />
           </div>
         </div>
 
-        {/* Right — Big gauge */}
+        {/* Left (RTL) — Big gauge */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
+          initial={{ opacity: 0, scale: 0.7 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.3, type: 'spring', stiffness: 200, damping: 20 }}
+          transition={{ delay: 0.25, type: 'spring', stiffness: 180, damping: 18 }}
           className="shrink-0"
         >
           <BigGauge ratio={ratio} />
