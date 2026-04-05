@@ -63,7 +63,12 @@ export default async (req: Request, _context: Context) => {
     })
   }
 
-  const userPrompt = `נתח את הדוח הניהולי הבא של סניף ותן תדריך בוקר עם פריטים ממוקדי פעולה, והמלצות אסטרטגיות. התייחס לחריגות, יעדים שלא הושגו, ומגמות.\n\n${JSON.stringify(payload, null, 2)}`
+  // Allow callers to override prompts (e.g. category AI analysis)
+  const systemOverride = typeof body.systemPrompt === 'string' ? body.systemPrompt : null
+  const userOverride = typeof body.userPrompt === 'string' ? body.userPrompt : null
+
+  const systemMessage = systemOverride ?? SYSTEM_PROMPT
+  const userPrompt = userOverride ?? `נתח את הדוח הניהולי הבא של סניף ותן תדריך בוקר עם פריטים ממוקדי פעולה, והמלצות אסטרטגיות. התייחס לחריגות, יעדים שלא הושגו, ומגמות.\n\n${JSON.stringify(payload, null, 2)}`
 
   try {
     const response = await fetch(ANTHROPIC_API_URL, {
@@ -76,7 +81,7 @@ export default async (req: Request, _context: Context) => {
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 2048,
-        system: SYSTEM_PROMPT,
+        system: systemMessage,
         messages: [{ role: 'user', content: userPrompt }],
         stream: true,
       }),

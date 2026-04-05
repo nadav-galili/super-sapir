@@ -12,6 +12,7 @@ import { PromotionCard } from '@/components/dashboard/PromotionCard'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { motion } from 'motion/react'
 import { CategorySuppliersDashboard } from '@/components/dashboard/CategorySuppliersDashboard'
+import { CategoryAIBriefing } from '@/components/dashboard/CategoryAIBriefing'
 import { allBranches } from '@/data/mock-branches'
 import { DEPARTMENT_NAMES, MONTHS_HE } from '@/data/constants'
 import { formatCurrencyShort } from '@/lib/format'
@@ -230,6 +231,8 @@ function CategoryDrillDown() {
       />
 
       <h2 className="text-2xl font-bold text-[#2D3748]">{categoryName}</h2>
+
+      <CategoryAIBriefing categoryId={categoryId} categoryName={categoryName} />
 
       <KPIGrid items={kpis} />
 
