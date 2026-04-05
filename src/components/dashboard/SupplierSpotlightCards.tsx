@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { motion } from 'motion/react'
 import { TrendingUp, TrendingDown, Award } from 'lucide-react'
 import { formatCurrencyShort } from '@/lib/format'
+import { SupplierLogo } from '@/components/dashboard/SupplierLogo'
 import {
   getMostProfitableSupplier,
   getAtRiskSupplier,
@@ -35,7 +36,10 @@ function SupplierCard({ title, icon, iconBg, accentColor, supplierName, stats, d
           </span>
           <h3 className="text-sm font-bold text-[#2D3748]">{title}</h3>
         </div>
-        <p className="text-base font-bold text-[#2D3748] mb-2">{supplierName}</p>
+        <div className="flex items-center gap-2 mb-2">
+          <SupplierLogo name={supplierName} size={32} />
+          <p className="text-base font-bold text-[#2D3748]">{supplierName}</p>
+        </div>
         <div className="flex flex-wrap gap-x-4 gap-y-1.5">
           {stats.map(s => (
             <div key={s.label}>

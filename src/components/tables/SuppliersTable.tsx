@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { motion } from 'motion/react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatCurrencyShort } from '@/lib/format'
+import { SupplierLogo } from '@/components/dashboard/SupplierLogo'
 import { getTopSuppliers } from '@/data/mock-suppliers'
 
 export function SuppliersTable() {
@@ -48,7 +49,12 @@ export function SuppliersTable() {
                       className="border-b border-[#FFF0EA] hover:bg-[#FDF8F6] transition-colors"
                     >
                       <td className="px-3 py-2.5 text-[13px] text-[#A0AEC0] font-mono">{i + 1}</td>
-                      <td className="px-3 py-2.5 font-medium text-[#2D3748] text-[13px] whitespace-nowrap">{sup.name}</td>
+                      <td className="px-3 py-2.5">
+                        <div className="flex items-center gap-2">
+                          <SupplierLogo name={sup.name} />
+                          <span className="font-medium text-[#2D3748] text-[13px] whitespace-nowrap">{sup.name}</span>
+                        </div>
+                      </td>
                       <td className="px-3 py-2.5 min-w-[120px]">
                         <span className="font-semibold font-mono text-[13px]" dir="ltr">
                           {formatCurrencyShort(sup.sales)}

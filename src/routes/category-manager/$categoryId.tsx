@@ -1,24 +1,20 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import {
   ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, Legend,
 } from 'recharts'
+import { AlertTriangle, CheckCircle2 } from 'lucide-react'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs'
 import { KPIGrid } from '@/components/dashboard/KPIGrid'
 import { PromotionCard } from '@/components/dashboard/PromotionCard'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-  useReactTable, getCoreRowModel, getSortedRowModel, flexRender,
-  type SortingState, type ColumnDef,
-} from '@tanstack/react-table'
 import { motion } from 'motion/react'
-import { SortHeader } from '@/components/tables/SortHeader'
+import { CategorySuppliersDashboard } from '@/components/dashboard/CategorySuppliersDashboard'
 import { allBranches } from '@/data/mock-branches'
 import { DEPARTMENT_NAMES, MONTHS_HE } from '@/data/constants'
-import { formatCurrencyShort, formatPercent } from '@/lib/format'
-import { getGrowthColor, getTargetColor, getMarginColor } from '@/lib/colors'
+import { formatCurrencyShort } from '@/lib/format'
 import type { KPICardData, Promotion } from '@/data/types'
 
 interface BranchCategoryRow {
@@ -29,6 +25,25 @@ interface BranchCategoryRow {
   grossMarginPercent: number
   inventoryDays: number
   yoyChange: number
+  stockoutRate: number
+}
+
+type AlertSeverity = 'critical' | 'warning'
+type AlertKind = 'target-miss' | 'stockout' | 'margin-drop' | 'sales-decline'
+
+interface BranchAlert {
+  branchName: string
+  kind: AlertKind
+  severity: AlertSeverity
+  headline: string
+  detail: string
+}
+
+const ALERT_CONFIG: Record<AlertKind, { label: string; color: string; bg: string }> = {
+  'target-miss': { label: 'החמצת יעד', color: '#DC4E59', bg: 'bg-[#DC4E59]/10' },
+  'stockout': { label: 'חוסרים', color: '#F6B93B', bg: 'bg-[#F6B93B]/10' },
+  'margin-drop': { label: 'שחיקת רווח', color: '#6C5CE7', bg: 'bg-[#6C5CE7]/10' },
+  'sales-decline': { label: 'ירידת מכירות', color: '#DC4E59', bg: 'bg-[#DC4E59]/10' },
 }
 
 // Seasonal weights for monthly target distribution: higher in holiday/summer months
@@ -64,6 +79,7 @@ function CategoryDrillDown() {
         grossMarginPercent: dept.grossMarginPercent,
         inventoryDays: dept.inventoryDays,
         yoyChange: dept.yoyChange,
+        stockoutRate: dept.stockoutRate,
       })
 
       totalInventoryDays += dept.inventoryDays
@@ -91,13 +107,71 @@ function CategoryDrillDown() {
       target: Math.round(monthlyTarget[i] / 1000),
     }))
 
+    // Derive branch alerts
+    const networkAvgMargin = avgMargin
+    const alerts: BranchAlert[] = []
+
+    for (const row of rows) {
+      if (row.targetAchievement < 90) {
+        alerts.push({
+          branchName: row.branchName,
+          kind: 'target-miss',
+          severity: row.targetAchievement < 80 ? 'critical' : 'warning',
+          headline: `עמידה ביעד ${row.targetAchievement.toFixed(0)}%`,
+          detail: `פער של ${formatCurrencyShort(row.targetSales - row.sales)} מהיעד`,
+        })
+      }
+      if (row.stockoutRate > 3.5) {
+        alerts.push({
+          branchName: row.branchName,
+          kind: 'stockout',
+          severity: row.stockoutRate > 5 ? 'critical' : 'warning',
+          headline: `חוסרים ${row.stockoutRate}%`,
+          detail: `${row.inventoryDays} ימי מלאי בלבד`,
+        })
+      }
+      if (row.grossMarginPercent < networkAvgMargin - 3) {
+        alerts.push({
+          branchName: row.branchName,
+          kind: 'margin-drop',
+          severity: row.grossMarginPercent < networkAvgMargin - 5 ? 'critical' : 'warning',
+          headline: `רווח ${row.grossMarginPercent}% (ממוצע ${networkAvgMargin}%)`,
+          detail: `פער של ${(networkAvgMargin - row.grossMarginPercent).toFixed(1)}% מהממוצע`,
+        })
+      }
+      if (row.yoyChange < -5) {
+        alerts.push({
+          branchName: row.branchName,
+          kind: 'sales-decline',
+          severity: row.yoyChange < -10 ? 'critical' : 'warning',
+          headline: `ירידה של ${Math.abs(row.yoyChange).toFixed(1)}% שנתי`,
+          detail: `מכירות ${formatCurrencyShort(row.sales)}`,
+        })
+      }
+    }
+
+    // Sort: critical first, then by kind
+    alerts.sort((a, b) => {
+      if (a.severity !== b.severity) return a.severity === 'critical' ? -1 : 1
+      return 0
+    })
+
+    // Group alerts by branch for table display
+    const groupedAlerts = new Map<string, BranchAlert[]>()
+    for (const a of alerts) {
+      const list = groupedAlerts.get(a.branchName) ?? []
+      list.push(a)
+      groupedAlerts.set(a.branchName, list)
+    }
+
     return {
       rows, totalSales, avgMargin, avgInventoryDays, avgStockout,
       targetAchievement, chartData, promotions: promotions.slice(0, 3),
+      alerts, groupedAlerts: Array.from(groupedAlerts.entries()),
     }
   }, [categoryId])
 
-  const { rows: branchData, totalSales, avgMargin, avgInventoryDays, avgStockout, targetAchievement, chartData, promotions } = derived
+  const { rows: branchData, totalSales, avgMargin, avgInventoryDays, avgStockout, targetAchievement, chartData, promotions, alerts, groupedAlerts } = derived
 
   if (branchData.length === 0) {
     return (
@@ -145,67 +219,6 @@ function CategoryDrillDown() {
       gradient: avgStockout > 4 ? 'red' : avgStockout > 2 ? 'orange' : 'green',
     },
   ]
-
-  const [sorting, setSorting] = useState<SortingState>([{ id: 'sales', desc: true }])
-
-  const columns = useMemo<ColumnDef<BranchCategoryRow>[]>(() => [
-    {
-      accessorKey: 'branchName',
-      header: 'סניף',
-      cell: ({ getValue }) => <span className="font-medium">{getValue() as string}</span>,
-    },
-    {
-      accessorKey: 'sales',
-      header: ({ column }) => <SortHeader column={column} label="מכירות" />,
-      cell: ({ getValue }) => <span className="font-semibold font-mono" dir="ltr">{formatCurrencyShort(getValue() as number)}</span>,
-    },
-    {
-      accessorKey: 'targetAchievement',
-      header: ({ column }) => <SortHeader column={column} label="עמידה ביעד" />,
-      cell: ({ getValue }) => {
-        const val = getValue() as number
-        return (
-          <span className="font-mono" dir="ltr" style={{ color: getTargetColor(val) }}>
-            {val.toFixed(0)}%
-          </span>
-        )
-      },
-    },
-    {
-      accessorKey: 'grossMarginPercent',
-      header: ({ column }) => <SortHeader column={column} label="רווח גולמי %" />,
-      cell: ({ getValue }) => {
-        const val = getValue() as number
-        return <span className="font-mono" dir="ltr" style={{ color: getMarginColor(val) }}>{val.toFixed(1)}%</span>
-      },
-    },
-    {
-      accessorKey: 'inventoryDays',
-      header: ({ column }) => <SortHeader column={column} label="ימי מלאי" />,
-      cell: ({ getValue }) => <span className="font-mono" dir="ltr">{getValue() as number}</span>,
-    },
-    {
-      accessorKey: 'yoyChange',
-      header: ({ column }) => <SortHeader column={column} label="שינוי שנתי" />,
-      cell: ({ getValue }) => {
-        const change = getValue() as number
-        return (
-          <span style={{ color: getGrowthColor(change) }} className="font-semibold font-mono" dir="ltr">
-            {change > 0 ? '+' : ''}{formatPercent(change)}
-          </span>
-        )
-      },
-    },
-  ], [])
-
-  const table = useReactTable({
-    data: branchData,
-    columns,
-    state: { sorting },
-    onSortingChange: setSorting,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-  })
 
   return (
     <PageContainer>
@@ -282,53 +295,100 @@ function CategoryDrillDown() {
         </Card>
       </motion.div>
 
+      <CategorySuppliersDashboard categoryId={categoryId} categoryName={categoryName} />
+
+      <PromotionCard promotions={promotions} categoryName={categoryName} />
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, duration: 0.5 }}
       >
         <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">השוואת סניפים — {categoryName}</CardTitle>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-1 h-6 rounded-full bg-[#DC4E59]" />
+                <CardTitle className="text-lg text-[#2D3748]">
+                  חריגות סניפים — {categoryName}
+                </CardTitle>
+              </div>
+              <span className="text-sm text-[#A0AEC0]">
+                {alerts.length > 0
+                  ? `${alerts.length} חריגות ב-${groupedAlerts.length} סניפים`
+                  : 'אין חריגות'}
+              </span>
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="overflow-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  {table.getHeaderGroups().map(hg => (
-                    <tr key={hg.id} className="border-b border-[#FFF0EA]">
-                      {hg.headers.map(header => (
-                        <th key={header.id} className="px-3 py-2 text-right font-medium text-[#A0AEC0]">
-                          {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                        </th>
-                      ))}
+            {alerts.length === 0 ? (
+              <div className="flex flex-col items-center py-8 text-center">
+                <CheckCircle2 className="w-10 h-10 text-[#2EC4D5] mb-3" />
+                <p className="text-base font-semibold text-[#2D3748]">כל הסניפים תקינים</p>
+                <p className="text-sm text-[#A0AEC0] mt-1">לא זוהו חריגות בקטגוריה זו</p>
+              </div>
+            ) : (
+              <div className="overflow-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+                <table className="w-full min-w-[500px] text-sm">
+                  <thead>
+                    <tr className="border-b border-[#FFF0EA]">
+                      <th className="px-3 py-2 text-right font-medium text-[#A0AEC0]">סניף</th>
+                      <th className="px-3 py-2 text-right font-medium text-[#A0AEC0]">חריגות</th>
+                      <th className="px-3 py-2 text-right font-medium text-[#A0AEC0]">פירוט</th>
                     </tr>
-                  ))}
-                </thead>
-                <tbody>
-                  {table.getRowModel().rows.map((row, i) => (
-                    <motion.tr
-                      key={row.id}
-                      initial={{ opacity: 0, x: 10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.03 }}
-                      className="border-b border-[#FFF0EA] hover:bg-[#FDF8F6] transition-colors"
-                    >
-                      {row.getVisibleCells().map(cell => (
-                        <td key={cell.id} className="px-3 py-2.5">
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </td>
-                      ))}
-                    </motion.tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {groupedAlerts.map(([branch, branchAlerts], i) => {
+                      const hasCritical = branchAlerts.some(a => a.severity === 'critical')
+                      return (
+                        <motion.tr
+                          key={branch}
+                          initial={{ opacity: 0, x: 10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: i * 0.04 }}
+                          className={`border-b border-[#FFF0EA] ${hasCritical ? 'bg-[#DC4E59]/[0.03]' : 'hover:bg-[#FDF8F6]'} transition-colors`}
+                        >
+                          <td className="px-3 py-3">
+                            <div className="flex items-center gap-2">
+                              {hasCritical && <span className="w-2 h-2 rounded-full bg-[#DC4E59] shrink-0" />}
+                              <span className="font-medium text-[#2D3748] text-[13px]">{branch}</span>
+                            </div>
+                          </td>
+                          <td className="px-3 py-3">
+                            <div className="flex flex-wrap gap-1.5">
+                              {branchAlerts.map(a => {
+                                const cfg = ALERT_CONFIG[a.kind]
+                                return (
+                                  <span
+                                    key={a.kind}
+                                    className="text-[10px] font-bold px-2 py-0.5 rounded-full text-white"
+                                    style={{ backgroundColor: cfg.color }}
+                                  >
+                                    {cfg.label}
+                                  </span>
+                                )
+                              })}
+                            </div>
+                          </td>
+                          <td className="px-3 py-3">
+                            <div className="space-y-0.5">
+                              {branchAlerts.map(a => (
+                                <p key={a.kind} className="text-[12px] text-[#4A5568]">
+                                  {a.headline}
+                                </p>
+                              ))}
+                            </div>
+                          </td>
+                        </motion.tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </CardContent>
         </Card>
       </motion.div>
-
-      <PromotionCard promotions={promotions} categoryName={categoryName} />
     </PageContainer>
   )
 }
