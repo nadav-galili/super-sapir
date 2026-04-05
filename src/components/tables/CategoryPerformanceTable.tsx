@@ -17,7 +17,7 @@ interface CategoryPerformanceTableProps {
 const STATUS_CONFIG = {
   opportunity: { label: 'ביצוע טוב', color: 'bg-[#2EC4D5]/10 text-[#2EC4D5] border-[#2EC4D5]/20', barColor: '#2EC4D5' },
   danger: { label: 'חריג', color: 'bg-[#DC4E59]/10 text-[#DC4E59] border-[#DC4E59]/20', barColor: '#DC4E59' },
-  monitor: { label: 'עוקב', color: 'bg-[#F6B93B]/10 text-[#F6B93B] border-[#F6B93B]/20', barColor: '#F6B93B' },
+  monitor: { label: 'במעקב', color: 'bg-[#F6B93B]/10 text-[#F6B93B] border-[#F6B93B]/20', barColor: '#F6B93B' },
 } as const
 
 export function CategoryPerformanceTable({ snapshots }: CategoryPerformanceTableProps) {

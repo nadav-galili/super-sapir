@@ -11,7 +11,7 @@ interface CategorySpotlightProps {
 const STATUS_BADGE = {
   opportunity: { label: 'ביצוע טוב', bg: 'bg-[#2EC4D5]' },
   danger: { label: 'חריג', bg: 'bg-[#DC4E59]' },
-  monitor: { label: 'עוקב', bg: 'bg-[#F6B93B]' },
+  monitor: { label: 'במעקב', bg: 'bg-[#F6B93B]' },
 } as const
 
 function SpotlightCard({ snap, index }: { snap: CategorySnapshot; index: number }) {

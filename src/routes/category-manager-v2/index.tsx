@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
-import { Megaphone, GitCompare, LayoutGrid } from 'lucide-react'
+import { Megaphone, GitCompare, LayoutGrid, Truck } from 'lucide-react'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { HeroBanner } from '@/components/dashboard/HeroBanner'
 import { QuickStatCards } from '@/components/dashboard/QuickStatCards'
@@ -14,6 +14,8 @@ import { HeroItemCards } from '@/components/dashboard/HeroItemCards'
 import { BranchPerformanceBars } from '@/components/dashboard/BranchPerformanceBars'
 import { BranchComparisonChart } from '@/components/charts/BranchComparisonChart'
 import { SectionHeader } from '@/components/dashboard/SectionHeader'
+import { SuppliersTable } from '@/components/tables/SuppliersTable'
+import { SupplierSpotlightCards } from '@/components/dashboard/SupplierSpotlightCards'
 import { allBranches } from '@/data/mock-branches'
 import { getCategorySummaries } from '@/data/mock-categories'
 import { getChainPromotions } from '@/data/mock-chain-promotions'
@@ -90,6 +92,17 @@ function CategoryManagerV2Page() {
           <CategoryDonut snapshots={categorySnapshots} />
           <HeroItemCards vertical />
         </div>
+      </div>
+
+      <SectionHeader
+        title="ספקים מובילים"
+        subtitle="10 הספקים המובילים ברשת לפי מכירות"
+        icon={Truck}
+        accentColor="#F6B93B"
+      />
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr,340px] gap-4 items-start">
+        <SuppliersTable />
+        <SupplierSpotlightCards />
       </div>
 
       <SectionHeader
