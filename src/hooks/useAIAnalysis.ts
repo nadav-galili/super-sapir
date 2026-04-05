@@ -1,13 +1,17 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { buildPromptPayload, type AIAnalysisResult, type BriefingItem, type Recommendation } from '@/lib/ai'
+import { getFromCache, setInCache, removeFromCache } from '@/lib/ai-cache'
 import type { BranchFullReport } from '@/data/hadera-real'
 
-const cache = new Map<string, AIAnalysisResult>()
+function getCached(branchId: string): AIAnalysisResult | null {
+  return getFromCache<AIAnalysisResult>(`branch:${branchId}`)
+}
 
 export function useAIAnalysis(branchId: string, report: BranchFullReport) {
-  const [briefing, setBriefing] = useState<BriefingItem[]>(cache.get(branchId)?.briefing ?? [])
-  const [recommendations, setRecommendations] = useState<Recommendation[]>(cache.get(branchId)?.recommendations ?? [])
-  const [isLoading, setIsLoading] = useState(!cache.has(branchId))
+  const cached = getCached(branchId)
+  const [briefing, setBriefing] = useState<BriefingItem[]>(cached?.briefing ?? [])
+  const [recommendations, setRecommendations] = useState<Recommendation[]>(cached?.recommendations ?? [])
+  const [isLoading, setIsLoading] = useState(!cached)
   const [isStreaming, setIsStreaming] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const abortRef = useRef<AbortController | null>(null)
@@ -86,7 +90,7 @@ export function useAIAnalysis(branchId: string, report: BranchFullReport) {
       if (!signal.aborted) {
         // Only cache if we got actual results
         if (collectedBriefing.length > 0 || collectedRecs.length > 0) {
-          cache.set(branchId, { briefing: collectedBriefing, recommendations: collectedRecs })
+          setInCache(`branch:${branchId}`, { briefing: collectedBriefing, recommendations: collectedRecs })
         } else if (!error) {
           setError('ניתוח AI לא החזיר תוצאות')
         }
@@ -103,10 +107,10 @@ export function useAIAnalysis(branchId: string, report: BranchFullReport) {
   }, [branchId, report])
 
   useEffect(() => {
-    if (cache.has(branchId)) {
-      const cached = cache.get(branchId)!
-      setBriefing(cached.briefing)
-      setRecommendations(cached.recommendations)
+    const stored = getCached(branchId)
+    if (stored) {
+      setBriefing(stored.briefing)
+      setRecommendations(stored.recommendations)
       setIsLoading(false)
       setIsStreaming(false)
       setError(null)
@@ -122,7 +126,7 @@ export function useAIAnalysis(branchId: string, report: BranchFullReport) {
   }, [branchId, fetchAnalysis])
 
   const retry = useCallback(() => {
-    cache.delete(branchId)
+    removeFromCache(`branch:${branchId}`)
     abortRef.current?.abort()
     const controller = new AbortController()
     abortRef.current = controller

@@ -1,7 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { buildCategoryPromptPayload, type CategoryAIResult, type BriefingItem, type Recommendation } from '@/lib/category-ai'
+import { getFromCache, setInCache, removeFromCache } from '@/lib/ai-cache'
 
-const cache = new Map<string, CategoryAIResult>()
+function getCached(categoryId: string): CategoryAIResult | null {
+  return getFromCache<CategoryAIResult>(`category:${categoryId}`)
+}
 
 const CATEGORY_SYSTEM_PROMPT = `אתה יועץ אנליטיקה למנהל קטגוריה ברשת סופר ספיר. אתה מנתח ביצועי ספקים, חריגות, ופוטנציאלים בקטגוריה ספציפית — ומספק תובנות ממוקדות פעולה בעברית.
 
@@ -31,9 +34,10 @@ const CATEGORY_SYSTEM_PROMPT = `אתה יועץ אנליטיקה למנהל קט
 - דרג לפי דחיפות (priority 1 = הדחוף ביותר)`
 
 export function useCategoryAIAnalysis(categoryId: string) {
-  const [briefing, setBriefing] = useState<BriefingItem[]>(cache.get(categoryId)?.briefing ?? [])
-  const [recommendations, setRecommendations] = useState<Recommendation[]>(cache.get(categoryId)?.recommendations ?? [])
-  const [isLoading, setIsLoading] = useState(!cache.has(categoryId))
+  const cached = getCached(categoryId)
+  const [briefing, setBriefing] = useState<BriefingItem[]>(cached?.briefing ?? [])
+  const [recommendations, setRecommendations] = useState<Recommendation[]>(cached?.recommendations ?? [])
+  const [isLoading, setIsLoading] = useState(!cached)
   const [isStreaming, setIsStreaming] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const abortRef = useRef<AbortController | null>(null)
@@ -111,7 +115,7 @@ export function useCategoryAIAnalysis(categoryId: string) {
 
       if (!signal.aborted) {
         if (collectedBriefing.length > 0 || collectedRecs.length > 0) {
-          cache.set(categoryId, { briefing: collectedBriefing, recommendations: collectedRecs })
+          setInCache(`category:${categoryId}`, { briefing: collectedBriefing, recommendations: collectedRecs })
         } else if (!error) {
           setError('ניתוח AI לא החזיר תוצאות')
         }
@@ -128,10 +132,10 @@ export function useCategoryAIAnalysis(categoryId: string) {
   }, [categoryId])
 
   useEffect(() => {
-    if (cache.has(categoryId)) {
-      const cached = cache.get(categoryId)!
-      setBriefing(cached.briefing)
-      setRecommendations(cached.recommendations)
+    const stored = getCached(categoryId)
+    if (stored) {
+      setBriefing(stored.briefing)
+      setRecommendations(stored.recommendations)
       setIsLoading(false)
       setIsStreaming(false)
       setError(null)
@@ -147,7 +151,7 @@ export function useCategoryAIAnalysis(categoryId: string) {
   }, [categoryId, fetchAnalysis])
 
   const retry = useCallback(() => {
-    cache.delete(categoryId)
+    removeFromCache(`category:${categoryId}`)
     abortRef.current?.abort()
     const controller = new AbortController()
     abortRef.current = controller
