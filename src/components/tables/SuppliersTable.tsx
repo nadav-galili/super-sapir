@@ -3,6 +3,7 @@ import { motion } from 'motion/react'
 import { ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { formatCurrencyShort } from '@/lib/format'
+import { usePeriodMultiplier } from '@/contexts/PeriodContext'
 import { SupplierLogo } from '@/components/dashboard/SupplierLogo'
 import { getTopSuppliers, type ChainSupplier } from '@/data/mock-suppliers'
 
@@ -16,7 +17,12 @@ function getTargetPct(s: ChainSupplier) {
 }
 
 export function SuppliersTable() {
-  const allSuppliers = useMemo(() => getTopSuppliers(), [])
+  const m = usePeriodMultiplier()
+  const allSuppliers = useMemo(() => getTopSuppliers().map(s => ({
+    ...s,
+    sales: Math.round(s.sales * m),
+    targetSales: Math.round(s.targetSales * m),
+  })), [m])
   const maxSales = allSuppliers[0]?.sales ?? 1
   const [sortKey, setSortKey] = useState<SortKey | null>(null)
   const [sortDir, setSortDir] = useState<SortDir>('desc')

@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { motion } from 'motion/react'
 import { TrendingUp, TrendingDown, Award } from 'lucide-react'
 import { formatCurrencyShort } from '@/lib/format'
+import { usePeriodMultiplier } from '@/contexts/PeriodContext'
 import { SupplierLogo } from '@/components/dashboard/SupplierLogo'
 import {
   getMostProfitableSupplier,
@@ -56,12 +57,13 @@ function SupplierCard({ title, icon, iconBg, accentColor, supplierName, stats, d
 }
 
 export function SupplierSpotlightCards() {
+  const m = usePeriodMultiplier()
   const profitable = useMemo(() => getMostProfitableSupplier(), [])
   const atRisk = useMemo(() => getAtRiskSupplier(), [])
   const growing = useMemo(() => getFastestGrowingSupplier(), [])
 
   const atRiskPct = atRisk.targetSales > 0 ? (atRisk.sales / atRisk.targetSales) * 100 : 100
-  const atRiskGap = atRisk.targetSales - atRisk.sales
+  const atRiskGap = (atRisk.targetSales - atRisk.sales) * m
   const growingPct = growing.targetSales > 0 ? (growing.sales / growing.targetSales) * 100 : 100
 
   return (
@@ -75,7 +77,7 @@ export function SupplierSpotlightCards() {
         delay={0.1}
         stats={[
           { label: 'רווח גולמי', value: `${profitable.grossProfitPercent}%`, color: '#6C5CE7' },
-          { label: 'מכירות', value: formatCurrencyShort(profitable.sales), color: '#2D3748' },
+          { label: 'מכירות', value: formatCurrencyShort(profitable.sales * m), color: '#2D3748' },
         ]}
       />
 
@@ -101,7 +103,7 @@ export function SupplierSpotlightCards() {
         delay={0.3}
         stats={[
           { label: 'עמידה ביעד', value: `${growingPct.toFixed(1)}%`, color: '#2EC4D5' },
-          { label: 'מכירות', value: formatCurrencyShort(growing.sales), color: '#2D3748' },
+          { label: 'מכירות', value: formatCurrencyShort(growing.sales * m), color: '#2D3748' },
         ]}
       />
     </div>

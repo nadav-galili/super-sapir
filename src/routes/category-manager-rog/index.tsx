@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { Megaphone, GitCompare, LayoutGrid, Truck } from 'lucide-react'
+import { TimePeriodFilter, getPeriodMultiplier, getPeriodJitter, type TimePeriod } from '@/components/dashboard/TimePeriodFilter'
+import { PeriodMultiplierProvider } from '@/contexts/PeriodContext'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { HeroBannerROG } from '@/components/dashboard/HeroBannerROG'
 import { QuickStatCardsROG } from '@/components/dashboard/QuickStatCardsROG'
@@ -23,34 +25,66 @@ import { getChainPromotions } from '@/data/mock-chain-promotions'
 import { deriveCategorySnapshots } from '@/lib/category-manager'
 
 function CategoryManagerROGPage() {
-  const promotions = useMemo(() => getChainPromotions(), [])
-  const [selectedPromo, setSelectedPromo] = useState(promotions[0])
+  const rawPromotions = useMemo(() => getChainPromotions(), [])
+  const [selectedPromoId, setSelectedPromoId] = useState(rawPromotions[0]?.id)
+  const [period, setPeriod] = useState<TimePeriod>({ type: 'yearly' })
+  const multiplier = getPeriodMultiplier(period)
+
+  const promotions = useMemo(() => {
+    if (multiplier === 1) return rawPromotions
+    return rawPromotions.map(p => ({
+      ...p,
+      sales: Math.round(p.sales * multiplier),
+      dailySales: p.dailySales.map(v => Math.round(v * multiplier)),
+      dailyBaseline: p.dailyBaseline.map(v => Math.round(v * multiplier)),
+    }))
+  }, [rawPromotions, multiplier])
+  const selectedPromo = promotions.find(p => p.id === selectedPromoId) ?? promotions[0]
+
   const categorySnapshots = useMemo(() => {
     const cats = getCategorySummaries()
-    return deriveCategorySnapshots(cats, 'vs-last-year')
-  }, [])
+    const snaps = deriveCategorySnapshots(cats, 'vs-last-year')
+    if (multiplier === 1) return snaps
+    return snaps.map(s => ({
+      ...s,
+      grossProfit: s.grossProfit * multiplier,
+      category: {
+        ...s.category,
+        sales: Math.round(s.category.sales * multiplier),
+        targetSales: Math.round(s.category.targetSales * multiplier),
+        lastYearSales: Math.round(s.category.lastYearSales * multiplier),
+      },
+    }))
+  }, [multiplier])
 
   const { totalSales, totalTargetSales, gaugeKpis } = useMemo(() => {
-    const sales = allBranches.reduce((sum, b) => sum + b.metrics.totalSales, 0)
+    const m = multiplier
+    const sales = allBranches.reduce((sum, b) => sum + b.metrics.totalSales, 0) * m
     const target = allBranches.reduce((sum, b) => {
       return sum + b.departments.reduce((ds, d) => ds + d.targetSales, 0)
-    }, 0)
+    }, 0) * m
 
-    const avgGrossMargin = allBranches.reduce((sum, b) => {
+    const j0 = getPeriodJitter(period, 0)
+    const j1 = getPeriodJitter(period, 1)
+    const j2 = getPeriodJitter(period, 2)
+    const j3 = getPeriodJitter(period, 3)
+    const j4 = getPeriodJitter(period, 4)
+
+    const avgGrossMargin = (allBranches.reduce((sum, b) => {
       const branchMargin = b.departments.reduce((ds, d) => ds + d.grossMarginPercent * d.sales, 0)
         / b.departments.reduce((ds, d) => ds + d.sales, 0)
       return sum + branchMargin
-    }, 0) / allBranches.length
+    }, 0) / allBranches.length) * j0
 
-    const avgBasket = allBranches.reduce((sum, b) => sum + b.metrics.avgBasket, 0) / allBranches.length
-    const avgSupplyRate = allBranches.reduce((sum, b) => sum + b.metrics.supplyRate, 0) / allBranches.length
-    const avgQuality = allBranches.reduce((sum, b) => sum + b.metrics.qualityScore, 0) / allBranches.length
+    const avgBasket = (allBranches.reduce((sum, b) => sum + b.metrics.avgBasket, 0) / allBranches.length) * m
+    const avgSupplyRate = (allBranches.reduce((sum, b) => sum + b.metrics.supplyRate, 0) / allBranches.length) * j2
+    const avgQuality = (allBranches.reduce((sum, b) => sum + b.metrics.qualityScore, 0) / allBranches.length) * j3
 
     const totalPromoSales = allBranches.reduce((sum, b) => {
       return sum + b.departments.reduce((ds, d) => {
         return ds + d.promotions.reduce((ps, p) => ps + p.actualSales, 0)
       }, 0)
-    }, 0)
+    }, 0) * m * j4
     const promoSalesPercent = sales > 0 ? (totalPromoSales / sales) * 100 : 0
 
     return {
@@ -61,12 +95,13 @@ function CategoryManagerROGPage() {
         { label: 'סל ממוצע ללקוח', value: Math.round(avgBasket), target: 280, format: 'currency' as const },
         { label: 'זמינות מדף', value: +avgSupplyRate.toFixed(1), target: 98, format: 'percent' as const },
         { label: 'ציון איכות', value: +avgQuality.toFixed(0), target: 100, format: 'percent' as const },
-        { label: 'מכירות מבצעים', value: +promoSalesPercent.toFixed(1), target: 15, format: 'percent' as const },
+        { label: 'מכירות מבצעים', value: +promoSalesPercent.toFixed(1), target: 60, format: 'percent' as const },
       ],
     }
-  }, [])
+  }, [multiplier, period])
 
   return (
+    <PeriodMultiplierProvider value={multiplier}>
     <PageContainer>
       <HeroBannerROG
         totalSales={totalSales}
@@ -74,6 +109,10 @@ function CategoryManagerROGPage() {
         branchCount={allBranches.length}
         categoryCount={categorySnapshots.length}
       />
+
+      <div className="flex justify-end">
+        <TimePeriodFilter value={period} onChange={setPeriod} />
+      </div>
 
       <QuickStatCardsROG />
 
@@ -136,7 +175,7 @@ function CategoryManagerROGPage() {
             <PromotionsTableROG
               promotions={promotions}
               selectedId={selectedPromo.id}
-              onSelect={setSelectedPromo}
+              onSelect={(p) => setSelectedPromoId(p.id)}
             />
           </div>
         </TabsContent>
@@ -153,6 +192,7 @@ function CategoryManagerROGPage() {
         <BranchComparisonChartROG />
       </div> */}
     </PageContainer>
+    </PeriodMultiplierProvider>
   )
 }
 

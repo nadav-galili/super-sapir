@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { motion } from 'motion/react'
 import { AlertTriangle, TrendingUp, Megaphone } from 'lucide-react'
 import { formatCurrencyShort } from '@/lib/format'
+import { usePeriodMultiplier } from '@/contexts/PeriodContext'
 import { getCategorySummaries } from '@/data/mock-categories'
 import { getTopStockoutItem, getTopSalesItem, getTopPromoItem } from '@/data/mock-items'
 
@@ -75,6 +76,7 @@ function SpotlightCard({ title, icon, iconBg, imageUrl, productName, categoryNam
 }
 
 export function HeroItemCards({ vertical }: HeroItemCardsProps) {
+  const m = usePeriodMultiplier()
   const stockoutItem = useMemo(() => getTopStockoutItem(), [])
   const topSalesItem = useMemo(() => getTopSalesItem(), [])
   const topPromoItem = useMemo(() => getTopPromoItem(), [])
@@ -85,7 +87,7 @@ export function HeroItemCards({ vertical }: HeroItemCardsProps) {
   const promoCatName = categories.find(c => c.id === topPromoItem.categoryId)?.name ?? topPromoItem.categoryId
 
   const yoyChange = topSalesItem.lastYearMonthlySales > 0
-    ? ((topSalesItem.monthlySales - topSalesItem.lastYearMonthlySales) / topSalesItem.lastYearMonthlySales * 100)
+    ? ((topSalesItem.monthlySales * m - topSalesItem.lastYearMonthlySales) / topSalesItem.lastYearMonthlySales * 100)
     : 0
 
   return (
@@ -100,8 +102,8 @@ export function HeroItemCards({ vertical }: HeroItemCardsProps) {
         accentColor="#DC4E59"
         delay={0.1}
         stats={[
-          { label: 'ימי חוסר', value: `${stockoutItem.stockoutDays} ימים`, color: '#DC4E59' },
-          { label: 'הפסד רווח', value: formatCurrencyShort(stockoutItem.estimatedProfitLoss), color: '#DC4E59' },
+          { label: 'ימי חוסר', value: `${Math.round(stockoutItem.stockoutDays * m)} ימים`, color: '#DC4E59' },
+          { label: 'הפסד רווח', value: formatCurrencyShort(stockoutItem.estimatedProfitLoss * m), color: '#DC4E59' },
         ]}
       />
 
@@ -115,7 +117,7 @@ export function HeroItemCards({ vertical }: HeroItemCardsProps) {
         accentColor="#2EC4D5"
         delay={0.2}
         stats={[
-          { label: 'מכירות חודשי', value: formatCurrencyShort(topSalesItem.monthlySales), color: '#2EC4D5' },
+          { label: 'מכירות חודשי', value: formatCurrencyShort(topSalesItem.monthlySales * m), color: '#2EC4D5' },
           { label: 'מול שנה שעברה', value: `${yoyChange >= 0 ? '+' : ''}${yoyChange.toFixed(1)}%`, color: yoyChange >= 0 ? '#2EC4D5' : '#DC4E59' },
         ]}
       />
@@ -130,7 +132,7 @@ export function HeroItemCards({ vertical }: HeroItemCardsProps) {
         accentColor="#6C5CE7"
         delay={0.3}
         stats={[
-          { label: 'מכירות מבצע', value: formatCurrencyShort(topPromoItem.promoSales ?? 0), color: '#6C5CE7' },
+          { label: 'מכירות מבצע', value: formatCurrencyShort((topPromoItem.promoSales ?? 0) * m), color: '#6C5CE7' },
           { label: 'עלייה במבצע', value: `+${topPromoItem.promoUpliftPercent ?? 0}%`, color: '#6C5CE7' },
         ]}
       />

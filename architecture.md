@@ -79,6 +79,8 @@
 │   │   ├── generators.ts              # Seeded random branch generator
 │   │   ├── constants.ts               # Department names, months, shared constants
 │   │   └── types.ts                    # Shared TypeScript types (KPICardData, Promotion, …)
+│   ├── contexts/
+│   │   └── PeriodContext.tsx            # Time-period multiplier context (consumed by all dashboard components)
 │   ├── hooks/
 │   │   ├── useAnimatedCounter.ts       # Smooth number animation hook
 │   │   ├── useAIAnalysis.ts            # Store-manager AI streaming hook

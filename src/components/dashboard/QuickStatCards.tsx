@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { motion } from 'motion/react'
 import { ShoppingCart, Users, PackageCheck, AlertTriangle } from 'lucide-react'
 import { useAnimatedCounter } from '@/hooks/useAnimatedCounter'
+import { usePeriodMultiplier } from '@/contexts/PeriodContext'
 import { allBranches } from '@/data/mock-branches'
 
 const ICONS = [ShoppingCart, Users, PackageCheck, AlertTriangle] as const
@@ -44,11 +45,12 @@ function StatCard({ stat, index }: { stat: QuickStat; index: number }) {
 }
 
 export function QuickStatCards() {
+  const m = usePeriodMultiplier()
   const stats = useMemo<QuickStat[]>(() => {
-    const totalCustomers = allBranches.reduce((sum, b) => sum + b.metrics.customersPerDay, 0)
-    const avgBasket = allBranches.reduce((sum, b) => sum + b.metrics.avgBasket, 0) / allBranches.length
+    const totalCustomers = Math.round(allBranches.reduce((sum, b) => sum + b.metrics.customersPerDay, 0) * m)
+    const avgBasket = (allBranches.reduce((sum, b) => sum + b.metrics.avgBasket, 0) / allBranches.length) * m
     const avgSupply = allBranches.reduce((sum, b) => sum + b.metrics.supplyRate, 0) / allBranches.length
-    const totalComplaints = allBranches.reduce((sum, b) => sum + b.metrics.complaints, 0)
+    const totalComplaints = Math.round(allBranches.reduce((sum, b) => sum + b.metrics.complaints, 0) * m)
 
     return [
       { label: 'לקוחות יומי', value: totalCustomers, suffix: 'לקוחות', icon: Users, color: '#2EC4D5' },
@@ -56,7 +58,7 @@ export function QuickStatCards() {
       { label: 'זמינות מדף', value: +avgSupply.toFixed(1), suffix: '%', icon: PackageCheck, color: '#2EC4D5' },
       { label: 'תלונות פתוחות', value: totalComplaints, suffix: 'תלונות', icon: AlertTriangle, color: '#DC4E59' },
     ]
-  }, [])
+  }, [m])
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">

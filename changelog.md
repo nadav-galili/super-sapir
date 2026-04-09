@@ -8,6 +8,14 @@
 
 ## 2026-04-09
 
+### Time period filter across all dashboard data
+- Added `TimePeriodFilter` component with 3 modes: שנתי (accumulated year), חודשי (month picker), שבועי (week picker)
+- Created `PeriodMultiplierProvider` context (`src/contexts/PeriodContext.tsx`) so all child components read the multiplier without prop drilling
+- All monetary values across both pages react to period selection: hero banner, quick stats, KPI gauges, category snapshots, supplier tables/cards, promotion tables/charts, hero item cards
+- Percentage KPIs (gross margin, supply rate, quality, promo %) use a small deterministic jitter per period for realistic variation
+- Fixed unrealistic "מכירות מבצעים" gauge target: 15% → 60%
+- **Files:** `TimePeriodFilter.tsx`, `PeriodContext.tsx`, both route pages, `QuickStatCards`, `HeroItemCards`, `SuppliersTable`, `SupplierSpotlightCards` (+ ROG variants)
+
 ### Tabbed navigation for categories, suppliers, and promotions
 - Replaced separate sections with Radix Tabs on both `category-manager-rog` and `category-manager-v2` pages
 - Three tabs: ביצועי קטגוריות (default) | ספקים | מבצעים
