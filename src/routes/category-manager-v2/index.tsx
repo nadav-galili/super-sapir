@@ -16,6 +16,7 @@ import { BranchComparisonChart } from '@/components/charts/BranchComparisonChart
 import { SectionHeader } from '@/components/dashboard/SectionHeader'
 import { SuppliersTable } from '@/components/tables/SuppliersTable'
 import { SupplierSpotlightCards } from '@/components/dashboard/SupplierSpotlightCards'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { allBranches } from '@/data/mock-branches'
 import { getCategorySummaries } from '@/data/mock-categories'
 import { getChainPromotions } from '@/data/mock-chain-promotions'
@@ -78,49 +79,70 @@ function CategoryManagerV2Page() {
 
       <KPIGaugeRow items={gaugeKpis} />
 
-      <SectionHeader
-        title="קטגוריות מובילות"
-        subtitle="4 הקטגוריות המובילות במכירות"
-        icon={LayoutGrid}
-        accentColor="#6C5CE7"
-      />
-      <CategorySpotlight snapshots={categorySnapshots} />
+      <Tabs defaultValue="categories" dir="rtl">
+        <TabsList className="h-auto gap-1 bg-[#FDF8F6] p-1 rounded-[12px] border border-[#FFE8DE]">
+          <TabsTrigger
+            value="categories"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[10px] text-lg font-medium text-[#4A5568] transition-all data-[state=active]:bg-white data-[state=active]:text-[#6C5CE7] data-[state=active]:shadow-sm"
+          >
+            <LayoutGrid className="w-5 h-5" />
+            ביצועי קטגוריות
+          </TabsTrigger>
+          <TabsTrigger
+            value="suppliers"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[10px] text-lg font-medium text-[#4A5568] transition-all data-[state=active]:bg-white data-[state=active]:text-[#F6B93B] data-[state=active]:shadow-sm"
+          >
+            <Truck className="w-5 h-5" />
+            ספקים
+          </TabsTrigger>
+          <TabsTrigger
+            value="promotions"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[10px] text-lg font-medium text-[#4A5568] transition-all data-[state=active]:bg-white data-[state=active]:text-[#DC4E59] data-[state=active]:shadow-sm"
+          >
+            <Megaphone className="w-5 h-5" />
+            מבצעים
+          </TabsTrigger>
+        </TabsList>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr,340px] gap-4 items-start">
-        <CategoryPerformanceTable snapshots={categorySnapshots} />
-        <div className="flex flex-col gap-4">
-          <CategoryDonut snapshots={categorySnapshots} />
-          <HeroItemCards vertical />
-        </div>
-      </div>
+        <TabsContent value="categories" className="mt-4 space-y-4">
+          <SectionHeader
+            title="קטגוריות מובילות"
+            subtitle="4 הקטגוריות המובילות במכירות"
+            icon={LayoutGrid}
+            accentColor="#6C5CE7"
+          />
+          <CategorySpotlight snapshots={categorySnapshots} />
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr,340px] gap-4 items-start">
+            <CategoryPerformanceTable snapshots={categorySnapshots} />
+            <div className="flex flex-col gap-4">
+              <CategoryDonut snapshots={categorySnapshots} />
+              <HeroItemCards vertical />
+            </div>
+          </div>
+        </TabsContent>
 
-      <SectionHeader
-        title="ספקים מובילים"
-        subtitle="10 הספקים המובילים ברשת לפי מכירות"
-        icon={Truck}
-        accentColor="#F6B93B"
-      />
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr,340px] gap-4 items-start">
-        <SuppliersTable />
-        <SupplierSpotlightCards />
-      </div>
+        <TabsContent value="suppliers" className="mt-4 space-y-4">
+          <h2 className="text-2xl font-bold text-[#2D3748]">ביצועי ספקים</h2>
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr,340px] gap-4 items-start">
+            <SuppliersTable />
+            <SupplierSpotlightCards />
+          </div>
+        </TabsContent>
 
-      <SectionHeader
-        title="ניתוח מבצעים"
-        subtitle="מעקב ביצועי מבצעים ברמת הרשת"
-        icon={Megaphone}
-        accentColor="#DC4E59"
-      />
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <PromotionDailyChart promotion={selectedPromo} />
-        <PromotionsTable
-          promotions={promotions}
-          selectedId={selectedPromo.id}
-          onSelect={setSelectedPromo}
-        />
-      </div>
+        <TabsContent value="promotions" className="mt-4 space-y-4">
+          <h2 className="text-2xl font-bold text-[#2D3748]">ניתוח מבצעים</h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <PromotionDailyChart promotion={selectedPromo} />
+            <PromotionsTable
+              promotions={promotions}
+              selectedId={selectedPromo.id}
+              onSelect={setSelectedPromo}
+            />
+          </div>
+        </TabsContent>
+      </Tabs>
 
-      <SectionHeader
+      {/* <SectionHeader
         title="השוואת סניפים"
         subtitle="5 הסניפים המובילים ברשת"
         icon={GitCompare}
@@ -129,7 +151,7 @@ function CategoryManagerV2Page() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <BranchPerformanceBars />
         <BranchComparisonChart />
-      </div>
+      </div> */}
     </PageContainer>
   )
 }

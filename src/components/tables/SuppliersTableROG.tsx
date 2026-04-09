@@ -1,15 +1,61 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { motion } from 'motion/react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
+import { Card, CardContent } from '@/components/ui/card'
 import { formatCurrencyShort } from '@/lib/format'
 import { SupplierLogo } from '@/components/dashboard/SupplierLogo'
-import { getTopSuppliers } from '@/data/mock-suppliers'
+import { getTopSuppliers, type ChainSupplier } from '@/data/mock-suppliers'
 
 const ROG_CHART_COLORS = ['#EF4444', '#22C55E', '#F97316', '#FBBF24', '#A0AEC0']
+const PAGE_SIZE = 10
+
+type SortKey = 'sales' | 'targetPct' | 'grossProfitPercent'
+type SortDir = 'asc' | 'desc'
+
+function getTargetPct(s: ChainSupplier) {
+  return s.targetSales > 0 ? (s.sales / s.targetSales) * 100 : 100
+}
 
 export function SuppliersTableROG() {
-  const suppliers = useMemo(() => getTopSuppliers(), [])
-  const maxSales = suppliers[0]?.sales ?? 1
+  const allSuppliers = useMemo(() => getTopSuppliers(), [])
+  const maxSales = allSuppliers[0]?.sales ?? 1
+  const [sortKey, setSortKey] = useState<SortKey | null>(null)
+  const [sortDir, setSortDir] = useState<SortDir>('desc')
+  const [page, setPage] = useState(0)
+
+  const sorted = useMemo(() => {
+    if (!sortKey) return allSuppliers
+    const list = [...allSuppliers]
+    list.sort((a, b) => {
+      let av: number, bv: number
+      if (sortKey === 'sales') { av = a.sales; bv = b.sales }
+      else if (sortKey === 'targetPct') { av = getTargetPct(a); bv = getTargetPct(b) }
+      else { av = a.grossProfitPercent; bv = b.grossProfitPercent }
+      return sortDir === 'desc' ? bv - av : av - bv
+    })
+    return list
+  }, [allSuppliers, sortKey, sortDir])
+
+  const totalPages = Math.ceil(sorted.length / PAGE_SIZE)
+  const pageSuppliers = sorted.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
+  const globalOffset = page * PAGE_SIZE
+
+  function handleSort(key: SortKey) {
+    if (sortKey === key) {
+      setSortDir(d => d === 'desc' ? 'asc' : 'desc')
+    } else {
+      setSortKey(key)
+      setSortDir('desc')
+    }
+    setPage(0)
+  }
+
+  function SortIcon({ column }: { column: SortKey }) {
+    if (sortKey !== column) return <ArrowUpDown className="w-4 h-4 opacity-40" />
+    return sortDir === 'desc'
+      ? <ArrowDown className="w-4 h-4 text-[#F97316]" />
+      : <ArrowUp className="w-4 h-4 text-[#F97316]" />
+  }
 
   return (
     <motion.div
@@ -18,12 +64,6 @@ export function SuppliersTableROG() {
       transition={{ delay: 0.3, duration: 0.5 }}
     >
       <Card>
-        <CardHeader className="pb-3">
-          <div className="flex items-center gap-3">
-            <div className="w-1 h-6 rounded-full bg-[#F97316]" />
-            <CardTitle className="text-2xl text-[#2D3748]">10 ספקים מובילים</CardTitle>
-          </div>
-        </CardHeader>
         <CardContent>
           <div className="overflow-auto -mx-4 px-4 sm:mx-0 sm:px-0">
             <table className="w-full min-w-[500px] text-lg">
@@ -31,17 +71,33 @@ export function SuppliersTableROG() {
                 <tr className="border-b border-[#FFF0EA]">
                   <th className="px-3 py-2 text-right font-medium text-[#A0AEC0]">#</th>
                   <th className="px-3 py-2 text-right font-medium text-[#A0AEC0]">ספק</th>
-                  <th className="px-3 py-2 text-right font-medium text-[#A0AEC0]">מכירות ₪</th>
-                  <th className="px-3 py-2 text-right font-medium text-[#A0AEC0]">עמידה ביעד</th>
-                  <th className="px-3 py-2 text-right font-medium text-[#A0AEC0]">רווח גולמי %</th>
+                  <th
+                    className="px-3 py-2 text-right font-medium text-[#A0AEC0] cursor-pointer select-none hover:text-[#4A5568] transition-colors"
+                    onClick={() => handleSort('sales')}
+                  >
+                    <span className="inline-flex items-center gap-1">מכירות ₪ <SortIcon column="sales" /></span>
+                  </th>
+                  <th
+                    className="px-3 py-2 text-right font-medium text-[#A0AEC0] cursor-pointer select-none hover:text-[#4A5568] transition-colors"
+                    onClick={() => handleSort('targetPct')}
+                  >
+                    <span className="inline-flex items-center gap-1">עמידה ביעד <SortIcon column="targetPct" /></span>
+                  </th>
+                  <th
+                    className="px-3 py-2 text-right font-medium text-[#A0AEC0] cursor-pointer select-none hover:text-[#4A5568] transition-colors"
+                    onClick={() => handleSort('grossProfitPercent')}
+                  >
+                    <span className="inline-flex items-center gap-1">רווח גולמי % <SortIcon column="grossProfitPercent" /></span>
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                {suppliers.map((sup, i) => {
-                  const targetPct = sup.targetSales > 0 ? (sup.sales / sup.targetSales) * 100 : 100
+                {pageSuppliers.map((sup, i) => {
+                  const rank = globalOffset + i
+                  const targetPct = getTargetPct(sup)
                   const hitTarget = targetPct >= 100
                   const barPct = (sup.sales / maxSales) * 100
-                  const barColor = ROG_CHART_COLORS[i % ROG_CHART_COLORS.length]
+                  const barColor = ROG_CHART_COLORS[rank % ROG_CHART_COLORS.length]
 
                   return (
                     <motion.tr
@@ -51,7 +107,7 @@ export function SuppliersTableROG() {
                       transition={{ delay: i * 0.03 }}
                       className="border-b border-[#FFF0EA] hover:bg-[#FDF8F6] transition-colors"
                     >
-                      <td className="px-3 py-2.5 text-[20px] text-[#A0AEC0] font-mono">{i + 1}</td>
+                      <td className="px-3 py-2.5 text-[20px] text-[#A0AEC0] font-mono">{rank + 1}</td>
                       <td className="px-3 py-2.5">
                         <div className="flex items-center gap-2">
                           <SupplierLogo name={sup.name} />
@@ -89,6 +145,40 @@ export function SuppliersTableROG() {
               </tbody>
             </table>
           </div>
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-3 pt-4 mt-2 border-t border-[#FFF0EA]">
+              <button
+                onClick={() => setPage(p => p - 1)}
+                disabled={page === 0}
+                className="inline-flex items-center justify-center w-9 h-9 rounded-[10px] border border-[#FFE8DE] text-[#4A5568] transition-all hover:bg-[#FDF8F6] disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+              <div className="flex items-center gap-1.5">
+                {Array.from({ length: totalPages }, (_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setPage(i)}
+                    className={`w-9 h-9 rounded-[10px] text-lg font-medium transition-all ${
+                      page === i
+                        ? 'bg-[#F97316] text-white shadow-sm'
+                        : 'text-[#4A5568] hover:bg-[#FDF8F6] border border-[#FFE8DE]'
+                    }`}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={() => setPage(p => p + 1)}
+                disabled={page === totalPages - 1}
+                className="inline-flex items-center justify-center w-9 h-9 rounded-[10px] border border-[#FFE8DE] text-[#4A5568] transition-all hover:bg-[#FDF8F6] disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+            </div>
+          )}
         </CardContent>
       </Card>
     </motion.div>

@@ -8,6 +8,15 @@
 
 ## 2026-04-09
 
+### Tabbed navigation for categories, suppliers, and promotions
+- Replaced separate sections with Radix Tabs on both `category-manager-rog` and `category-manager-v2` pages
+- Three tabs: ביצועי קטגוריות (default) | ספקים | מבצעים
+- Added `@radix-ui/react-tabs` dependency and `src/components/ui/tabs.tsx` (shadcn pattern)
+- Expanded suppliers data from 10 to 25 with realistic Israeli brands
+- Added pagination (10 per page) and column sorting (sales, target %, gross margin) to both supplier tables
+- Commented out "השוואת סניפים" section on both pages (preserved for future use)
+- **Files:** `category-manager-rog/index.tsx`, `category-manager-v2/index.tsx`, `SuppliersTable.tsx`, `SuppliersTableROG.tsx`, `mock-suppliers.ts`, `ui/tabs.tsx`
+
 ### Fix: `/update-docs-and-commit` slash command not appearing
 - Added `.md` extension to `.claude/commands/update-docs-and-commit` — Claude Code requires `.md` for custom slash commands
 - **Files:** `.claude/commands/update-docs-and-commit.md`

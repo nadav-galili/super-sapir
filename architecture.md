@@ -64,7 +64,7 @@
 │   │   │   ├── BranchRankingTable.tsx
 │   │   │   ├── CategoryTable.tsx
 │   │   │   └── SortHeader.tsx
-│   │   └── ui/                         # shadcn/ui primitives (card, button, badge, sidebar, …)
+│   │   └── ui/                         # shadcn/ui primitives (card, button, badge, sidebar, tabs, …)
 │   ├── data/
 │   │   ├── hadera-real.ts              # Real Hadera branch #44 report data (Dec 2025)
 │   │   ├── hadera-branch.ts            # Simplified Branch type for multi-branch system
