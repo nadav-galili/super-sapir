@@ -56,7 +56,7 @@ export function CategoryAIBriefing({ categoryId, categoryName }: CategoryAIBrief
         />
 
         <CardHeader className="pb-2">
-          <CardTitle className="text-base flex items-center gap-2 text-[#2D3748]">
+          <CardTitle className="text-xl flex items-center gap-2 text-[#2D3748]">
             <div className="w-7 h-7 rounded-[10px] flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #6C5CE7, #8B7FED)' }}>
               {isLoading || isStreaming ? (
                 <Loader2 className="w-4 h-4 text-white animate-spin" />
@@ -65,11 +65,11 @@ export function CategoryAIBriefing({ categoryId, categoryName }: CategoryAIBrief
               )}
             </div>
             ניתוח AI — ספקים {categoryName}
-            <span className="text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ background: 'linear-gradient(135deg, #6C5CE7, #8B7FED)', color: 'white' }}>
+            <span className="text-[15px] font-medium px-2 py-0.5 rounded-full" style={{ background: 'linear-gradient(135deg, #6C5CE7, #8B7FED)', color: 'white' }}>
               AI
             </span>
             {isStreaming && (
-              <span className="text-[10px] text-[#6C5CE7] font-medium animate-pulse me-auto">מנתח ספקים...</span>
+              <span className="text-[15px] text-[#6C5CE7] font-medium animate-pulse me-auto">מנתח ספקים...</span>
             )}
           </CardTitle>
         </CardHeader>
@@ -93,10 +93,10 @@ export function CategoryAIBriefing({ categoryId, categoryName }: CategoryAIBrief
           {/* Error */}
           {error && (
             <div className="flex items-center justify-between py-2">
-              <span className="text-sm text-[#DC4E59]">לא ניתן לטעון ניתוח AI</span>
+              <span className="text-lg text-[#DC4E59]">לא ניתן לטעון ניתוח AI</span>
               <button
                 onClick={retry}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-[8px] border border-warm-border text-[#4A5568] hover:bg-[#FDF8F6]"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-base font-medium rounded-[8px] border border-warm-border text-[#4A5568] hover:bg-[#FDF8F6]"
               >
                 <RefreshCw className="w-3 h-3" />
                 נסה שוב
@@ -127,7 +127,7 @@ export function CategoryAIBriefing({ categoryId, categoryName }: CategoryAIBrief
                         >
                           <Icon className="w-3.5 h-3.5" style={{ color }} />
                         </div>
-                        <p className="text-sm text-[#4A5568] leading-relaxed">
+                        <p className="text-lg text-[#4A5568] leading-relaxed">
                           <TypingText text={item.text} animate={isStreaming} />
                         </p>
                       </motion.div>
@@ -155,7 +155,7 @@ export function CategoryAIBriefing({ categoryId, categoryName }: CategoryAIBrief
               transition={{ delay: 0.3 }}
               className="mt-5 pt-4 border-t border-[#FFF0EA]"
             >
-              <p className="text-[11px] font-semibold text-[#A0AEC0] uppercase tracking-wider mb-3">המלצות לפעולה</p>
+              <p className="text-[16px] font-semibold text-[#A0AEC0] uppercase tracking-wider mb-3">המלצות לפעולה</p>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {recommendations.map((rec, i) => {
                   const impactColor = IMPACT_COLORS[rec.impact] ?? '#2EC4D5'
@@ -168,17 +168,17 @@ export function CategoryAIBriefing({ categoryId, categoryName }: CategoryAIBrief
                       className="rounded-[12px] border border-warm-border p-3"
                     >
                       <div className="h-0.5 w-8 rounded-full mb-2" style={{ backgroundColor: impactColor }} />
-                      <p className="text-sm font-bold text-[#2D3748] mb-1">{rec.title}</p>
-                      <p className="text-[12px] text-[#4A5568] leading-relaxed mb-2">{rec.description}</p>
+                      <p className="text-lg font-bold text-[#2D3748] mb-1">{rec.title}</p>
+                      <p className="text-[18px] text-[#4A5568] leading-relaxed mb-2">{rec.description}</p>
                       <div className="flex items-center gap-2">
                         <span
-                          className="text-[10px] font-bold px-2 py-0.5 rounded-full text-white"
+                          className="text-[15px] font-bold px-2 py-0.5 rounded-full text-white"
                           style={{ backgroundColor: impactColor }}
                         >
                           {IMPACT_LABELS[rec.impact] ?? rec.impact}
                         </span>
                         {rec.estimatedEffect && (
-                          <span className="text-[10px] text-[#A0AEC0]">{rec.estimatedEffect}</span>
+                          <span className="text-[15px] text-[#A0AEC0]">{rec.estimatedEffect}</span>
                         )}
                       </div>
                     </motion.div>

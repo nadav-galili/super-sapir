@@ -10,17 +10,18 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatCurrencyShort } from '@/lib/format'
 import type { CategorySnapshot } from '@/lib/category-manager'
 
-interface CategoryPerformanceTableProps {
+interface CategoryPerformanceTableROGProps {
   snapshots: CategorySnapshot[]
 }
 
+// Classic ROG status colors
 const STATUS_CONFIG = {
-  opportunity: { label: 'ביצוע טוב', color: 'bg-[#2EC4D5]/10 text-[#2EC4D5] border-[#2EC4D5]/20', barColor: '#2EC4D5' },
-  danger: { label: 'חריג', color: 'bg-[#DC4E59]/10 text-[#DC4E59] border-[#DC4E59]/20', barColor: '#DC4E59' },
-  monitor: { label: 'במעקב', color: 'bg-[#F6B93B]/10 text-[#F6B93B] border-[#F6B93B]/20', barColor: '#F6B93B' },
+  opportunity: { label: 'ביצוע טוב', color: 'bg-[#22C55E]/10 text-[#22C55E] border-[#22C55E]/20', barColor: '#22C55E' },
+  danger: { label: 'חריג', color: 'bg-[#EF4444]/10 text-[#EF4444] border-[#EF4444]/20', barColor: '#EF4444' },
+  monitor: { label: 'במעקב', color: 'bg-[#F97316]/10 text-[#F97316] border-[#F97316]/20', barColor: '#F97316' },
 } as const
 
-export function CategoryPerformanceTable({ snapshots }: CategoryPerformanceTableProps) {
+export function CategoryPerformanceTableROG({ snapshots }: CategoryPerformanceTableROGProps) {
   const navigate = useNavigate()
   const [sorting, setSorting] = useState<SortingState>([{ id: 'sales', desc: true }])
 
@@ -88,7 +89,7 @@ export function CategoryPerformanceTable({ snapshots }: CategoryPerformanceTable
         const val = getValue() as number
         return (
           <span
-            className={`font-semibold font-mono ${val >= 0 ? 'text-[#2EC4D5]' : 'text-[#DC4E59]'}`}
+            className={`font-semibold font-mono ${val >= 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}
             dir="ltr"
           >
             {val >= 0 ? '+' : ''}{val}%
@@ -134,7 +135,7 @@ export function CategoryPerformanceTable({ snapshots }: CategoryPerformanceTable
             e.stopPropagation()
             navigate({ to: '/category-manager/$categoryId', params: { categoryId: row.original.category.id } })
           }}
-          className="text-[#DC4E59] hover:text-[#E8777F] transition-colors"
+          className="text-[#EF4444] hover:text-[#F87171] transition-colors"
         >
           <ExternalLink className="w-4 h-4" />
         </button>
@@ -162,7 +163,7 @@ export function CategoryPerformanceTable({ snapshots }: CategoryPerformanceTable
       <Card>
         <CardHeader className="pb-3">
           <div className="flex items-center gap-3">
-            <div className="w-1 h-6 rounded-full bg-[#DC4E59]" />
+            <div className="w-1 h-6 rounded-full bg-[#EF4444]" />
             <CardTitle className="text-2xl text-[#2D3748]">ביצועי קטגוריות</CardTitle>
           </div>
         </CardHeader>

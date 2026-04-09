@@ -23,7 +23,7 @@ function StatCard({ stat, index }: { stat: QuickStat; index: number }) {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1 + index * 0.08, duration: 0.4 }}
-      whileHover={{ y: -2, boxShadow: 'rgba(220, 78, 89, 0.06) 0px 6px 20px' }}
+      whileHover={{ y: -2, boxShadow: 'rgba(34, 197, 94, 0.06) 0px 6px 20px' }}
       className="rounded-[14px] bg-white border border-warm-border p-4 flex items-center gap-3 cursor-default"
     >
       <div
@@ -43,18 +43,19 @@ function StatCard({ stat, index }: { stat: QuickStat; index: number }) {
   )
 }
 
-export function QuickStatCards() {
+export function QuickStatCardsROG() {
   const stats = useMemo<QuickStat[]>(() => {
     const totalCustomers = allBranches.reduce((sum, b) => sum + b.metrics.customersPerDay, 0)
     const avgBasket = allBranches.reduce((sum, b) => sum + b.metrics.avgBasket, 0) / allBranches.length
     const avgSupply = allBranches.reduce((sum, b) => sum + b.metrics.supplyRate, 0) / allBranches.length
     const totalComplaints = allBranches.reduce((sum, b) => sum + b.metrics.complaints, 0)
 
+    // Classic ROG colors
     return [
-      { label: 'לקוחות יומי', value: totalCustomers, suffix: 'לקוחות', icon: Users, color: '#2EC4D5' },
-      { label: 'סל ממוצע', value: Math.round(avgBasket), suffix: '₪', icon: ShoppingCart, color: '#6C5CE7' },
-      { label: 'זמינות מדף', value: +avgSupply.toFixed(1), suffix: '%', icon: PackageCheck, color: '#2EC4D5' },
-      { label: 'תלונות פתוחות', value: totalComplaints, suffix: 'תלונות', icon: AlertTriangle, color: '#DC4E59' },
+      { label: 'לקוחות יומי', value: totalCustomers, suffix: 'לקוחות', icon: Users, color: '#22C55E' },
+      { label: 'סל ממוצע', value: Math.round(avgBasket), suffix: '₪', icon: ShoppingCart, color: '#F97316' },
+      { label: 'זמינות מדף', value: +avgSupply.toFixed(1), suffix: '%', icon: PackageCheck, color: '#22C55E' },
+      { label: 'תלונות פתוחות', value: totalComplaints, suffix: 'תלונות', icon: AlertTriangle, color: '#EF4444' },
     ]
   }, [])
 

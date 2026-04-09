@@ -7,32 +7,7 @@ import {
 import { motion } from 'motion/react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatCurrencyShort } from '@/lib/format'
-import { allBranches } from '@/data/mock-branches'
-
-export interface BranchComparison {
-  id: string
-  name: string
-  currentSales: number
-  lastYearSales: number
-  yoyGrowthPercent: number
-}
-
-export function getTopBranches(count: number): BranchComparison[] {
-  return [...allBranches]
-    .sort((a, b) => b.metrics.totalSales - a.metrics.totalSales)
-    .slice(0, count)
-    .map(b => {
-      const growth = b.metrics.yoyGrowth
-      const lastYear = b.metrics.totalSales / (1 + growth / 100)
-      return {
-        id: b.id,
-        name: b.name,
-        currentSales: b.metrics.totalSales,
-        lastYearSales: Math.round(lastYear),
-        yoyGrowthPercent: +growth.toFixed(1),
-      }
-    })
-}
+import { getTopBranches } from '@/components/charts/BranchComparisonChart'
 
 function GrowthLabel(props: { x?: number; y?: number; width?: number; value?: number }) {
   const { x = 0, y = 0, width = 0, value = 0 } = props
@@ -44,14 +19,14 @@ function GrowthLabel(props: { x?: number; y?: number; width?: number; value?: nu
       textAnchor="middle"
       fontSize={16}
       fontWeight={600}
-      fill={isPositive ? '#2EC4D5' : '#DC4E59'}
+      fill={isPositive ? '#22C55E' : '#EF4444'}
     >
       {isPositive ? '+' : ''}{value}%
     </text>
   )
 }
 
-export function BranchComparisonChart() {
+export function BranchComparisonChartROG() {
   const navigate = useNavigate()
   const data = useMemo(() => getTopBranches(5), [])
 
@@ -104,12 +79,12 @@ export function BranchComparisonChart() {
                     if (name === 'lastYearSales') return [formatCurrencyShort(value as number), 'שנה קודמת']
                     return [`${value}%`, 'צמיחה שנתית']
                   }}
-                  cursor={{ fill: 'rgba(220, 78, 89, 0.04)' }}
+                  cursor={{ fill: 'rgba(34, 197, 94, 0.04)' }}
                 />
                 <Bar
                   yAxisId="sales"
                   dataKey="currentSales"
-                  fill="#DC4E59"
+                  fill="#EF4444"
                   radius={[4, 4, 0, 0]}
                   animationDuration={1000}
                   barSize={28}
@@ -134,19 +109,18 @@ export function BranchComparisonChart() {
                   yAxisId="growth"
                   type="monotone"
                   dataKey="yoyGrowthPercent"
-                  stroke="#6C5CE7"
+                  stroke="#22C55E"
                   strokeWidth={2}
-                  dot={{ r: 4, fill: '#6C5CE7' }}
+                  dot={{ r: 4, fill: '#22C55E' }}
                   animationDuration={1200}
                   animationBegin={400}
                 />
               </ComposedChart>
             </ResponsiveContainer>
           </div>
-          {/* Legend */}
           <div className="flex items-center justify-center gap-5 mt-2 text-base text-[#4A5568]">
             <span className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded-sm bg-[#DC4E59] inline-block" />
+              <span className="w-3 h-3 rounded-sm bg-[#EF4444] inline-block" />
               שנה נוכחית
             </span>
             <span className="flex items-center gap-1.5">
@@ -154,7 +128,7 @@ export function BranchComparisonChart() {
               שנה קודמת
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded-full bg-[#6C5CE7] inline-block" />
+              <span className="w-3 h-3 rounded-full bg-[#22C55E] inline-block" />
               צמיחה %
             </span>
           </div>

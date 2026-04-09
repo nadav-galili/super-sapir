@@ -23,8 +23,8 @@ export function SectionHeader({ title, subtitle, icon: Icon, accentColor = '#DC4
         <Icon className="w-5 h-5" style={{ color: accentColor }} />
       </div>
       <div>
-        <h2 className="text-lg font-bold text-[#2D3748]">{title}</h2>
-        {subtitle && <p className="text-[13px] text-[#A0AEC0] mt-0.5">{subtitle}</p>}
+        <h2 className="text-2xl font-bold text-[#2D3748]">{title}</h2>
+        {subtitle && <p className="text-[20px] text-[#A0AEC0] mt-0.5">{subtitle}</p>}
       </div>
       <div className="flex-1 h-px bg-gradient-to-l from-transparent via-[#FFE8DE] to-transparent ms-3" />
     </motion.div>

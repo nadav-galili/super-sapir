@@ -55,7 +55,7 @@ function SupplierCard({ title, icon, iconBg, accentColor, supplierName, stats, d
   )
 }
 
-export function SupplierSpotlightCards() {
+export function SupplierSpotlightCardsROG() {
   const profitable = useMemo(() => getMostProfitableSupplier(), [])
   const atRisk = useMemo(() => getAtRiskSupplier(), [])
   const growing = useMemo(() => getFastestGrowingSupplier(), [])
@@ -68,39 +68,39 @@ export function SupplierSpotlightCards() {
     <div className="flex flex-col gap-4">
       <SupplierCard
         title="ספק מוביל ברווחיות"
-        icon={<Award className="w-4 h-4 text-[#6C5CE7]" />}
-        iconBg="bg-[#6C5CE7]/10"
-        accentColor="#6C5CE7"
+        icon={<Award className="w-4 h-4 text-[#22C55E]" />}
+        iconBg="bg-[#22C55E]/10"
+        accentColor="#22C55E"
         supplierName={profitable.name}
         delay={0.1}
         stats={[
-          { label: 'רווח גולמי', value: `${profitable.grossProfitPercent}%`, color: '#6C5CE7' },
+          { label: 'רווח גולמי', value: `${profitable.grossProfitPercent}%`, color: '#22C55E' },
           { label: 'מכירות', value: formatCurrencyShort(profitable.sales), color: '#2D3748' },
         ]}
       />
 
       <SupplierCard
         title="ספק בסיכון — החמצת יעד"
-        icon={<TrendingDown className="w-4 h-4 text-[#DC4E59]" />}
-        iconBg="bg-[#DC4E59]/10"
-        accentColor="#DC4E59"
+        icon={<TrendingDown className="w-4 h-4 text-[#EF4444]" />}
+        iconBg="bg-[#EF4444]/10"
+        accentColor="#EF4444"
         supplierName={atRisk.name}
         delay={0.2}
         stats={[
-          { label: 'עמידה ביעד', value: `${atRiskPct.toFixed(1)}%`, color: '#DC4E59' },
-          { label: 'פער מהיעד', value: formatCurrencyShort(atRiskGap), color: '#DC4E59' },
+          { label: 'עמידה ביעד', value: `${atRiskPct.toFixed(1)}%`, color: '#EF4444' },
+          { label: 'פער מהיעד', value: formatCurrencyShort(atRiskGap), color: '#EF4444' },
         ]}
       />
 
       <SupplierCard
         title="ספק צומח"
-        icon={<TrendingUp className="w-4 h-4 text-[#2EC4D5]" />}
-        iconBg="bg-[#2EC4D5]/10"
-        accentColor="#2EC4D5"
+        icon={<TrendingUp className="w-4 h-4 text-[#F97316]" />}
+        iconBg="bg-[#F97316]/10"
+        accentColor="#F97316"
         supplierName={growing.name}
         delay={0.3}
         stats={[
-          { label: 'עמידה ביעד', value: `${growingPct.toFixed(1)}%`, color: '#2EC4D5' },
+          { label: 'עמידה ביעד', value: `${growingPct.toFixed(1)}%`, color: '#F97316' },
           { label: 'מכירות', value: formatCurrencyShort(growing.sales), color: '#2D3748' },
         ]}
       />

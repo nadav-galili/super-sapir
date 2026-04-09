@@ -2,21 +2,21 @@ import { motion } from 'motion/react'
 import { TrendingUp, TrendingDown } from 'lucide-react'
 import { useAnimatedCounter } from '@/hooks/useAnimatedCounter'
 import { formatCurrencyShort, formatNumber, formatPercent, formatCompact } from '@/lib/format'
-import { PALETTE } from '@/lib/colors'
 import type { KPICardData } from '@/data/types'
 
-interface KPICardProps extends KPICardData {
+interface KPICardROGProps extends KPICardData {
   delay?: number
 }
 
+// Classic ROG accent map
 const ACCENT_MAP: Record<string, { border: string; text: string }> = {
-  green:  { border: PALETTE.cyan,   text: PALETTE.cyan },
-  blue:   { border: PALETTE.cyan,   text: PALETTE.cyan },
-  purple: { border: PALETTE.violet, text: PALETTE.violet },
-  teal:   { border: PALETTE.cyan,   text: PALETTE.cyan },
-  orange: { border: PALETTE.amber,  text: PALETTE.amber },
-  pink:   { border: PALETTE.red,    text: PALETTE.red },
-  red:    { border: PALETTE.red,    text: PALETTE.red },
+  green:  { border: '#22C55E', text: '#22C55E' },
+  blue:   { border: '#22C55E', text: '#22C55E' },
+  purple: { border: '#F97316', text: '#F97316' },
+  teal:   { border: '#22C55E', text: '#22C55E' },
+  orange: { border: '#F97316', text: '#F97316' },
+  pink:   { border: '#EF4444', text: '#EF4444' },
+  red:    { border: '#EF4444', text: '#EF4444' },
 }
 
 function formatValue(value: number, format: KPICardData['format']): string {
@@ -29,9 +29,9 @@ function formatValue(value: number, format: KPICardData['format']): string {
   }
 }
 
-export function KPICard({ label, value, format, trend, trendLabel, gradient, delay = 0 }: KPICardProps) {
+export function KPICardROG({ label, value, format, trend, trendLabel, gradient, delay = 0 }: KPICardROGProps) {
   const animatedValue = useAnimatedCounter(value, 1500, delay)
-  const accent = ACCENT_MAP[gradient] ?? ACCENT_MAP.blue
+  const accent = ACCENT_MAP[gradient] ?? ACCENT_MAP.green
   const isPositive = trend >= 0
 
   return (
@@ -39,7 +39,7 @@ export function KPICard({ label, value, format, trend, trendLabel, gradient, del
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: delay / 1000, type: 'spring', stiffness: 300, damping: 24 }}
-      whileHover={{ y: -2, boxShadow: 'rgba(220, 78, 89, 0.08) 0px 8px 24px' }}
+      whileHover={{ y: -2, boxShadow: 'rgba(34, 197, 94, 0.08) 0px 8px 24px' }}
       className="relative overflow-hidden rounded-[16px] bg-white border border-warm-border cursor-default"
     >
       <div className="p-3 sm:p-4 text-center">
@@ -49,7 +49,7 @@ export function KPICard({ label, value, format, trend, trendLabel, gradient, del
         </p>
         <div className="flex items-center justify-center gap-1 sm:gap-1.5 mt-1.5 sm:mt-2">
           <span className={`inline-flex items-center gap-0.5 sm:gap-1 text-[15px] sm:text-base font-semibold px-1.5 sm:px-2 py-0.5 rounded-[20px] ${
-            isPositive ? 'bg-[#2EC4D5]/10 text-[#2EC4D5]' : 'bg-[#DC4E59]/10 text-[#DC4E59]'
+            isPositive ? 'bg-[#22C55E]/10 text-[#22C55E]' : 'bg-[#EF4444]/10 text-[#EF4444]'
           }`} dir="ltr">
             {isPositive ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
             {isPositive ? '+' : ''}{trend}%

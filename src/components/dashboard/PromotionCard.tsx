@@ -22,14 +22,14 @@ export function PromotionCard({ promotions, categoryName }: PromotionCardProps) 
     >
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
+          <CardTitle className="text-2xl flex items-center gap-2">
             <Megaphone className="w-5 h-5 text-[#6C5CE7]" />
             אפקטיביות מבצעים — {categoryName}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-lg">
               <thead>
                 <tr className="border-b border-[#FFF0EA]">
                   <th className="px-3 py-2 text-right font-medium text-[#A0AEC0]">מבצע</th>
@@ -55,12 +55,12 @@ export function PromotionCard({ promotions, categoryName }: PromotionCardProps) 
                     <td className="px-3 py-2.5 font-mono text-[#4A5568]"><span dir="ltr">{formatCurrencyShort(promo.baselineSales)}</span></td>
                     <td className="px-3 py-2.5 font-mono font-semibold text-[#2D3748]"><span dir="ltr">{formatCurrencyShort(promo.actualSales)}</span></td>
                     <td className="px-3 py-2.5">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-[20px] bg-[#2EC4D5]/10 text-[#2EC4D5] text-xs font-semibold font-mono" dir="ltr">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-[20px] bg-[#2EC4D5]/10 text-[#2EC4D5] text-base font-semibold font-mono" dir="ltr">
                         +{promo.upliftPercent}%
                       </span>
                     </td>
                     <td className="px-3 py-2.5">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-[20px] text-xs font-semibold font-mono ${
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-[20px] text-base font-semibold font-mono ${
                         promo.roi > 0
                           ? 'bg-[#2EC4D5]/10 text-[#2EC4D5]'
                           : 'bg-[#DC4E59]/10 text-[#DC4E59]'
@@ -70,12 +70,12 @@ export function PromotionCard({ promotions, categoryName }: PromotionCardProps) 
                     </td>
                     <td className="px-3 py-2.5">
                       {promo.hasCannibalization ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-[20px] bg-[#F6B93B]/10 text-[#F6B93B] text-xs font-medium">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-[20px] bg-[#F6B93B]/10 text-[#F6B93B] text-base font-medium">
                           <AlertTriangle className="w-3 h-3" />
                           כן
                         </span>
                       ) : (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-[20px] bg-[#A0AEC0]/10 text-[#A0AEC0] text-xs font-medium">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-[20px] bg-[#A0AEC0]/10 text-[#A0AEC0] text-base font-medium">
                           לא
                         </span>
                       )}
@@ -91,10 +91,10 @@ export function PromotionCard({ promotions, categoryName }: PromotionCardProps) 
               const maxSales = Math.max(promo.baselineSales, promo.actualSales)
               return (
                 <div key={i} className="space-y-2">
-                  <p className="text-xs font-medium text-[#4A5568]">{promo.name}</p>
+                  <p className="text-base font-medium text-[#4A5568]">{promo.name}</p>
                   <div className="space-y-1.5">
                     <div className="flex items-center gap-3">
-                      <span className="text-[11px] text-[#A0AEC0] w-10 text-left">בסיס</span>
+                      <span className="text-[16px] text-[#A0AEC0] w-10 text-left">בסיס</span>
                       <div className="flex-1 h-5 bg-[#FDF8F6] rounded-[5px] overflow-hidden">
                         <div
                           className="h-full bg-[#A0AEC0] rounded-[5px]"

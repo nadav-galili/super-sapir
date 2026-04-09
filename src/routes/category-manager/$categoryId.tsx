@@ -230,7 +230,7 @@ function CategoryDrillDown() {
         ]}
       />
 
-      <h2 className="text-2xl font-bold text-[#2D3748]">{categoryName}</h2>
+      <h2 className="text-4xl font-bold text-[#2D3748]">{categoryName}</h2>
 
       <CategoryAIBriefing categoryId={categoryId} categoryName={categoryName} />
 
@@ -243,7 +243,7 @@ function CategoryDrillDown() {
       >
         <Card className="border-warm-border rounded-[16px]">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base text-[#2D3748]">מגמת מכירות — {categoryName} (12 חודשים)</CardTitle>
+            <CardTitle className="text-xl text-[#2D3748]">מגמת מכירות — {categoryName} (12 חודשים)</CardTitle>
           </CardHeader>
           <CardContent>
             <div dir="ltr" className="h-[300px]">
@@ -253,10 +253,10 @@ function CategoryDrillDown() {
                   margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.04)" />
-                  <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#4A5568' }} />
+                  <XAxis dataKey="month" tick={{ fontSize: 16, fill: '#4A5568' }} />
                   <YAxis
                     tickFormatter={(v: number) => formatCurrencyShort(v * 1000)}
-                    tick={{ fontSize: 11, fill: '#A0AEC0' }}
+                    tick={{ fontSize: 16, fill: '#A0AEC0' }}
                     width={50}
                   />
                   <Tooltip
@@ -264,14 +264,14 @@ function CategoryDrillDown() {
                       `₪${Number(value).toLocaleString()}K`,
                       name === 'sales' ? 'מכירות' : 'יעד',
                     ]}
-                    contentStyle={{ direction: 'rtl', borderRadius: '10px', border: '1px solid #FFE8DE', fontSize: 12, color: '#2D3748' }}
+                    contentStyle={{ direction: 'rtl', borderRadius: '10px', border: '1px solid #FFE8DE', fontSize: 18, color: '#2D3748' }}
                     itemStyle={{ color: '#4A5568' }}
                     labelStyle={{ color: '#2D3748', fontWeight: 600 }}
                   />
                   <Legend
                     formatter={(v: string) => <span style={{ color: '#4A5568' }}>{v === 'sales' ? 'מכירות' : 'יעד'}</span>}
                     iconType="plainline"
-                    wrapperStyle={{ fontSize: 12, paddingTop: 8 }}
+                    wrapperStyle={{ fontSize: 18, paddingTop: 8 }}
                   />
                   <Bar
                     dataKey="sales"
@@ -312,11 +312,11 @@ function CategoryDrillDown() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-1 h-6 rounded-full bg-[#DC4E59]" />
-                <CardTitle className="text-lg text-[#2D3748]">
+                <CardTitle className="text-2xl text-[#2D3748]">
                   חריגות סניפים — {categoryName}
                 </CardTitle>
               </div>
-              <span className="text-sm text-[#A0AEC0]">
+              <span className="text-lg text-[#A0AEC0]">
                 {alerts.length > 0
                   ? `${alerts.length} חריגות ב-${groupedAlerts.length} סניפים`
                   : 'אין חריגות'}
@@ -327,12 +327,12 @@ function CategoryDrillDown() {
             {alerts.length === 0 ? (
               <div className="flex flex-col items-center py-8 text-center">
                 <CheckCircle2 className="w-10 h-10 text-[#2EC4D5] mb-3" />
-                <p className="text-base font-semibold text-[#2D3748]">כל הסניפים תקינים</p>
-                <p className="text-sm text-[#A0AEC0] mt-1">לא זוהו חריגות בקטגוריה זו</p>
+                <p className="text-xl font-semibold text-[#2D3748]">כל הסניפים תקינים</p>
+                <p className="text-lg text-[#A0AEC0] mt-1">לא זוהו חריגות בקטגוריה זו</p>
               </div>
             ) : (
               <div className="overflow-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-                <table className="w-full min-w-[500px] text-sm">
+                <table className="w-full min-w-[500px] text-lg">
                   <thead>
                     <tr className="border-b border-[#FFF0EA]">
                       <th className="px-3 py-2 text-right font-medium text-[#A0AEC0]">סניף</th>
@@ -354,7 +354,7 @@ function CategoryDrillDown() {
                           <td className="px-3 py-3">
                             <div className="flex items-center gap-2">
                               {hasCritical && <span className="w-2 h-2 rounded-full bg-[#DC4E59] shrink-0" />}
-                              <span className="font-medium text-[#2D3748] text-[13px]">{branch}</span>
+                              <span className="font-medium text-[#2D3748] text-[20px]">{branch}</span>
                             </div>
                           </td>
                           <td className="px-3 py-3">
@@ -364,7 +364,7 @@ function CategoryDrillDown() {
                                 return (
                                   <span
                                     key={a.kind}
-                                    className="text-[10px] font-bold px-2 py-0.5 rounded-full text-white"
+                                    className="text-[15px] font-bold px-2 py-0.5 rounded-full text-white"
                                     style={{ backgroundColor: cfg.color }}
                                   >
                                     {cfg.label}
@@ -376,7 +376,7 @@ function CategoryDrillDown() {
                           <td className="px-3 py-3">
                             <div className="space-y-0.5">
                               {branchAlerts.map(a => (
-                                <p key={a.kind} className="text-[12px] text-[#4A5568]">
+                                <p key={a.kind} className="text-[18px] text-[#4A5568]">
                                   {a.headline}
                                 </p>
                               ))}

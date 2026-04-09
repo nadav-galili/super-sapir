@@ -3,7 +3,7 @@ import { useAnimatedCounter } from '@/hooks/useAnimatedCounter'
 import { formatCurrencyShort } from '@/lib/format'
 import { Activity } from 'lucide-react'
 
-interface HeroBannerProps {
+interface HeroBannerROGProps {
   totalSales: number
   targetSales: number
   branchCount: number
@@ -33,25 +33,23 @@ function BigGauge({ ratio }: { ratio: number }) {
   const pct = Math.round(ratio * 100)
   const animatedPct = useAnimatedCounter(pct, 1800, 300)
 
-  const color = ratio >= 0.95 ? '#2EC4D5' : ratio >= 0.85 ? '#F6B93B' : '#DC4E59'
+  // Classic ROG colors
+  const color = ratio >= 0.95 ? '#22C55E' : ratio >= 0.85 ? '#F97316' : '#EF4444'
 
   return (
     <div className="relative" style={{ width: size, height: size }}>
-      {/* Outer pulse ring */}
       <motion.div
         className="absolute -inset-3 rounded-full border-2 opacity-0"
         style={{ borderColor: color }}
         animate={{ opacity: [0, 0.3, 0], scale: [0.95, 1.05, 0.95] }}
         transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
       />
-      {/* Glow */}
       <div
         className="absolute -inset-4 rounded-full blur-xl opacity-20"
         style={{ background: color }}
       />
 
       <svg className="w-full h-full -rotate-90 relative z-10" viewBox={`0 0 ${size} ${size}`}>
-        {/* Track */}
         <circle
           cx={size / 2} cy={size / 2} r={r}
           fill="none" stroke="rgba(255,255,255,0.1)"
@@ -63,7 +61,6 @@ function BigGauge({ ratio }: { ratio: number }) {
             stroke="rgba(255,255,255,0.08)" strokeWidth={1}
           />
         ))}
-        {/* Progress */}
         <motion.circle
           cx={size / 2} cy={size / 2} r={r}
           fill="none" stroke={color}
@@ -107,7 +104,7 @@ function StatPill({ label, value, delay, mono }: StatPillProps) {
   )
 }
 
-export function HeroBanner({ totalSales, targetSales, branchCount, categoryCount }: HeroBannerProps) {
+export function HeroBannerROG({ totalSales, targetSales, branchCount, categoryCount }: HeroBannerROGProps) {
   const ratio = targetSales > 0 ? totalSales / targetSales : 1
   const animatedSales = useAnimatedCounter(totalSales, 1600, 200)
 
@@ -118,23 +115,18 @@ export function HeroBanner({ totalSales, targetSales, branchCount, categoryCount
       transition={{ duration: 0.5 }}
       className="relative rounded-[20px] overflow-hidden shadow-xl"
     >
-      {/* Background image */}
       <div className="absolute inset-0">
         <img
           src="/hero/supermarket-banner.jpg"
           alt=""
           className="w-full h-full object-cover scale-105"
         />
-        {/* Multi-layer gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-l from-black/85 via-black/70 to-black/50" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
       </div>
 
-      {/* Content */}
       <div className="relative z-10 p-6 sm:p-10 flex flex-col sm:flex-row items-center gap-8 sm:gap-12 min-h-[280px]">
-        {/* Right (RTL) — Title + stats */}
         <div className="flex-1 text-right">
-          {/* Live indicator */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -142,7 +134,7 @@ export function HeroBanner({ totalSales, targetSales, branchCount, categoryCount
             className="inline-flex items-center gap-2 bg-white/[0.08] backdrop-blur-sm rounded-full px-3 py-1 mb-4 border border-white/[0.08]"
           >
             <motion.span
-              className="w-2 h-2 rounded-full bg-[#2EC4D5]"
+              className="w-2 h-2 rounded-full bg-[#22C55E]"
               animate={{ opacity: [1, 0.3, 1] }}
               transition={{ duration: 2, repeat: Infinity }}
             />
@@ -170,7 +162,6 @@ export function HeroBanner({ totalSales, targetSales, branchCount, categoryCount
             סקירת ביצועים כלל-רשתית לכל הקטגוריות והסניפים
           </motion.p>
 
-          {/* Stat pills */}
           <div className="flex flex-wrap gap-3">
             <StatPill label="מכירות רשת" value={formatCurrencyShort(animatedSales)} delay={0.45} mono />
             <StatPill label="סניפים" value={branchCount} delay={0.55} />
@@ -178,7 +169,6 @@ export function HeroBanner({ totalSales, targetSales, branchCount, categoryCount
           </div>
         </div>
 
-        {/* Left (RTL) — Big gauge */}
         <motion.div
           initial={{ opacity: 0, scale: 0.7 }}
           animate={{ opacity: 1, scale: 1 }}

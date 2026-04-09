@@ -38,17 +38,17 @@ function SupplierKpiCard({ title, icon, iconBg, accentColor, name, stats, delay 
           <span className={`inline-flex items-center justify-center w-6 h-6 rounded-lg ${iconBg}`}>
             {icon}
           </span>
-          <h4 className="text-[13px] font-bold text-[#2D3748]">{title}</h4>
+          <h4 className="text-[20px] font-bold text-[#2D3748]">{title}</h4>
         </div>
         <div className="flex items-center gap-2 mb-2">
           <SupplierLogo name={name} size={32} />
-          <p className="text-base font-bold text-[#2D3748]">{name}</p>
+          <p className="text-xl font-bold text-[#2D3748]">{name}</p>
         </div>
         <div className="flex flex-wrap gap-x-4 gap-y-1">
           {stats.map(s => (
             <div key={s.label}>
-              <p className="text-[10px] text-[#A0AEC0]">{s.label}</p>
-              <p className="text-sm font-bold font-mono" style={{ color: s.color }} dir="ltr">{s.value}</p>
+              <p className="text-[15px] text-[#A0AEC0]">{s.label}</p>
+              <p className="text-lg font-bold font-mono" style={{ color: s.color }} dir="ltr">{s.value}</p>
             </div>
           ))}
         </div>
@@ -94,8 +94,8 @@ export function CategorySuppliersDashboard({ categoryId, categoryName }: Categor
           <Award className="w-5 h-5 text-[#F6B93B]" />
         </div>
         <div>
-          <h2 className="text-lg font-bold text-[#2D3748]">ספקים — {categoryName}</h2>
-          <p className="text-[13px] text-[#A0AEC0] mt-0.5">{suppliers.length} ספקים פעילים בקטגוריה</p>
+          <h2 className="text-2xl font-bold text-[#2D3748]">ספקים — {categoryName}</h2>
+          <p className="text-[20px] text-[#A0AEC0] mt-0.5">{suppliers.length} ספקים פעילים בקטגוריה</p>
         </div>
         <div className="flex-1 h-px bg-gradient-to-l from-transparent via-[#FFE8DE] to-transparent ms-3" />
       </motion.div>
@@ -156,17 +156,17 @@ export function CategorySuppliersDashboard({ categoryId, categoryName }: Categor
         >
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-base text-[#2D3748]">מכירות מול יעד — לפי ספק</CardTitle>
+              <CardTitle className="text-xl text-[#2D3748]">מכירות מול יעד — לפי ספק</CardTitle>
             </CardHeader>
             <CardContent>
               <div dir="ltr" className="h-[260px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }} barGap={2}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#FFF0EA" />
-                    <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                    <XAxis dataKey="name" tick={{ fontSize: 16 }} />
                     <YAxis
                       tickFormatter={(v: number) => formatCurrencyShort(v)}
-                      tick={{ fontSize: 11 }}
+                      tick={{ fontSize: 16 }}
                       width={55}
                     />
                     <Tooltip
@@ -174,7 +174,7 @@ export function CategorySuppliersDashboard({ categoryId, categoryName }: Categor
                         formatCurrencyShort(value as number),
                         name === 'sales' ? 'מכירות' : 'יעד',
                       ]}
-                      contentStyle={{ direction: 'rtl', borderRadius: '8px', fontSize: 12 }}
+                      contentStyle={{ direction: 'rtl', borderRadius: '8px', fontSize: 18 }}
                     />
                     <Bar dataKey="sales" radius={[4, 4, 0, 0]} animationDuration={1000} barSize={18}>
                       {chartData.map((_, i) => (
@@ -197,11 +197,11 @@ export function CategorySuppliersDashboard({ categoryId, categoryName }: Categor
         >
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-base text-[#2D3748]">פירוט ספקים</CardTitle>
+              <CardTitle className="text-xl text-[#2D3748]">פירוט ספקים</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="overflow-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-                <table className="w-full text-sm">
+                <table className="w-full text-lg">
                   <thead>
                     <tr className="border-b border-[#FFF0EA]">
                       <th className="px-3 py-2 text-right font-medium text-[#A0AEC0]">ספק</th>
@@ -229,11 +229,11 @@ export function CategorySuppliersDashboard({ categoryId, categoryName }: Categor
                           <td className="px-3 py-2.5">
                             <div className="flex items-center gap-2">
                               <SupplierLogo name={sup.name} size={24} />
-                              <span className="font-medium text-[#2D3748] text-[13px]">{sup.name}</span>
+                              <span className="font-medium text-[#2D3748] text-[20px]">{sup.name}</span>
                             </div>
                           </td>
                           <td className="px-3 py-2.5 min-w-[100px]">
-                            <span className="font-semibold font-mono text-[13px]" dir="ltr">{formatCurrencyShort(sup.sales)}</span>
+                            <span className="font-semibold font-mono text-[20px]" dir="ltr">{formatCurrencyShort(sup.sales)}</span>
                             <div className="mt-1 h-1 w-full bg-[#FFF0EA] rounded-full overflow-hidden">
                               <motion.div
                                 className="h-full rounded-full"
@@ -245,19 +245,19 @@ export function CategorySuppliersDashboard({ categoryId, categoryName }: Categor
                             </div>
                           </td>
                           <td className="px-3 py-2.5">
-                            <span className={`font-semibold font-mono text-[13px] ${hit ? 'text-[#2EC4D5]' : 'text-[#DC4E59]'}`} dir="ltr">
+                            <span className={`font-semibold font-mono text-[20px] ${hit ? 'text-[#2EC4D5]' : 'text-[#DC4E59]'}`} dir="ltr">
                               {targetPct.toFixed(1)}%
                             </span>
                           </td>
                           <td className="px-3 py-2.5">
-                            <span className="font-mono text-[13px]" dir="ltr">{sup.grossProfitPercent}%</span>
+                            <span className="font-mono text-[20px]" dir="ltr">{sup.grossProfitPercent}%</span>
                           </td>
                           <td className="px-3 py-2.5">
-                            <span className={`font-mono text-[13px] ${sup.stockoutRate > 3 ? 'text-[#DC4E59] font-semibold' : ''}`} dir="ltr">
+                            <span className={`font-mono text-[20px] ${sup.stockoutRate > 3 ? 'text-[#DC4E59] font-semibold' : ''}`} dir="ltr">
                               {sup.stockoutRate}%
                             </span>
                           </td>
-                          <td className="px-3 py-2.5 text-[13px] text-[#4A5568]">{sup.productCount}</td>
+                          <td className="px-3 py-2.5 text-[20px] text-[#4A5568]">{sup.productCount}</td>
                         </motion.tr>
                       )
                     })}

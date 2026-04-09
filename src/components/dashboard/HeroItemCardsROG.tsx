@@ -5,7 +5,7 @@ import { formatCurrencyShort } from '@/lib/format'
 import { getCategorySummaries } from '@/data/mock-categories'
 import { getTopStockoutItem, getTopSalesItem, getTopPromoItem } from '@/data/mock-items'
 
-interface HeroItemCardsProps {
+interface HeroItemCardsROGProps {
   vertical?: boolean
 }
 
@@ -30,11 +30,9 @@ function SpotlightCard({ title, icon, iconBg, imageUrl, productName, categoryNam
       whileHover={{ y: -4, boxShadow: `${accentColor}22 0px 12px 32px` }}
       className="relative overflow-hidden rounded-[16px] bg-white border border-warm-border group cursor-default"
     >
-      {/* Accent top bar */}
       <div className="h-1 w-full" style={{ background: `linear-gradient(90deg, ${accentColor}, ${accentColor}80)` }} />
 
       <div className="p-4 sm:p-5">
-        {/* Header */}
         <div className="flex items-center gap-2 mb-3">
           <span className={`inline-flex items-center justify-center w-7 h-7 rounded-lg ${iconBg}`}>
             {icon}
@@ -42,7 +40,6 @@ function SpotlightCard({ title, icon, iconBg, imageUrl, productName, categoryNam
           <h3 className="text-lg font-bold text-[#2D3748]">{title}</h3>
         </div>
 
-        {/* Product row */}
         <div className="flex items-center gap-4">
           <motion.div
             whileHover={{ scale: 1.05 }}
@@ -74,7 +71,7 @@ function SpotlightCard({ title, icon, iconBg, imageUrl, productName, categoryNam
   )
 }
 
-export function HeroItemCards({ vertical }: HeroItemCardsProps) {
+export function HeroItemCardsROG({ vertical }: HeroItemCardsROGProps) {
   const stockoutItem = useMemo(() => getTopStockoutItem(), [])
   const topSalesItem = useMemo(() => getTopSalesItem(), [])
   const topPromoItem = useMemo(() => getTopPromoItem(), [])
@@ -92,46 +89,46 @@ export function HeroItemCards({ vertical }: HeroItemCardsProps) {
     <div className={vertical ? 'flex flex-col gap-4' : 'grid grid-cols-1 lg:grid-cols-3 gap-4'}>
       <SpotlightCard
         title="פריט חסר — הפסד מוביל"
-        icon={<AlertTriangle className="w-4 h-4 text-[#DC4E59]" />}
-        iconBg="bg-[#DC4E59]/10"
+        icon={<AlertTriangle className="w-4 h-4 text-[#EF4444]" />}
+        iconBg="bg-[#EF4444]/10"
         imageUrl="/hero/stockout-meat.jpg"
         productName={stockoutItem.nameHe}
         categoryName={stockoutCatName}
-        accentColor="#DC4E59"
+        accentColor="#EF4444"
         delay={0.1}
         stats={[
-          { label: 'ימי חוסר', value: `${stockoutItem.stockoutDays} ימים`, color: '#DC4E59' },
-          { label: 'הפסד רווח', value: formatCurrencyShort(stockoutItem.estimatedProfitLoss), color: '#DC4E59' },
+          { label: 'ימי חוסר', value: `${stockoutItem.stockoutDays} ימים`, color: '#EF4444' },
+          { label: 'הפסד רווח', value: formatCurrencyShort(stockoutItem.estimatedProfitLoss), color: '#EF4444' },
         ]}
       />
 
       <SpotlightCard
         title="פריט מוביל מכירות"
-        icon={<TrendingUp className="w-4 h-4 text-[#2EC4D5]" />}
-        iconBg="bg-[#2EC4D5]/10"
+        icon={<TrendingUp className="w-4 h-4 text-[#22C55E]" />}
+        iconBg="bg-[#22C55E]/10"
         imageUrl="/hero/top-sales-cola.jpg"
         productName={topSalesItem.nameHe}
         categoryName={topSalesCatName}
-        accentColor="#2EC4D5"
+        accentColor="#22C55E"
         delay={0.2}
         stats={[
-          { label: 'מכירות חודשי', value: formatCurrencyShort(topSalesItem.monthlySales), color: '#2EC4D5' },
-          { label: 'מול שנה שעברה', value: `${yoyChange >= 0 ? '+' : ''}${yoyChange.toFixed(1)}%`, color: yoyChange >= 0 ? '#2EC4D5' : '#DC4E59' },
+          { label: 'מכירות חודשי', value: formatCurrencyShort(topSalesItem.monthlySales), color: '#22C55E' },
+          { label: 'מול שנה שעברה', value: `${yoyChange >= 0 ? '+' : ''}${yoyChange.toFixed(1)}%`, color: yoyChange >= 0 ? '#22C55E' : '#EF4444' },
         ]}
       />
 
       <SpotlightCard
         title="פריט מוביל מבצעים"
-        icon={<Megaphone className="w-4 h-4 text-[#6C5CE7]" />}
-        iconBg="bg-[#6C5CE7]/10"
+        icon={<Megaphone className="w-4 h-4 text-[#F97316]" />}
+        iconBg="bg-[#F97316]/10"
         imageUrl="/hero/promo-tissue.jpg"
         productName={topPromoItem.nameHe}
         categoryName={promoCatName}
-        accentColor="#6C5CE7"
+        accentColor="#F97316"
         delay={0.3}
         stats={[
-          { label: 'מכירות מבצע', value: formatCurrencyShort(topPromoItem.promoSales ?? 0), color: '#6C5CE7' },
-          { label: 'עלייה במבצע', value: `+${topPromoItem.promoUpliftPercent ?? 0}%`, color: '#6C5CE7' },
+          { label: 'מכירות מבצע', value: formatCurrencyShort(topPromoItem.promoSales ?? 0), color: '#F97316' },
+          { label: 'עלייה במבצע', value: `+${topPromoItem.promoUpliftPercent ?? 0}%`, color: '#F97316' },
         ]}
       />
     </div>

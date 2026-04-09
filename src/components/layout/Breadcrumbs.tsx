@@ -15,7 +15,7 @@ export function Breadcrumbs({ items }: BreadcrumbsProps) {
   if (items.length <= 1) return null
 
   return (
-    <nav className="flex items-center gap-1 text-sm text-muted-foreground mb-4">
+    <nav className="flex items-center gap-1 text-lg text-muted-foreground mb-4">
       {items.map((item, i) => (
         <motion.div
           key={item.label}

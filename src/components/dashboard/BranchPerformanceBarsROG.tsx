@@ -3,10 +3,11 @@ import { useNavigate } from '@tanstack/react-router'
 import { motion } from 'motion/react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatCurrencyShort } from '@/lib/format'
-import { CHART_COLORS } from '@/lib/colors'
 import { allBranches } from '@/data/mock-branches'
 
-export function BranchPerformanceBars() {
+const ROG_CHART_COLORS = ['#EF4444', '#22C55E', '#F97316', '#FBBF24', '#A0AEC0']
+
+export function BranchPerformanceBarsROG() {
   const navigate = useNavigate()
 
   const top5 = useMemo(() =>
@@ -22,7 +23,7 @@ export function BranchPerformanceBars() {
     <Card>
       <CardHeader className="pb-3">
         <div className="flex items-center gap-3">
-          <div className="w-1 h-6 rounded-full bg-[#6C5CE7]" />
+          <div className="w-1 h-6 rounded-full bg-[#F97316]" />
           <CardTitle className="text-2xl text-[#2D3748]">ביצועי סניפים מובילים</CardTitle>
         </div>
       </CardHeader>
@@ -30,7 +31,7 @@ export function BranchPerformanceBars() {
         {top5.map((branch, i) => {
           const pct = (branch.metrics.totalSales / maxSales) * 100
           const growth = branch.metrics.yoyGrowth
-          const color = CHART_COLORS[i]
+          const color = ROG_CHART_COLORS[i]
 
           return (
             <motion.div
@@ -44,7 +45,7 @@ export function BranchPerformanceBars() {
               <div className="flex items-center justify-between mb-1.5">
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: color }} />
-                  <span className="text-lg font-medium text-[#2D3748] group-hover:text-[#DC4E59] transition-colors">
+                  <span className="text-lg font-medium text-[#2D3748] group-hover:text-[#EF4444] transition-colors">
                     {branch.name}
                   </span>
                 </div>
@@ -53,7 +54,7 @@ export function BranchPerformanceBars() {
                     {formatCurrencyShort(branch.metrics.totalSales)}
                   </span>
                   <span
-                    className={`text-base font-semibold font-mono ${growth >= 0 ? 'text-[#2EC4D5]' : 'text-[#DC4E59]'}`}
+                    className={`text-base font-semibold font-mono ${growth >= 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}
                     dir="ltr"
                   >
                     {growth >= 0 ? '+' : ''}{growth.toFixed(1)}%

@@ -4,14 +4,15 @@ import { motion } from 'motion/react'
 import { formatCurrencyShort } from '@/lib/format'
 import type { CategorySnapshot } from '@/lib/category-manager'
 
-interface CategorySpotlightProps {
+interface CategorySpotlightROGProps {
   snapshots: CategorySnapshot[]
 }
 
+// Classic ROG status badges
 const STATUS_BADGE = {
-  opportunity: { label: 'ביצוע טוב', bg: 'bg-[#2EC4D5]' },
-  danger: { label: 'חריג', bg: 'bg-[#DC4E59]' },
-  monitor: { label: 'במעקב', bg: 'bg-[#F6B93B]' },
+  opportunity: { label: 'ביצוע טוב', bg: 'bg-[#22C55E]' },
+  danger: { label: 'חריג', bg: 'bg-[#EF4444]' },
+  monitor: { label: 'במעקב', bg: 'bg-[#F97316]' },
 } as const
 
 function SpotlightCard({ snap, index }: { snap: CategorySnapshot; index: number }) {
@@ -28,7 +29,6 @@ function SpotlightCard({ snap, index }: { snap: CategorySnapshot; index: number 
       onClick={() => navigate({ to: '/category-manager/$categoryId', params: { categoryId: snap.category.id } })}
       className="relative rounded-[16px] overflow-hidden cursor-pointer group h-[200px]"
     >
-      {/* Background image */}
       <div className="absolute inset-0">
         <img
           src={`/categories/${snap.category.id}.png`}
@@ -38,14 +38,12 @@ function SpotlightCard({ snap, index }: { snap: CategorySnapshot; index: number 
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10" />
       </div>
 
-      {/* Status badge */}
       <div className="absolute top-3 start-3 z-10">
         <span className={`${badge.bg} text-white text-[15px] font-bold px-2.5 py-1 rounded-full`}>
           {badge.label}
         </span>
       </div>
 
-      {/* Content */}
       <div className="absolute bottom-0 inset-x-0 p-4 z-10">
         <h3 className="text-2xl font-bold text-white mb-1">{snap.category.name}</h3>
         <div className="flex items-center gap-4">
@@ -57,7 +55,7 @@ function SpotlightCard({ snap, index }: { snap: CategorySnapshot; index: number 
           </div>
           <div>
             <p className="text-[15px] text-white/50">שינוי שנתי</p>
-            <p className={`text-lg font-bold font-mono ${yoyPositive ? 'text-[#2EC4D5]' : 'text-[#DC4E59]'}`} dir="ltr">
+            <p className={`text-lg font-bold font-mono ${yoyPositive ? 'text-[#22C55E]' : 'text-[#EF4444]'}`} dir="ltr">
               {yoyPositive ? '+' : ''}{snap.category.yoyChange}%
             </p>
           </div>
@@ -67,8 +65,7 @@ function SpotlightCard({ snap, index }: { snap: CategorySnapshot; index: number 
   )
 }
 
-export function CategorySpotlight({ snapshots }: CategorySpotlightProps) {
-  // Show top 4 categories by sales
+export function CategorySpotlightROG({ snapshots }: CategorySpotlightROGProps) {
   const top = useMemo(() =>
     [...snapshots].sort((a, b) => b.category.sales - a.category.sales).slice(0, 4),
     [snapshots],

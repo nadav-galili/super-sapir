@@ -9,14 +9,15 @@ interface GaugeKPI {
   format: 'currency' | 'percent'
 }
 
-interface KPIGaugeRowProps {
+interface KPIGaugeRowROGProps {
   items: GaugeKPI[]
 }
 
+// Classic Red / Orange / Green
 function getScoreColor(ratio: number): string {
-  if (ratio >= 0.95) return '#2EC4D5'
-  if (ratio >= 0.85) return '#F6B93B'
-  return '#DC4E59'
+  if (ratio >= 0.95) return '#22C55E'
+  if (ratio >= 0.85) return '#F97316'
+  return '#EF4444'
 }
 
 function DarkGauge({ ratio, size = 80, strokeWidth = 7 }: { ratio: number; size?: number; strokeWidth?: number }) {
@@ -28,7 +29,6 @@ function DarkGauge({ ratio, size = 80, strokeWidth = 7 }: { ratio: number; size?
 
   return (
     <div className="relative" style={{ width: size, height: size }}>
-      {/* Glow ring */}
       <div
         className="absolute inset-0 rounded-full blur-md opacity-30"
         style={{ background: `radial-gradient(circle, ${color}40, transparent 70%)` }}
@@ -85,7 +85,7 @@ function DarkGaugeCard({ item, index }: { item: GaugeKPI; index: number }) {
   )
 }
 
-export function KPIGaugeRow({ items }: KPIGaugeRowProps) {
+export function KPIGaugeRowROG({ items }: KPIGaugeRowROGProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -99,18 +99,18 @@ export function KPIGaugeRow({ items }: KPIGaugeRowProps) {
         ))}
       </div>
 
-      {/* Color legend */}
+      {/* Color legend — ROG */}
       <div className="flex items-center justify-center gap-5 mt-4 text-[16px] text-white/40">
         <span className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-[#2EC4D5] inline-block" />
+          <span className="w-2 h-2 rounded-full bg-[#22C55E] inline-block" />
           95%+
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-[#F6B93B] inline-block" />
+          <span className="w-2 h-2 rounded-full bg-[#F97316] inline-block" />
           85-95%
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-[#DC4E59] inline-block" />
+          <span className="w-2 h-2 rounded-full bg-[#EF4444] inline-block" />
           &lt;85%
         </span>
       </div>

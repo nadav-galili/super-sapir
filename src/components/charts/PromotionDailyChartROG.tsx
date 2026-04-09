@@ -10,11 +10,11 @@ import type { ChainPromotion } from '@/data/mock-chain-promotions'
 
 const DAYS_HE = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳']
 
-interface PromotionDailyChartProps {
+interface PromotionDailyChartROGProps {
   promotion: ChainPromotion
 }
 
-export function PromotionDailyChart({ promotion }: PromotionDailyChartProps) {
+export function PromotionDailyChartROG({ promotion }: PromotionDailyChartROGProps) {
   const data = useMemo(() =>
     DAYS_HE.map((day, i) => ({
       day,
@@ -27,7 +27,6 @@ export function PromotionDailyChart({ promotion }: PromotionDailyChartProps) {
   return (
     <Card className="h-full">
       <CardContent className="p-4 sm:p-5">
-        {/* Promotion details header */}
         <div className="flex items-start gap-3 mb-4">
           <div className="w-14 h-14 rounded-[10px] overflow-hidden border border-warm-border shrink-0 bg-[#FDF8F6]">
             <img
@@ -50,7 +49,6 @@ export function PromotionDailyChart({ promotion }: PromotionDailyChartProps) {
           </div>
         </div>
 
-        {/* Chart */}
         <AnimatePresence mode="wait">
           <motion.div
             key={promotion.id}
@@ -88,9 +86,9 @@ export function PromotionDailyChart({ promotion }: PromotionDailyChartProps) {
                   <Line
                     type="monotone"
                     dataKey="actual"
-                    stroke="#DC4E59"
+                    stroke="#EF4444"
                     strokeWidth={2.5}
-                    dot={{ r: 3, fill: '#DC4E59' }}
+                    dot={{ r: 3, fill: '#EF4444' }}
                     animationDuration={800}
                   />
                 </ComposedChart>
@@ -99,10 +97,9 @@ export function PromotionDailyChart({ promotion }: PromotionDailyChartProps) {
           </motion.div>
         </AnimatePresence>
 
-        {/* Legend */}
         <div className="flex items-center justify-center gap-4 mt-2 text-base text-[#4A5568]">
           <span className="flex items-center gap-1.5">
-            <span className="w-4 h-0.5 bg-[#DC4E59] inline-block rounded" />
+            <span className="w-4 h-0.5 bg-[#EF4444] inline-block rounded" />
             מכירות בפועל
           </span>
           <span className="flex items-center gap-1.5">

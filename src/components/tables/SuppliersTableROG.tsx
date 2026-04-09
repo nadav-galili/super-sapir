@@ -5,7 +5,9 @@ import { formatCurrencyShort } from '@/lib/format'
 import { SupplierLogo } from '@/components/dashboard/SupplierLogo'
 import { getTopSuppliers } from '@/data/mock-suppliers'
 
-export function SuppliersTable() {
+const ROG_CHART_COLORS = ['#EF4444', '#22C55E', '#F97316', '#FBBF24', '#A0AEC0']
+
+export function SuppliersTableROG() {
   const suppliers = useMemo(() => getTopSuppliers(), [])
   const maxSales = suppliers[0]?.sales ?? 1
 
@@ -18,7 +20,7 @@ export function SuppliersTable() {
       <Card>
         <CardHeader className="pb-3">
           <div className="flex items-center gap-3">
-            <div className="w-1 h-6 rounded-full bg-[#F6B93B]" />
+            <div className="w-1 h-6 rounded-full bg-[#F97316]" />
             <CardTitle className="text-2xl text-[#2D3748]">10 ספקים מובילים</CardTitle>
           </div>
         </CardHeader>
@@ -39,6 +41,7 @@ export function SuppliersTable() {
                   const targetPct = sup.targetSales > 0 ? (sup.sales / sup.targetSales) * 100 : 100
                   const hitTarget = targetPct >= 100
                   const barPct = (sup.sales / maxSales) * 100
+                  const barColor = ROG_CHART_COLORS[i % ROG_CHART_COLORS.length]
 
                   return (
                     <motion.tr
@@ -61,7 +64,8 @@ export function SuppliersTable() {
                         </span>
                         <div className="mt-1 h-1.5 w-full bg-[#FFF0EA] rounded-full overflow-hidden">
                           <motion.div
-                            className="h-full rounded-full bg-[#F6B93B]"
+                            className="h-full rounded-full"
+                            style={{ backgroundColor: barColor }}
                             initial={{ width: 0 }}
                             animate={{ width: `${barPct}%` }}
                             transition={{ duration: 0.8, delay: 0.2 + i * 0.05, ease: 'easeOut' }}
@@ -70,7 +74,7 @@ export function SuppliersTable() {
                       </td>
                       <td className="px-3 py-2.5">
                         <span
-                          className={`font-semibold font-mono text-[20px] ${hitTarget ? 'text-[#2EC4D5]' : 'text-[#DC4E59]'}`}
+                          className={`font-semibold font-mono text-[20px] ${hitTarget ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}
                           dir="ltr"
                         >
                           {targetPct.toFixed(1)}%

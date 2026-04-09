@@ -3,13 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatCurrencyShort } from '@/lib/format'
 import type { ChainPromotion } from '@/data/mock-chain-promotions'
 
-interface PromotionsTableProps {
+interface PromotionsTableROGProps {
   promotions: ChainPromotion[]
   selectedId: string
   onSelect: (promotion: ChainPromotion) => void
 }
 
-export function PromotionsTable({ promotions, selectedId, onSelect }: PromotionsTableProps) {
+export function PromotionsTableROG({ promotions, selectedId, onSelect }: PromotionsTableROGProps) {
   const top10 = promotions.slice(0, 10)
 
   return (
@@ -43,7 +43,7 @@ export function PromotionsTable({ promotions, selectedId, onSelect }: Promotions
                     onClick={() => onSelect(promo)}
                     className={`cursor-pointer border-b border-[#FFF0EA] transition-colors ${
                       isSelected
-                        ? 'bg-[#DC4E59]/5 border-s-2 border-s-[#DC4E59]'
+                        ? 'bg-[#EF4444]/5 border-s-2 border-s-[#EF4444]'
                         : 'hover:bg-[#FDF8F6]'
                     }`}
                   >
@@ -62,7 +62,7 @@ export function PromotionsTable({ promotions, selectedId, onSelect }: Promotions
                       {formatCurrencyShort(promo.sales)}
                     </td>
                     <td className="py-2 px-3 whitespace-nowrap">
-                      <span className="text-[#2EC4D5] font-semibold text-[20px]" dir="ltr">
+                      <span className="text-[#22C55E] font-semibold text-[20px]" dir="ltr">
                         +{promo.upliftPercent}%
                       </span>
                     </td>

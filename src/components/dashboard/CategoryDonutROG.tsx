@@ -2,14 +2,16 @@ import { useMemo } from 'react'
 import { motion } from 'motion/react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useAnimatedCounter } from '@/hooks/useAnimatedCounter'
-import { CHART_COLORS } from '@/lib/colors'
 import type { CategorySnapshot } from '@/lib/category-manager'
 
-interface CategoryDonutProps {
+interface CategoryDonutROGProps {
   snapshots: CategorySnapshot[]
 }
 
-export function CategoryDonut({ snapshots }: CategoryDonutProps) {
+// ROG chart colors
+const ROG_CHART_COLORS = ['#EF4444', '#22C55E', '#F97316', '#FBBF24', '#A0AEC0']
+
+export function CategoryDonutROG({ snapshots }: CategoryDonutROGProps) {
   const { slices, segments, totalYoy, size, strokeWidth, r, circumference } = useMemo(() => {
     const sorted = [...snapshots].sort((a, b) => b.category.sales - a.category.sales)
     const totalSales = sorted.reduce((sum, s) => sum + s.category.sales, 0)
@@ -21,19 +23,18 @@ export function CategoryDonut({ snapshots }: CategoryDonutProps) {
         label: s.category.name,
         value: s.category.sales,
         pct: totalSales > 0 ? (s.category.sales / totalSales) * 100 : 0,
-        color: CHART_COLORS[i],
+        color: ROG_CHART_COLORS[i],
       })),
       ...(otherSales > 0
         ? [{
           label: 'אחרים',
           value: otherSales,
           pct: totalSales > 0 ? (otherSales / totalSales) * 100 : 0,
-          color: CHART_COLORS[4],
+          color: ROG_CHART_COLORS[4],
         }]
         : []),
     ]
 
-    // Average YoY
     const avgYoy = sorted.length > 0
       ? sorted.reduce((sum, s) => sum + s.category.yoyChange, 0) / sorted.length
       : 0
@@ -62,13 +63,12 @@ export function CategoryDonut({ snapshots }: CategoryDonutProps) {
     <Card>
       <CardHeader className="pb-3">
         <div className="flex items-center gap-3">
-          <div className="w-1 h-6 rounded-full bg-[#2EC4D5]" />
+          <div className="w-1 h-6 rounded-full bg-[#22C55E]" />
           <CardTitle className="text-2xl text-[#2D3748]">חלוקת מכירות</CardTitle>
         </div>
       </CardHeader>
       <CardContent>
         <div className="flex items-center gap-6">
-          {/* Donut */}
           <div className="relative shrink-0" style={{ width: size, height: size }}>
             <svg className="w-full h-full -rotate-90" viewBox={`0 0 ${size} ${size}`}>
               <circle
@@ -89,16 +89,14 @@ export function CategoryDonut({ snapshots }: CategoryDonutProps) {
                 />
               ))}
             </svg>
-            {/* Center text */}
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className={`text-3xl font-bold font-mono ${yoyPositive ? 'text-[#2EC4D5]' : 'text-[#DC4E59]'}`} dir="ltr">
+              <span className={`text-3xl font-bold font-mono ${yoyPositive ? 'text-[#22C55E]' : 'text-[#EF4444]'}`} dir="ltr">
                 {yoyPositive ? '+' : '-'}{animatedYoy.toFixed(1)}%
               </span>
               <span className="text-[15px] text-[#A0AEC0]">שנתי</span>
             </div>
           </div>
 
-          {/* Legend */}
           <div className="flex-1 space-y-2.5">
             {slices.map((slice) => (
               <div key={slice.label} className="flex items-center justify-between">

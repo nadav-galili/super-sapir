@@ -15,6 +15,9 @@ RetailSkillz Analytics — a B2B SaaS retail management dashboard MVP built for 
 
 ## Architecture
 
+> Full file tree, route map, and ROG vs Modern palette reference: **[architecture.md](./architecture.md)**
+> Regenerate the tree with: `tree -I 'node_modules|dist|.git|.vite|.playwright-mcp|.netlify|.tanstack|promo-video|.ralph-tui|.cline|.agents|.claude' --dirsfirst`
+
 **Runtime**: Bun + Vite 8 + React 19 + TypeScript
 **Routing**: TanStack Router (file-based, auto-generates `src/routeTree.gen.ts`)
 **Styling**: Tailwind CSS 3 + shadcn/ui pattern (components in `src/components/ui/`)
@@ -107,6 +110,27 @@ Light, minimal, clean, modern — shadcn aesthetic. Plenty of white space, good 
 - Bar chart columns: `4px`
 - Progress bars: `5px`
 
+**Font Sizes — Target Scale**
+
+All dashboard text should use these sizes (approximately 1.5x standard):
+
+| Role | Size | Tailwind |
+|------|------|----------|
+| Tiny labels (badge, tag, caption) | 15px | `text-[15px]` |
+| Small labels (stat label, legend) | 16px | `text-[16px]` |
+| Secondary text (descriptions) | 18px | `text-[18px]` or `text-lg` |
+| Table body / cell values | 20px | `text-[20px]` |
+| Body text / card descriptions | 18–20px | `text-lg` or `text-xl` |
+| Card titles | 20–24px | `text-xl` or `text-2xl` |
+| Section headers | 24px | `text-2xl` |
+| Page titles | 36px | `text-4xl` |
+| Hero headings | 48–60px | `text-5xl` / `text-6xl` |
+| KPI values (large numbers) | 30–36px | `text-3xl` / `text-4xl` |
+
+Chart axis/tooltip font sizes: `fontSize: 16` for axes, `fontSize: 18` for tooltips and X-axis labels.
+
+Do NOT use `text-[10px]`, `text-[11px]`, `text-[12px]`, `text-[13px]`, `text-xs` (12px), or `text-sm` (14px) — these are too small for the dashboard aesthetic.
+
 ### Motion
 
 Light motion only:
@@ -118,7 +142,7 @@ Light motion only:
 
 - Use Lucide icons for all iconography
 - Maintain generous white space and clear visual hierarchy
-- Keep font sizes >= 14px for body text
+- Keep font sizes >= 15px for labels, >= 18px for body text (see Font Sizes table above)
 - Make layouts mobile responsive
 - Use the warm color palette above consistently across all screens
 
@@ -130,10 +154,16 @@ Light motion only:
 - No heavy shadows or busy patterns
 - No dark mode
 - No border-radius > `rounded-2xl`
-- No cramped spacing or tiny fonts (< 14px)
+- No cramped spacing or tiny fonts (< 15px)
 
 
-## Descisions 
+## Changelog
+
+All changes are tracked in **[changelog.md](./changelog.md)**.
+
+**You MUST update `changelog.md` before finishing any session that modifies code.** Append entries under today's date in reverse-chronological order. Each entry: short description + files/areas affected. Group related changes under a `###` heading.
+
+## Decisions 
 When choosing between alternatives that affect more than today's task — a library, an architecture pattern, an API design, or deciding NOT to do something — log it:
 
 File: /decisions/YYYY-MM-DD-{topic}.md
