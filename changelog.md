@@ -8,6 +8,10 @@
 
 ## 2026-04-09
 
+### Fix: `/update-docs-and-commit` slash command not appearing
+- Added `.md` extension to `.claude/commands/update-docs-and-commit` — Claude Code requires `.md` for custom slash commands
+- **Files:** `.claude/commands/update-docs-and-commit.md`
+
 ### Text scaling — 1.5x font enlargement across category-manager screens
 - Scaled all text sizes ~1.5x on `category-manager-v2` and `category-manager/$categoryId` pages
 - Smallest fonts (`text-[10px]`–`text-[13px]`) bumped to `text-[15px]`–`text-[20px]`
