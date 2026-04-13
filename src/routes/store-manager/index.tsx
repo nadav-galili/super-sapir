@@ -18,8 +18,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { BranchInfoBar } from '@/components/store-manager/BranchInfoBar'
-import { AIBriefingCard } from '@/components/store-manager/AIBriefingCard'
-import { AIRecommendations } from '@/components/store-manager/AIRecommendations'
+import { StoreAIBriefing } from '@/components/store-manager/StoreAIBriefing'
 import { useAIAnalysis } from '@/hooks/useAIAnalysis'
 import { ComplianceCards } from '@/components/store-manager/ComplianceCards'
 import { haderaFullReport, type DepartmentSales, type MonthlyDetail } from '@/data/hadera-real'
@@ -686,16 +685,14 @@ function OverviewStaffingCard({ hr }: { hr: Report['hr'] }) {
 }
 
 function AIView({ report, branchId }: { report: Report; branchId: string }) {
-  const { briefing, recommendations, isLoading, isStreaming, error, retry } = useAIAnalysis(branchId, report)
+  const { rows, isLoading, isStreaming, error, retry } = useAIAnalysis(branchId, report)
   return (
-    <div className="space-y-5">
-      <AIBriefingCard briefing={briefing} isLoading={isLoading} isStreaming={isStreaming} error={error} onRetry={retry} />
-      <AIRecommendations recommendations={recommendations} isLoading={isLoading} isStreaming={isStreaming} />
-    </div>
+    <StoreAIBriefing rows={rows} isLoading={isLoading} isStreaming={isStreaming} error={error} onRetry={retry} />
   )
 }
 
-function OverviewView({ report }: { report: Report }) {
+function OverviewView({ report, branchId }: { report: Report; branchId: string }) {
+  const { rows, isLoading, isStreaming, error, retry } = useAIAnalysis(branchId, report)
   const s = report.sales
   const kpis: KPICardData[] = [
     { label: 'מכירות סניף', value: s.total.current, format: 'currencyShort', trend: s.total.vsTarget, trendLabel: `יעד: ${formatCurrencyShort(s.total.target)}`, gradient: s.total.vsTarget >= 0 ? 'blue' : 'red' },
@@ -705,6 +702,8 @@ function OverviewView({ report }: { report: Report }) {
   ]
   return (
     <div className="space-y-5">
+      <StoreAIBriefing rows={rows} isLoading={isLoading} isStreaming={isStreaming} error={error} onRetry={retry} />
+
       <KPIGrid items={kpis} columns={4} />
 
       <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-5">
@@ -922,7 +921,7 @@ function StoreManagerPage() {
 
       case 'alerts': return <AlertsView report={report} />
       case 'ai': return <AIView report={report} branchId={selectedBranchId} />
-      default: return <OverviewView report={report} />
+      default: return <OverviewView report={report} branchId={selectedBranchId} />
     }
   }
 

@@ -16,6 +16,15 @@
 - Added `insight` type handling to the Netlify serverless function SSE parser and fallback JSON parser
 - **Files:** `CategoryAIBriefing.tsx`, `useCategoryAIAnalysis.ts`, `category-ai.ts`, `netlify/functions/ai-analyze.ts`
 
+### Store manager AI analysis — table format on overview page
+- Converted store manager AI from old briefing/recommendation bullet format to the 3-column traffic-light table (subject, recommendation, status)
+- Created `StoreAIBriefing` table component in `src/components/store-manager/StoreAIBriefing.tsx`
+- Rewrote `useAIAnalysis` hook to use `insight` item type with custom store-manager system prompt (no longer relies on the default prompt)
+- Added AI table to the top of `store-manager?view=overview` page; also used in the dedicated `?view=ai` tab
+- Old `AIBriefingCard` and `AIRecommendations` components are no longer imported (can be cleaned up later)
+- Handles stale browser cache gracefully (old `briefing`/`recommendations` format detected and cleared)
+- **Files:** `StoreAIBriefing.tsx`, `useAIAnalysis.ts`, `store-manager/index.tsx`
+
 ### Chain-level AI analysis on category-manager-v2 page
 - Added `ChainAIBriefing` component with the same 3-column traffic-light table format (subject, recommendation, status)
 - Created `useChainAIAnalysis` hook — calls the same Netlify AI endpoint with a trade-manager-focused system prompt

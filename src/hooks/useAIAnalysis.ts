@@ -1,17 +1,56 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { buildPromptPayload, type AIAnalysisResult, type BriefingItem, type Recommendation } from '@/lib/ai'
+import { buildPromptPayload } from '@/lib/ai'
 import { getFromCache, setInCache, removeFromCache } from '@/lib/ai-cache'
 import type { BranchFullReport } from '@/data/hadera-real'
+import type { CategoryInsightRow } from '@/lib/category-ai'
 
-function getCached(branchId: string): AIAnalysisResult | null {
-  return getFromCache<AIAnalysisResult>(`branch:${branchId}`)
+export type StoreInsightRow = CategoryInsightRow
+
+export interface StoreAIResult {
+  rows: StoreInsightRow[]
 }
+
+function getCached(branchId: string): StoreAIResult | null {
+  return getFromCache<StoreAIResult>(`branch:${branchId}`)
+}
+
+const STORE_SYSTEM_PROMPT = `אתה יועץ אנליטיקה לרשת סופר ספיר. אתה מנתח דוחות ניהוליים של סניפים ומספק תובנות ממוקדות פעולה בעברית.
+
+פורמט פלט: שורת JSON אחת לכל פריט (JSONL). כל שורה חייבת להיות אובייקט JSON תקין ושלם.
+אין לעטוף באובייקט חיצוני. אין markdown. אין טקסט מלבד שורות ה-JSON.
+
+פלט בדיוק 4 שורות, כל שורה מייצגת נושא שונה לניתוח.
+
+פורמט כל שורה:
+{"type":"insight","subject":"נושא הניתוח","recommendation":"המלצה קונקרטית לפעולה","status":"red"}
+
+ערכי status (רמזור):
+- "red" — דחוף, דורש טיפול מיידי
+- "yellow" — בינוני, דורש תשומת לב
+- "green" — מצב טוב, להמשיך במסלול
+
+כללים:
+- פלט רק שורות JSON, ללא טקסט נוסף
+- אובייקט JSON אחד בכל שורה
+- כל הטקסט בעברית
+- התמקד בפריטים קריטיים וממוקדי פעולה עבור מנהל הסניף
+- ציין מספרים ספציפיים מהדוח
+- נושא = תחום הניתוח (לדוגמה: עמידה ביעדי מכירות, כוח אדם, מלאי וחוסרים, איכות ותפעול)
+- המלצה = פעולה ספציפית עם מספרים ופרטים
+- ודא שיש מגוון סטטוסים (לא הכל אדום או ירוק)
+
+שפה ונימה:
+- השתמש בשפה מקצועית, מכבדת ועניינית
+- אין להשתמש במילים פוגעניות, משפילות או שליליות כמו: מפגר, כושל, נכשל, גרוע, איום, עלוב
+- במקום "מפגר ביעד" אמור "לא עומד ביעד" או "מתחת ליעד"
+- במקום "כושל" אמור "דורש שיפור" או "מציג ביצועים נמוכים"
+- שמור על טון בונה ומכוון לפתרון — לא ביקורתי או שיפוטי`
 
 export function useAIAnalysis(branchId: string, report: BranchFullReport) {
   const cached = getCached(branchId)
-  const [briefing, setBriefing] = useState<BriefingItem[]>(cached?.briefing ?? [])
-  const [recommendations, setRecommendations] = useState<Recommendation[]>(cached?.recommendations ?? [])
-  const [isLoading, setIsLoading] = useState(!cached)
+  const hasValidCache = cached != null && Array.isArray(cached.rows)
+  const [rows, setRows] = useState<StoreInsightRow[]>(hasValidCache ? cached.rows : [])
+  const [isLoading, setIsLoading] = useState(!hasValidCache)
   const [isStreaming, setIsStreaming] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const abortRef = useRef<AbortController | null>(null)
@@ -20,15 +59,20 @@ export function useAIAnalysis(branchId: string, report: BranchFullReport) {
     setIsLoading(true)
     setIsStreaming(false)
     setError(null)
-    setBriefing([])
-    setRecommendations([])
+    setRows([])
 
     try {
       const payload = buildPromptPayload(report)
+      const userPrompt = `נתח את הדוח הניהולי הבא של סניף ותן תדריך בוקר עם פריטים ממוקדי פעולה.\n\n${JSON.stringify(payload, null, 2)}`
+
       const response = await fetch('/.netlify/functions/ai-analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ payload }),
+        body: JSON.stringify({
+          payload,
+          systemPrompt: STORE_SYSTEM_PROMPT,
+          userPrompt,
+        }),
         signal,
       })
 
@@ -37,9 +81,7 @@ export function useAIAnalysis(branchId: string, report: BranchFullReport) {
         throw new Error(err.error ?? `HTTP ${response.status}`)
       }
 
-      if (!response.body) {
-        throw new Error('No response body')
-      }
+      if (!response.body) throw new Error('No response body')
 
       setIsLoading(false)
       setIsStreaming(true)
@@ -47,8 +89,7 @@ export function useAIAnalysis(branchId: string, report: BranchFullReport) {
       const reader = response.body.getReader()
       const decoder = new TextDecoder()
       let buffer = ''
-      const collectedBriefing: BriefingItem[] = []
-      const collectedRecs: Recommendation[] = []
+      const collectedRows: StoreInsightRow[] = []
 
       while (true) {
         const { done, value } = await reader.read()
@@ -66,31 +107,23 @@ export function useAIAnalysis(branchId: string, report: BranchFullReport) {
           if (data === '[DONE]') continue
 
           let item
-          try {
-            item = JSON.parse(data)
-          } catch {
-            continue // skip malformed SSE data
-          }
+          try { item = JSON.parse(data) } catch { continue }
 
           if (item.type === 'error') {
             setError(item.message ?? 'שגיאת AI')
             break
           }
 
-          if (item.type === 'briefing' && item.data) {
-            collectedBriefing.push(item.data)
-            setBriefing([...collectedBriefing])
-          } else if (item.type === 'recommendation' && item.data) {
-            collectedRecs.push(item.data)
-            setRecommendations([...collectedRecs])
+          if (item.type === 'insight' && item.data) {
+            collectedRows.push(item.data)
+            setRows([...collectedRows])
           }
         }
       }
 
       if (!signal.aborted) {
-        // Only cache if we got actual results
-        if (collectedBriefing.length > 0 || collectedRecs.length > 0) {
-          setInCache(`branch:${branchId}`, { briefing: collectedBriefing, recommendations: collectedRecs })
+        if (collectedRows.length > 0) {
+          setInCache(`branch:${branchId}`, { rows: collectedRows })
         } else if (!error) {
           setError('ניתוח AI לא החזיר תוצאות')
         }
@@ -108,14 +141,14 @@ export function useAIAnalysis(branchId: string, report: BranchFullReport) {
 
   useEffect(() => {
     const stored = getCached(branchId)
-    if (stored) {
-      setBriefing(stored.briefing)
-      setRecommendations(stored.recommendations)
+    if (stored && Array.isArray(stored.rows)) {
+      setRows(stored.rows)
       setIsLoading(false)
       setIsStreaming(false)
       setError(null)
       return
     }
+    if (stored) removeFromCache(`branch:${branchId}`)
 
     abortRef.current?.abort()
     const controller = new AbortController()
@@ -134,8 +167,7 @@ export function useAIAnalysis(branchId: string, report: BranchFullReport) {
   }, [branchId, fetchAnalysis])
 
   return {
-    briefing: briefing.length > 0 ? briefing : null,
-    recommendations: recommendations.length > 0 ? recommendations : null,
+    rows: rows.length > 0 ? rows : null,
     isLoading,
     isStreaming,
     error,
