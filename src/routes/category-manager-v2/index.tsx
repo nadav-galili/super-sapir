@@ -18,6 +18,7 @@ import { BranchComparisonChart } from '@/components/charts/BranchComparisonChart
 import { SectionHeader } from '@/components/dashboard/SectionHeader'
 import { SuppliersTable } from '@/components/tables/SuppliersTable'
 import { SupplierSpotlightCards } from '@/components/dashboard/SupplierSpotlightCards'
+import { ChainAIBriefing } from '@/components/dashboard/ChainAIBriefing'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { allBranches } from '@/data/mock-branches'
 import { getCategorySummaries } from '@/data/mock-categories'
@@ -109,6 +110,8 @@ function CategoryManagerV2Page() {
         branchCount={allBranches.length}
         categoryCount={categorySnapshots.length}
       />
+
+      <ChainAIBriefing />
 
       <div className="flex justify-end">
         <TimePeriodFilter value={period} onChange={setPeriod} />

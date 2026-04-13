@@ -16,6 +16,14 @@
 - Added `insight` type handling to the Netlify serverless function SSE parser and fallback JSON parser
 - **Files:** `CategoryAIBriefing.tsx`, `useCategoryAIAnalysis.ts`, `category-ai.ts`, `netlify/functions/ai-analyze.ts`
 
+### Chain-level AI analysis on category-manager-v2 page
+- Added `ChainAIBriefing` component with the same 3-column traffic-light table format (subject, recommendation, status)
+- Created `useChainAIAnalysis` hook — calls the same Netlify AI endpoint with a trade-manager-focused system prompt
+- Created `buildChainPromptPayload()` in `chain-ai.ts` — aggregates chain KPIs, top 10 categories, top 12 suppliers, all promotions, and anomaly detection
+- System prompt focuses on categories, suppliers, promotions and trade strategy — explicitly excludes individual store analysis
+- Placed at top of page, right after the hero banner
+- **Files:** `ChainAIBriefing.tsx`, `useChainAIAnalysis.ts`, `chain-ai.ts`, `category-manager-v2/index.tsx`
+
 ### Category sales trend chart — realistic target crossing & color-coded dots
 - Normalized the target line to sit at the same level as actual sales (was ~50% below due to data mismatch), then applied per-month deterministic variation so the target naturally crosses above/below sales bars
 - Added `getMonthlyPerformanceFactors()` — seeded hash per categoryId produces ±8% per-month variation, giving each category a unique crossing pattern
