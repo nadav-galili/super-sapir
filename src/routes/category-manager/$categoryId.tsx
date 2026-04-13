@@ -50,6 +50,35 @@ const ALERT_CONFIG: Record<AlertKind, { label: string; color: string; bg: string
 // Seasonal weights for monthly target distribution: higher in holiday/summer months
 const SEASONAL_WEIGHTS = [0.88, 0.85, 0.95, 1.08, 1.02, 1.05, 1.04, 1.00, 1.10, 1.06, 0.98, 0.99]
 
+// Per-month performance variation so sales naturally cross above/below target
+// Seeded by categoryId for deterministic results per category
+function getMonthlyPerformanceFactors(categoryId: string): number[] {
+  let hash = 0
+  for (let i = 0; i < categoryId.length; i++) {
+    hash = ((hash << 5) - hash + categoryId.charCodeAt(i)) | 0
+  }
+  return Array.from({ length: 12 }, (_, i) => {
+    const x = Math.sin(hash * (i + 1) * 0.7831 + i * 2.419) * 0.5 + 0.5 // 0..1
+    return 0.92 + x * 0.16 // range: 0.92..1.08
+  })
+}
+
+function TargetDot(props: { cx?: number; cy?: number; payload?: { sales: number; target: number } }) {
+  const { cx, cy, payload } = props
+  if (cx == null || cy == null || !payload) return null
+  const above = payload.sales >= payload.target
+  return (
+    <circle
+      cx={cx}
+      cy={cy}
+      r={5}
+      fill={above ? '#2EC4D5' : '#DC4E59'}
+      stroke="#fff"
+      strokeWidth={2}
+    />
+  )
+}
+
 function CategoryDrillDown() {
   const { categoryId } = Route.useParams()
   const categoryName = DEPARTMENT_NAMES[categoryId] ?? categoryId
@@ -102,11 +131,19 @@ function CategoryDrillDown() {
     const avgStockout = +(totalStockout / count).toFixed(1)
     const targetAchievement = totalTarget > 0 ? ((totalSales - totalTarget) / totalTarget) * 100 : 0
 
-    const chartData = monthlyTrend.map((sales, i) => ({
-      month: MONTHS_HE[i],
-      sales: Math.round(sales / 1000),
-      target: Math.round(monthlyTarget[i] / 1000),
-    }))
+    // Normalize target to sit at the same level as actual sales,
+    // then apply per-month variation so the target crosses above/below
+    const totalMonthSales = monthlyTrend.reduce((s, v) => s + v, 0)
+    const totalMonthTarget = monthlyTarget.reduce((s, v) => s + v, 0)
+    const targetScale = totalMonthTarget > 0 ? totalMonthSales / totalMonthTarget : 1
+    const perfFactors = getMonthlyPerformanceFactors(categoryId)
+    const chartData = monthlyTrend.map((sales, i) => {
+      const salesK = Math.round(sales / 1000)
+      // Scale target up to sales level, then shift with per-month factor
+      const normalizedTarget = monthlyTarget[i] * targetScale * perfFactors[i]
+      const targetK = Math.round(normalizedTarget / 1000)
+      return { month: MONTHS_HE[i], sales: salesK, target: targetK }
+    })
 
     // Derive branch alerts
     const networkAvgMargin = avgMargin
@@ -287,7 +324,7 @@ function CategoryDrillDown() {
                     stroke="#F6B93B"
                     strokeWidth={1.5}
                     strokeDasharray="4 4"
-                    dot={{ r: 3, fill: '#F6B93B' }}
+                    dot={<TargetDot />}
                     animationDuration={1500}
                     animationBegin={300}
                   />

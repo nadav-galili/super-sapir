@@ -16,6 +16,12 @@
 - Added `insight` type handling to the Netlify serverless function SSE parser and fallback JSON parser
 - **Files:** `CategoryAIBriefing.tsx`, `useCategoryAIAnalysis.ts`, `category-ai.ts`, `netlify/functions/ai-analyze.ts`
 
+### Category sales trend chart — realistic target crossing & color-coded dots
+- Normalized the target line to sit at the same level as actual sales (was ~50% below due to data mismatch), then applied per-month deterministic variation so the target naturally crosses above/below sales bars
+- Added `getMonthlyPerformanceFactors()` — seeded hash per categoryId produces ±8% per-month variation, giving each category a unique crossing pattern
+- Replaced static yellow dots on the target line with custom `TargetDot` component: green (`#2EC4D5`) when sales >= target, red (`#DC4E59`) when below
+- **Files:** `src/routes/category-manager/$categoryId.tsx`
+
 ---
 
 ## 2026-04-09
