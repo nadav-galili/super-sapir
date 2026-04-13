@@ -6,6 +6,18 @@
 
 ---
 
+## 2026-04-13
+
+### Category AI analysis — table format with traffic-light status
+- Replaced the category AI briefing (bullet list + recommendation cards) with a 3-column table: נושא (subject), המלצה (recommendation), סטטוס (traffic light: red/yellow/green)
+- Updated system prompt to request 3-4 insight rows with subject/recommendation/status format
+- New `CategoryInsightRow` type replaces `BriefingItem` + `Recommendation` in the category AI flow
+- Updated `useCategoryAIAnalysis` hook to parse `insight` items instead of `briefing`/`recommendation`
+- Added `insight` type handling to the Netlify serverless function SSE parser and fallback JSON parser
+- **Files:** `CategoryAIBriefing.tsx`, `useCategoryAIAnalysis.ts`, `category-ai.ts`, `netlify/functions/ai-analyze.ts`
+
+---
+
 ## 2026-04-09
 
 ### Time period filter across all dashboard data

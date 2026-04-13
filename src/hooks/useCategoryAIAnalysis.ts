@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { buildCategoryPromptPayload, type CategoryAIResult, type BriefingItem, type Recommendation } from '@/lib/category-ai'
+import { buildCategoryPromptPayload, type CategoryAIResult, type CategoryInsightRow } from '@/lib/category-ai'
 import { getFromCache, setInCache, removeFromCache } from '@/lib/ai-cache'
 
 function getCached(categoryId: string): CategoryAIResult | null {
@@ -11,18 +11,15 @@ const CATEGORY_SYSTEM_PROMPT = `אתה יועץ אנליטיקה למנהל קט
 פורמט פלט: שורת JSON אחת לכל פריט (JSONL). כל שורה חייבת להיות אובייקט JSON תקין ושלם.
 אין לעטוף באובייקט חיצוני. אין markdown. אין טקסט מלבד שורות ה-JSON.
 
-תחילה פלט פריטי תדריך (4-6), ואחר כך המלצות (2-3).
+פלט בדיוק 3-4 שורות, כל שורה מייצגת נושא שונה לניתוח.
 
-פורמט שורת תדריך:
-{"type":"briefing","priority":1,"icon":"alert","text":"תיאור התובנה"}
+פורמט כל שורה:
+{"type":"insight","subject":"נושא הניתוח","recommendation":"המלצה קונקרטית לפעולה","status":"red"}
 
-ערכי icon אפשריים: alert, trend, target, staff, quality
-
-פורמט שורת המלצה:
-{"type":"recommendation","title":"כותרת","description":"תיאור מפורט","impact":"high","category":"sales","estimatedEffect":"אומדן השפעה"}
-
-ערכי impact: high, medium, low
-ערכי category: sales, operations, hr, compliance
+ערכי status (רמזור):
+- "red" — דחוף, דורש טיפול מיידי
+- "yellow" — בינוני, דורש תשומת לב
+- "green" — מצב טוב, להמשיך במסלול
 
 כללים:
 - פלט רק שורות JSON, ללא טקסט נוסף
@@ -31,7 +28,9 @@ const CATEGORY_SYSTEM_PROMPT = `אתה יועץ אנליטיקה למנהל קט
 - התמקד בניתוח ספקים: חריגות יעדים, שיעורי חוסרים, רווחיות, ומגמות
 - ציין שמות ספקים ומספרים ספציפיים
 - הצע פעולות קונקרטיות שמנהל קטגוריה יכול לנקוט
-- דרג לפי דחיפות (priority 1 = הדחוף ביותר)
+- נושא = תחום הניתוח (לדוגמה: עמידה ביעדים, חוסרים במלאי, רווחיות ספקים, מגמת מכירות)
+- המלצה = פעולה ספציפית עם מספרים ופרטים
+- ודא שיש מגוון סטטוסים (לא הכל אדום או ירוק)
 
 שפה ונימה:
 - השתמש בשפה מקצועית, מכבדת ועניינית
@@ -43,9 +42,9 @@ const CATEGORY_SYSTEM_PROMPT = `אתה יועץ אנליטיקה למנהל קט
 
 export function useCategoryAIAnalysis(categoryId: string) {
   const cached = getCached(categoryId)
-  const [briefing, setBriefing] = useState<BriefingItem[]>(cached?.briefing ?? [])
-  const [recommendations, setRecommendations] = useState<Recommendation[]>(cached?.recommendations ?? [])
-  const [isLoading, setIsLoading] = useState(!cached)
+  const hasValidCache = cached != null && Array.isArray(cached.rows)
+  const [rows, setRows] = useState<CategoryInsightRow[]>(hasValidCache ? cached.rows : [])
+  const [isLoading, setIsLoading] = useState(!hasValidCache)
   const [isStreaming, setIsStreaming] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const abortRef = useRef<AbortController | null>(null)
@@ -54,8 +53,7 @@ export function useCategoryAIAnalysis(categoryId: string) {
     setIsLoading(true)
     setIsStreaming(false)
     setError(null)
-    setBriefing([])
-    setRecommendations([])
+    setRows([])
 
     try {
       const categoryPayload = buildCategoryPromptPayload(categoryId)
@@ -85,8 +83,7 @@ export function useCategoryAIAnalysis(categoryId: string) {
       const reader = response.body.getReader()
       const decoder = new TextDecoder()
       let buffer = ''
-      const collectedBriefing: BriefingItem[] = []
-      const collectedRecs: Recommendation[] = []
+      const collectedRows: CategoryInsightRow[] = []
 
       while (true) {
         const { done, value } = await reader.read()
@@ -111,19 +108,16 @@ export function useCategoryAIAnalysis(categoryId: string) {
             break
           }
 
-          if (item.type === 'briefing' && item.data) {
-            collectedBriefing.push(item.data)
-            setBriefing([...collectedBriefing])
-          } else if (item.type === 'recommendation' && item.data) {
-            collectedRecs.push(item.data)
-            setRecommendations([...collectedRecs])
+          if (item.type === 'insight' && item.data) {
+            collectedRows.push(item.data)
+            setRows([...collectedRows])
           }
         }
       }
 
       if (!signal.aborted) {
-        if (collectedBriefing.length > 0 || collectedRecs.length > 0) {
-          setInCache(`category:${categoryId}`, { briefing: collectedBriefing, recommendations: collectedRecs })
+        if (collectedRows.length > 0) {
+          setInCache(`category:${categoryId}`, { rows: collectedRows })
         } else if (!error) {
           setError('ניתוח AI לא החזיר תוצאות')
         }
@@ -141,14 +135,15 @@ export function useCategoryAIAnalysis(categoryId: string) {
 
   useEffect(() => {
     const stored = getCached(categoryId)
-    if (stored) {
-      setBriefing(stored.briefing)
-      setRecommendations(stored.recommendations)
+    if (stored && Array.isArray(stored.rows)) {
+      setRows(stored.rows)
       setIsLoading(false)
       setIsStreaming(false)
       setError(null)
       return
     }
+    // Stale cache with old format — clear it
+    if (stored) removeFromCache(`category:${categoryId}`)
 
     abortRef.current?.abort()
     const controller = new AbortController()
@@ -167,8 +162,7 @@ export function useCategoryAIAnalysis(categoryId: string) {
   }, [categoryId, fetchAnalysis])
 
   return {
-    briefing: briefing.length > 0 ? briefing : null,
-    recommendations: recommendations.length > 0 ? recommendations : null,
+    rows: rows.length > 0 ? rows : null,
     isLoading,
     isStreaming,
     error,

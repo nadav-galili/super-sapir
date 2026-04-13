@@ -1,35 +1,14 @@
 import { motion, AnimatePresence } from 'motion/react'
-import { Sparkles, AlertTriangle, TrendingUp, Target, Users, Shield, RefreshCw, Loader2 } from 'lucide-react'
+import { Sparkles, RefreshCw, Loader2 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { TypingText } from '@/components/ui/typing-text'
 import { useCategoryAIAnalysis } from '@/hooks/useCategoryAIAnalysis'
+import type { CategoryInsightRow } from '@/lib/category-ai'
 
-const ICON_MAP = {
-  alert: AlertTriangle,
-  trend: TrendingUp,
-  target: Target,
-  staff: Users,
-  quality: Shield,
-}
-
-const PRIORITY_COLORS: Record<number, string> = {
-  1: '#DC4E59',
-  2: '#F6B93B',
-  3: '#2EC4D5',
-  4: '#2EC4D5',
-  5: '#2EC4D5',
-}
-
-const IMPACT_COLORS: Record<string, string> = {
-  high: '#DC4E59',
-  medium: '#F6B93B',
-  low: '#2EC4D5',
-}
-
-const IMPACT_LABELS: Record<string, string> = {
-  high: 'השפעה גבוהה',
-  medium: 'השפעה בינונית',
-  low: 'השפעה נמוכה',
+const STATUS_CONFIG: Record<CategoryInsightRow['status'], { label: string; color: string; bg: string }> = {
+  red: { label: 'דחוף', color: '#DC4E59', bg: 'rgba(220, 78, 89, 0.12)' },
+  yellow: { label: 'דורש תשומת לב', color: '#F6B93B', bg: 'rgba(246, 185, 59, 0.12)' },
+  green: { label: 'תקין', color: '#2EC4D5', bg: 'rgba(46, 196, 213, 0.12)' },
 }
 
 interface CategoryAIBriefingProps {
@@ -38,9 +17,9 @@ interface CategoryAIBriefingProps {
 }
 
 export function CategoryAIBriefing({ categoryId, categoryName }: CategoryAIBriefingProps) {
-  const { briefing, recommendations, isLoading, isStreaming, error, retry } = useCategoryAIAnalysis(categoryId)
+  const { rows, isLoading, isStreaming, error, retry } = useCategoryAIAnalysis(categoryId)
 
-  const showShimmer = isLoading && !briefing
+  const showShimmer = isLoading && !rows
 
   return (
     <motion.div
@@ -64,12 +43,12 @@ export function CategoryAIBriefing({ categoryId, categoryName }: CategoryAIBrief
                 <Sparkles className="w-4 h-4 text-white" />
               )}
             </div>
-            ניתוח AI — ספקים {categoryName}
+            ניתוח AI — {categoryName}
             <span className="text-[15px] font-medium px-2 py-0.5 rounded-full" style={{ background: 'linear-gradient(135deg, #6C5CE7, #8B7FED)', color: 'white' }}>
               AI
             </span>
             {isStreaming && (
-              <span className="text-[15px] text-[#6C5CE7] font-medium animate-pulse me-auto">מנתח ספקים...</span>
+              <span className="text-[15px] text-[#6C5CE7] font-medium animate-pulse me-auto">מנתח...</span>
             )}
           </CardTitle>
         </CardHeader>
@@ -78,13 +57,11 @@ export function CategoryAIBriefing({ categoryId, categoryName }: CategoryAIBrief
           {/* Shimmer skeleton */}
           {showShimmer && (
             <div className="space-y-3">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="flex items-start gap-3">
-                  <div className="w-5 h-5 rounded ai-shimmer shrink-0" />
-                  <div className="flex-1 space-y-1.5">
-                    <div className="h-3.5 ai-shimmer rounded" style={{ width: `${85 - i * 8}%`, animationDelay: `${i * 0.15}s` }} />
-                    {i < 3 && <div className="h-3 ai-shimmer rounded" style={{ width: `${60 - i * 8}%`, animationDelay: `${i * 0.15 + 0.1}s` }} />}
-                  </div>
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="flex items-center gap-4">
+                  <div className="flex-1 h-4 ai-shimmer rounded" style={{ width: '25%', animationDelay: `${i * 0.15}s` }} />
+                  <div className="flex-[2] h-4 ai-shimmer rounded" style={{ width: '50%', animationDelay: `${i * 0.15 + 0.05}s` }} />
+                  <div className="w-20 h-6 ai-shimmer rounded-full" style={{ animationDelay: `${i * 0.15 + 0.1}s` }} />
                 </div>
               ))}
             </div>
@@ -104,39 +81,60 @@ export function CategoryAIBriefing({ categoryId, categoryName }: CategoryAIBrief
             </div>
           )}
 
-          {/* Briefing items */}
-          {briefing && briefing.length > 0 && (
-            <div className="space-y-3">
-              <AnimatePresence mode="popLayout">
-                {briefing
-                  .sort((a, b) => a.priority - b.priority)
-                  .map((item, i) => {
-                    const Icon = ICON_MAP[item.icon] ?? AlertTriangle
-                    const color = PRIORITY_COLORS[item.priority] ?? '#2EC4D5'
-                    return (
-                      <motion.div
-                        key={`${item.priority}-${i}`}
-                        initial={{ opacity: 0, x: 20, height: 0 }}
-                        animate={{ opacity: 1, x: 0, height: 'auto' }}
-                        transition={{ duration: 0.4, ease: 'easeOut' }}
-                        className="flex items-start gap-3 overflow-hidden"
-                      >
-                        <div
-                          className="w-5 h-5 rounded flex items-center justify-center shrink-0 mt-0.5"
-                          style={{ background: `${color}20` }}
+          {/* Insights table */}
+          {rows && rows.length > 0 && (
+            <div className="overflow-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+              <table className="w-full min-w-[500px] text-lg">
+                <thead>
+                  <tr className="border-b-2 border-[#FFF0EA]">
+                    <th className="px-3 py-2.5 text-right font-semibold text-[#2D3748] text-[18px]">נושא</th>
+                    <th className="px-3 py-2.5 text-right font-semibold text-[#2D3748] text-[18px]">המלצה</th>
+                    <th className="px-3 py-2.5 text-center font-semibold text-[#2D3748] text-[18px]">סטטוס</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <AnimatePresence mode="popLayout">
+                    {rows.map((row, i) => {
+                      const cfg = STATUS_CONFIG[row.status] ?? STATUS_CONFIG.yellow
+                      return (
+                        <motion.tr
+                          key={`${row.subject}-${i}`}
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.4, delay: i * 0.08 }}
+                          className="border-b border-[#FFF0EA] hover:bg-[#FDF8F6] transition-colors"
                         >
-                          <Icon className="w-3.5 h-3.5" style={{ color }} />
-                        </div>
-                        <p className="text-lg text-[#4A5568] leading-relaxed">
-                          <TypingText text={item.text} animate={isStreaming} />
-                        </p>
-                      </motion.div>
-                    )
-                  })}
-              </AnimatePresence>
+                          <td className="px-3 py-3 align-top">
+                            <span className="font-bold text-[20px] text-[#2D3748]">
+                              <TypingText text={row.subject} animate={isStreaming} />
+                            </span>
+                          </td>
+                          <td className="px-3 py-3 align-top">
+                            <span className="text-[18px] text-[#4A5568] leading-relaxed">
+                              <TypingText text={row.recommendation} animate={isStreaming} />
+                            </span>
+                          </td>
+                          <td className="px-3 py-3 align-top text-center">
+                            <span
+                              className="inline-flex items-center gap-1.5 text-[15px] font-bold px-3 py-1 rounded-full"
+                              style={{ backgroundColor: cfg.bg, color: cfg.color }}
+                            >
+                              <span
+                                className="w-2.5 h-2.5 rounded-full shrink-0"
+                                style={{ backgroundColor: cfg.color }}
+                              />
+                              {cfg.label}
+                            </span>
+                          </td>
+                        </motion.tr>
+                      )
+                    })}
+                  </AnimatePresence>
+                </tbody>
+              </table>
 
               {isStreaming && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2 ps-8">
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center justify-center gap-2 py-3">
                   <div className="flex gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#6C5CE7] animate-bounce" style={{ animationDelay: '0ms' }} />
                     <span className="w-1.5 h-1.5 rounded-full bg-[#6C5CE7] animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -145,47 +143,6 @@ export function CategoryAIBriefing({ categoryId, categoryName }: CategoryAIBrief
                 </motion.div>
               )}
             </div>
-          )}
-
-          {/* Recommendations */}
-          {recommendations && recommendations.length > 0 && !isStreaming && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="mt-5 pt-4 border-t border-[#FFF0EA]"
-            >
-              <p className="text-[16px] font-semibold text-[#A0AEC0] uppercase tracking-wider mb-3">המלצות לפעולה</p>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {recommendations.map((rec, i) => {
-                  const impactColor = IMPACT_COLORS[rec.impact] ?? '#2EC4D5'
-                  return (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.1 + i * 0.1 }}
-                      className="rounded-[12px] border border-warm-border p-3"
-                    >
-                      <div className="h-0.5 w-8 rounded-full mb-2" style={{ backgroundColor: impactColor }} />
-                      <p className="text-lg font-bold text-[#2D3748] mb-1">{rec.title}</p>
-                      <p className="text-[18px] text-[#4A5568] leading-relaxed mb-2">{rec.description}</p>
-                      <div className="flex items-center gap-2">
-                        <span
-                          className="text-[15px] font-bold px-2 py-0.5 rounded-full text-white"
-                          style={{ backgroundColor: impactColor }}
-                        >
-                          {IMPACT_LABELS[rec.impact] ?? rec.impact}
-                        </span>
-                        {rec.estimatedEffect && (
-                          <span className="text-[15px] text-[#A0AEC0]">{rec.estimatedEffect}</span>
-                        )}
-                      </div>
-                    </motion.div>
-                  )
-                })}
-              </div>
-            </motion.div>
           )}
         </CardContent>
       </Card>

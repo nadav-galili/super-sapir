@@ -2,13 +2,15 @@ import { allBranches } from '@/data/mock-branches'
 import { getCategorySuppliers } from '@/data/mock-category-suppliers'
 import { DEPARTMENT_NAMES } from '@/data/constants'
 import { formatCurrencyShort } from '@/lib/format'
-import type { BriefingItem, Recommendation } from '@/lib/ai'
 
-export type { BriefingItem, Recommendation }
+export interface CategoryInsightRow {
+  subject: string
+  recommendation: string
+  status: 'red' | 'yellow' | 'green'
+}
 
 export interface CategoryAIResult {
-  briefing: BriefingItem[]
-  recommendations: Recommendation[]
+  rows: CategoryInsightRow[]
 }
 
 export function buildCategoryPromptPayload(categoryId: string) {

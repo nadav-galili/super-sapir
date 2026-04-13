@@ -244,6 +244,10 @@ function formatSSEItem(item: Record<string, unknown>): string | null {
     const { type: _, ...data } = item
     return `data: ${JSON.stringify({ type: 'recommendation', data })}\n\n`
   }
+  if (item.type === 'insight') {
+    const { type: _, ...data } = item
+    return `data: ${JSON.stringify({ type: 'insight', data })}\n\n`
+  }
   console.warn('Unrecognized JSONL item type:', item.type)
   return null
 }
@@ -275,6 +279,12 @@ function tryParseFallbackJSON(text: string): string[] {
   if (Array.isArray(parsed.recommendations)) {
     for (const item of parsed.recommendations) {
       const ev = formatSSEItem({ type: 'recommendation', ...item })
+      if (ev) events.push(ev)
+    }
+  }
+  if (Array.isArray(parsed.rows ?? parsed.insights)) {
+    for (const item of (parsed.rows ?? parsed.insights)) {
+      const ev = formatSSEItem({ type: 'insight', ...item })
       if (ev) events.push(ev)
     }
   }
