@@ -1,6 +1,7 @@
 import { motion } from 'motion/react'
 import { useAnimatedCounter } from '@/hooks/useAnimatedCounter'
 import { formatCurrencyShort } from '@/lib/format'
+import { getKpiStatusColor, KPI_STATUS } from '@/lib/colors'
 
 interface GaugeKPI {
   label: string
@@ -13,17 +14,11 @@ interface KPIGaugeRowProps {
   items: GaugeKPI[]
 }
 
-function getScoreColor(ratio: number): string {
-  if (ratio >= 0.95) return '#2EC4D5'
-  if (ratio >= 0.85) return '#F6B93B'
-  return '#DC4E59'
-}
-
 function DarkGauge({ ratio, size = 80, strokeWidth = 7 }: { ratio: number; size?: number; strokeWidth?: number }) {
   const r = (size - strokeWidth) / 2
   const circumference = 2 * Math.PI * r
   const offset = circumference - (Math.min(ratio, 1) * circumference)
-  const color = getScoreColor(ratio)
+  const color = getKpiStatusColor(ratio)
   const pct = Math.round(ratio * 100)
 
   return (
@@ -61,7 +56,7 @@ function DarkGauge({ ratio, size = 80, strokeWidth = 7 }: { ratio: number; size?
 function DarkGaugeCard({ item, index }: { item: GaugeKPI; index: number }) {
   const ratio = item.target > 0 ? item.value / item.target : 1
   const animatedValue = useAnimatedCounter(item.value, 1400, index * 100)
-  const color = getScoreColor(ratio)
+  const color = getKpiStatusColor(ratio)
 
   const formattedValue = item.format === 'currency'
     ? formatCurrencyShort(animatedValue)
@@ -102,15 +97,15 @@ export function KPIGaugeRow({ items }: KPIGaugeRowProps) {
       {/* Color legend */}
       <div className="flex items-center justify-center gap-5 mt-4 text-[16px] text-white/40">
         <span className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-[#2EC4D5] inline-block" />
+          <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: KPI_STATUS.good }} />
           95%+
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-[#F6B93B] inline-block" />
+          <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: KPI_STATUS.warning }} />
           85-95%
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-[#DC4E59] inline-block" />
+          <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: KPI_STATUS.bad }} />
           &lt;85%
         </span>
       </div>

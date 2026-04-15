@@ -6,6 +6,17 @@
 
 ---
 
+## 2026-04-15
+
+### Global KPI color system — unified traffic-light colors (#13)
+- Created `getKpiStatusColor(ratio)` utility and `KPI_STATUS` constants in `src/lib/colors.ts` as the single source of truth for KPI status colors: good (`#10B981`), warning (`#FBBF24`), bad (`#F43F5E`)
+- Replaced local `getScoreColor()` functions in `KPIGaugeRow.tsx` and `KPIGaugeRowROG.tsx` with the shared utility; updated legend dot colors
+- Replaced inline color ternaries in `HeroBanner.tsx` and `HeroBannerROG.tsx` BigGauge with `getKpiStatusColor()`
+- Updated `STATUS_CONFIG` in `ChainAIBriefing.tsx`, `CategoryAIBriefing.tsx`, and `StoreAIBriefing.tsx` to use `KPI_STATUS` constants
+- Updated `TargetBars.tsx` bar color logic and legend to use the shared utility
+- Updated `CategoryPerformanceTable.tsx` and `CategoryPerformanceTableROG.tsx` status badge and YoY change colors to use `KPI_STATUS` constants with inline styles
+- **Files:** `src/lib/colors.ts`, `KPIGaugeRow.tsx`, `KPIGaugeRowROG.tsx`, `HeroBanner.tsx`, `HeroBannerROG.tsx`, `ChainAIBriefing.tsx`, `CategoryAIBriefing.tsx`, `StoreAIBriefing.tsx`, `TargetBars.tsx`, `CategoryPerformanceTable.tsx`, `CategoryPerformanceTableROG.tsx`
+
 ## 2026-04-13
 
 ### Category AI analysis — table format with traffic-light status

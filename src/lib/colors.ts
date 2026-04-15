@@ -13,6 +13,23 @@ export const PALETTE = {
   separator: '#F5E6DE',
 } as const
 
+// KPI status colors — single source of truth (traffic-light system)
+export const KPI_STATUS = {
+  good: '#10B981',    // emerald green — >=95% of target
+  warning: '#FBBF24', // amber yellow — 85-95% of target
+  bad: '#F43F5E',     // rose red — <85% of target
+} as const
+
+/**
+ * Returns the KPI status color based on a performance ratio (value / target).
+ * >= 0.95 → good (green)  |  >= 0.85 → warning (yellow)  |  < 0.85 → bad (red)
+ */
+export function getKpiStatusColor(ratio: number): string {
+  if (ratio >= 0.95) return KPI_STATUS.good
+  if (ratio >= 0.85) return KPI_STATUS.warning
+  return KPI_STATUS.bad
+}
+
 export function getPerformanceColor(score: number, max = 100): string {
   const ratio = score / max
   if (ratio >= 0.8) return PALETTE.cyan

@@ -1,6 +1,7 @@
 import { motion } from 'motion/react'
 import { useAnimatedCounter } from '@/hooks/useAnimatedCounter'
 import { formatCurrencyShort } from '@/lib/format'
+import { getKpiStatusColor } from '@/lib/colors'
 import { Activity } from 'lucide-react'
 
 interface HeroBannerProps {
@@ -33,7 +34,7 @@ function BigGauge({ ratio }: { ratio: number }) {
   const pct = Math.round(ratio * 100)
   const animatedPct = useAnimatedCounter(pct, 1800, 300)
 
-  const color = ratio >= 0.95 ? '#2EC4D5' : ratio >= 0.85 ? '#F6B93B' : '#DC4E59'
+  const color = getKpiStatusColor(ratio)
 
   return (
     <div className="relative" style={{ width: size, height: size }}>

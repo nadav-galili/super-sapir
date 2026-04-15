@@ -3,6 +3,7 @@ import { Target } from 'lucide-react'
 import { currentMonthYear } from '@/data/constants'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatCurrencyShort } from '@/lib/format'
+import { getKpiStatusColor, KPI_STATUS } from '@/lib/colors'
 import type { SalesData } from '@/data/hadera-real'
 
 interface TargetBarProps {
@@ -17,9 +18,7 @@ interface TargetBarProps {
 function TargetBar({ label, actual, target, vsTarget, ranking, delay = 0 }: TargetBarProps) {
   const pct = Math.min((actual / target) * 100, 100)
 
-  let barColor = '#2EC4D5' // good
-  if (pct < 85) barColor = '#DC4E59' // bad
-  else if (pct < 95) barColor = '#F6B93B' // warning
+  const barColor = getKpiStatusColor(pct / 100)
 
   return (
     <motion.div
@@ -88,15 +87,15 @@ export function TargetBars({ sales }: { sales: SalesData }) {
           {/* Legend */}
           <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[11px] text-[#A0AEC0] pb-2 border-b border-dashed border-warm-separator">
             <span className="flex items-center gap-1.5">
-              <span className="w-3 h-2 rounded-sm" style={{ background: '#2EC4D5' }} />
+              <span className="w-3 h-2 rounded-sm" style={{ background: KPI_STATUS.good }} />
               עמד ביעד (≥95%)
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="w-3 h-2 rounded-sm" style={{ background: '#F6B93B' }} />
+              <span className="w-3 h-2 rounded-sm" style={{ background: KPI_STATUS.warning }} />
               קרוב ליעד (85-95%)
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="w-3 h-2 rounded-sm" style={{ background: '#DC4E59' }} />
+              <span className="w-3 h-2 rounded-sm" style={{ background: KPI_STATUS.bad }} />
               מתחת ליעד (&lt;85%)
             </span>
             <span className="flex items-center gap-1.5">

@@ -2,12 +2,13 @@ import { motion, AnimatePresence } from 'motion/react'
 import { Sparkles, RefreshCw, Loader2 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { TypingText } from '@/components/ui/typing-text'
+import { KPI_STATUS } from '@/lib/colors'
 import type { StoreInsightRow } from '@/hooks/useAIAnalysis'
 
 const STATUS_CONFIG: Record<StoreInsightRow['status'], { label: string; color: string; bg: string }> = {
-  red: { label: 'דחוף', color: '#DC4E59', bg: 'rgba(220, 78, 89, 0.12)' },
-  yellow: { label: 'דורש תשומת לב', color: '#F6B93B', bg: 'rgba(246, 185, 59, 0.12)' },
-  green: { label: 'תקין', color: '#2EC4D5', bg: 'rgba(46, 196, 213, 0.12)' },
+  red: { label: 'דחוף', color: KPI_STATUS.bad, bg: `${KPI_STATUS.bad}1F` },
+  yellow: { label: 'דורש תשומת לב', color: KPI_STATUS.warning, bg: `${KPI_STATUS.warning}1F` },
+  green: { label: 'תקין', color: KPI_STATUS.good, bg: `${KPI_STATUS.good}1F` },
 }
 
 interface StoreAIBriefingProps {

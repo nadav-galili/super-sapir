@@ -8,6 +8,7 @@ import { motion } from 'motion/react'
 import { ArrowUpDown, ExternalLink } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatCurrencyShort } from '@/lib/format'
+import { KPI_STATUS } from '@/lib/colors'
 import type { CategorySnapshot } from '@/lib/category-manager'
 
 interface CategoryPerformanceTableProps {
@@ -15,10 +16,10 @@ interface CategoryPerformanceTableProps {
 }
 
 const STATUS_CONFIG = {
-  opportunity: { label: 'ביצוע טוב', color: 'bg-[#2EC4D5]/10 text-[#2EC4D5] border-[#2EC4D5]/20', barColor: '#2EC4D5' },
-  danger: { label: 'חריג', color: 'bg-[#DC4E59]/10 text-[#DC4E59] border-[#DC4E59]/20', barColor: '#DC4E59' },
-  monitor: { label: 'במעקב', color: 'bg-[#F6B93B]/10 text-[#F6B93B] border-[#F6B93B]/20', barColor: '#F6B93B' },
-} as const
+  opportunity: { label: 'ביצוע טוב', statusColor: KPI_STATUS.good, barColor: KPI_STATUS.good },
+  danger: { label: 'חריג', statusColor: KPI_STATUS.bad, barColor: KPI_STATUS.bad },
+  monitor: { label: 'במעקב', statusColor: KPI_STATUS.warning, barColor: KPI_STATUS.warning },
+}
 
 export function CategoryPerformanceTable({ snapshots }: CategoryPerformanceTableProps) {
   const navigate = useNavigate()
@@ -88,7 +89,8 @@ export function CategoryPerformanceTable({ snapshots }: CategoryPerformanceTable
         const val = getValue() as number
         return (
           <span
-            className={`font-semibold font-mono ${val >= 0 ? 'text-[#2EC4D5]' : 'text-[#DC4E59]'}`}
+            className="font-semibold font-mono"
+            style={{ color: val >= 0 ? KPI_STATUS.good : KPI_STATUS.bad }}
             dir="ltr"
           >
             {val >= 0 ? '+' : ''}{val}%
@@ -115,7 +117,10 @@ export function CategoryPerformanceTable({ snapshots }: CategoryPerformanceTable
       cell: ({ row }) => {
         const cfg = STATUS_CONFIG[row.original.status]
         return (
-          <span className={`inline-block px-2.5 py-0.5 text-[16px] font-semibold rounded-[20px] border ${cfg.color}`}>
+          <span
+            className="inline-block px-2.5 py-0.5 text-[16px] font-semibold rounded-[20px] border"
+            style={{ backgroundColor: `${cfg.statusColor}1A`, color: cfg.statusColor, borderColor: `${cfg.statusColor}33` }}
+          >
             {cfg.label}
           </span>
         )
