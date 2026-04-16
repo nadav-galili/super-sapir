@@ -8,6 +8,27 @@
 
 ## 2026-04-16
 
+### Formats tab: big stores vs city stores comparison (#17)
+- Added `format: 'big' | 'city'` field to `Branch` type
+- Assigned 2 branches as big (Tel Aviv, Rishon LeZion), 10 as city in mock data
+- Created `FormatsOverview` component with two side-by-side cards showing 5 KPIs (sales, gross profit, shrinkage, operational score, satisfaction) as progress bars vs target with YoY delta
+- Connected to `PeriodMultiplierProvider` context — changing time period updates format KPIs
+- KPI status colors use shared `getKpiStatusColor` utility
+- **Files:** `src/data/types.ts`, `src/data/hadera-branch.ts`, `src/data/generators.ts`, `src/data/mock-branches.ts`, `src/components/dashboard/FormatsOverview.tsx`, `src/routes/category-manager/index.tsx`
+
+### Gauge label + tabs/filter layout refactor (#16)
+- Added Hebrew header `כל המדדים מוצגים ביחס ליעד` above the 5-gauge row
+- Moved `TimePeriodFilter` into the same row as tabs (tabs right, filter pinned left via `justify-between`)
+- Reordered tabs to: פורמטים | ביצועי קטגוריות | ספקים | מבצעים
+- Added פורמטים tab trigger (content built in #17)
+- **Files:** `src/routes/category-manager/index.tsx`
+
+### Hero banner redesign: clean gradient, no stock photo (#15)
+- Replaced stock supermarket background image with a clean warm gradient (`#2D3748 → #3D3050 → #DC4E59`)
+- Added subtle decorative radial shapes for premium SaaS aesthetic
+- All functional elements preserved: title, subtitle, live indicator, stat pills, large gauge
+- **Files:** `src/components/dashboard/HeroBanner.tsx`
+
 ### Consolidate 3 category-manager screens into one (#14)
 - Replaced `/category-manager` V1 content with V2 content (AI briefing, period filter, gauges, tabs with categories/suppliers/promotions)
 - Deleted `/category-manager-v2` route directory
