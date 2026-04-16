@@ -7,6 +7,7 @@ export const haderaBranch: Branch = {
   name: 'חדרה',
   branchNumber: 44,
   regionId: 'north',
+  format: 'city',
   lat: 32.4340,
   lng: 34.9196,
   metrics: {

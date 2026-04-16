@@ -17,6 +17,7 @@ import { SectionHeader } from '@/components/dashboard/SectionHeader'
 import { SuppliersTable } from '@/components/tables/SuppliersTable'
 import { SupplierSpotlightCards } from '@/components/dashboard/SupplierSpotlightCards'
 import { ChainAIBriefing } from '@/components/dashboard/ChainAIBriefing'
+import { FormatsOverview } from '@/components/dashboard/FormatsOverview'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { allBranches } from '@/data/mock-branches'
 import { getCategorySummaries } from '@/data/mock-categories'
@@ -152,9 +153,7 @@ function CategoryManagerPage() {
         </div>
 
         <TabsContent value="formats" className="mt-4">
-          <div className="flex items-center justify-center py-16 rounded-[16px] border border-[#FFE8DE] bg-white">
-            <p className="text-xl text-[#A0AEC0] font-medium">בקרוב</p>
-          </div>
+          <FormatsOverview />
         </TabsContent>
 
         <TabsContent value="categories" className="mt-4 space-y-4">

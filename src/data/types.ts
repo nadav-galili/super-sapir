@@ -3,6 +3,7 @@ export interface Branch {
   name: string
   branchNumber: number
   regionId: string
+  format: 'big' | 'city'
   lat: number
   lng: number
   metrics: BranchMetrics

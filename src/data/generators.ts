@@ -114,7 +114,8 @@ export function generateBranch(
   regionId: string,
   lat: number,
   lng: number,
-  scale = 1
+  scale = 1,
+  format: 'big' | 'city' = 'city'
 ): Branch {
   const metrics = generateMetrics(scale)
   return {
@@ -122,6 +123,7 @@ export function generateBranch(
     name,
     branchNumber,
     regionId,
+    format,
     lat,
     lng,
     metrics,
