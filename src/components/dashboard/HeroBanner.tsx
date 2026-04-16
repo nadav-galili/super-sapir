@@ -119,16 +119,25 @@ export function HeroBanner({ totalSales, targetSales, branchCount, categoryCount
       transition={{ duration: 0.5 }}
       className="relative rounded-[20px] overflow-hidden shadow-xl"
     >
-      {/* Background image */}
-      <div className="absolute inset-0">
-        <img
-          src="/hero/supermarket-banner.jpg"
-          alt=""
-          className="w-full h-full object-cover scale-105"
+      {/* Clean gradient background */}
+      <div
+        className="absolute inset-0"
+        style={{ background: 'linear-gradient(135deg, #2D3748 0%, #3D3050 45%, #DC4E59 100%)' }}
+      />
+      {/* Subtle decorative shapes */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div
+          className="absolute -top-20 -left-20 w-72 h-72 rounded-full opacity-[0.06]"
+          style={{ background: 'radial-gradient(circle, #FFFFFF 0%, transparent 70%)' }}
         />
-        {/* Multi-layer gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-l from-black/85 via-black/70 to-black/50" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+        <div
+          className="absolute -bottom-16 right-1/4 w-96 h-96 rounded-full opacity-[0.04]"
+          style={{ background: 'radial-gradient(circle, #FFFFFF 0%, transparent 70%)' }}
+        />
+        <div
+          className="absolute top-1/2 left-1/3 w-40 h-40 rounded-full opacity-[0.03]"
+          style={{ background: '#FFFFFF' }}
+        />
       </div>
 
       {/* Content */}
