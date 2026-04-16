@@ -15,7 +15,7 @@ RetailSkillz Analytics — a B2B SaaS retail management dashboard MVP built for 
 
 ## Architecture
 
-> Full file tree, route map, and ROG vs Modern palette reference: **[architecture.md](./architecture.md)**
+> Full file tree and route map: **[architecture.md](./architecture.md)**
 > Regenerate the tree with: `tree -I 'node_modules|dist|.git|.vite|.playwright-mcp|.netlify|.tanstack|promo-video|.ralph-tui|.cline|.agents|.claude' --dirsfirst`
 
 **Runtime**: Bun + Vite 8 + React 19 + TypeScript
@@ -80,11 +80,13 @@ Light, minimal, clean, modern — shadcn aesthetic. Plenty of white space, good 
 - Muted / secondary text: `#A0AEC0`
 - On-primary (white surfaces): `#FFFFFF`
 
-**Semantic**
-- Success / positive change: `#2EC4D5`
-- Danger / negative change: `#DC4E59`
-- Warning / caution: `#F6B93B`
+**Semantic / KPI Status (traffic-light system — used for all gauges, AI briefing, status badges)**
+- Good / success (>=95% of target): `#10B981` (emerald green)
+- Warning / caution (85–95% of target): `#FBBF24` (amber yellow)
+- Bad / danger (<85% of target): `#F43F5E` (rose red)
 - Neutral / inactive: `#A0AEC0`
+
+All KPI status colors must come from the shared `getKpiStatusColor(ratio)` utility — never hardcode thresholds or hex values in components.
 
 **Gradients**
 - Primary button: `linear-gradient(135deg, #DC4E59, #E8777F)`

@@ -22,8 +22,8 @@
 │   ├── components
 │   │   ├── branding/BrandLogo.tsx
 │   │   ├── charts/                     # Recharts wrappers (all wrap content in <div dir="ltr">)
-│   │   │   ├── BranchComparisonChart.tsx / ROG variant
-│   │   │   ├── PromotionDailyChart.tsx  / ROG variant
+│   │   │   ├── BranchComparisonChart.tsx
+│   │   │   ├── PromotionDailyChart.tsx
 │   │   │   ├── CategoryBubbleChart.tsx
 │   │   │   ├── CategoryPriorityMatrix.tsx
 │   │   │   ├── ComparisonChart.tsx
@@ -33,16 +33,16 @@
 │   │   │   ├── RegionDonutChart.tsx
 │   │   │   └── TrendLineChart.tsx
 │   │   ├── dashboard/                  # Dashboard section components
-│   │   │   ├── HeroBanner.tsx / ROG    # Full-width hero with gauge
-│   │   │   ├── QuickStatCards.tsx / ROG # 4-stat row (customers, basket, supply, complaints)
-│   │   │   ├── KPIGaugeRow.tsx / ROG   # Dark gauge strip with 5 KPIs
-│   │   │   ├── KPICard.tsx / ROG       # Single KPI card with trend badge
-│   │   │   ├── KPIGrid.tsx / ROG       # Grid wrapper for KPICard
-│   │   │   ├── CategorySpotlight.tsx / ROG  # Top-4 category image cards
-│   │   │   ├── CategoryDonut.tsx / ROG      # Sales split donut chart
-│   │   │   ├── HeroItemCards.tsx / ROG      # Product spotlight cards (stockout, top sales, promo)
-│   │   │   ├── BranchPerformanceBars.tsx / ROG # Horizontal bar ranking
-│   │   │   ├── SupplierSpotlightCards.tsx / ROG # 3 supplier highlight cards
+│   │   │   ├── HeroBanner.tsx           # Full-width hero with gauge
+│   │   │   ├── QuickStatCards.tsx       # 4-stat row (customers, basket, supply, complaints)
+│   │   │   ├── KPIGaugeRow.tsx          # Dark gauge strip with 5 KPIs
+│   │   │   ├── KPICard.tsx              # Single KPI card with trend badge
+│   │   │   ├── KPIGrid.tsx              # Grid wrapper for KPICard
+│   │   │   ├── CategorySpotlight.tsx    # Top-4 category image cards
+│   │   │   ├── CategoryDonut.tsx        # Sales split donut chart
+│   │   │   ├── HeroItemCards.tsx        # Product spotlight cards (stockout, top sales, promo)
+│   │   │   ├── BranchPerformanceBars.tsx # Horizontal bar ranking
+│   │   │   ├── SupplierSpotlightCards.tsx # 3 supplier highlight cards
 │   │   │   ├── SectionHeader.tsx       # Reusable section header with icon + divider
 │   │   │   ├── CategorySuppliersDashboard.tsx # Supplier drill-down (category detail page)
 │   │   │   ├── CategoryAIBriefing.tsx  # AI analysis card with streaming
@@ -58,9 +58,9 @@
 │   │   ├── map/                        # Leaflet map components (division manager)
 │   │   ├── store-manager/              # Store-manager-specific components
 │   │   ├── tables/                     # Data tables (TanStack Table + custom)
-│   │   │   ├── CategoryPerformanceTable.tsx / ROG
-│   │   │   ├── PromotionsTable.tsx / ROG
-│   │   │   ├── SuppliersTable.tsx / ROG
+│   │   │   ├── CategoryPerformanceTable.tsx
+│   │   │   ├── PromotionsTable.tsx
+│   │   │   ├── SuppliersTable.tsx
 │   │   │   ├── BranchRankingTable.tsx
 │   │   │   ├── CategoryTable.tsx
 │   │   │   └── SortHeader.tsx
@@ -97,10 +97,8 @@
 │   ├── routes/                         # TanStack Router file-based routes
 │   │   ├── __root.tsx                  # Root layout — RTL DirectionProvider + SidebarProvider
 │   │   ├── index.tsx                   # Home page — role cards
-│   │   ├── category-manager/index.tsx  # Category manager V1
+│   │   ├── category-manager/index.tsx  # Trade management (consolidated from V2)
 │   │   ├── category-manager/$categoryId.tsx  # Category drill-down (AI briefing, alerts, charts)
-│   │   ├── category-manager-v2/index.tsx     # Category manager V2 (modern palette)
-│   │   ├── category-manager-rog/index.tsx    # Category manager ROG (classic red/orange/green)
 │   │   ├── division-manager/index.tsx + $regionId.tsx  # Map + region drill-down
 │   │   └── store-manager/index.tsx + $branchId.tsx     # Store manager with view system
 │   ├── global.css                      # Tailwind base + custom warm theme variables
@@ -127,18 +125,6 @@
 | `/store-manager/$branchId` | Store manager (any branch) | Same as above, branchToFullReport() adapter |
 | `/division-manager` | Division manager | IsraelMap, BranchRankingTable, RegionDonutChart |
 | `/division-manager/$regionId` | Region drill-down | Region-filtered branch list |
-| `/category-manager` | Category manager V1 | CategoryTable, CategoryBubbleChart |
+| `/category-manager` | Trade management (ניהול סחר) | HeroBanner, ChainAIBriefing, QuickStatCards, KPIGaugeRow, tabs (categories/suppliers/promotions) |
 | `/category-manager/$categoryId` | Category drill-down | KPIGrid, CategoryAIBriefing, CategorySuppliersDashboard, PromotionCard, alerts table |
-| `/category-manager-v2` | Category manager V2 (modern) | HeroBanner, QuickStatCards, KPIGaugeRow, full dashboard |
-| `/category-manager-rog` | Category manager ROG (classic) | All ROG variants — red/orange/green color palette |
 
-## ROG vs Modern Palette
-
-Components with `*ROG.tsx` suffixes are color-swapped variants:
-
-| Modern (V2) | ROG | Color Change |
-|-------------|-----|-------------|
-| `#2EC4D5` (cyan) | `#22C55E` (green) | Good / positive |
-| `#F6B93B` (amber) | `#F97316` (orange) | Warning / monitor |
-| `#DC4E59` (warm red) | `#EF4444` (classic red) | Danger / negative |
-| `#6C5CE7` (violet) | `#F97316` (orange) | Tertiary accent |

@@ -1,217 +1,187 @@
 import { useMemo, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
-import { ArrowUpRight, ShieldAlert, Store } from 'lucide-react'
+import { Megaphone, LayoutGrid, Truck } from 'lucide-react'
+import { TimePeriodFilter, getPeriodMultiplier, getPeriodJitter, type TimePeriod } from '@/components/dashboard/TimePeriodFilter'
+import { PeriodMultiplierProvider } from '@/contexts/PeriodContext'
 import { PageContainer } from '@/components/layout/PageContainer'
-import { KPIGrid } from '@/components/dashboard/KPIGrid'
-import { ComparisonToggle } from '@/components/dashboard/ComparisonToggle'
-import { CategoryActionPanel } from '@/components/dashboard/CategoryActionPanel'
-import { CategoryPriorityMatrix } from '@/components/charts/CategoryPriorityMatrix'
-import { CategoryTable } from '@/components/tables/CategoryTable'
-import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { HeroBanner } from '@/components/dashboard/HeroBanner'
+import { QuickStatCards } from '@/components/dashboard/QuickStatCards'
+import { KPIGaugeRow } from '@/components/dashboard/KPIGaugeRow'
+import { CategorySpotlight } from '@/components/dashboard/CategorySpotlight'
+import { CategoryDonut } from '@/components/dashboard/CategoryDonut'
+import { PromotionDailyChart } from '@/components/charts/PromotionDailyChart'
+import { PromotionsTable } from '@/components/tables/PromotionsTable'
+import { CategoryPerformanceTable } from '@/components/tables/CategoryPerformanceTable'
+import { HeroItemCards } from '@/components/dashboard/HeroItemCards'
+import { SectionHeader } from '@/components/dashboard/SectionHeader'
+import { SuppliersTable } from '@/components/tables/SuppliersTable'
+import { SupplierSpotlightCards } from '@/components/dashboard/SupplierSpotlightCards'
+import { ChainAIBriefing } from '@/components/dashboard/ChainAIBriefing'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import { allBranches } from '@/data/mock-branches'
 import { getCategorySummaries } from '@/data/mock-categories'
-import type { KPICardData, ComparisonMode } from '@/data/types'
-import { deriveCategorySnapshots, getComparisonLabel } from '@/lib/category-manager'
-import { formatCurrencyShort } from '@/lib/format'
+import { getChainPromotions } from '@/data/mock-chain-promotions'
+import { deriveCategorySnapshots } from '@/lib/category-manager'
 
 function CategoryManagerPage() {
-  const [comparisonMode, setComparisonMode] = useState<ComparisonMode>('vs-target')
-  const {
-    snapshots,
-    totalSales,
-    totalTarget,
-    totalLastYear,
-    weightedMargin,
-    weightedTargetAchievement,
-    avgShareGap,
-    totalStockoutExposure,
-    weightedStockoutRate,
-    avgPromoRoi,
-    avgPromoUplift,
-    dangerCount,
-    dangerSalesShare,
-  } = useMemo(() => {
+  const rawPromotions = useMemo(() => getChainPromotions(), [])
+  const [selectedPromoId, setSelectedPromoId] = useState(rawPromotions[0]?.id)
+  const [period, setPeriod] = useState<TimePeriod>({ type: 'yearly' })
+  const multiplier = getPeriodMultiplier(period)
+
+  const promotions = useMemo(() => {
+    if (multiplier === 1) return rawPromotions
+    return rawPromotions.map(p => ({
+      ...p,
+      sales: Math.round(p.sales * multiplier),
+      dailySales: p.dailySales.map(v => Math.round(v * multiplier)),
+      dailyBaseline: p.dailyBaseline.map(v => Math.round(v * multiplier)),
+    }))
+  }, [rawPromotions, multiplier])
+  const selectedPromo = promotions.find(p => p.id === selectedPromoId) ?? promotions[0]
+
+  const categorySnapshots = useMemo(() => {
     const cats = getCategorySummaries()
-    const derivedSnapshots = deriveCategorySnapshots(cats, comparisonMode)
-    const sales = cats.reduce((sum, category) => sum + category.sales, 0)
-    const target = cats.reduce((sum, category) => sum + category.targetSales, 0)
-    const lastYear = cats.reduce((sum, category) => sum + category.lastYearSales, 0)
-    const grossProfit = derivedSnapshots.reduce((sum, snapshot) => sum + snapshot.grossProfit, 0)
-    const stockoutExposure = derivedSnapshots.reduce((sum, snapshot) => sum + snapshot.stockoutExposure, 0)
-    const dangerSales = derivedSnapshots
-      .filter((snapshot) => snapshot.status === 'danger')
-      .reduce((sum, snapshot) => sum + snapshot.category.sales, 0)
+    const snaps = deriveCategorySnapshots(cats, 'vs-last-year')
+    if (multiplier === 1) return snaps
+    return snaps.map(s => ({
+      ...s,
+      grossProfit: s.grossProfit * multiplier,
+      category: {
+        ...s.category,
+        sales: Math.round(s.category.sales * multiplier),
+        targetSales: Math.round(s.category.targetSales * multiplier),
+        lastYearSales: Math.round(s.category.lastYearSales * multiplier),
+      },
+    }))
+  }, [multiplier])
+
+  const { totalSales, totalTargetSales, gaugeKpis } = useMemo(() => {
+    const m = multiplier
+    const sales = allBranches.reduce((sum, b) => sum + b.metrics.totalSales, 0) * m
+    const target = allBranches.reduce((sum, b) => {
+      return sum + b.departments.reduce((ds, d) => ds + d.targetSales, 0)
+    }, 0) * m
+
+    const j0 = getPeriodJitter(period, 0)
+    const j2 = getPeriodJitter(period, 2)
+    const j3 = getPeriodJitter(period, 3)
+    const j4 = getPeriodJitter(period, 4)
+
+    const avgGrossMargin = (allBranches.reduce((sum, b) => {
+      const branchMargin = b.departments.reduce((ds, d) => ds + d.grossMarginPercent * d.sales, 0)
+        / b.departments.reduce((ds, d) => ds + d.sales, 0)
+      return sum + branchMargin
+    }, 0) / allBranches.length) * j0
+
+    const avgBasket = (allBranches.reduce((sum, b) => sum + b.metrics.avgBasket, 0) / allBranches.length) * m
+    const avgSupplyRate = (allBranches.reduce((sum, b) => sum + b.metrics.supplyRate, 0) / allBranches.length) * j2
+    const avgQuality = (allBranches.reduce((sum, b) => sum + b.metrics.qualityScore, 0) / allBranches.length) * j3
+
+    const totalPromoSales = allBranches.reduce((sum, b) => {
+      return sum + b.departments.reduce((ds, d) => {
+        return ds + d.promotions.reduce((ps, p) => ps + p.actualSales, 0)
+      }, 0)
+    }, 0) * m * j4
+    const promoSalesPercent = sales > 0 ? (totalPromoSales / sales) * 100 : 0
 
     return {
-      snapshots: derivedSnapshots,
       totalSales: sales,
-      totalTarget: target,
-      totalLastYear: lastYear,
-      weightedMargin: sales > 0 ? +((grossProfit / sales) * 100).toFixed(1) : 0,
-      weightedTargetAchievement: target > 0 ? +((sales / target) * 100).toFixed(1) : 0,
-      avgShareGap: derivedSnapshots.length > 0
-        ? +(derivedSnapshots.reduce((sum, snapshot) => sum + snapshot.shareGap, 0) / derivedSnapshots.length).toFixed(1)
-        : 0,
-      totalStockoutExposure: Math.round(stockoutExposure),
-      weightedStockoutRate: sales > 0 ? +((stockoutExposure / sales) * 100).toFixed(1) : 0,
-      avgPromoRoi: derivedSnapshots.length > 0
-        ? +(derivedSnapshots.reduce((sum, snapshot) => sum + snapshot.avgPromoRoi, 0) / derivedSnapshots.length).toFixed(2)
-        : 0,
-      avgPromoUplift: derivedSnapshots.length > 0
-        ? +(derivedSnapshots.reduce((sum, snapshot) => sum + snapshot.avgPromoUplift, 0) / derivedSnapshots.length).toFixed(1)
-        : 0,
-      dangerCount: derivedSnapshots.filter((snapshot) => snapshot.status === 'danger').length,
-      dangerSalesShare: sales > 0 ? +((dangerSales / sales) * 100).toFixed(1) : 0,
+      totalTargetSales: target,
+      gaugeKpis: [
+        { label: 'רווח גולמי', value: +avgGrossMargin.toFixed(1), target: 30, format: 'percent' as const },
+        { label: 'סל ממוצע ללקוח', value: Math.round(avgBasket), target: 280, format: 'currency' as const },
+        { label: 'זמינות מדף', value: +avgSupplyRate.toFixed(1), target: 98, format: 'percent' as const },
+        { label: 'ציון איכות', value: +avgQuality.toFixed(0), target: 100, format: 'percent' as const },
+        { label: 'מכירות מבצעים', value: +promoSalesPercent.toFixed(1), target: 60, format: 'percent' as const },
+      ],
     }
-  }, [comparisonMode])
-
-  function getComparisonTrend(): { trend: number; label: string } {
-    switch (comparisonMode) {
-      case 'vs-target': {
-        const pct = totalTarget > 0 ? ((totalSales - totalTarget) / totalTarget) * 100 : 0
-        return { trend: +pct.toFixed(1), label: 'מול יעד' }
-      }
-      case 'vs-last-year': {
-        const pct = totalLastYear > 0 ? ((totalSales - totalLastYear) / totalLastYear) * 100 : 0
-        return { trend: +pct.toFixed(1), label: 'מול שנה קודמת' }
-      }
-      case 'vs-last-month': {
-        const lastMonth = snapshots.reduce((sum, snapshot) => sum + (snapshot.category.avgMonthlyTrend[11] ?? 0), 0)
-        const prevMonth = snapshots.reduce((sum, snapshot) => sum + (snapshot.category.avgMonthlyTrend[10] ?? 0), 0)
-        const pct = prevMonth > 0 ? ((lastMonth - prevMonth) / prevMonth) * 100 : 0
-        return { trend: +pct.toFixed(1), label: 'מול חודש קודם' }
-      }
-    }
-  }
-
-  const comparison = getComparisonTrend()
-  const topDangerItems = [...snapshots].sort((a, b) => b.downsideEstimate - a.downsideEstimate).slice(0, 4)
-  const topOpportunityItems = [...snapshots].sort((a, b) => b.upsideEstimate - a.upsideEstimate).slice(0, 4)
-  const topDanger = topDangerItems[0]
-  const topOpportunity = topOpportunityItems[0]
-
-  const kpis: KPICardData[] = [
-    {
-      label: 'סה"כ מכירות',
-      value: totalSales,
-      format: 'currencyShort',
-      trend: comparison.trend,
-      trendLabel: comparison.label,
-      gradient: comparison.trend >= 0 ? 'green' : 'red',
-    },
-    {
-      label: 'עמידה משוקללת ביעד',
-      value: weightedTargetAchievement,
-      format: 'percent',
-      trend: comparison.trend,
-      trendLabel: getComparisonLabel(comparisonMode),
-      gradient: weightedTargetAchievement >= 100 ? 'green' : 'orange',
-    },
-    {
-      label: 'רווח גולמי משוקלל',
-      value: weightedMargin,
-      format: 'percent',
-      trend: avgShareGap,
-      trendLabel: 'פער נתח',
-      gradient: weightedMargin >= 20 ? 'purple' : 'red',
-    },
-    {
-      label: 'פדיון בסיכון מחוסרים',
-      value: totalStockoutExposure,
-      format: 'currencyShort',
-      trend: -weightedStockoutRate,
-      trendLabel: 'חוסרים משוקלל',
-      gradient: weightedStockoutRate > 2 ? 'red' : 'orange',
-    },
-    {
-      label: 'ROI מבצעים ממוצע',
-      value: avgPromoRoi,
-      format: 'number',
-      trend: avgPromoUplift,
-      trendLabel: 'uplift',
-      gradient: avgPromoRoi >= 1.7 ? 'green' : 'blue',
-    },
-    {
-      label: 'קטגוריות לטיפול',
-      value: dangerCount,
-      format: 'number',
-      trend: -dangerSalesShare,
-      trendLabel: 'נתח מכירות בסיכון',
-      gradient: dangerCount > 0 ? 'red' : 'green',
-    },
-  ]
+  }, [multiplier, period])
 
   return (
+    <PeriodMultiplierProvider value={multiplier}>
     <PageContainer>
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-[#2D3748]">מנהל קטגוריה</h1>
-          <p className="mt-1 text-xs sm:text-sm text-[#4A5568]">
-            לוח פעולה לזיהוי מהיר של קטגוריות בסיכון, הזדמנויות צמיחה ופערי ביצוע בין סניפים
-          </p>
-        </div>
-        <ComparisonToggle value={comparisonMode} onChange={setComparisonMode} />
+      <HeroBanner
+        totalSales={totalSales}
+        targetSales={totalTargetSales}
+        branchCount={allBranches.length}
+        categoryCount={categorySnapshots.length}
+      />
+
+      <ChainAIBriefing />
+
+      <div className="flex justify-end">
+        <TimePeriodFilter value={period} onChange={setPeriod} />
       </div>
 
-      <Card className="overflow-hidden border-[#FFE8DE] bg-white">
-        <CardContent className="grid gap-4 p-4 sm:p-5 sm:grid-cols-2 lg:grid-cols-[1.1fr_1.1fr_0.8fr]">
-          <div className="rounded-[16px] bg-[#DC4E59]/6 p-4">
-            <div className="flex items-center gap-2">
-              <ShieldAlert className="h-4 w-4 text-[#DC4E59]" />
-              <p className="text-sm font-semibold text-[#2D3748]">הסיכון המרכזי</p>
+      <QuickStatCards />
+
+      <KPIGaugeRow items={gaugeKpis} />
+
+      <Tabs defaultValue="categories" dir="rtl">
+        <TabsList className="h-auto gap-1 bg-[#FDF8F6] p-1 rounded-[12px] border border-[#FFE8DE]">
+          <TabsTrigger
+            value="categories"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[10px] text-lg font-medium text-[#4A5568] transition-all data-[state=active]:bg-white data-[state=active]:text-[#6C5CE7] data-[state=active]:shadow-sm"
+          >
+            <LayoutGrid className="w-5 h-5" />
+            ביצועי קטגוריות
+          </TabsTrigger>
+          <TabsTrigger
+            value="suppliers"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[10px] text-lg font-medium text-[#4A5568] transition-all data-[state=active]:bg-white data-[state=active]:text-[#F6B93B] data-[state=active]:shadow-sm"
+          >
+            <Truck className="w-5 h-5" />
+            ספקים
+          </TabsTrigger>
+          <TabsTrigger
+            value="promotions"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[10px] text-lg font-medium text-[#4A5568] transition-all data-[state=active]:bg-white data-[state=active]:text-[#DC4E59] data-[state=active]:shadow-sm"
+          >
+            <Megaphone className="w-5 h-5" />
+            מבצעים
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="categories" className="mt-4 space-y-4">
+          <SectionHeader
+            title="קטגוריות מובילות"
+            subtitle="4 הקטגוריות המובילות במכירות"
+            icon={LayoutGrid}
+            accentColor="#6C5CE7"
+          />
+          <CategorySpotlight snapshots={categorySnapshots} />
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr,340px] gap-4 items-start">
+            <CategoryPerformanceTable snapshots={categorySnapshots} />
+            <div className="flex flex-col gap-4">
+              <CategoryDonut snapshots={categorySnapshots} />
+              <HeroItemCards vertical />
             </div>
-            <p className="mt-2 sm:mt-3 text-base sm:text-lg font-semibold text-[#2D3748]">{topDanger?.category.name}</p>
-            <p className="mt-1 text-xs sm:text-sm text-[#4A5568]">
-              {topDanger
-                ? `${topDanger.weakBranchCount} סניפים חלשים וחשיפה של ${formatCurrencyShort(topDanger.downsideEstimate)}`
-                : 'אין קטגוריה חריגה כרגע'}
-            </p>
-            {topDanger && <p className="mt-1.5 sm:mt-2 text-[11px] sm:text-xs text-[#A0AEC0]">{topDanger.focusAction}</p>}
           </div>
+        </TabsContent>
 
-          <div className="rounded-[16px] bg-[#2EC4D5]/8 p-4">
-            <div className="flex items-center gap-2">
-              <ArrowUpRight className="h-4 w-4 text-[#2EC4D5]" />
-              <p className="text-sm font-semibold text-[#2D3748]">ההזדמנות המרכזית</p>
-            </div>
-            <p className="mt-2 sm:mt-3 text-base sm:text-lg font-semibold text-[#2D3748]">{topOpportunity?.category.name}</p>
-            <p className="mt-1 text-xs sm:text-sm text-[#4A5568]">
-              {topOpportunity
-                ? `פוטנציאל של ${formatCurrencyShort(topOpportunity.upsideEstimate)} עם ${topOpportunity.avgPromoRoi.toFixed(2)}x ROI מבצעים`
-                : 'אין הזדמנות בולטת כרגע'}
-            </p>
-            {topOpportunity && <p className="mt-1.5 sm:mt-2 text-[11px] sm:text-xs text-[#A0AEC0]">{topOpportunity.focusAction}</p>}
+        <TabsContent value="suppliers" className="mt-4 space-y-4">
+          <h2 className="text-2xl font-bold text-[#2D3748]">ביצועי ספקים</h2>
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr,340px] gap-4 items-start">
+            <SuppliersTable />
+            <SupplierSpotlightCards />
           </div>
+        </TabsContent>
 
-          <div className="rounded-[16px] border border-[#FFE8DE] bg-[#FDF8F6] p-4 sm:col-span-2 lg:col-span-1">
-            <div className="flex items-center gap-2">
-              <Store className="h-4 w-4 text-[#F6B93B]" />
-              <p className="text-sm font-semibold text-[#2D3748]">מבט רשת</p>
-            </div>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <Badge variant="warning">{snapshots.length} קטגוריות</Badge>
-              <Badge variant="success">{avgPromoUplift.toFixed(1)}% uplift ממוצע</Badge>
-            </div>
-            <p className="mt-3 text-sm text-[#4A5568]">
-              {dangerSalesShare}% מהמכירות יושבות בקטגוריות שמסומנות כרגע לטיפול.
-            </p>
-            <p className="mt-2 text-xs text-[#A0AEC0]">
-              השוואה פעילה: {getComparisonLabel(comparisonMode)}
-            </p>
+        <TabsContent value="promotions" className="mt-4 space-y-4">
+          <h2 className="text-2xl font-bold text-[#2D3748]">ניתוח מבצעים</h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <PromotionDailyChart promotion={selectedPromo} />
+            <PromotionsTable
+              promotions={promotions}
+              selectedId={selectedPromo.id}
+              onSelect={(p) => setSelectedPromoId(p.id)}
+            />
           </div>
-        </CardContent>
-      </Card>
-
-      <KPIGrid items={kpis} columns={6} />
-
-      <div className="grid gap-4 xl:grid-cols-2">
-        <CategoryActionPanel title="סיכונים מיידיים" tone="danger" items={topDangerItems} />
-        <CategoryActionPanel title="הזדמנויות לצמיחה" tone="opportunity" items={topOpportunityItems} />
-      </div>
-
-      <CategoryPriorityMatrix data={snapshots} />
-      <CategoryTable data={snapshots} comparisonMode={comparisonMode} onComparisonChange={setComparisonMode} />
+        </TabsContent>
+      </Tabs>
     </PageContainer>
+    </PeriodMultiplierProvider>
   )
 }
 

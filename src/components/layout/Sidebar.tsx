@@ -1,7 +1,7 @@
 import { Link, useMatchRoute, useLocation, useNavigate } from '@tanstack/react-router'
 import { currentMonthYear } from '@/data/constants'
 import {
-  LayoutDashboard, Store, Map, ShoppingCart, BarChart3, PieChart,
+  LayoutDashboard, Store, Map, PieChart,
   Package, Users, LayoutGrid, Bell, Sparkles,
 } from 'lucide-react'
 import {
@@ -25,9 +25,7 @@ const generalNavItems = [
   { to: '/', label: 'סקירה כללית', icon: LayoutDashboard },
   { to: '/store-manager', label: 'מנהל סניף', icon: Store },
   { to: '/division-manager', label: 'מנהל אזור', icon: Map },
-  { to: '/category-manager', label: 'מנהל קטגוריה', icon: ShoppingCart },
-  { to: '/category-manager-v2', label: 'מנהל קטגוריה V2', icon: BarChart3 },
-  { to: '/category-manager-rog', label: 'ניהול סחר ROG', icon: PieChart },
+  { to: '/category-manager', label: 'ניהול סחר', icon: PieChart },
 ] as const
 
 const storeCategories = [

@@ -10,8 +10,7 @@ const pageTitles: Record<string, string> = {
   '/': 'סקירה כללית',
   '/store-manager': 'לוח בקרה - מנהל סניף',
   '/division-manager': 'לוח בקרה - מנהל אזור',
-  '/category-manager': 'לוח בקרה - מנהל קטגוריה',
-  '/category-manager-v2': 'לוח בקרה - מנהל קטגוריה V2',
+  '/category-manager': 'לוח בקרה - ניהול סחר',
 }
 
 function RootLayout() {

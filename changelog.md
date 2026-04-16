@@ -6,6 +6,18 @@
 
 ---
 
+## 2026-04-16
+
+### Consolidate 3 category-manager screens into one (#14)
+- Replaced `/category-manager` V1 content with V2 content (AI briefing, period filter, gauges, tabs with categories/suppliers/promotions)
+- Deleted `/category-manager-v2` route directory
+- Deleted `/category-manager-rog` route directory
+- Deleted all 15 ROG-duplicate components: `HeroBannerROG`, `KPIGaugeRowROG`, `QuickStatCardsROG`, `KPICardROG`, `KPIGridROG`, `CategorySpotlightROG`, `CategoryDonutROG`, `HeroItemCardsROG`, `BranchPerformanceBarsROG`, `SupplierSpotlightCardsROG`, `BranchComparisonChartROG`, `PromotionDailyChartROG`, `PromotionsTableROG`, `SuppliersTableROG`, `CategoryPerformanceTableROG`
+- Updated Sidebar: single entry `ניהול סחר` with PieChart icon, removed V2 and ROG entries
+- Updated `__root.tsx` page title to `ניהול סחר`, removed V2 title entry
+- Category drill-down route (`/category-manager/$categoryId`) preserved unchanged
+- **Files:** `src/routes/category-manager/index.tsx`, `src/components/layout/Sidebar.tsx`, `src/routes/__root.tsx`, `src/routeTree.gen.ts` (auto-regenerated), 15 deleted ROG component files, 2 deleted route directories
+
 ## 2026-04-15
 
 ### Global KPI color system — unified traffic-light colors (#13)
