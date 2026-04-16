@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
-import { Megaphone, LayoutGrid, Truck } from 'lucide-react'
+import { Megaphone, LayoutGrid, Truck, Store } from 'lucide-react'
 import { TimePeriodFilter, getPeriodMultiplier, getPeriodJitter, type TimePeriod } from '@/components/dashboard/TimePeriodFilter'
 import { PeriodMultiplierProvider } from '@/contexts/PeriodContext'
 import { PageContainer } from '@/components/layout/PageContainer'
@@ -110,38 +110,52 @@ function CategoryManagerPage() {
 
       <ChainAIBriefing />
 
-      <div className="flex justify-end">
-        <TimePeriodFilter value={period} onChange={setPeriod} />
-      </div>
-
       <QuickStatCards />
+
+      <p className="text-xl font-medium text-[#4A5568]">כל המדדים מוצגים ביחס ליעד</p>
 
       <KPIGaugeRow items={gaugeKpis} />
 
       <Tabs defaultValue="categories" dir="rtl">
-        <TabsList className="h-auto gap-1 bg-[#FDF8F6] p-1 rounded-[12px] border border-[#FFE8DE]">
-          <TabsTrigger
-            value="categories"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[10px] text-lg font-medium text-[#4A5568] transition-all data-[state=active]:bg-white data-[state=active]:text-[#6C5CE7] data-[state=active]:shadow-sm"
-          >
-            <LayoutGrid className="w-5 h-5" />
-            ביצועי קטגוריות
-          </TabsTrigger>
-          <TabsTrigger
-            value="suppliers"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[10px] text-lg font-medium text-[#4A5568] transition-all data-[state=active]:bg-white data-[state=active]:text-[#F6B93B] data-[state=active]:shadow-sm"
-          >
-            <Truck className="w-5 h-5" />
-            ספקים
-          </TabsTrigger>
-          <TabsTrigger
-            value="promotions"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[10px] text-lg font-medium text-[#4A5568] transition-all data-[state=active]:bg-white data-[state=active]:text-[#DC4E59] data-[state=active]:shadow-sm"
-          >
-            <Megaphone className="w-5 h-5" />
-            מבצעים
-          </TabsTrigger>
-        </TabsList>
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <TabsList className="h-auto gap-1 bg-[#FDF8F6] p-1 rounded-[12px] border border-[#FFE8DE]">
+            <TabsTrigger
+              value="formats"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[10px] text-lg font-medium text-[#4A5568] transition-all data-[state=active]:bg-white data-[state=active]:text-[#2EC4D5] data-[state=active]:shadow-sm"
+            >
+              <Store className="w-5 h-5" />
+              פורמטים
+            </TabsTrigger>
+            <TabsTrigger
+              value="categories"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[10px] text-lg font-medium text-[#4A5568] transition-all data-[state=active]:bg-white data-[state=active]:text-[#6C5CE7] data-[state=active]:shadow-sm"
+            >
+              <LayoutGrid className="w-5 h-5" />
+              ביצועי קטגוריות
+            </TabsTrigger>
+            <TabsTrigger
+              value="suppliers"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[10px] text-lg font-medium text-[#4A5568] transition-all data-[state=active]:bg-white data-[state=active]:text-[#F6B93B] data-[state=active]:shadow-sm"
+            >
+              <Truck className="w-5 h-5" />
+              ספקים
+            </TabsTrigger>
+            <TabsTrigger
+              value="promotions"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[10px] text-lg font-medium text-[#4A5568] transition-all data-[state=active]:bg-white data-[state=active]:text-[#DC4E59] data-[state=active]:shadow-sm"
+            >
+              <Megaphone className="w-5 h-5" />
+              מבצעים
+            </TabsTrigger>
+          </TabsList>
+          <TimePeriodFilter value={period} onChange={setPeriod} />
+        </div>
+
+        <TabsContent value="formats" className="mt-4">
+          <div className="flex items-center justify-center py-16 rounded-[16px] border border-[#FFE8DE] bg-white">
+            <p className="text-xl text-[#A0AEC0] font-medium">בקרוב</p>
+          </div>
+        </TabsContent>
 
         <TabsContent value="categories" className="mt-4 space-y-4">
           <SectionHeader
