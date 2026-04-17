@@ -13,7 +13,7 @@ import { ArrowUpDown, ExternalLink } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { formatCurrencyShort, formatPercent } from '@/lib/format'
-import { getPerformanceColor } from '@/lib/colors'
+import { getTargetStatusColor, getDeltaStatusColor } from '@/lib/colors'
 import type { Branch } from '@/data/types'
 
 interface BranchRankingTableProps {
@@ -72,7 +72,7 @@ export function BranchRankingTable({ branches, title = 'דירוג סניפים'
       cell: ({ getValue }) => {
         const score = getValue() as number
         return (
-          <span className="font-semibold" style={{ color: getPerformanceColor(score) }} dir="ltr">
+          <span className="font-semibold" style={{ color: getTargetStatusColor(score, 100) }} dir="ltr">
             {score}
           </span>
         )
@@ -89,7 +89,7 @@ export function BranchRankingTable({ branches, title = 'דירוג סניפים'
       cell: ({ getValue }) => {
         const growth = getValue() as number
         return (
-          <span className={growth >= 0 ? 'text-[#2EC4D5]' : 'text-[#DC4E59]'} dir="ltr">
+          <span style={{ color: getDeltaStatusColor(growth) }} dir="ltr">
             {growth >= 0 ? '+' : ''}{formatPercent(growth)}
           </span>
         )

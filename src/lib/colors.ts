@@ -70,29 +70,6 @@ export function getDeltaStatusColor(
   return KPI_STATUS.warning
 }
 
-export function getPerformanceColor(score: number, max = 100): string {
-  const ratio = score / max
-  if (ratio >= 0.8) return PALETTE.cyan
-  if (ratio >= 0.6) return PALETTE.amber
-  return PALETTE.red
-}
-
-export function getGrowthColor(growth: number): string {
-  if (growth > 0) return PALETTE.cyan
-  if (growth === 0) return PALETTE.muted
-  return PALETTE.red
-}
-
-export function getTrendColor(isPositive: boolean): string {
-  return isPositive ? PALETTE.cyan : PALETTE.red
-}
-
-export function getTargetColor(achievementPercent: number): string {
-  if (achievementPercent < 90) return PALETTE.red
-  if (achievementPercent < 100) return PALETTE.amber
-  return PALETTE.cyan
-}
-
 export function getMarginColor(marginPercent: number): string {
   return marginPercent < 20 ? PALETTE.red : PALETTE.heading
 }

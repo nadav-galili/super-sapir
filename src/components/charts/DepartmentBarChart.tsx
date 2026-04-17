@@ -4,7 +4,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { motion } from 'motion/react'
 import { formatCurrencyShort } from '@/lib/format'
-import { getGrowthColor } from '@/lib/colors'
+import { getDeltaStatusColor } from '@/lib/colors'
 import type { DepartmentMetrics } from '@/data/types'
 
 interface DepartmentBarChartProps {
@@ -47,7 +47,7 @@ export function DepartmentBarChart({ data, title = 'פילוח לפי מחלקה
                 />
                 <Bar dataKey="sales" radius={[0, 4, 4, 0]} animationDuration={1200}>
                   {sorted.map((entry, i) => (
-                    <Cell key={i} fill={getGrowthColor(entry.yoyChange)} />
+                    <Cell key={i} fill={getDeltaStatusColor(entry.yoyChange)} />
                   ))}
                 </Bar>
               </BarChart>

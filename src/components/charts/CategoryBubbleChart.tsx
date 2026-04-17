@@ -3,7 +3,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { motion } from 'motion/react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatCurrencyShort } from '@/lib/format'
-import { getGrowthColor } from '@/lib/colors'
+import { getDeltaStatusColor } from '@/lib/colors'
 import type { CategorySummary } from '@/data/mock-categories'
 
 interface CategoryBubbleChartProps {
@@ -23,7 +23,7 @@ function CustomTooltip({ active, payload }: BubbleTooltipProps) {
       <p className="font-semibold text-[#2D3748] mb-1">{d.name}</p>
       <p className="text-sm text-[#4A5568]">מכירות: <span className="font-mono" dir="ltr">{formatCurrencyShort(d.sales)}</span></p>
       <p className="text-sm text-[#4A5568]">רווח גולמי: <span className="font-mono" dir="ltr">{d.grossMarginPercent}%</span></p>
-      <p className="text-sm" style={{ color: getGrowthColor(d.yoyChange) }}>
+      <p className="text-sm" style={{ color: getDeltaStatusColor(d.yoyChange) }}>
         צמיחה: <span className="font-mono" dir="ltr">{d.yoyChange > 0 ? '+' : ''}{d.yoyChange}%</span>
       </p>
     </div>
@@ -42,7 +42,7 @@ export function CategoryBubbleChart({ data }: CategoryBubbleChartProps) {
     x: d.sales,
     y: d.grossMarginPercent,
     z: Math.max(Math.abs(d.yoyChange) * 80, 200),
-    color: getGrowthColor(d.yoyChange),
+    color: getDeltaStatusColor(d.yoyChange),
   }))
 
   return (

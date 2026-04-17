@@ -1,6 +1,6 @@
 import { Marker, Popup } from 'react-leaflet'
 import L from 'leaflet'
-import { getPerformanceColor } from '@/lib/colors'
+import { getTargetStatusColor } from '@/lib/colors'
 import { formatCurrencyShort } from '@/lib/format'
 import type { Branch } from '@/data/types'
 
@@ -29,7 +29,7 @@ function createColoredIcon(color: string) {
 }
 
 export function BranchMarker({ branch, onClick }: BranchMarkerProps) {
-  const color = getPerformanceColor(branch.metrics.qualityScore)
+  const color = getTargetStatusColor(branch.metrics.qualityScore, 100)
   const icon = createColoredIcon(color)
 
   return (

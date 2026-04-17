@@ -1,7 +1,7 @@
 import { motion } from 'motion/react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useAnimatedCounter } from '@/hooks/useAnimatedCounter'
-import { getPerformanceColor } from '@/lib/colors'
+import { getTargetStatusColor } from '@/lib/colors'
 
 interface QualityGaugeProps {
   score: number
@@ -11,7 +11,7 @@ interface QualityGaugeProps {
 
 export function QualityGauge({ score, maxScore = 100, title = 'ציון איכות' }: QualityGaugeProps) {
   const animatedScore = useAnimatedCounter(score, 1500, 400)
-  const color = getPerformanceColor(score, maxScore)
+  const color = getTargetStatusColor(score, maxScore)
   const percentage = (score / maxScore) * 100
   const circumference = 2 * Math.PI * 60
   const strokeDashoffset = circumference - (percentage / 100) * circumference
