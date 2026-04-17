@@ -6,6 +6,46 @@
 
 ---
 
+## 2026-04-17
+
+### Legacy color helper cleanup (#24)
+- Migrated all remaining callers of `getPerformanceColor`, `getGrowthColor`, `getTrendColor`, `getTargetColor` to traffic-light helpers (`getTargetStatusColor`, `getDeltaStatusColor`)
+- Deleted all four legacy helpers from `src/lib/colors.ts` (zero remaining references)
+- **Files:** `src/lib/colors.ts`, `QualityGauge.tsx`, `BranchMarker.tsx`, `DepartmentBarChart.tsx`, `CategoryBubbleChart.tsx`, `BranchRankingTable.tsx`
+
+### Store-manager overview presentational swap (#22)
+- Migrated cyan-as-status to traffic-light on store-manager overview page
+- `BranchPerformanceCard` trend arrows → `getDeltaStatusColor`
+- `OverviewExpenseTable` row change indicators → `getDeltaStatusColor` with `lowerIsBetter: true`
+- `OverviewDepartmentBars` YoY indicators → `getDeltaStatusColor`
+- `AlertsTargetsCard` three-color output (emerald/amber/rose) via `getTargetStatusColor` for bar fill and status pill; binary met/unmet logic removed
+- `MonthlyComparisonChart` unchanged
+- **Files:** `src/routes/store-manager/index.tsx`
+
+### Category-manager presentational swap (#21)
+- `CategorySpotlight` status badges → `KPI_STATUS.good / warning / bad`; YoY text → `getDeltaStatusColor`
+- `CategoryDonut` center YoY text → `getDeltaStatusColor`; slices unchanged
+- `HeroItemCards`: top-sales card accent driven by `getDeltaStatusColor(yoyChange)`, top-promo card unconditionally emerald, stockout card stays red
+- `QuickStatCards` cyan icon tints swapped to emerald `#10B981`
+- **Files:** `CategorySpotlight.tsx`, `CategoryDonut.tsx`, `HeroItemCards.tsx`, `QuickStatCards.tsx`
+
+### KPICard data-driven coloring (#20)
+- `KPICardData` type: dropped `gradient`, added optional `target?` and `lowerIsBetter?`
+- `KPICard` big-number color now derived from `getTargetStatusColor` (when target provided) or `getDeltaStatusColor`; trend pill always uses `getDeltaStatusColor`
+- Removed `ACCENT_MAP` from `KPICard`
+- Updated all callers across store-manager (overview, inventory, HR, departments, alerts), category-manager detail, division-manager, and branch drill-down pages
+- **Files:** `src/data/types.ts`, `KPICard.tsx`, `KPIGrid.tsx`, `store-manager/index.tsx`, `store-manager/$branchId.tsx`, `category-manager/$categoryId.tsx`, `division-manager/index.tsx`, `division-manager/$regionId.tsx`
+
+### Color semantics foundation: new helpers + Vitest setup (#19)
+- Added `getTargetStatusColor(actual, target, opts?)` — traffic-light color based on actual vs target with higher-is-better/lower-is-better support
+- Added `getDeltaStatusColor(delta, opts?)` — traffic-light color based on percentage delta with configurable dead band (default ±2%)
+- Repointed `GRADIENT_PRESETS.green` from cyan to emerald gradient
+- Set up Vitest: installed as dev dependency, created `vitest.config.ts`, added `bun run test` script
+- 25 unit tests covering `getKpiStatusColor`, `getTargetStatusColor`, `getDeltaStatusColor` with boundary conditions and edge cases
+- **Files:** `src/lib/colors.ts`, `src/lib/colors.test.ts`, `vitest.config.ts`, `package.json`
+
+---
+
 ## 2026-04-16
 
 ### Formats tab: big stores vs city stores comparison (#17)
