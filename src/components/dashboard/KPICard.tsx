@@ -2,21 +2,11 @@ import { motion } from 'motion/react'
 import { TrendingUp, TrendingDown } from 'lucide-react'
 import { useAnimatedCounter } from '@/hooks/useAnimatedCounter'
 import { formatCurrencyShort, formatNumber, formatPercent, formatCompact } from '@/lib/format'
-import { PALETTE } from '@/lib/colors'
+import { getTargetStatusColor, getDeltaStatusColor } from '@/lib/colors'
 import type { KPICardData } from '@/data/types'
 
 interface KPICardProps extends KPICardData {
   delay?: number
-}
-
-const ACCENT_MAP: Record<string, { border: string; text: string }> = {
-  green:  { border: PALETTE.cyan,   text: PALETTE.cyan },
-  blue:   { border: PALETTE.cyan,   text: PALETTE.cyan },
-  purple: { border: PALETTE.violet, text: PALETTE.violet },
-  teal:   { border: PALETTE.cyan,   text: PALETTE.cyan },
-  orange: { border: PALETTE.amber,  text: PALETTE.amber },
-  pink:   { border: PALETTE.red,    text: PALETTE.red },
-  red:    { border: PALETTE.red,    text: PALETTE.red },
 }
 
 function formatValue(value: number, format: KPICardData['format']): string {
@@ -29,10 +19,15 @@ function formatValue(value: number, format: KPICardData['format']): string {
   }
 }
 
-export function KPICard({ label, value, format, trend, trendLabel, gradient, delay = 0 }: KPICardProps) {
+export function KPICard({ label, value, format, trend, trendLabel, target, lowerIsBetter, delay = 0 }: KPICardProps) {
   const animatedValue = useAnimatedCounter(value, 1500, delay)
-  const accent = ACCENT_MAP[gradient] ?? ACCENT_MAP.blue
   const isPositive = trend >= 0
+
+  const bigNumberColor = target != null
+    ? getTargetStatusColor(value, target, { lowerIsBetter })
+    : getDeltaStatusColor(trend, { lowerIsBetter })
+
+  const trendColor = getDeltaStatusColor(trend, { lowerIsBetter })
 
   return (
     <motion.div
@@ -44,13 +39,18 @@ export function KPICard({ label, value, format, trend, trendLabel, gradient, del
     >
       <div className="p-3 sm:p-4 text-center">
         <p className="text-lg sm:text-xl font-semibold text-[#2D3748] mb-1 truncate">{label}</p>
-        <p className="text-3xl sm:text-4xl font-bold font-mono tabular-nums" style={{ color: accent.text }} dir="ltr">
+        <p className="text-3xl sm:text-4xl font-bold font-mono tabular-nums" style={{ color: bigNumberColor }} dir="ltr">
           {formatValue(animatedValue, format)}
         </p>
         <div className="flex items-center justify-center gap-1 sm:gap-1.5 mt-1.5 sm:mt-2">
-          <span className={`inline-flex items-center gap-0.5 sm:gap-1 text-[15px] sm:text-base font-semibold px-1.5 sm:px-2 py-0.5 rounded-[20px] ${
-            isPositive ? 'bg-[#2EC4D5]/10 text-[#2EC4D5]' : 'bg-[#DC4E59]/10 text-[#DC4E59]'
-          }`} dir="ltr">
+          <span
+            className="inline-flex items-center gap-0.5 sm:gap-1 text-[15px] sm:text-base font-semibold px-1.5 sm:px-2 py-0.5 rounded-[20px]"
+            style={{
+              color: trendColor,
+              backgroundColor: `${trendColor}18`,
+            }}
+            dir="ltr"
+          >
             {isPositive ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
             {isPositive ? '+' : ''}{trend}%
           </span>

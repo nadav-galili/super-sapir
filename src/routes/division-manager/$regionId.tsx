@@ -21,10 +21,10 @@ function RegionDrillDown() {
   const totalEmployees = branches.reduce((s, b) => s + b.metrics.totalEmployees, 0)
 
   const kpis: KPICardData[] = [
-    { label: 'מכירות אזוריות', value: totalSales, format: 'currencyShort', trend: avgGrowth, trendLabel: 'צמיחה', gradient: 'green' },
-    { label: 'סניפים', value: branches.length, format: 'number', trend: 0, trendLabel: '', gradient: 'blue' },
-    { label: 'ציון איכות ממוצע', value: avgQuality, format: 'number', trend: 1.5, trendLabel: 'שנתי', gradient: 'orange' },
-    { label: 'עובדים', value: totalEmployees, format: 'number', trend: 2.0, trendLabel: 'שנתי', gradient: 'purple' },
+    { label: 'מכירות אזוריות', value: totalSales, format: 'currencyShort', trend: avgGrowth, trendLabel: 'צמיחה' },
+    { label: 'סניפים', value: branches.length, format: 'number', trend: 0, trendLabel: '' },
+    { label: 'ציון איכות ממוצע', value: avgQuality, format: 'number', trend: 1.5, trendLabel: 'שנתי', target: 85 },
+    { label: 'עובדים', value: totalEmployees, format: 'number', trend: 2.0, trendLabel: 'שנתי' },
   ]
 
   return (

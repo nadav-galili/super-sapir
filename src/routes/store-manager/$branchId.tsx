@@ -18,10 +18,10 @@ function BranchDrillDown() {
   const m = branch.metrics
 
   const kpis: KPICardData[] = [
-    { label: 'מכירות כוללות', value: m.totalSales, format: 'currencyShort', trend: m.yoyGrowth, trendLabel: 'שנתי', gradient: 'green' },
-    { label: 'מכירות רשת', value: m.networkSales, format: 'currencyShort', trend: 5.8, trendLabel: 'שנתי', gradient: 'blue' },
-    { label: 'סל ממוצע', value: m.avgBasket, format: 'currency', trend: 3.2, trendLabel: 'שנתי', gradient: 'teal' },
-    { label: 'לקוחות/יום', value: m.customersPerDay, format: 'number', trend: 1.8, trendLabel: 'שנתי', gradient: 'orange' },
+    { label: 'מכירות כוללות', value: m.totalSales, format: 'currencyShort', trend: m.yoyGrowth, trendLabel: 'שנתי' },
+    { label: 'מכירות רשת', value: m.networkSales, format: 'currencyShort', trend: 5.8, trendLabel: 'שנתי' },
+    { label: 'סל ממוצע', value: m.avgBasket, format: 'currency', trend: 3.2, trendLabel: 'שנתי' },
+    { label: 'לקוחות/יום', value: m.customersPerDay, format: 'number', trend: 1.8, trendLabel: 'שנתי' },
   ]
 
   return (

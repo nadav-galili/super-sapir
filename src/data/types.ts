@@ -100,6 +100,7 @@ export interface KPICardData {
   format: 'currency' | 'currencyShort' | 'number' | 'percent' | 'compact'
   trend: number
   trendLabel: string
-  gradient: 'green' | 'blue' | 'orange' | 'purple' | 'teal' | 'pink' | 'red'
+  target?: number
+  lowerIsBetter?: boolean
   icon?: string
 }

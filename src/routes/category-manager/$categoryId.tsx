@@ -223,6 +223,7 @@ function CategoryDrillDown() {
     )
   }
 
+  const totalTarget = branchData.reduce((s, b) => s + b.targetSales, 0)
   const kpis: KPICardData[] = [
     {
       label: 'מכירות כוללות',
@@ -230,7 +231,7 @@ function CategoryDrillDown() {
       format: 'currencyShort',
       trend: +targetAchievement.toFixed(1),
       trendLabel: 'מול יעד',
-      gradient: targetAchievement >= 0 ? 'green' : 'red',
+      target: totalTarget,
     },
     {
       label: 'רווח גולמי',
@@ -238,7 +239,7 @@ function CategoryDrillDown() {
       format: 'percent',
       trend: 0.8,
       trendLabel: 'שנתי',
-      gradient: avgMargin >= 20 ? 'purple' : 'red',
+      target: 20,
     },
     {
       label: 'ממוצע ימי מלאי',
@@ -246,7 +247,7 @@ function CategoryDrillDown() {
       format: 'number',
       trend: 1.2,
       trendLabel: 'שנתי',
-      gradient: 'blue',
+      lowerIsBetter: true,
     },
     {
       label: 'שיעור חוסרים',
@@ -254,7 +255,8 @@ function CategoryDrillDown() {
       format: 'percent',
       trend: avgStockout > 3 ? -avgStockout : avgStockout,
       trendLabel: '',
-      gradient: avgStockout > 4 ? 'red' : avgStockout > 2 ? 'orange' : 'green',
+      target: 3,
+      lowerIsBetter: true,
     },
   ]
 

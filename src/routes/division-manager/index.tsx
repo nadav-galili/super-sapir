@@ -13,13 +13,12 @@ function DivisionManagerPage() {
   const totals = getCompanyTotals()
   const regions = getRegionSummaries()
 
-  const kpis: KPICardData[] = regions.map((r, i) => ({
+  const kpis: KPICardData[] = regions.map((r) => ({
     label: `אזור ${r.name}`,
     value: r.totalSales,
     format: 'currencyShort' as const,
     trend: r.avgGrowth,
     trendLabel: 'צמיחה',
-    gradient: (['blue', 'green', 'orange'] as const)[i],
   }))
 
   kpis.push({
@@ -28,7 +27,6 @@ function DivisionManagerPage() {
     format: 'currencyShort',
     trend: totals.avgGrowth,
     trendLabel: 'צמיחה',
-    gradient: 'purple',
   })
 
   const sortedByPerformance = [...allBranches].sort(

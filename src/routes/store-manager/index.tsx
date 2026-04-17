@@ -695,10 +695,10 @@ function OverviewView({ report, branchId }: { report: Report; branchId: string }
   const { rows, isLoading, isStreaming, error, retry } = useAIAnalysis(branchId, report)
   const s = report.sales
   const kpis: KPICardData[] = [
-    { label: 'מכירות סניף', value: s.total.current, format: 'currencyShort', trend: s.total.vsTarget, trendLabel: `יעד: ${formatCurrencyShort(s.total.target)}`, gradient: s.total.vsTarget >= 0 ? 'blue' : 'red' },
-    { label: 'לקוחות', value: s.customers.current, format: 'number', trend: s.customers.change, trendLabel: `סל ממוצע: ₪${s.avgBasket.current.toLocaleString()}`, gradient: 'pink' },
-    { label: 'לקוחות ליום', value: Math.round(s.customers.current / WORKING_DAYS_PER_MONTH), format: 'number', trend: s.customers.change, trendLabel: `דירוג #${s.customers.ranking}`, gradient: 'orange' },
-    { label: 'סל ממוצע', value: s.avgBasket.current, format: 'currency', trend: s.avgBasket.change, trendLabel: 'שנתי', gradient: 'teal' },
+    { label: 'מכירות סניף', value: s.total.current, format: 'currencyShort', trend: s.total.vsTarget, trendLabel: `יעד: ${formatCurrencyShort(s.total.target)}`, target: s.total.target },
+    { label: 'לקוחות', value: s.customers.current, format: 'number', trend: s.customers.change, trendLabel: `סל ממוצע: ₪${s.avgBasket.current.toLocaleString()}`, target: s.customers.target },
+    { label: 'לקוחות ליום', value: Math.round(s.customers.current / WORKING_DAYS_PER_MONTH), format: 'number', trend: s.customers.change, trendLabel: `דירוג #${s.customers.ranking}` },
+    { label: 'סל ממוצע', value: s.avgBasket.current, format: 'currency', trend: s.avgBasket.change, trendLabel: 'שנתי' },
   ]
   return (
     <div className="space-y-5">
@@ -728,9 +728,9 @@ function OverviewView({ report, branchId }: { report: Report; branchId: string }
 function InventoryView({ report }: { report: Report }) {
   const ops = report.operations
   const kpis: KPICardData[] = [
-    { label: 'ימי מלאי ממוצע', value: ops.avgDaysOfInventory.current, format: 'number', trend: ops.avgDaysOfInventory.current <= ops.avgDaysOfInventory.target ? 0 : -Math.round(((ops.avgDaysOfInventory.current - ops.avgDaysOfInventory.target) / ops.avgDaysOfInventory.target) * 100), trendLabel: `יעד: ${ops.avgDaysOfInventory.target} ימים`, gradient: ops.avgDaysOfInventory.current <= ops.avgDaysOfInventory.target ? 'green' : 'red' },
-    { label: 'פריטי מלאי גבוה', value: report.compliance.highInventory.actual, format: 'number', trend: report.compliance.highInventory.met ? 0 : -11.7, trendLabel: `יעד: ${report.compliance.highInventory.target}`, gradient: 'orange' },
-    { label: 'חסרי פעילות', value: report.compliance.missingActivities.actual, format: 'number', trend: -report.compliance.missingActivities.deviation, trendLabel: `יעד: ${report.compliance.missingActivities.timeTarget}`, gradient: 'red' },
+    { label: 'ימי מלאי ממוצע', value: ops.avgDaysOfInventory.current, format: 'number', trend: ops.avgDaysOfInventory.current <= ops.avgDaysOfInventory.target ? 0 : -Math.round(((ops.avgDaysOfInventory.current - ops.avgDaysOfInventory.target) / ops.avgDaysOfInventory.target) * 100), trendLabel: `יעד: ${ops.avgDaysOfInventory.target} ימים`, target: ops.avgDaysOfInventory.target, lowerIsBetter: true },
+    { label: 'פריטי מלאי גבוה', value: report.compliance.highInventory.actual, format: 'number', trend: report.compliance.highInventory.met ? 0 : -11.7, trendLabel: `יעד: ${report.compliance.highInventory.target}`, target: report.compliance.highInventory.target, lowerIsBetter: true },
+    { label: 'חסרי פעילות', value: report.compliance.missingActivities.actual, format: 'number', trend: -report.compliance.missingActivities.deviation, trendLabel: `יעד: ${report.compliance.missingActivities.timeTarget}`, target: report.compliance.missingActivities.fixedTarget, lowerIsBetter: true },
   ]
   const target = ops.avgDaysOfInventory.target
   const sorted = [...report.departments].sort((a, b) => b.avgDaysOfInventory - a.avgDaysOfInventory)
@@ -801,11 +801,11 @@ function InventoryView({ report }: { report: Report }) {
 function HRView({ report }: { report: Report }) {
   const hr = report.hr
   const kpis: KPICardData[] = [
-    { label: 'תקן עובדים', value: hr.authorized, format: 'number', trend: 0, trendLabel: '', gradient: 'blue' },
-    { label: 'עובדים בפועל', value: hr.actual, format: 'number', trend: hr.authorized > 0 ? +(((hr.actual - hr.authorized) / hr.authorized) * 100).toFixed(2) : 0, trendLabel: 'מעל תקן', gradient: 'green' },
-    { label: 'עלות שכר', value: +hr.salaryCostPercent.toFixed(2), format: 'percent', trend: 0.9, trendLabel: `יעד: ${hr.salaryTarget}%`, gradient: 'pink' },
-    { label: 'עלות שכר בש״ח', value: hr.salaryExpense.current, format: 'currencyShort', trend: hr.salaryExpense.monthlyAvg2024 > 0 ? +((hr.salaryExpense.current - hr.salaryExpense.monthlyAvg2024) / hr.salaryExpense.monthlyAvg2024 * 100).toFixed(1) : 0, trendLabel: '', gradient: 'purple' },
-    { label: 'תחלופה שנתית', value: Math.round(hr.turnoverRate), format: 'number', trend: -2.3, trendLabel: `דירוג #${hr.turnoverRanking}`, gradient: 'orange' },
+    { label: 'תקן עובדים', value: hr.authorized, format: 'number', trend: 0, trendLabel: '' },
+    { label: 'עובדים בפועל', value: hr.actual, format: 'number', trend: hr.authorized > 0 ? +(((hr.actual - hr.authorized) / hr.authorized) * 100).toFixed(2) : 0, trendLabel: 'מעל תקן', target: hr.authorized },
+    { label: 'עלות שכר', value: +hr.salaryCostPercent.toFixed(2), format: 'percent', trend: 0.9, trendLabel: `יעד: ${hr.salaryTarget}%`, target: hr.salaryTarget, lowerIsBetter: true },
+    { label: 'עלות שכר בש״ח', value: hr.salaryExpense.current, format: 'currencyShort', trend: hr.salaryExpense.monthlyAvg2024 > 0 ? +((hr.salaryExpense.current - hr.salaryExpense.monthlyAvg2024) / hr.salaryExpense.monthlyAvg2024 * 100).toFixed(1) : 0, trendLabel: '', lowerIsBetter: true },
+    { label: 'תחלופה שנתית', value: Math.round(hr.turnoverRate), format: 'number', trend: -2.3, trendLabel: `דירוג #${hr.turnoverRanking}`, lowerIsBetter: true },
   ]
   return (
     <>
@@ -819,9 +819,9 @@ function DepartmentsView({ report }: { report: Report }) {
   const bestDept = report.departments.reduce((a, b) => a.yoyChangePercent > b.yoyChangePercent ? a : b)
   const worstDept = report.departments.reduce((a, b) => a.yoyChangePercent < b.yoyChangePercent ? a : b)
   const kpis: KPICardData[] = [
-    { label: 'מחלקות פעילות', value: report.departments.length, format: 'number', trend: 0, trendLabel: '', gradient: 'blue' },
-    { label: `מוביל: ${bestDept.name}`, value: Math.round(bestDept.yoyChangePercent), format: 'number', trend: bestDept.yoyChangePercent, trendLabel: 'צמיחה', gradient: 'green' },
-    { label: `נחלש: ${worstDept.name}`, value: Math.abs(Math.round(worstDept.yoyChangePercent)), format: 'number', trend: worstDept.yoyChangePercent, trendLabel: 'ירידה', gradient: 'red' },
+    { label: 'מחלקות פעילות', value: report.departments.length, format: 'number', trend: 0, trendLabel: '' },
+    { label: `מוביל: ${bestDept.name}`, value: Math.round(bestDept.yoyChangePercent), format: 'number', trend: bestDept.yoyChangePercent, trendLabel: 'צמיחה' },
+    { label: `נחלש: ${worstDept.name}`, value: Math.abs(Math.round(worstDept.yoyChangePercent)), format: 'number', trend: worstDept.yoyChangePercent, trendLabel: 'ירידה' },
   ]
   const growers = [...report.departments].filter(d => d.yoyChangePercent > 0).sort((a, b) => b.yoyChangePercent - a.yoyChangePercent).slice(0, 4)
   const decliners = [...report.departments].filter(d => d.yoyChangePercent < 0).sort((a, b) => a.yoyChangePercent - b.yoyChangePercent).slice(0, 4)
@@ -879,9 +879,9 @@ function DepartmentsView({ report }: { report: Report }) {
 
 function AlertsView({ report }: { report: Report }) {
   const kpis: KPICardData[] = [
-    { label: 'התראות אדומות', value: report.compliance.redAlerts.actual, format: 'number', trend: -10, trendLabel: `יעד: ${report.compliance.redAlerts.target}`, gradient: 'red' },
-    { label: 'חותמות אדומות', value: report.compliance.redAlerts.redSubscriptions, format: 'number', trend: -report.compliance.redAlerts.rate, trendLabel: '', gradient: 'orange' },
-    { label: 'דיווחי מוקד', value: report.operations.focusReports.current, format: 'number', trend: -50, trendLabel: `יעד: ${report.operations.focusReports.target}`, gradient: 'purple' },
+    { label: 'התראות אדומות', value: report.compliance.redAlerts.actual, format: 'number', trend: -10, trendLabel: `יעד: ${report.compliance.redAlerts.target}`, target: report.compliance.redAlerts.target, lowerIsBetter: true },
+    { label: 'חותמות אדומות', value: report.compliance.redAlerts.redSubscriptions, format: 'number', trend: -report.compliance.redAlerts.rate, trendLabel: '', target: report.compliance.redAlerts.target, lowerIsBetter: true },
+    { label: 'דיווחי מוקד', value: report.operations.focusReports.current, format: 'number', trend: -50, trendLabel: `יעד: ${report.operations.focusReports.target}`, target: report.operations.focusReports.target },
   ]
   return (
     <>
