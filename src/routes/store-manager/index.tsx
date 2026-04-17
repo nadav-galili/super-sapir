@@ -25,7 +25,7 @@ import { haderaFullReport, type DepartmentSales, type MonthlyDetail } from '@/da
 import { currentMonthYear, REPORT_MONTH, REPORT_YEAR, WORKING_DAYS_PER_MONTH, MONTHS_HE } from '@/data/constants'
 import { allBranches } from '@/data/mock-branches'
 import { formatCurrencyShort } from '@/lib/format'
-import { CHART_COLORS } from '@/lib/colors'
+import { CHART_COLORS, getDeltaStatusColor, getTargetStatusColor } from '@/lib/colors'
 import type { KPICardData } from '@/data/types'
 
 // ─── Monthly Sales Comparison Chart ──────────────────────────────
@@ -464,7 +464,7 @@ function BranchPerformanceCard({ report }: { report: Report }) {
               <div className="flex items-center justify-center gap-1.5">
                 <span className="text-2xl font-bold text-[#2D3748] font-mono" dir="ltr">{item.value}</span>
                 {item.change !== null && (
-                  <span className={`text-xs font-semibold ${item.change >= 0 ? 'text-[#2EC4D5]' : 'text-[#DC4E59]'}`} dir="ltr">
+                  <span className="text-xs font-semibold" style={{ color: getDeltaStatusColor(item.change) }} dir="ltr">
                     {item.change > 0 ? '▲' : '▼'}{Math.abs(item.change)}%
                   </span>
                 )}
@@ -515,9 +515,7 @@ function OverviewExpenseTable({ expenses }: { expenses: typeof haderaFullReport.
                 />
               </div>
               <span className="text-xs font-semibold text-[#2D3748] w-12 text-left tabular-nums font-mono" dir="ltr">{exp.percentOfRevenue}%</span>
-              <span className={`text-[11px] w-14 text-left tabular-nums ${
-                pctChange > 0 ? 'text-[#DC4E59]' : pctChange < 0 ? 'text-[#2EC4D5]' : 'text-[#A0AEC0]'
-              }`} dir="ltr">
+              <span className="text-[11px] w-14 text-left tabular-nums" style={{ color: pctChange !== 0 ? getDeltaStatusColor(pctChange, { lowerIsBetter: true }) : '#A0AEC0' }} dir="ltr">
                 {pctChange !== 0 ? `${pctChange > 0 ? '▲' : '▼'} ${Math.abs(pctChange)}%` : '—'}
               </span>
             </div>
@@ -551,7 +549,7 @@ function OverviewDepartmentBars({ departments }: { departments: DepartmentSales[
               />
             </div>
             <span className="text-xs font-semibold text-[#2D3748] w-12 text-left tabular-nums font-mono" dir="ltr">{dept.sharePercent}%</span>
-            <span className={`text-[11px] w-14 text-left tabular-nums ${dept.yoyChangePercent > 0 ? 'text-[#2EC4D5]' : dept.yoyChangePercent < 0 ? 'text-[#DC4E59]' : 'text-[#A0AEC0]'}`} dir="ltr">
+            <span className="text-[11px] w-14 text-left tabular-nums" style={{ color: getDeltaStatusColor(dept.yoyChangePercent) }} dir="ltr">
               {dept.yoyChangePercent > 0 ? '▲' : dept.yoyChangePercent < 0 ? '▼' : '—'} {Math.abs(dept.yoyChangePercent)}%
             </span>
           </div>
@@ -580,14 +578,14 @@ function AlertsTargetsCard({ report }: { report: Report }) {
         <div className="flex items-center justify-between">
           <CardTitle className="text-base text-[#2D3748]">התראות ויעדים</CardTitle>
           <div className="flex items-center gap-4 text-[11px] text-[#A0AEC0]">
-            <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-[#2EC4D5]" />ביצוע</span>
+            <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-[#2D3748]" />ביצוע</span>
             <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm border-2 border-[#A0AEC0] border-dashed" />יעד</span>
           </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
         {kpis.map((kpi, i) => {
-          const met = kpi.lowerIsBetter ? kpi.actual <= kpi.target : kpi.actual >= kpi.target
+          const statusColor = getTargetStatusColor(kpi.actual, kpi.target, { lowerIsBetter: kpi.lowerIsBetter })
           const rawMax = Math.max(kpi.actual, kpi.target)
           const maxVal = rawMax > 0 ? rawMax * 1.15 : 1
           const actualPct = (kpi.actual / maxVal) * 100
@@ -598,8 +596,8 @@ function AlertsTargetsCard({ report }: { report: Report }) {
               <div className="flex items-center justify-between mb-1">
                 <span className="text-xs text-[#4A5568]">{kpi.label}</span>
                 <span className="flex items-center gap-1.5 text-xs font-semibold shrink-0">
-                  <span className={`w-2 h-2 rounded-full ${met ? 'bg-[#2EC4D5]' : 'bg-[#DC4E59]'}`} />
-                  <span className={met ? 'text-[#2EC4D5]' : 'text-[#DC4E59]'}>{met ? 'עמד' : 'לא עמד'}</span>
+                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: statusColor }} />
+                  <span style={{ color: statusColor }}>{statusColor === '#10B981' ? 'עמד' : statusColor === '#FBBF24' ? 'קרוב' : 'לא עמד'}</span>
                 </span>
               </div>
               <div className="relative h-[14px] bg-[#FDF8F6] rounded-[7px] overflow-visible border border-warm-border">
@@ -608,7 +606,7 @@ function AlertsTargetsCard({ report }: { report: Report }) {
                   animate={{ width: `${actualPct}%` }}
                   transition={{ delay: 0.2 + i * 0.05, duration: 0.8 }}
                   className="absolute inset-y-0 start-0 rounded-[7px]"
-                  style={{ background: met ? 'linear-gradient(90deg, #2EC4D5, #5DD8E3)' : 'linear-gradient(90deg, #DC4E59, #E8777F)' }}
+                  style={{ background: statusColor }}
                 />
                 <div
                   className="absolute top-[-3px] bottom-[-3px] w-[2px] bg-[#4A5568] rounded-full"
