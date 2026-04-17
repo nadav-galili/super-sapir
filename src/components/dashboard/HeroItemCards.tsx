@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { motion } from 'motion/react'
 import { AlertTriangle, TrendingUp, Megaphone } from 'lucide-react'
 import { formatCurrencyShort } from '@/lib/format'
+import { getDeltaStatusColor, KPI_STATUS } from '@/lib/colors'
 import { usePeriodMultiplier } from '@/contexts/PeriodContext'
 import { getCategorySummaries } from '@/data/mock-categories'
 import { getTopStockoutItem, getTopSalesItem, getTopPromoItem } from '@/data/mock-items'
@@ -109,31 +110,31 @@ export function HeroItemCards({ vertical }: HeroItemCardsProps) {
 
       <SpotlightCard
         title="פריט מוביל מכירות"
-        icon={<TrendingUp className="w-4 h-4 text-[#2EC4D5]" />}
-        iconBg="bg-[#2EC4D5]/10"
+        icon={<TrendingUp className="w-4 h-4" style={{ color: getDeltaStatusColor(yoyChange) }} />}
+        iconBg="bg-[#10B981]/10"
         imageUrl="/hero/top-sales-cola.jpg"
         productName={topSalesItem.nameHe}
         categoryName={topSalesCatName}
-        accentColor="#2EC4D5"
+        accentColor={getDeltaStatusColor(yoyChange)}
         delay={0.2}
         stats={[
-          { label: 'מכירות חודשי', value: formatCurrencyShort(topSalesItem.monthlySales * m), color: '#2EC4D5' },
-          { label: 'מול שנה שעברה', value: `${yoyChange >= 0 ? '+' : ''}${yoyChange.toFixed(1)}%`, color: yoyChange >= 0 ? '#2EC4D5' : '#DC4E59' },
+          { label: 'מכירות חודשי', value: formatCurrencyShort(topSalesItem.monthlySales * m), color: getDeltaStatusColor(yoyChange) },
+          { label: 'מול שנה שעברה', value: `${yoyChange >= 0 ? '+' : ''}${yoyChange.toFixed(1)}%`, color: getDeltaStatusColor(yoyChange) },
         ]}
       />
 
       <SpotlightCard
         title="פריט מוביל מבצעים"
-        icon={<Megaphone className="w-4 h-4 text-[#6C5CE7]" />}
-        iconBg="bg-[#6C5CE7]/10"
+        icon={<Megaphone className="w-4 h-4" style={{ color: KPI_STATUS.good }} />}
+        iconBg="bg-[#10B981]/10"
         imageUrl="/hero/promo-tissue.jpg"
         productName={topPromoItem.nameHe}
         categoryName={promoCatName}
-        accentColor="#6C5CE7"
+        accentColor={KPI_STATUS.good}
         delay={0.3}
         stats={[
-          { label: 'מכירות מבצע', value: formatCurrencyShort((topPromoItem.promoSales ?? 0) * m), color: '#6C5CE7' },
-          { label: 'עלייה במבצע', value: `+${topPromoItem.promoUpliftPercent ?? 0}%`, color: '#6C5CE7' },
+          { label: 'מכירות מבצע', value: formatCurrencyShort((topPromoItem.promoSales ?? 0) * m), color: KPI_STATUS.good },
+          { label: 'עלייה במבצע', value: `+${topPromoItem.promoUpliftPercent ?? 0}%`, color: KPI_STATUS.good },
         ]}
       />
     </div>

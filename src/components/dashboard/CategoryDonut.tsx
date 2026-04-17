@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { motion } from 'motion/react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useAnimatedCounter } from '@/hooks/useAnimatedCounter'
-import { CHART_COLORS } from '@/lib/colors'
+import { CHART_COLORS, getDeltaStatusColor } from '@/lib/colors'
 import type { CategorySnapshot } from '@/lib/category-manager'
 
 interface CategoryDonutProps {
@@ -91,7 +91,7 @@ export function CategoryDonut({ snapshots }: CategoryDonutProps) {
             </svg>
             {/* Center text */}
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className={`text-3xl font-bold font-mono ${yoyPositive ? 'text-[#2EC4D5]' : 'text-[#DC4E59]'}`} dir="ltr">
+              <span className="text-3xl font-bold font-mono" style={{ color: getDeltaStatusColor(totalYoy) }} dir="ltr">
                 {yoyPositive ? '+' : '-'}{animatedYoy.toFixed(1)}%
               </span>
               <span className="text-[15px] text-[#A0AEC0]">שנתי</span>

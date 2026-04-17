@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { motion } from 'motion/react'
 import { formatCurrencyShort } from '@/lib/format'
+import { KPI_STATUS, getDeltaStatusColor } from '@/lib/colors'
 import type { CategorySnapshot } from '@/lib/category-manager'
 
 interface CategorySpotlightProps {
@@ -9,9 +10,9 @@ interface CategorySpotlightProps {
 }
 
 const STATUS_BADGE = {
-  opportunity: { label: 'ביצוע טוב', bg: 'bg-[#2EC4D5]' },
-  danger: { label: 'חריג', bg: 'bg-[#DC4E59]' },
-  monitor: { label: 'במעקב', bg: 'bg-[#F6B93B]' },
+  opportunity: { label: 'ביצוע טוב', color: KPI_STATUS.good },
+  danger: { label: 'חריג', color: KPI_STATUS.bad },
+  monitor: { label: 'במעקב', color: KPI_STATUS.warning },
 } as const
 
 function SpotlightCard({ snap, index }: { snap: CategorySnapshot; index: number }) {
@@ -40,7 +41,7 @@ function SpotlightCard({ snap, index }: { snap: CategorySnapshot; index: number 
 
       {/* Status badge */}
       <div className="absolute top-3 start-3 z-10">
-        <span className={`${badge.bg} text-white text-[15px] font-bold px-2.5 py-1 rounded-full`}>
+        <span className="text-white text-[15px] font-bold px-2.5 py-1 rounded-full" style={{ backgroundColor: badge.color }}>
           {badge.label}
         </span>
       </div>
@@ -57,7 +58,7 @@ function SpotlightCard({ snap, index }: { snap: CategorySnapshot; index: number 
           </div>
           <div>
             <p className="text-[15px] text-white/50">שינוי שנתי</p>
-            <p className={`text-lg font-bold font-mono ${yoyPositive ? 'text-[#2EC4D5]' : 'text-[#DC4E59]'}`} dir="ltr">
+            <p className="text-lg font-bold font-mono" style={{ color: getDeltaStatusColor(snap.category.yoyChange) }} dir="ltr">
               {yoyPositive ? '+' : ''}{snap.category.yoyChange}%
             </p>
           </div>

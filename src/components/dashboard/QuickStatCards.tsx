@@ -53,9 +53,9 @@ export function QuickStatCards() {
     const totalComplaints = Math.round(allBranches.reduce((sum, b) => sum + b.metrics.complaints, 0) * m)
 
     return [
-      { label: 'לקוחות יומי', value: totalCustomers, suffix: 'לקוחות', icon: Users, color: '#2EC4D5' },
+      { label: 'לקוחות יומי', value: totalCustomers, suffix: 'לקוחות', icon: Users, color: '#10B981' },
       { label: 'סל ממוצע', value: Math.round(avgBasket), suffix: '₪', icon: ShoppingCart, color: '#6C5CE7' },
-      { label: 'זמינות מדף', value: +avgSupply.toFixed(1), suffix: '%', icon: PackageCheck, color: '#2EC4D5' },
+      { label: 'זמינות מדף', value: +avgSupply.toFixed(1), suffix: '%', icon: PackageCheck, color: '#10B981' },
       { label: 'תלונות פתוחות', value: totalComplaints, suffix: 'תלונות', icon: AlertTriangle, color: '#DC4E59' },
     ]
   }, [m])
