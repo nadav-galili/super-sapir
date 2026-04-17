@@ -1,0 +1,20 @@
+{
+  "enabledPlugins": {
+    "code-review@claude-code-plugins": true,
+    "feature-dev@claude-code-plugins": true,
+    "frontend-design@claude-code-plugins": true,
+    "pr-review-toolkit@claude-code-plugins": true,
+    "agent-sdk-dev@claude-plugins-official": true,
+    "commit-commands@claude-plugins-official": true,
+    "feature-dev@claude-plugins-official": true,
+    "expo-app-design@expo-plugins": true,
+    "expo-deployment@expo-plugins": true,
+    "supabase@claude-plugins-official": true,
+    "react-native-best-practices@callstack-agent-skills": true,
+    "postgres-best-practices@supabase-agent-skills": true,
+    "code-simplifier@claude-plugins-official": true,
+    "compound-engineering@every-marketplace": true,
+    "typescript-lsp@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true
+  }
+}

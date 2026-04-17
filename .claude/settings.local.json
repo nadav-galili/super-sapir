@@ -12,7 +12,9 @@
       "mcp__plugin_compound-engineering_pw__browser_type",
       "Bash(npx remotion:*)",
       "Bash(curl -s http://localhost:5177/category-manager?view=promotions)",
-      "Bash(gh issue:*)"
+      "Bash(gh issue:*)",
+      "mcp__claude_ai_Notion__notion-fetch",
+      "mcp__claude_ai_Notion__notion-move-pages"
     ]
   }
 }

@@ -8,9 +8,11 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "deploy": "netlify deploy --prod"
+    "deploy": "netlify deploy --prod",
+    "sandcastle": "npx tsx .sandcastle/main.ts"
   },
   "dependencies": {
+    "@ai-hero/sandcastle": "^0.4.7",
     "@fontsource-variable/rubik": "^5.2.8",
     "@fontsource/fira-code": "^5.2.7",
     "@radix-ui/react-dialog": "^1.1.15",

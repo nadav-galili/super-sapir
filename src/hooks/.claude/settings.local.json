@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:github.com)",
+      "Read(//Users/nadavgalili/personal_projects/superSapir/**)",
+      "Bash(bun add *)",
+      "Bash(npx sandcastle *)"
+    ]
+  }
+}
