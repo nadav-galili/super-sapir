@@ -30,6 +30,46 @@ export function getKpiStatusColor(ratio: number): string {
   return KPI_STATUS.bad
 }
 
+/**
+ * Returns traffic-light color based on actual vs target.
+ * Higher-is-better (default): >=95% → green, >=85% → amber, <85% → red
+ * Lower-is-better: <=105% → green, <=115% → amber, >115% → red
+ * Edge case: target=0 returns neutral muted color.
+ */
+export function getTargetStatusColor(
+  actual: number,
+  target: number,
+  opts?: { lowerIsBetter?: boolean }
+): string {
+  if (target === 0) return PALETTE.muted
+  const ratio = actual / target
+  if (opts?.lowerIsBetter) {
+    if (ratio <= 1.05) return KPI_STATUS.good
+    if (ratio <= 1.15) return KPI_STATUS.warning
+    return KPI_STATUS.bad
+  }
+  if (ratio >= 0.95) return KPI_STATUS.good
+  if (ratio >= 0.85) return KPI_STATUS.warning
+  return KPI_STATUS.bad
+}
+
+/**
+ * Returns traffic-light color based on a delta (percentage change).
+ * Higher-is-better (default): >= +deadBand → green, <= -deadBand → red, else amber
+ * Lower-is-better: flipped — negative delta is good, positive is bad.
+ * Default dead band: ±2%.
+ */
+export function getDeltaStatusColor(
+  delta: number,
+  opts?: { lowerIsBetter?: boolean; deadBand?: number }
+): string {
+  const deadBand = opts?.deadBand ?? 2
+  const effective = opts?.lowerIsBetter ? -delta : delta
+  if (effective >= deadBand) return KPI_STATUS.good
+  if (effective <= -deadBand) return KPI_STATUS.bad
+  return KPI_STATUS.warning
+}
+
 export function getPerformanceColor(score: number, max = 100): string {
   const ratio = score / max
   if (ratio >= 0.8) return PALETTE.cyan
@@ -67,7 +107,7 @@ export const CHART_COLORS = [
 ]
 
 export const GRADIENT_PRESETS = {
-  green: { from: '#2EC4D5', to: '#5DD8E3' },
+  green: { from: '#10B981', to: '#34D399' },
   blue: { from: '#2EC4D5', to: '#5DD8E3' },
   orange: { from: '#F6B93B', to: '#F8CB6B' },
   purple: { from: '#6C5CE7', to: '#8B7FED' },
