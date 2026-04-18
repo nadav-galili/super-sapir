@@ -14,7 +14,10 @@
       "Bash(curl -s http://localhost:5177/category-manager?view=promotions)",
       "Bash(gh issue:*)",
       "mcp__claude_ai_Notion__notion-fetch",
-      "mcp__claude_ai_Notion__notion-move-pages"
+      "mcp__claude_ai_Notion__notion-move-pages",
+      "Bash(gh repo *)",
+      "Bash(gh label *)",
+      "Bash(kill 38604 38635 38664 38665 39089)"
     ]
   }
 }
