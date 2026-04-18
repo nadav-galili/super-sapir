@@ -1,7 +1,8 @@
 // AI view: just renders the streaming AI briefing rows.
 import type { BranchFullReport } from "@/data/hadera-real";
 import { StoreAIBriefing } from "@/components/store-manager/StoreAIBriefing";
-import { useAIAnalysis } from "@/hooks/useAIAnalysis";
+import { useAIInsight } from "@/hooks/useAIInsight";
+import { buildStoreInsight } from "@/lib/ai/builders";
 
 export interface AIViewProps {
   report: BranchFullReport;
@@ -9,9 +10,8 @@ export interface AIViewProps {
 }
 
 export function AIView({ report, branchId }: AIViewProps) {
-  const { rows, isLoading, isStreaming, error, retry } = useAIAnalysis(
-    branchId,
-    report
+  const { rows, isLoading, isStreaming, error, retry } = useAIInsight(
+    buildStoreInsight({ branchId, report })
   );
   return (
     <StoreAIBriefing

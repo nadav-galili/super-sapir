@@ -4,7 +4,10 @@
 // re-deriving it. Pure compose — no network, no side effects.
 import { useMemo } from "react";
 import { getBranchReportOrFallback } from "@/data/getBranchReport";
-import { detectAnomalies, type AnomalyResult } from "@/lib/ai";
+import {
+  detectDepartmentAnomalies,
+  type AnomalyResult,
+} from "@/lib/ai/anomalies";
 import type { BranchFullReport } from "@/data/hadera-real";
 
 export interface StoreReport {
@@ -15,7 +18,11 @@ export interface StoreReport {
 export function useStoreReport(branchId: string): StoreReport {
   const report = useMemo(() => getBranchReportOrFallback(branchId), [branchId]);
   const anomalies = useMemo(
-    () => detectAnomalies(report.departments, report.sales.total.yoyChange),
+    () =>
+      detectDepartmentAnomalies(
+        report.departments,
+        report.sales.total.yoyChange
+      ),
     [report]
   );
   return { report, anomalies };

@@ -7,7 +7,8 @@ import { WORKING_DAYS_PER_MONTH } from "@/data/constants";
 import { formatCurrencyShort } from "@/lib/format";
 import type { KPICardData } from "@/data/types";
 import { StoreAIBriefing } from "@/components/store-manager/StoreAIBriefing";
-import { useAIAnalysis } from "@/hooks/useAIAnalysis";
+import { useAIInsight } from "@/hooks/useAIInsight";
+import { buildStoreInsight } from "@/lib/ai/builders";
 import { MonthlyComparisonChart } from "@/components/store-manager/charts/MonthlyComparisonChart";
 import { BranchPerformanceCard } from "@/components/store-manager/charts/BranchPerformanceCard";
 import { OverviewExpenseTable } from "@/components/store-manager/charts/OverviewExpenseTable";
@@ -21,9 +22,8 @@ export interface OverviewViewProps {
 }
 
 export function OverviewView({ report, branchId }: OverviewViewProps) {
-  const { rows, isLoading, isStreaming, error, retry } = useAIAnalysis(
-    branchId,
-    report
+  const { rows, isLoading, isStreaming, error, retry } = useAIInsight(
+    buildStoreInsight({ branchId, report })
   );
   const s = report.sales;
   const kpis: KPICardData[] = [

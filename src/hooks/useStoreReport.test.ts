@@ -1,9 +1,9 @@
 // Boundary test for useStoreReport — since the hook is pure-compose
-// over `getBranchReport` + `detectAnomalies` we don't need a React
-// renderer; we just exercise the same wiring the hook uses.
+// over `getBranchReport` + `detectDepartmentAnomalies` we don't need a
+// React renderer; we just exercise the same wiring the hook uses.
 import { describe, it, expect } from "vitest";
 import { getBranchReportOrFallback } from "@/data/getBranchReport";
-import { detectAnomalies } from "@/lib/ai";
+import { detectDepartmentAnomalies } from "@/lib/ai/anomalies";
 import { allBranches } from "@/data/mock-branches";
 import { HADERA_BRANCH_ID } from "@/data/getBranchReport";
 
@@ -12,7 +12,7 @@ import { HADERA_BRANCH_ID } from "@/data/getBranchReport";
 // `useStoreReport(branchId)` returns after its two useMemo calls.
 function resolveStoreReport(branchId: string) {
   const report = getBranchReportOrFallback(branchId);
-  const anomalies = detectAnomalies(
+  const anomalies = detectDepartmentAnomalies(
     report.departments,
     report.sales.total.yoyChange
   );

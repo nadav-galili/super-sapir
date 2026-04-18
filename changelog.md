@@ -8,6 +8,30 @@
 
 ## 2026-04-18
 
+### AI engine deepening — Ports & Adapters + useAIInsight (#39)
+
+- Three per-surface hooks (`useAIAnalysis`, `useCategoryAIAnalysis`, `useChainAIAnalysis`) collapsed into one generic `useAIInsight(build, options?)`. Each surface now calls a small builder (`buildStoreInsight`, `buildCategoryInsight`, `buildChainInsight`) to produce an `AIBuildResult<TPayload>` — cache key + payload + system prompt + user prompt — and hands that to the hook. Zero duplicated SSE-parsing, cache-management or AbortController lifecycle left.
+- New `src/lib/ai/` module boundary:
+  - `types.ts` — `InsightRow`, `AIInsightResult`, `AIPhase`, `AIBuildResult<TPayload>`, `AIBuilderId`.
+  - `transport.ts` — `AITransport` port + `httpSseTransport` (production fetch/SSE adapter) + `createInMemoryTransport({ chunks, error?, delayMs? })` (test adapter that yields pre-canned SSE chunks deterministically).
+  - `cache.ts` — `AICachePort` + `localStorageCache` (delegates to the existing `ai-cache.ts` module so keys stay compatible) + `createInMemoryCache()`.
+  - `anomalies.ts` — single source of truth for anomaly detection. Exposes `detectDepartmentAnomalies(departments, storeYoy)` (typed `AnomalyResult[]` for UI), `detectCategoryAnomalies(input)` and `detectChainAnomalies(input)` (string arrays for the prompts). The three builders consume these helpers; inline anomaly logic in `ai.ts` / `category-ai.ts` / `chain-ai.ts` is gone.
+  - `builders.ts` — registry of the three `AIBuildResult` producers. System prompts live here with their builder.
+  - `engine.ts` — `runAIInsight({ build, transport, cache, signal, useCache?, onPhase?, onRows?, onError? })`. The only place that knows how to parse SSE, accumulate rows, and decide what goes in the cache.
+- Briefing UI components (`StoreAIBriefing`, `CategoryAIBriefing`, `ChainAIBriefing`) updated to consume `InsightRow` from `@/lib/ai/types` and call `useAIInsight(buildXxxInsight(...))`. Store views now live at `views/OverviewView.tsx` + `views/AIView.tsx`.
+- Tests: `engine.test.ts` covers the full lifecycle via `createInMemoryTransport` (success, cache hit short-circuit, retry bypassing cache, transport error, inline SSE error, empty stream, mid-stream abort). `anomalies.test.ts` covers all three detectors as pure functions. `builders.test.ts` asserts the boundary contract (cache key shape, JSON-serializable payload, prompts non-empty). All 120 vitest tests pass.
+- Files deleted: `src/hooks/useAIAnalysis.ts`, `src/hooks/useCategoryAIAnalysis.ts`, `src/hooks/useChainAIAnalysis.ts`, `src/lib/ai.ts`, `src/lib/category-ai.ts`, `src/lib/chain-ai.ts`, `src/components/store-manager/AIBriefingCard.tsx`, `src/components/store-manager/AIRecommendations.tsx` (dead code from the pre-JSONL era).
+- Netlify function at `netlify/functions/ai-analyze.ts` unchanged — the production transport still hits the same endpoint with the same body shape.
+- Zero new lint errors (still at 39, same as post-#38 baseline); `bun run build` clean.
+- **Files:** `src/lib/ai/types.ts`, `src/lib/ai/cache.ts`, `src/lib/ai/transport.ts`, `src/lib/ai/anomalies.ts`, `src/lib/ai/builders.ts`, `src/lib/ai/engine.ts`, `src/lib/ai/anomalies.test.ts`, `src/lib/ai/builders.test.ts`, `src/lib/ai/engine.test.ts` (all new), `src/hooks/useAIInsight.ts` (new), `src/hooks/useStoreReport.ts` + `src/hooks/useStoreReport.test.ts` + `src/components/store-manager/charts/DepartmentBreakdown.tsx` + `src/components/store-manager/charts/__tests__/mocks.ts` + `src/components/store-manager/views/DepartmentsView.tsx` + `src/components/store-manager/StoreAIBriefing.tsx` + `src/components/store-manager/views/OverviewView.tsx` + `src/components/store-manager/views/AIView.tsx` + `src/components/dashboard/CategoryAIBriefing.tsx` + `src/components/dashboard/ChainAIBriefing.tsx` (migrated imports), 8 files deleted.
+
+### Ubiquitous Language — shared domain glossary
+
+- New `context.md` at repo root — a DDD-style ubiquitous language glossary for the retail analytics domain. Defines canonical terms, organizational hierarchy (**Chain → Region → Branch → Department → Category → Item**), roles (**Store Manager**, **Region Manager**, **Category Manager**), metrics, alerts, and aliases to avoid. Includes a dev ↔ domain-expert example dialogue and a "Flagged ambiguities" section calling out known code debt.
+- Key clarifications baked in: Departments exist at both chain scope (taxonomy) and branch scope (physical floor area); Categories (e.g. _Cheese_, _Milk_) are sub-units inside a Department (e.g. _Dairy_) and are not yet modelled in code — today's `DepartmentMetrics` / `CategorySummary` actually describe Departments. **Region** is canonical; "Division" is banned in new code (the `/division-manager` URL is kept only for URL stability).
+- `CLAUDE.md` now has a **Ubiquitous Language** section near the top linking to `context.md`, so the agent reads the glossary before writing domain code or copy.
+- **Files:** `context.md` (new), `CLAUDE.md`
+
 ### Store-manager extraction — chart components + useStoreReport (#38)
 
 - The 1453-line store-manager route monolith is now a 112-line layout shell. All inline chart and view logic moved out to `src/components/store-manager/{charts,views}/`.

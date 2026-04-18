@@ -2,7 +2,7 @@
 // breakdown chart (with pre-computed anomalies from `useStoreReport`).
 import { KPIGrid } from "@/components/dashboard/KPIGrid";
 import type { BranchFullReport } from "@/data/hadera-real";
-import type { AnomalyResult } from "@/lib/ai";
+import type { AnomalyResult } from "@/lib/ai/anomalies";
 import type { KPICardData } from "@/data/types";
 import { DepartmentBreakdown } from "@/components/store-manager/charts/DepartmentBreakdown";
 import { DepartmentMoversCard } from "@/components/store-manager/charts/DepartmentMoversCard";

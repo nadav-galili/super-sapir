@@ -1,11 +1,11 @@
 // Department sales breakdown — horizontal paired bars per department
 // (current month vs YTD) with optional anomaly icons pulled from
-// `detectAnomalies`. Sorted by YTD descending.
+// `detectDepartmentAnomalies`. Sorted by YTD descending.
 import { motion } from "motion/react";
 import { AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { DepartmentSales } from "@/data/hadera-real";
-import type { AnomalyResult } from "@/lib/ai";
+import type { AnomalyResult } from "@/lib/ai/anomalies";
 import { REPORT_YEAR } from "@/data/constants";
 import { formatCurrencyShort } from "@/lib/format";
 import { CHART_COLORS } from "@/lib/colors";

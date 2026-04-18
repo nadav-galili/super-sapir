@@ -6,7 +6,7 @@ import type {
   DepartmentSales,
   MonthlyDetail,
 } from "@/data/hadera-real";
-import type { AnomalyResult } from "@/lib/ai";
+import type { AnomalyResult } from "@/lib/ai/anomalies";
 
 export const mockMonthly: MonthlyDetail[] = Array.from(
   { length: 12 },
