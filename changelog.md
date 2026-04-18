@@ -8,6 +8,19 @@
 
 ## 2026-04-18
 
+### Store-manager extraction — chart components + useStoreReport (#38)
+
+- The 1453-line store-manager route monolith is now a 112-line layout shell. All inline chart and view logic moved out to `src/components/store-manager/{charts,views}/`.
+- 10 chart components extracted under `src/components/store-manager/charts/`: `MonthlyComparisonChart`, `DepartmentBreakdown`, `StaffingSection`, `BranchPerformanceCard`, `OverviewExpenseTable`, `OverviewDepartmentBars`, `AlertsTargetsCard`, `OverviewStaffingCard`, `InventoryByDepartmentChart`, `DepartmentMoversCard` (the last two were previously inline inside the Inventory/Departments views). Shared `BAR_GRADIENTS` palette moved to `charts/bar-gradients.ts`.
+- 6 view components extracted under `src/components/store-manager/views/`: `OverviewView`, `InventoryView`, `HRView`, `DepartmentsView`, `AlertsView`, `AIView`. Each accepts a typed slice of the report as props — never the raw `BranchFullReport` where a narrower type suffices.
+- New `useStoreReport(branchId)` hook in `src/hooks/` owns data fetch (`getBranchReportOrFallback`) + anomaly detection (`detectAnomalies`) in two memoized steps. Views consume `{ report, anomalies }` directly — the route no longer runs anomaly detection inline.
+- New shared `MiniStatTile` under `src/components/store-manager/` — one source of truth for the label + value + optional subtitle/accessory pattern that used to be copy-pasted across `BranchPerformanceCard` and other KPI tile groupings.
+- Per-chart tests live under `src/components/store-manager/charts/__tests__/` — each chart is rendered via `renderToString` (react-dom/server, no new test-library dependency needed) with mock data, and asserts key data points appear in the output. `useStoreReport.test.ts` covers the hook's pure-compose wiring against known + unknown branch ids.
+- `vitest.config.ts` now also picks up `.test.tsx` files (previously only `.test.ts`).
+- Visual + functional parity preserved: every `?view=overview|inventory|hr|departments|alerts|ai` renders identically; branch switching still works; no color/font/spacing changes.
+- Lint went from 53 errors → 39 errors (zero new errors; the refactor eliminated 14 `react-refresh/only-export-components` errors from the old monolithic route).
+- **Files:** `src/hooks/useStoreReport.ts` (new), `src/hooks/useStoreReport.test.ts` (new), `src/components/store-manager/MiniStatTile.tsx` (new), `src/components/store-manager/charts/` (10 new chart files + `bar-gradients.ts` + 10 `__tests__/*.test.tsx` + `__tests__/mocks.ts`), `src/components/store-manager/views/` (6 new view files), `src/routes/store-manager/index.tsx` (rewritten, 1453 → 112 lines), `vitest.config.ts`
+
 ### Branch report adapter — getBranchReport(branchId) (#37)
 
 - New `getBranchReport(branchId)` boundary in `src/data/` is the single entry point for fetching a `BranchFullReport`. Hadera returns the curated real report verbatim; synthetic branches are inflated from the flat `Branch` shape using deterministic seeded helpers. `getBranchReportOrFallback(id)` is the non-nullable variant used by the route.
