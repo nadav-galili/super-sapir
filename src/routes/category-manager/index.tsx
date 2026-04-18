@@ -181,41 +181,37 @@ function CategoryManagerPage() {
 
         <QuickStatCards />
 
-        <p className="text-xl font-medium text-[#4A5568]">
-          כל המדדים מוצגים ביחס ליעד
-        </p>
-
         <KPIGaugeRow items={gaugeKpis} />
 
         <Tabs defaultValue="formats" dir="rtl">
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <TabsList className="h-auto gap-1 bg-[#FDF8F6] p-1 rounded-[12px] border border-[#FFE8DE]">
+          <div className="flex items-center justify-between gap-4 flex-wrap border-b border-[#FFE8DE]">
+            <TabsList className="h-auto gap-6 bg-transparent p-0 rounded-none">
               <TabsTrigger
                 value="formats"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[10px] text-lg font-medium text-[#4A5568] transition-all data-[state=active]:bg-white data-[state=active]:text-[#2EC4D5] data-[state=active]:shadow-sm"
+                className="group relative inline-flex items-center gap-2 px-1 pb-3 rounded-none bg-transparent text-[17px] font-medium text-[#A0AEC0] hover:text-[#4A5568] data-[state=active]:bg-transparent data-[state=active]:text-[#2D3748] data-[state=active]:shadow-none transition-colors after:absolute after:inset-x-0 after:-bottom-px after:h-[2px] after:bg-[#DC4E59] after:origin-center after:scale-x-0 data-[state=active]:after:scale-x-100 after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.16,1,0.3,1)]"
               >
-                <Store className="w-5 h-5" />
+                <Store className="w-[18px] h-[18px]" strokeWidth={2} />
                 פורמטים
               </TabsTrigger>
               <TabsTrigger
                 value="categories"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[10px] text-lg font-medium text-[#4A5568] transition-all data-[state=active]:bg-white data-[state=active]:text-[#6C5CE7] data-[state=active]:shadow-sm"
+                className="group relative inline-flex items-center gap-2 px-1 pb-3 rounded-none bg-transparent text-[17px] font-medium text-[#A0AEC0] hover:text-[#4A5568] data-[state=active]:bg-transparent data-[state=active]:text-[#2D3748] data-[state=active]:shadow-none transition-colors after:absolute after:inset-x-0 after:-bottom-px after:h-[2px] after:bg-[#DC4E59] after:origin-center after:scale-x-0 data-[state=active]:after:scale-x-100 after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.16,1,0.3,1)]"
               >
-                <LayoutGrid className="w-5 h-5" />
+                <LayoutGrid className="w-[18px] h-[18px]" strokeWidth={2} />
                 ביצועי קטגוריות
               </TabsTrigger>
               <TabsTrigger
                 value="suppliers"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[10px] text-lg font-medium text-[#4A5568] transition-all data-[state=active]:bg-white data-[state=active]:text-[#F6B93B] data-[state=active]:shadow-sm"
+                className="group relative inline-flex items-center gap-2 px-1 pb-3 rounded-none bg-transparent text-[17px] font-medium text-[#A0AEC0] hover:text-[#4A5568] data-[state=active]:bg-transparent data-[state=active]:text-[#2D3748] data-[state=active]:shadow-none transition-colors after:absolute after:inset-x-0 after:-bottom-px after:h-[2px] after:bg-[#DC4E59] after:origin-center after:scale-x-0 data-[state=active]:after:scale-x-100 after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.16,1,0.3,1)]"
               >
-                <Truck className="w-5 h-5" />
+                <Truck className="w-[18px] h-[18px]" strokeWidth={2} />
                 ספקים
               </TabsTrigger>
               <TabsTrigger
                 value="promotions"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[10px] text-lg font-medium text-[#4A5568] transition-all data-[state=active]:bg-white data-[state=active]:text-[#DC4E59] data-[state=active]:shadow-sm"
+                className="group relative inline-flex items-center gap-2 px-1 pb-3 rounded-none bg-transparent text-[17px] font-medium text-[#A0AEC0] hover:text-[#4A5568] data-[state=active]:bg-transparent data-[state=active]:text-[#2D3748] data-[state=active]:shadow-none transition-colors after:absolute after:inset-x-0 after:-bottom-px after:h-[2px] after:bg-[#DC4E59] after:origin-center after:scale-x-0 data-[state=active]:after:scale-x-100 after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.16,1,0.3,1)]"
               >
-                <Megaphone className="w-5 h-5" />
+                <Megaphone className="w-[18px] h-[18px]" strokeWidth={2} />
                 מבצעים
               </TabsTrigger>
             </TabsList>

@@ -14,7 +14,7 @@ interface HeroBannerProps {
   backgroundImage?: string;
 }
 
-const GAUGE_SIZE = 180;
+const GAUGE_SIZE = 200;
 const GAUGE_STROKE = 14;
 const GAUGE_R = (GAUGE_SIZE - GAUGE_STROKE) / 2;
 
@@ -31,41 +31,34 @@ const TICK_MARKS = Array.from({ length: 40 }, (_, i) => {
 
 function BigGauge({ actual, target }: { actual: number; target: number }) {
   const ratio = target > 0 ? actual / target : 1;
-  const size = GAUGE_SIZE;
-  const r = GAUGE_R;
-  const circumference = 2 * Math.PI * r;
+  const circumference = 2 * Math.PI * GAUGE_R;
   const offset = circumference - Math.min(ratio, 1) * circumference;
   const pct = Math.round(ratio * 100);
   const animatedPct = useAnimatedCounter(pct, 1800, 300);
-
   const color = getSalesColor({ actual, target });
 
   return (
-    <div className="relative" style={{ width: size, height: size }}>
-      {/* Outer pulse ring */}
+    <div className="relative" style={{ width: GAUGE_SIZE, height: GAUGE_SIZE }}>
+      {/* Ambient halo — perpetual pulse, isolated transform-only */}
       <motion.div
-        className="absolute -inset-3 rounded-full border-2 opacity-0"
-        style={{ borderColor: color }}
-        animate={{ opacity: [0, 0.3, 0], scale: [0.95, 1.05, 0.95] }}
-        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-      />
-      {/* Glow */}
-      <div
-        className="absolute -inset-4 rounded-full blur-xl opacity-20"
-        style={{ background: color }}
+        className="absolute -inset-4 rounded-full opacity-0 pointer-events-none"
+        style={{
+          background: `radial-gradient(circle, ${color}33 0%, transparent 65%)`,
+        }}
+        animate={{ opacity: [0, 0.7, 0], scale: [0.92, 1.08, 0.92] }}
+        transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
       />
 
       <svg
         className="w-full h-full -rotate-90 relative z-10"
-        viewBox={`0 0 ${size} ${size}`}
+        viewBox={`0 0 ${GAUGE_SIZE} ${GAUGE_SIZE}`}
       >
-        {/* Track */}
         <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={r}
+          cx={GAUGE_SIZE / 2}
+          cy={GAUGE_SIZE / 2}
+          r={GAUGE_R}
           fill="none"
-          stroke="rgba(255,255,255,0.1)"
+          stroke="rgba(255,255,255,0.08)"
           strokeWidth={GAUGE_STROKE}
         />
         {TICK_MARKS.map((t, i) => (
@@ -75,15 +68,14 @@ function BigGauge({ actual, target }: { actual: number; target: number }) {
             y1={t.y1}
             x2={t.x2}
             y2={t.y2}
-            stroke="rgba(255,255,255,0.08)"
+            stroke="rgba(255,255,255,0.1)"
             strokeWidth={1}
           />
         ))}
-        {/* Progress */}
         <motion.circle
-          cx={size / 2}
-          cy={size / 2}
-          r={r}
+          cx={GAUGE_SIZE / 2}
+          cy={GAUGE_SIZE / 2}
+          r={GAUGE_R}
           fill="none"
           stroke={color}
           strokeWidth={GAUGE_STROKE}
@@ -91,18 +83,24 @@ function BigGauge({ actual, target }: { actual: number; target: number }) {
           strokeDasharray={circumference}
           initial={{ strokeDashoffset: circumference }}
           animate={{ strokeDashoffset: offset }}
-          transition={{ duration: 1.8, delay: 0.4, ease: "easeOut" }}
+          transition={{
+            type: "spring",
+            stiffness: 60,
+            damping: 18,
+            delay: 0.3,
+          }}
         />
       </svg>
+
       <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
         <span
-          className="text-6xl font-bold font-mono text-white tracking-tight"
+          className="text-[72px] leading-none font-semibold font-mono text-white tracking-tight"
           dir="ltr"
         >
           {animatedPct}
-          <span className="text-3xl text-white/60">%</span>
+          <span className="text-3xl text-white/60 ms-0.5">%</span>
         </span>
-        <span className="text-base text-white/50 mt-1 tracking-wide">
+        <span className="text-[15px] text-white/70 mt-2 tracking-wide font-medium">
           עמידה ביעד
         </span>
       </div>
@@ -110,26 +108,26 @@ function BigGauge({ actual, target }: { actual: number; target: number }) {
   );
 }
 
-interface StatPillProps {
+interface InlineStatProps {
   label: string;
   value: string | number;
   delay: number;
   mono?: boolean;
 }
 
-function StatPill({ label, value, delay, mono }: StatPillProps) {
+function InlineStat({ label, value, delay, mono }: InlineStatProps) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay }}
-      className="bg-white/[0.07] backdrop-blur-md rounded-[14px] px-5 py-3 border border-white/[0.08] hover:bg-white/[0.12] transition-colors"
+      transition={{ delay, type: "spring", stiffness: 100, damping: 20 }}
+      className="px-5 first:ps-0 last:pe-0"
     >
-      <p className="text-[16px] text-white/40 uppercase tracking-wider">
+      <p className="text-[15px] text-white/55 uppercase tracking-[0.08em] font-medium">
         {label}
       </p>
       <p
-        className={`text-2xl font-bold text-white mt-0.5 ${mono ? "font-mono" : ""}`}
+        className={`text-[26px] font-semibold text-white mt-1 leading-none ${mono ? "font-mono tracking-tight" : ""}`}
         dir="ltr"
       >
         {value}
@@ -152,73 +150,52 @@ export function HeroBanner({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="relative rounded-[20px] overflow-hidden shadow-xl"
+      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+      className="relative rounded-[20px] overflow-hidden shadow-[0_20px_40px_-15px_rgba(15,23,42,0.25)]"
     >
-      {/* Background image (optional) */}
-      {backgroundImage && (
+      {/* Asymmetric split: content panel (RTL-start / right) + image zone (RTL-end / left) */}
+      <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_clamp(420px,42%,540px)]">
+        {/* Content panel — solid dark surface, all text lives here → guaranteed contrast */}
         <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${backgroundImage})` }}
-          aria-hidden
-        />
-      )}
-      {/* Gradient — full color when no image, darkened overlay on top of image */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background: backgroundImage
-            ? "linear-gradient(135deg, rgba(17,24,39,0.70) 0%, rgba(45,55,72,0.55) 100%)"
-            : "linear-gradient(135deg, #2D3748 0%, #3D3050 45%, #DC4E59 100%)",
-        }}
-      />
-      {/* Subtle decorative shapes */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div
-          className="absolute -top-20 -left-20 w-72 h-72 rounded-full opacity-[0.06]"
+          className="relative order-2 md:order-1 p-8 sm:p-10 md:p-12 flex flex-col justify-center min-h-[340px]"
           style={{
-            background: "radial-gradient(circle, #FFFFFF 0%, transparent 70%)",
+            background:
+              "linear-gradient(180deg, #0F172A 0%, #111B2E 60%, #0F172A 100%)",
           }}
-        />
-        <div
-          className="absolute -bottom-16 right-1/4 w-96 h-96 rounded-full opacity-[0.04]"
-          style={{
-            background: "radial-gradient(circle, #FFFFFF 0%, transparent 70%)",
-          }}
-        />
-        <div
-          className="absolute top-1/2 left-1/3 w-40 h-40 rounded-full opacity-[0.03]"
-          style={{ background: "#FFFFFF" }}
-        />
-      </div>
-
-      {/* Content */}
-      <div className="relative z-10 p-6 sm:p-10 flex flex-col sm:flex-row items-center gap-8 sm:gap-12 min-h-[280px]">
-        {/* Right (RTL) — Title + stats */}
-        <div className="flex-1 text-right">
-          {/* Live indicator */}
+        >
+          {/* Live indicator — liquid glass (inner border + inset highlight) */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.8 }}
-            className="inline-flex items-center gap-2 bg-white/[0.08] backdrop-blur-sm rounded-full px-3 py-1 mb-4 border border-white/[0.08]"
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="inline-flex self-start items-center gap-2 bg-white/[0.04] backdrop-blur-xl rounded-full px-3 py-1.5 mb-6 border border-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
           >
             <motion.span
-              className="w-2 h-2 rounded-full bg-[#2EC4D5]"
-              animate={{ opacity: [1, 0.3, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
+              className="w-1.5 h-1.5 rounded-full bg-[#2EC4D5] relative"
+              animate={{
+                boxShadow: [
+                  "0 0 0 0 rgba(46,196,213,0.6)",
+                  "0 0 0 8px rgba(46,196,213,0)",
+                ],
+              }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
             />
-            <span className="text-[16px] text-white/50 font-medium">
-              <Activity className="w-3 h-3 inline-block me-1" />
+            <span className="text-[15px] text-white/80 font-medium inline-flex items-center gap-1.5">
+              <Activity className="w-3.5 h-3.5" strokeWidth={2} />
               נתונים בזמן אמת
             </span>
           </motion.div>
 
           <motion.h1
-            initial={{ opacity: 0, x: 20 }}
+            initial={{ opacity: 0, x: -16 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.15, duration: 0.6 }}
-            className="text-5xl sm:text-6xl font-bold text-white leading-[1.15] mb-3"
+            transition={{
+              delay: 0.18,
+              type: "spring",
+              stiffness: 90,
+              damping: 18,
+            }}
+            className="text-5xl md:text-6xl font-bold text-white leading-[1.05] tracking-tight mb-3"
           >
             ניהול סחר
           </motion.h1>
@@ -226,50 +203,101 @@ export function HeroBanner({
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.35 }}
-            className="text-lg text-white/40 mb-6 max-w-md"
+            transition={{ delay: 0.3 }}
+            className="text-lg text-white/70 leading-relaxed max-w-[40ch] mb-7"
           >
             סקירת ביצועים כלל-רשתית לכל הקטגוריות והסניפים
           </motion.p>
 
-          {/* Stat pills */}
-          <div className="flex flex-wrap gap-3">
-            <StatPill
+          {/* Inline stats — divided, no card boxes (anti-card-overuse) */}
+          <div className="flex items-stretch divide-x divide-white/10 -mx-1 mb-7">
+            <InlineStat
               label="מכירות רשת"
               value={formatCurrencyShort(animatedSales)}
-              delay={0.45}
+              delay={0.4}
               mono
             />
-            <StatPill label="סניפים" value={branchCount} delay={0.55} />
-            <StatPill label="קטגוריות" value={categoryCount} delay={0.65} />
+            <InlineStat label="סניפים" value={branchCount} delay={0.5} mono />
+            <InlineStat
+              label="קטגוריות"
+              value={categoryCount}
+              delay={0.6}
+              mono
+            />
           </div>
 
           {cta && (
             <motion.div
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.75 }}
-              className="mt-6"
+              transition={{ delay: 0.7 }}
+              className="self-start [&>*:active]:scale-[0.98] [&>*]:transition-transform"
             >
               {cta}
             </motion.div>
           )}
         </div>
 
-        {/* Left (RTL) — Big gauge */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.7 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{
-            delay: 0.25,
-            type: "spring",
-            stiffness: 180,
-            damping: 18,
-          }}
-          className="shrink-0"
-        >
-          <BigGauge actual={totalSales} target={targetSales} />
-        </motion.div>
+        {/* Image zone — gauge as glassmorphic overlay, image fades into panel seam */}
+        <div className="relative order-1 md:order-2 min-h-[260px] md:min-h-[420px] overflow-hidden">
+          {backgroundImage ? (
+            <div
+              className="absolute inset-0 bg-cover bg-center"
+              style={{ backgroundImage: `url(${backgroundImage})` }}
+              aria-hidden
+            />
+          ) : (
+            <div
+              className="absolute inset-0"
+              style={{
+                background: "linear-gradient(135deg, #1E293B 0%, #334155 100%)",
+              }}
+              aria-hidden
+            />
+          )}
+          {/* Fade the image into the panel seam (right side in RTL/ms direction on desktop, bottom on mobile) */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background:
+                "linear-gradient(to right, rgba(15,23,42,0) 55%, rgba(15,23,42,0.9) 100%)",
+            }}
+            aria-hidden
+          />
+          <div
+            className="absolute inset-0 pointer-events-none md:hidden"
+            style={{
+              background:
+                "linear-gradient(to bottom, rgba(15,23,42,0) 50%, rgba(15,23,42,0.95) 100%)",
+            }}
+            aria-hidden
+          />
+
+          {/* Gauge — liquid glass treatment */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.85 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{
+              delay: 0.25,
+              type: "spring",
+              stiffness: 140,
+              damping: 18,
+            }}
+            className="absolute inset-0 flex items-center justify-center p-6"
+          >
+            <div
+              className="relative rounded-full p-6 backdrop-blur-2xl border border-white/15"
+              style={{
+                background:
+                  "radial-gradient(circle at 30% 20%, rgba(255,255,255,0.12) 0%, rgba(15,23,42,0.35) 60%)",
+                boxShadow:
+                  "inset 0 1px 0 rgba(255,255,255,0.15), 0 20px 50px -20px rgba(0,0,0,0.4)",
+              }}
+            >
+              <BigGauge actual={totalSales} target={targetSales} />
+            </div>
+          </motion.div>
+        </div>
       </div>
     </motion.div>
   );

@@ -1,111 +1,329 @@
-import { useMemo } from 'react'
-import { motion } from 'motion/react'
-import { TrendingUp, TrendingDown, Award } from 'lucide-react'
-import { formatCurrencyShort } from '@/lib/format'
-import { usePeriodMultiplier } from '@/contexts/PeriodContext'
-import { SupplierLogo } from '@/components/dashboard/SupplierLogo'
+import { useMemo } from "react";
+import { motion } from "motion/react";
+import { TrendingUp, TrendingDown, Award } from "lucide-react";
+import { formatCurrencyShort } from "@/lib/format";
+import { usePeriodMultiplier } from "@/contexts/PeriodContext";
+import { SupplierLogo } from "@/components/dashboard/SupplierLogo";
+import { getSalesColor, getMarginColor } from "@/lib/kpi/resolvers";
 import {
   getMostProfitableSupplier,
   getAtRiskSupplier,
   getFastestGrowingSupplier,
-} from '@/data/mock-suppliers'
+  type ChainSupplier,
+} from "@/data/mock-suppliers";
 
-interface SupplierCardProps {
-  title: string
-  icon: React.ReactNode
-  iconBg: string
-  accentColor: string
-  supplierName: string
-  stats: { label: string; value: string; color: string }[]
-  delay: number
+// ─── Mini sparkline bar (purely visual, ratio-based) ────────────────────────
+function MiniSparkline({ actual, target }: { actual: number; target: number }) {
+  const ratio = target > 0 ? Math.min(actual / target, 1.1) : 1;
+  const pct = Math.round(ratio * 100);
+  const color = getSalesColor({ actual, target });
+
+  return (
+    <div className="mt-4">
+      <div className="flex items-center justify-between mb-1.5">
+        <span
+          className="text-[#A0AEC0] uppercase tracking-[0.08em]"
+          style={{ fontSize: 15 }}
+        >
+          עמידה ביעד
+        </span>
+        <span
+          className="font-mono font-semibold"
+          style={{ fontSize: 18, color }}
+          dir="ltr"
+        >
+          {pct}%
+        </span>
+      </div>
+      <div
+        className="w-full rounded-full overflow-hidden"
+        style={{ height: 5, background: "#FFF0EA" }}
+      >
+        <motion.div
+          className="h-full rounded-full"
+          style={{ backgroundColor: color }}
+          initial={{ width: 0 }}
+          animate={{ width: `${Math.min(pct, 100)}%` }}
+          transition={{
+            type: "spring",
+            stiffness: 100,
+            damping: 20,
+            delay: 0.3,
+          }}
+        />
+      </div>
+    </div>
+  );
 }
 
-function SupplierCard({ title, icon, iconBg, accentColor, supplierName, stats, delay }: SupplierCardProps) {
+// ─── Hero supplier card (top) ────────────────────────────────────────────────
+interface HeroSupplierCardProps {
+  supplier: ChainSupplier;
+  title: string;
+  icon: React.ReactNode;
+  accentColor: string;
+  metricLabel: string;
+  metricValue: string;
+  metricColor: string;
+  m: number;
+}
+
+function HeroSupplierCard({
+  supplier,
+  title,
+  icon,
+  accentColor,
+  metricLabel,
+  metricValue,
+  metricColor,
+  m,
+}: HeroSupplierCardProps) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.5, type: 'spring', stiffness: 260, damping: 22 }}
-      whileHover={{ y: -4, boxShadow: `${accentColor}22 0px 12px 32px` }}
-      className="relative overflow-hidden rounded-[16px] bg-white border border-warm-border cursor-default"
+      transition={{ delay: 0.1, type: "spring", stiffness: 100, damping: 20 }}
+      className="relative overflow-hidden rounded-[16px] bg-white border border-[#FFE8DE]"
+      style={{
+        boxShadow: "0 10px 30px -15px rgba(220,78,89,0.15)",
+      }}
     >
-      <div className="h-1 w-full" style={{ background: `linear-gradient(90deg, ${accentColor}, ${accentColor}80)` }} />
-      <div className="p-4 sm:p-5">
-        <div className="flex items-center gap-2 mb-3">
-          <span className={`inline-flex items-center justify-center w-7 h-7 rounded-lg ${iconBg}`}>
+      {/* 3px accent top-bar */}
+      <div
+        className="h-[3px] w-full"
+        style={{
+          background: `linear-gradient(90deg, ${accentColor}, ${accentColor}60)`,
+        }}
+      />
+
+      <div className="p-5">
+        {/* Title row */}
+        <div className="flex items-center gap-2 mb-4">
+          <span
+            className="inline-flex items-center justify-center w-7 h-7 rounded-[10px]"
+            style={{ background: `${accentColor}18` }}
+          >
             {icon}
           </span>
-          <h3 className="text-lg font-bold text-[#2D3748]">{title}</h3>
+          <span
+            className="font-medium text-[#A0AEC0] uppercase tracking-[0.08em]"
+            style={{ fontSize: 15 }}
+          >
+            {title}
+          </span>
         </div>
-        <div className="flex items-center gap-2 mb-2">
-          <SupplierLogo name={supplierName} size={32} />
-          <p className="text-xl font-bold text-[#2D3748]">{supplierName}</p>
-        </div>
-        <div className="flex flex-wrap gap-x-4 gap-y-1.5">
-          {stats.map(s => (
-            <div key={s.label}>
-              <p className="text-[16px] text-[#A0AEC0]">{s.label}</p>
-              <p className="text-lg font-bold font-mono" style={{ color: s.color }} dir="ltr">
-                {s.value}
-              </p>
+
+        {/* Supplier identity — logo + name side by side */}
+        <div className="flex items-center gap-3 mb-3">
+          {/* Logo: 56×56, perpetual slow glow via motion */}
+          <div className="relative shrink-0">
+            <motion.div
+              className="absolute -inset-2 rounded-[16px] pointer-events-none"
+              style={{ background: `${accentColor}22` }}
+              animate={{ opacity: [0, 0.15, 0] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <div
+              className="relative rounded-[12px] overflow-hidden border border-[#FFE8DE] bg-white"
+              style={{ width: 56, height: 56 }}
+            >
+              <SupplierLogo name={supplier.name} size={56} />
             </div>
-          ))}
+          </div>
+
+          {/* Name + headline metric stack */}
+          <div className="flex-1 min-w-0">
+            <p
+              className="font-bold text-[#2D3748] leading-tight truncate"
+              style={{ fontSize: 22 }}
+            >
+              {supplier.name}
+            </p>
+            <div className="flex items-baseline gap-1.5 mt-0.5">
+              <span
+                className="font-mono font-bold"
+                style={{ fontSize: 28, color: metricColor }}
+                dir="ltr"
+              >
+                {metricValue}
+              </span>
+              <span className="text-[#A0AEC0]" style={{ fontSize: 15 }}>
+                {metricLabel}
+              </span>
+            </div>
+          </div>
         </div>
+
+        {/* Sales sub-stat */}
+        <div className="pt-3 border-t border-[#FFF0EA]">
+          <div className="flex items-center justify-between">
+            <span className="text-[#A0AEC0]" style={{ fontSize: 16 }}>
+              מכירות
+            </span>
+            <span
+              className="font-mono font-semibold text-[#2D3748]"
+              style={{ fontSize: 18 }}
+              dir="ltr"
+            >
+              {formatCurrencyShort(supplier.sales * m)}
+            </span>
+          </div>
+        </div>
+
+        {/* Mini sparkline at bottom */}
+        <MiniSparkline actual={supplier.sales} target={supplier.targetSales} />
       </div>
     </motion.div>
-  )
+  );
 }
 
-export function SupplierSpotlightCards() {
-  const m = usePeriodMultiplier()
-  const profitable = useMemo(() => getMostProfitableSupplier(), [])
-  const atRisk = useMemo(() => getAtRiskSupplier(), [])
-  const growing = useMemo(() => getFastestGrowingSupplier(), [])
+// ─── Supporting capsule row (divided, no per-supplier box) ───────────────────
+interface CapsuleRowProps {
+  supplier: ChainSupplier;
+  title: string;
+  icon: React.ReactNode;
+  accentColor: string;
+  metricLabel: string;
+  metricValue: string;
+  metricColor: string;
+  delay: number;
+}
 
-  const atRiskPct = atRisk.targetSales > 0 ? (atRisk.sales / atRisk.targetSales) * 100 : 100
-  const atRiskGap = (atRisk.targetSales - atRisk.sales) * m
-  const growingPct = growing.targetSales > 0 ? (growing.sales / growing.targetSales) * 100 : 100
+function CapsuleRow({
+  supplier,
+  title,
+  icon,
+  accentColor,
+  metricLabel,
+  metricValue,
+  metricColor,
+  delay,
+}: CapsuleRowProps) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 8 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay, type: "spring", stiffness: 100, damping: 20 }}
+      className="py-4 flex items-center gap-3"
+    >
+      {/* Logo: 32×32 */}
+      <div
+        className="shrink-0 rounded-[10px] overflow-hidden border border-[#FFE8DE] bg-white"
+        style={{ width: 32, height: 32 }}
+      >
+        <SupplierLogo name={supplier.name} size={32} />
+      </div>
+
+      {/* Title + supplier name */}
+      <div className="flex-1 min-w-0">
+        <p
+          className="text-[#A0AEC0] uppercase tracking-[0.08em] leading-none"
+          style={{ fontSize: 15 }}
+        >
+          {title}
+        </p>
+        <p
+          className="font-medium text-[#2D3748] mt-0.5 truncate"
+          style={{ fontSize: 18 }}
+        >
+          {supplier.name}
+        </p>
+      </div>
+
+      {/* Accent icon + headline metric */}
+      <div className="shrink-0 flex flex-col items-end gap-0.5">
+        <span
+          className="inline-flex items-center justify-center w-6 h-6 rounded-[8px]"
+          style={{ background: `${accentColor}18` }}
+        >
+          {icon}
+        </span>
+        <span
+          className="font-mono font-semibold"
+          style={{ fontSize: 18, color: metricColor }}
+          dir="ltr"
+        >
+          {metricValue}
+          <span
+            className="text-[#A0AEC0] font-normal ms-0.5"
+            style={{ fontSize: 15 }}
+          >
+            {metricLabel}
+          </span>
+        </span>
+      </div>
+    </motion.div>
+  );
+}
+
+// ─── Public export ────────────────────────────────────────────────────────────
+export function SupplierSpotlightCards() {
+  const m = usePeriodMultiplier();
+  const profitable = useMemo(() => getMostProfitableSupplier(), []);
+  const atRisk = useMemo(() => getAtRiskSupplier(), []);
+  const growing = useMemo(() => getFastestGrowingSupplier(), []);
+
+  const atRiskPct =
+    atRisk.targetSales > 0 ? (atRisk.sales / atRisk.targetSales) * 100 : 100;
+  const growingPct =
+    growing.targetSales > 0 ? (growing.sales / growing.targetSales) * 100 : 100;
+
+  const profitMarginColor = getMarginColor({
+    marginPercent: profitable.grossProfitPercent,
+  });
+  const atRiskSalesColor = getSalesColor({
+    actual: atRisk.sales,
+    target: atRisk.targetSales,
+  });
+  const growingSalesColor = getSalesColor({
+    actual: growing.sales,
+    target: growing.targetSales,
+  });
 
   return (
-    <div className="flex flex-col gap-4">
-      <SupplierCard
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.2, type: "spring", stiffness: 100, damping: 20 }}
+      className="flex flex-col gap-0"
+    >
+      {/* Hero card — most profitable supplier (largest, asymmetric weight) */}
+      <HeroSupplierCard
+        supplier={profitable}
         title="ספק מוביל ברווחיות"
-        icon={<Award className="w-4 h-4 text-[#6C5CE7]" />}
-        iconBg="bg-[#6C5CE7]/10"
+        icon={<Award className="w-3.5 h-3.5" style={{ color: "#6C5CE7" }} />}
         accentColor="#6C5CE7"
-        supplierName={profitable.name}
-        delay={0.1}
-        stats={[
-          { label: 'רווח גולמי', value: `${profitable.grossProfitPercent}%`, color: '#6C5CE7' },
-          { label: 'מכירות', value: formatCurrencyShort(profitable.sales * m), color: '#2D3748' },
-        ]}
+        metricLabel="רווח גולמי"
+        metricValue={`${profitable.grossProfitPercent}%`}
+        metricColor={profitMarginColor}
+        m={m}
       />
 
-      <SupplierCard
-        title="ספק בסיכון — החמצת יעד"
-        icon={<TrendingDown className="w-4 h-4 text-[#DC4E59]" />}
-        iconBg="bg-[#DC4E59]/10"
-        accentColor="#DC4E59"
-        supplierName={atRisk.name}
-        delay={0.2}
-        stats={[
-          { label: 'עמידה ביעד', value: `${atRiskPct.toFixed(1)}%`, color: '#DC4E59' },
-          { label: 'פער מהיעד', value: formatCurrencyShort(atRiskGap), color: '#DC4E59' },
-        ]}
-      />
-
-      <SupplierCard
-        title="ספק צומח"
-        icon={<TrendingUp className="w-4 h-4 text-[#2EC4D5]" />}
-        iconBg="bg-[#2EC4D5]/10"
-        accentColor="#2EC4D5"
-        supplierName={growing.name}
-        delay={0.3}
-        stats={[
-          { label: 'עמידה ביעד', value: `${growingPct.toFixed(1)}%`, color: '#2EC4D5' },
-          { label: 'מכירות', value: formatCurrencyShort(growing.sales * m), color: '#2D3748' },
-        ]}
-      />
-    </div>
-  )
+      {/* Divider + supporting capsule rows — no individual boxes */}
+      <div className="divide-y divide-[#FFF0EA]">
+        <CapsuleRow
+          supplier={atRisk}
+          title="ספק בסיכון"
+          icon={
+            <TrendingDown className="w-3 h-3" style={{ color: "#DC4E59" }} />
+          }
+          accentColor="#DC4E59"
+          metricLabel="%"
+          metricValue={atRiskPct.toFixed(1)}
+          metricColor={atRiskSalesColor}
+          delay={0.22}
+        />
+        <CapsuleRow
+          supplier={growing}
+          title="ספק צומח"
+          icon={<TrendingUp className="w-3 h-3" style={{ color: "#2EC4D5" }} />}
+          accentColor="#2EC4D5"
+          metricLabel="%"
+          metricValue={growingPct.toFixed(1)}
+          metricColor={growingSalesColor}
+          delay={0.28}
+        />
+      </div>
+    </motion.div>
+  );
 }
