@@ -7,10 +7,12 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
+    "typecheck": "tsc -b",
     "test": "vitest run",
     "preview": "vite preview",
     "deploy": "netlify deploy --prod",
-    "sandcastle": "bash -c \"npx tsx .sandcastle/main.ts 2> >(grep -v 'chown: changing ownership' >&2)\""
+    "sandcastle": "bash -c \"npx tsx .sandcastle/main.ts 2> >(grep -v 'chown: changing ownership' >&2)\"",
+    "prepare": "husky"
   },
   "dependencies": {
     "@ai-hero/sandcastle": "^0.4.7",
@@ -52,7 +54,10 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.4.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "postcss": "^8.5.8",
+    "prettier": "^3.8.3",
     "tailwindcss": "3",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.9.3",
