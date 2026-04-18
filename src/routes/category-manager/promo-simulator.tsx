@@ -5,6 +5,7 @@ import { ArrowRight, ArrowLeft, RotateCcw, Home } from 'lucide-react'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { Stepper } from '@/components/promo-simulator/Stepper'
 import { StepPlaceholder } from '@/components/promo-simulator/StepPlaceholder'
+import { Step1Brief } from '@/components/promo-simulator/Step1Brief'
 import {
   createDefaultState,
   decodeState,
@@ -98,11 +99,15 @@ function PromoSimulatorPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.25, ease: 'easeOut' }}
         >
-          <StepPlaceholder
-            stepNumber={stepMeta.id}
-            title={stepMeta.title}
-            sliceNumber={sliceNum}
-          />
+          {state.step === 1 ? (
+            <Step1Brief state={state} onChange={setState} />
+          ) : (
+            <StepPlaceholder
+              stepNumber={stepMeta.id}
+              title={stepMeta.title}
+              sliceNumber={sliceNum}
+            />
+          )}
         </motion.div>
 
         <div className="flex items-center justify-between gap-4 flex-wrap pt-2">
