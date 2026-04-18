@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { calcMetrics } from '@/lib/promo-simulator/calc'
 import { formatCurrency, formatNumber } from '@/lib/format'
-import { getKpiStatusColor } from '@/lib/colors'
+import { getKpiStatusColor, KPI_STATUS } from '@/lib/colors'
 import { UpliftChart } from './UpliftChart'
 import type { SimulatorState } from '@/lib/promo-simulator/state'
 
@@ -21,21 +21,21 @@ interface KpiCardProps {
   accent?: string
 }
 
-function KpiCard({ title, value, sub, accent = '#DC4E59' }: KpiCardProps) {
+function KpiCard({ title, value, sub, accent = KPI_STATUS.good }: KpiCardProps) {
   return (
     <Card className="border-[#FFE8DE] rounded-[16px]">
-      <CardContent className="p-5">
-        <p className="text-[15px] font-medium text-[#A0AEC0] uppercase tracking-wide">
+      <CardContent className="p-5 min-w-0">
+        <p className="text-[15px] font-medium text-[#A0AEC0] uppercase tracking-wide whitespace-nowrap truncate">
           {title}
         </p>
         <p
-          className="text-3xl font-bold font-mono mt-1"
+          className="text-2xl font-bold font-mono mt-1 whitespace-nowrap truncate"
           style={{ color: accent }}
           dir="ltr"
         >
           {value}
         </p>
-        <p className="text-[15px] text-[#4A5568] mt-1" dir="ltr">
+        <p className="text-[15px] text-[#4A5568] mt-1 whitespace-nowrap truncate" dir="ltr">
           {sub}
         </p>
       </CardContent>
@@ -49,7 +49,24 @@ export function Step5Forecast({ state, onChange }: Step5ForecastProps) {
     ? formatNumber(m.breakEvenUnits)
     : '—'
   const coverageColor = getKpiStatusColor(Math.min(m.stockCoverage / 100, 1))
-  const roiColor = getKpiStatusColor(m.roi >= 0 ? 1 : 0.5)
+  const roiColor =
+    m.roi >= 15 ? KPI_STATUS.good : m.roi >= 0 ? KPI_STATUS.warning : KPI_STATUS.bad
+  const revenueColor = getKpiStatusColor(
+    m.baseRevenue > 0 ? m.promoRevenue / m.baseRevenue : 1
+  )
+  const profitColor = getKpiStatusColor(
+    m.baseProfit > 0 ? m.promoProfit / m.baseProfit : m.promoProfit > 0 ? 1 : 0.5
+  )
+  const upliftColor = getKpiStatusColor(
+    state.upliftPct >= 15 ? 1 : state.upliftPct >= 5 ? 0.9 : 0.7
+  )
+  const breakEvenColor = Number.isFinite(m.breakEvenUnits)
+    ? getKpiStatusColor(
+        m.breakEvenUnits > 0 && m.promoUnits > 0
+          ? Math.min(m.promoUnits / m.breakEvenUnits, 2)
+          : 0.5
+      )
+    : KPI_STATUS.bad
 
   return (
     <div className="space-y-4">
@@ -59,8 +76,8 @@ export function Step5Forecast({ state, onChange }: Step5ForecastProps) {
             <CardTitle className="text-2xl text-[#2D3748]">
               יעדים / תחזית
             </CardTitle>
-            <p className="text-lg text-[#4A5568]">
-              הזן את הנתונים הצפויים — ה-KPI יתעדכנו בזמן אמת
+            <p className="text-lg text-[#4A5568] text-balance">
+              הזן את הנתונים הצפויים — ה-KPI יתעדכנו בזמן&nbsp;אמת
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -163,30 +180,30 @@ export function Step5Forecast({ state, onChange }: Step5ForecastProps) {
           </CardContent>
         </Card>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 content-start">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 content-start">
           <KpiCard
             title="פדיון צפוי"
             value={formatCurrency(m.promoRevenue)}
             sub={`בסיס: ${formatCurrency(m.baseRevenue)}`}
-            accent="#DC4E59"
+            accent={revenueColor}
           />
           <KpiCard
             title="רווח גולמי צפוי"
             value={formatCurrency(m.promoProfit)}
             sub={`בסיס: ${formatCurrency(m.baseProfit)}`}
-            accent="#2EC4D5"
+            accent={profitColor}
           />
           <KpiCard
             title="יחידות במבצע"
             value={formatNumber(m.promoUnits)}
             sub="כולל uplift"
-            accent="#6C5CE7"
+            accent={upliftColor}
           />
           <KpiCard
             title="Break-even"
             value={breakEvenStr}
             sub="יחידות לאיזון"
-            accent="#F6B93B"
+            accent={breakEvenColor}
           />
           <KpiCard
             title="ROI"

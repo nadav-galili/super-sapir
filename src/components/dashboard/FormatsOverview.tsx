@@ -3,7 +3,7 @@ import { motion } from 'motion/react'
 import { TrendingUp, TrendingDown } from 'lucide-react'
 import { getKpiStatusColor } from '@/lib/colors'
 import { formatCurrencyShort } from '@/lib/format'
-import { usePeriodMultiplier } from '@/contexts/PeriodContext'
+import { getPeriodJitter, getPeriodMultiplier, type TimePeriod } from '@/components/dashboard/TimePeriodFilter'
 import type { Branch } from '@/data/types'
 import { allBranches } from '@/data/mock-branches'
 
@@ -15,37 +15,40 @@ interface FormatKPI {
   format: 'currency' | 'percent'
 }
 
-function computeFormatKPIs(branches: Branch[], multiplier: number): FormatKPI[] {
+function computeFormatKPIs(branches: Branch[], period: TimePeriod, seedOffset: number): FormatKPI[] {
   const count = branches.length
   if (count === 0) return []
+
+  const multiplier = getPeriodMultiplier(period)
+  const j = (i: number) => getPeriodJitter(period, i + seedOffset)
 
   const totalSales = branches.reduce((s, b) => s + b.metrics.totalSales, 0) * multiplier
   const totalTarget = branches.reduce((s, b) => {
     return s + b.departments.reduce((ds, d) => ds + d.targetSales, 0)
   }, 0) * multiplier
 
-  const avgGrossMargin = branches.reduce((s, b) => {
+  const avgGrossMargin = (branches.reduce((s, b) => {
     const branchMargin = b.departments.reduce((ds, d) => ds + d.grossMarginPercent * d.sales, 0)
       / b.departments.reduce((ds, d) => ds + d.sales, 0)
     return s + branchMargin
-  }, 0) / count
+  }, 0) / count) * j(1)
 
-  const avgStockoutRate = branches.reduce((s, b) => {
+  const avgStockoutRate = (branches.reduce((s, b) => {
     const branchStockout = b.departments.reduce((ds, d) => ds + d.stockoutRate, 0) / b.departments.length
     return s + branchStockout
-  }, 0) / count
+  }, 0) / count) * j(2)
 
-  const avgQuality = branches.reduce((s, b) => s + b.metrics.qualityScore, 0) / count
-  const avgSupplyRate = branches.reduce((s, b) => s + b.metrics.supplyRate, 0) / count
+  const avgQuality = (branches.reduce((s, b) => s + b.metrics.qualityScore, 0) / count) * j(3)
+  const avgSupplyRate = (branches.reduce((s, b) => s + b.metrics.supplyRate, 0) / count) * j(4)
 
-  const avgYoy = branches.reduce((s, b) => s + b.metrics.yoyGrowth, 0) / count
+  const avgYoy = (branches.reduce((s, b) => s + b.metrics.yoyGrowth, 0) / count) * j(0)
 
   return [
     { label: 'מכירות', value: totalSales, target: totalTarget, yoyDelta: avgYoy, format: 'currency' },
-    { label: 'רווח גולמי', value: avgGrossMargin, target: 30, yoyDelta: +(avgYoy * 0.4 + 1.2).toFixed(1), format: 'percent' },
-    { label: 'חוסרים', value: 100 - avgStockoutRate, target: 98, yoyDelta: +(1.5 - avgStockoutRate * 0.2).toFixed(1), format: 'percent' },
-    { label: 'ציון תפעול', value: avgQuality, target: 100, yoyDelta: +(avgYoy * 0.3 + 2.0).toFixed(1), format: 'percent' },
-    { label: 'שביעות רצון', value: avgSupplyRate, target: 98, yoyDelta: +(avgYoy * 0.2 + 0.8).toFixed(1), format: 'percent' },
+    { label: 'רווח גולמי', value: avgGrossMargin, target: 30, yoyDelta: avgYoy * 0.4 + 1.2, format: 'percent' },
+    { label: 'חוסרים', value: 100 - avgStockoutRate, target: 98, yoyDelta: 1.5 - avgStockoutRate * 0.2, format: 'percent' },
+    { label: 'ציון תפעול', value: avgQuality, target: 100, yoyDelta: avgYoy * 0.3 + 2.0, format: 'percent' },
+    { label: 'שביעות רצון', value: avgSupplyRate, target: 98, yoyDelta: avgYoy * 0.2 + 0.8, format: 'percent' },
   ]
 }
 
@@ -57,7 +60,7 @@ function KPIProgressBar({ kpi, index }: { kpi: FormatKPI; index: number }) {
 
   const displayValue = kpi.format === 'currency'
     ? formatCurrencyShort(kpi.value)
-    : `${kpi.value.toFixed(1)}%`
+    : `${kpi.value.toFixed(2)}%`
 
   return (
     <motion.div
@@ -76,7 +79,7 @@ function KPIProgressBar({ kpi, index }: { kpi: FormatKPI; index: number }) {
             dir="ltr"
           >
             {isPositive ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
-            {isPositive ? '+' : ''}{kpi.yoyDelta}%
+            {isPositive ? '+' : ''}{kpi.yoyDelta.toFixed(2)}%
           </span>
         </div>
       </div>
@@ -124,16 +127,14 @@ function FormatCard({
   )
 }
 
-export function FormatsOverview() {
-  const multiplier = usePeriodMultiplier()
-
+export function FormatsOverview({ period }: { period: TimePeriod }) {
   const { bigBranches, cityBranches } = useMemo(() => ({
     bigBranches: allBranches.filter(b => b.format === 'big'),
     cityBranches: allBranches.filter(b => b.format === 'city'),
   }), [])
 
-  const bigKpis = useMemo(() => computeFormatKPIs(bigBranches, multiplier), [bigBranches, multiplier])
-  const cityKpis = useMemo(() => computeFormatKPIs(cityBranches, multiplier), [cityBranches, multiplier])
+  const bigKpis = useMemo(() => computeFormatKPIs(bigBranches, period, 0), [bigBranches, period])
+  const cityKpis = useMemo(() => computeFormatKPIs(cityBranches, period, 10), [cityBranches, period])
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

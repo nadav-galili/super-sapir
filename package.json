@@ -10,7 +10,7 @@
     "test": "vitest run",
     "preview": "vite preview",
     "deploy": "netlify deploy --prod",
-    "sandcastle": "npx tsx .sandcastle/main.ts"
+    "sandcastle": "bash -c \"npx tsx .sandcastle/main.ts 2> >(grep -v 'chown: changing ownership' >&2)\""
   },
   "dependencies": {
     "@ai-hero/sandcastle": "^0.4.7",

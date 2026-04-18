@@ -130,7 +130,7 @@ function CategoryManagerPage() {
 
       <KPIGaugeRow items={gaugeKpis} />
 
-      <Tabs defaultValue="categories" dir="rtl">
+      <Tabs defaultValue="formats" dir="rtl">
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <TabsList className="h-auto gap-1 bg-[#FDF8F6] p-1 rounded-[12px] border border-[#FFE8DE]">
             <TabsTrigger
@@ -166,7 +166,7 @@ function CategoryManagerPage() {
         </div>
 
         <TabsContent value="formats" className="mt-4">
-          <FormatsOverview />
+          <FormatsOverview period={period} />
         </TabsContent>
 
         <TabsContent value="categories" className="mt-4 space-y-4">
