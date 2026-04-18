@@ -9,6 +9,7 @@ import { Step1Brief } from '@/components/promo-simulator/Step1Brief'
 import { Step2Goal } from '@/components/promo-simulator/Step2Goal'
 import { Step3PromoType } from '@/components/promo-simulator/Step3PromoType'
 import { Step4Terms } from '@/components/promo-simulator/Step4Terms'
+import { Step5Forecast } from '@/components/promo-simulator/Step5Forecast'
 import { LiveKPIPanel } from '@/components/promo-simulator/LiveKPIPanel'
 import {
   createDefaultState,
@@ -103,6 +104,8 @@ function PromoSimulatorPage() {
       <Step3PromoType state={state} onChange={setState} />
     ) : state.step === 4 ? (
       <Step4Terms state={state} onChange={setState} />
+    ) : state.step === 5 ? (
+      <Step5Forecast state={state} onChange={setState} />
     ) : (
       <StepPlaceholder
         stepNumber={stepMeta.id}
