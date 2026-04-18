@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { Link } from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'motion/react'
 import {
@@ -10,7 +10,17 @@ import {
   ArrowRight,
 } from 'lucide-react'
 import { PromoSummaryCard } from './PromoSummaryCard'
+import { PromoFullReport } from './PromoFullReport'
+import { exportElementToPdf } from '@/lib/promo-simulator/export-pdf'
 import type { SimulatorState } from '@/lib/promo-simulator/state'
+
+function safeFileSegment(s: string): string {
+  return s
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/[^\p{L}\p{N}\-_]+/gu, '')
+    .slice(0, 40)
+}
 
 interface SuccessScreenProps {
   state: SimulatorState
@@ -23,10 +33,13 @@ interface ActionButton {
   toast: string
   icon: typeof Download
   onClickExtra?: () => void
+  suppressToast?: boolean
 }
 
 export function SuccessScreen({ state, onRestart }: SuccessScreenProps) {
   const [toastText, setToastText] = useState<string | null>(null)
+  const [isExporting, setIsExporting] = useState(false)
+  const reportRef = useRef<HTMLDivElement | null>(null)
   const reduceMotion = useReducedMotion()
 
   const showToast = useCallback((text: string) => {
@@ -35,12 +48,34 @@ export function SuccessScreen({ state, onRestart }: SuccessScreenProps) {
     return () => window.clearTimeout(id)
   }, [])
 
+  const handleDownloadPdf = useCallback(async () => {
+    if (!reportRef.current || isExporting) return
+    setIsExporting(true)
+    showToast('PDF הורדה החלה')
+    try {
+      const parts = [
+        'promo',
+        safeFileSegment(state.category),
+        safeFileSegment(state.product),
+      ].filter(Boolean)
+      const filename = `${parts.join('-') || 'promo'}.pdf`
+      await exportElementToPdf(reportRef.current, { filename })
+    } catch (err) {
+      console.error('PDF export failed', err)
+      showToast('שגיאה ביצירת PDF')
+    } finally {
+      setIsExporting(false)
+    }
+  }, [isExporting, showToast, state.category, state.product])
+
   const actions: ActionButton[] = [
     {
       key: 'pdf',
-      label: 'הורד PDF',
-      toast: 'PDF הורדה החלה',
+      label: isExporting ? 'מכין PDF…' : 'הורד PDF',
+      toast: '',
       icon: Download,
+      onClickExtra: handleDownloadPdf,
+      suppressToast: true,
     },
     {
       key: 'archive',
@@ -121,10 +156,11 @@ export function SuccessScreen({ state, onRestart }: SuccessScreenProps) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 + i * 0.08, duration: 0.3 }}
                 onClick={() => {
-                  showToast(a.toast)
+                  if (!a.suppressToast && a.toast) showToast(a.toast)
                   a.onClickExtra?.()
                 }}
-                className="inline-flex flex-col items-center justify-center gap-2 rounded-[10px] border border-[#FFE8DE] bg-white px-4 py-5 text-[16px] font-medium text-[#4A5568] transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_16px_rgba(220,78,89,0.08)]"
+                disabled={a.key === 'pdf' && isExporting}
+                className="inline-flex flex-col items-center justify-center gap-2 rounded-[10px] border border-[#FFE8DE] bg-white px-4 py-5 text-[16px] font-medium text-[#4A5568] transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_16px_rgba(220,78,89,0.08)] disabled:opacity-60 disabled:cursor-wait disabled:hover:translate-y-0"
               >
                 <Icon className="w-5 h-5 text-[#DC4E59]" />
                 <span className="text-center leading-tight">{a.label}</span>
@@ -154,6 +190,23 @@ export function SuccessScreen({ state, onRestart }: SuccessScreenProps) {
           {toastText}
         </motion.div>
       )}
+
+      {/* Off-screen full report — used only for PDF capture. */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: -10000,
+          width: 800,
+          pointerEvents: 'none',
+          opacity: 0,
+        }}
+      >
+        <div ref={reportRef}>
+          <PromoFullReport state={state} />
+        </div>
+      </div>
     </div>
   )
 }
