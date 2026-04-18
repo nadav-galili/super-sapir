@@ -68,7 +68,9 @@
 │   │                                   #   + Magic UI primitives (number-ticker, border-beam, confetti, shimmer-button)
 │   ├── data/
 │   │   ├── hadera-real.ts              # Real Hadera branch #44 report data (Dec 2025)
-│   │   ├── hadera-branch.ts            # Simplified Branch type for multi-branch system
+│   │   ├── hadera-seed.ts              # Hadera Branch object — real data + seed template for generateBranch()
+│   │   ├── getBranchReport.ts          # getBranchReport(branchId) → BranchFullReport (Hadera verbatim + synthetic inflation)
+│   │   ├── rng.ts                      # Seeded PRNG helpers (seededInt/Float/Bool/Pick)
 │   │   ├── mock-branches.ts            # allBranches[12] — Hadera + 11 generated
 │   │   ├── mock-categories.ts          # Aggregate category summaries
 │   │   ├── mock-category-suppliers.ts  # Per-category supplier breakdowns
@@ -121,13 +123,12 @@
 
 ## Route Map
 
-| Route | Page | Key Components |
-|-------|------|----------------|
-| `/` | Home | RoleCard |
-| `/store-manager` | Store manager (Hadera default) | BranchInfoBar, KPIGrid, view system via `?view=` |
-| `/store-manager/$branchId` | Store manager (any branch) | Same as above, branchToFullReport() adapter |
-| `/division-manager` | Division manager | IsraelMap, BranchRankingTable, RegionDonutChart |
-| `/division-manager/$regionId` | Region drill-down | Region-filtered branch list |
-| `/category-manager` | Trade management (ניהול סחר) | HeroBanner, ChainAIBriefing, QuickStatCards, KPIGaugeRow, tabs (categories/suppliers/promotions) |
-| `/category-manager/$categoryId` | Category drill-down | KPIGrid, CategoryAIBriefing, CategorySuppliersDashboard, PromotionCard, alerts table |
-
+| Route                           | Page                           | Key Components                                                                                   |
+| ------------------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------ |
+| `/`                             | Home                           | RoleCard                                                                                         |
+| `/store-manager`                | Store manager (Hadera default) | BranchInfoBar, KPIGrid, view system via `?view=`                                                 |
+| `/store-manager/$branchId`      | Store manager (any branch)     | Same as above, uses getBranchReport() adapter from `src/data/`                                   |
+| `/division-manager`             | Division manager               | IsraelMap, BranchRankingTable, RegionDonutChart                                                  |
+| `/division-manager/$regionId`   | Region drill-down              | Region-filtered branch list                                                                      |
+| `/category-manager`             | Trade management (ניהול סחר)   | HeroBanner, ChainAIBriefing, QuickStatCards, KPIGaugeRow, tabs (categories/suppliers/promotions) |
+| `/category-manager/$categoryId` | Category drill-down            | KPIGrid, CategoryAIBriefing, CategorySuppliersDashboard, PromotionCard, alerts table             |
