@@ -16,6 +16,7 @@ import { Step8Analysis } from '@/components/promo-simulator/Step8Analysis'
 import { Step9Documentation } from '@/components/promo-simulator/Step9Documentation'
 import { SuccessScreen } from '@/components/promo-simulator/SuccessScreen'
 import { LiveKPIPanel } from '@/components/promo-simulator/LiveKPIPanel'
+import { AINarrative } from '@/components/promo-simulator/AINarrative'
 import {
   createDefaultState,
   decodeState,
@@ -103,6 +104,7 @@ function PromoSimulatorPage() {
   const stepMeta = STEPS[state.step - 1]
   const sliceNum = SLICE_BY_STEP[state.step]
   const showLiveKpi = state.step >= 4 && state.step <= 7
+  const showNarrative = state.step >= 2 && state.step <= 5
 
   const stepContent =
     state.step === 1 ? (
@@ -153,11 +155,17 @@ function PromoSimulatorPage() {
         >
           {showLiveKpi ? (
             <div className="grid grid-cols-1 lg:grid-cols-[1fr,320px] gap-4 items-start">
-              <div>{stepContent}</div>
+              <div className="space-y-4">
+                {stepContent}
+                {showNarrative && <AINarrative state={state} />}
+              </div>
               <LiveKPIPanel state={state} />
             </div>
           ) : (
-            stepContent
+            <div className="space-y-4">
+              {stepContent}
+              {showNarrative && <AINarrative state={state} />}
+            </div>
           )}
         </motion.div>
 
