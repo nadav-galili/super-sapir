@@ -6,6 +6,64 @@
 
 ---
 
+## 2026-04-18
+
+### Promo Simulator — Slice 9: Polish pass (#34)
+- Step transitions use `AnimatePresence` mode="wait" for fade+slide in/out
+- Completed stepper circles spring-scale their check icons in
+- Goal and promo-type cards (Step 2 / Step 3) get staggered entrance + warm hover shadow
+- `LiveKPIPanel` values animate via `useAnimatedCounter`; new `useDebouncedValue` (250ms) hook feeds the counter so slider drags settle before animating
+- `SuccessScreen` header, description, and action buttons enter in staggered sequence
+- Pulse, spring, and entrance motions respect `prefers-reduced-motion` via `useReducedMotion`
+- **Files:** `src/hooks/useDebouncedValue.ts` (new), `src/components/promo-simulator/Stepper.tsx`, `Step2Goal.tsx`, `Step3PromoType.tsx`, `SuccessScreen.tsx`, `LiveKPIPanel.tsx`, `src/routes/category-manager/promo-simulator.tsx`
+
+### Promo Simulator — Slice 8: AI Narrative panel (W3) (#33)
+- New pure templating module generates 1–3 Hebrew paragraphs of consultative commentary for steps 2–5 based on goal / promo type / discount / calc status
+- `AINarrative` component mirrors `ChainAIBriefing` visual language (purple gradient header strip, Sparkles pill, AI badge) and types each paragraph via `TypingText`
+- Paragraph string used as React key so type-on only replays when content changes
+- Wired into the route below stepContent on steps 2–5
+- **Files:** `src/lib/promo-simulator/narrative.ts` (new), `src/components/promo-simulator/AINarrative.tsx` (new), `src/routes/category-manager/promo-simulator.tsx`
+
+### Promo Simulator — Slice 7: Steps 8+9 + Success screen (#32)
+- Step 8 (ניתוח והערכה): header status badge using warm-palette tints + 3 delta metric cards (profit vs base, break-even gap, stock coverage) + free-text assessment textarea bound to `analysisNote`
+- Step 9 (תיעוד): documentation textarea bound to `documentation` + reusable 8-row `PromoSummaryCard` + single-row summary table with 9 columns
+- Step 9 continue button reads "סיום" and sets `completed=1` in the URL
+- `SuccessScreen`: emerald check icon with pulse, header, reused summary card, 4 visual-only action buttons (PDF / archive / share / new) with inline toast feedback, and `חזרה לקטגוריות` link
+- **Files:** `src/components/promo-simulator/Step8Analysis.tsx` (new), `Step9Documentation.tsx` (new), `PromoSummaryCard.tsx` (new), `SuccessScreen.tsx` (new), `src/routes/category-manager/promo-simulator.tsx`
+
+### Promo Simulator — Slice 6: Steps 6+7 (Implementation & Control) (#31)
+- Step 6 (יישום בשטח): 4-checkbox grid (signage / shelf / training / cashierBrief) + 3 operational tip cards (POS, מלאי, תדריך קצר)
+- Step 7 (בקרה): 3-checkbox control grid (price / stock / display) + reflective question card in violet + 3 KPI cards (status via `getKpiStatusColor(statusRatio)`, pace-vs-forecast %, operational readiness X/4)
+- **Files:** `src/components/promo-simulator/Step6Implementation.tsx` (new), `Step7Control.tsx` (new), `src/routes/category-manager/promo-simulator.tsx`
+
+### Promo Simulator — Slice 5: Step 5 Forecast + UpliftChart (#30)
+- 2-col layout — form (baseUnits, unitPrice, unitCost, upliftPct slider 0–80, stockUnits) + 2×3 KPI grid (revenue, profit, promo units, break-even, ROI, coverage) with traffic-light colors
+- New `UpliftChart` Recharts ComposedChart wrapped in `<div dir="ltr">` — base vs promo weekly bars + cumulative promo revenue line
+- **Files:** `src/components/promo-simulator/Step5Forecast.tsx` (new), `UpliftChart.tsx` (new)
+
+### Promo Simulator — Slice 4: Step 4 Terms + LiveKPIPanel (#29)
+- Step 4: 2-col layout — promo-type (read-only) + taxonomy-driven condition/benefit text fields + cyan discount slider (0–50) + business-translation panel (regular price, effective price, unit margin, meaning)
+- `LiveKPIPanel`: sticky side panel on steps 4–7 with status pill + 3 KPI rows (ROI / profit delta / stock coverage) via `getKpiStatusColor`
+- **Files:** `src/components/promo-simulator/Step4Terms.tsx` (new), `LiveKPIPanel.tsx` (new)
+
+### Promo Simulator — Slice 3: Steps 2+3 Goal & Promo Type (#28)
+- Step 2: 5 goal cards in a 3-col grid with emerald-tinted active state; changing goal clears `promoType`
+- Step 3: empty state if no goal, else filtered promo-type cards with 1–3 star rating (amber), reason, and score badge; selected-goal chip in violet on the header
+- **Files:** `src/components/promo-simulator/Step2Goal.tsx` (new), `Step3PromoType.tsx` (new)
+
+### Promo Simulator — Slice 2: Step 1 Brief form with pre-fill (#27)
+- 4-col responsive form (category dropdown from `getCategorySummaries()`, segment, product, arena, retailer, startDate, duration, salesOwner) + 3 info cards (ארכיון / נתונים / מאגר ידע)
+- HeroBanner gained an optional `cta` slot; category-manager index renders a primary-gradient `סימולטור מבצע חדש` CTA Link
+- **Files:** `src/components/promo-simulator/Step1Brief.tsx` (new), `src/components/dashboard/HeroBanner.tsx`, `src/routes/category-manager/index.tsx`
+
+### Promo Simulator — Slice 1: Wizard tracer + foundation (#26)
+- Pure data & state foundation: `taxonomy.ts` (5 goals, promo types per goal, arenas/segments/durations, `STEPS` list), `state.ts` (full `SimulatorState`, URL codec via `validateSearch`/`decodeState`/`encodeState`), `calc.ts` (pure metrics module: effective price, unit margin, promo units, revenues/profits, ROI, break-even, stock coverage, status enum)
+- 14 Vitest tests cover all calc branches incl. status boundaries and zero-base-units / zero-stock edges
+- `Stepper` (sticky top stepper with progress fill, active pulse, done check) + `StepPlaceholder` + route component `/category-manager/promo-simulator` with LiveKPIPanel visibility on steps 4–7
+- **Files:** `src/lib/promo-simulator/{taxonomy,state,calc,calc.test}.ts` (new), `src/components/promo-simulator/{Stepper,StepPlaceholder}.tsx` (new), `src/routes/category-manager/promo-simulator.tsx` (new)
+
+---
+
 ## 2026-04-17
 
 ### Legacy color helper cleanup (#24)
