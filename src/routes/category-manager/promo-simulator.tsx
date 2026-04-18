@@ -1,6 +1,6 @@
 import { useMemo, useCallback } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { motion } from 'motion/react'
+import { AnimatePresence, motion } from 'motion/react'
 import { ArrowRight, ArrowLeft, RotateCcw, Home } from 'lucide-react'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { Stepper } from '@/components/promo-simulator/Stepper'
@@ -147,27 +147,30 @@ function PromoSimulatorPage() {
     <div className="min-h-screen bg-[#FDF8F6]">
       <Stepper current={state.step} onJump={jumpToStep} />
       <PageContainer>
-        <motion.div
-          key={state.step}
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.25, ease: 'easeOut' }}
-        >
-          {showLiveKpi ? (
-            <div className="grid grid-cols-1 lg:grid-cols-[1fr,320px] gap-4 items-start">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={state.step}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.25, ease: 'easeOut' }}
+          >
+            {showLiveKpi ? (
+              <div className="grid grid-cols-1 lg:grid-cols-[1fr,320px] gap-4 items-start">
+                <div className="space-y-4">
+                  {stepContent}
+                  {showNarrative && <AINarrative state={state} />}
+                </div>
+                <LiveKPIPanel state={state} />
+              </div>
+            ) : (
               <div className="space-y-4">
                 {stepContent}
                 {showNarrative && <AINarrative state={state} />}
               </div>
-              <LiveKPIPanel state={state} />
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {stepContent}
-              {showNarrative && <AINarrative state={state} />}
-            </div>
-          )}
-        </motion.div>
+            )}
+          </motion.div>
+        </AnimatePresence>
 
         <div className="flex items-center justify-between gap-4 flex-wrap pt-2">
           <div className="flex items-center gap-3">

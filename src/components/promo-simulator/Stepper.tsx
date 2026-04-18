@@ -1,4 +1,4 @@
-import { motion } from 'motion/react'
+import { motion, useReducedMotion } from 'motion/react'
 import { Check } from 'lucide-react'
 import { STEPS, type StepId } from '@/lib/promo-simulator/taxonomy'
 
@@ -9,6 +9,7 @@ interface StepperProps {
 
 export function Stepper({ current, onJump }: StepperProps) {
   const progressPct = ((current - 1) / (STEPS.length - 1)) * 100
+  const reduceMotion = useReducedMotion()
 
   return (
     <div className="sticky top-0 z-20 bg-[#FDF8F6]/95 backdrop-blur-sm border-b border-[#FFE8DE] py-4">
@@ -59,11 +60,23 @@ export function Stepper({ current, onJump }: StepperProps) {
                     }}
                   >
                     {state === 'done' ? (
-                      <Check className="w-6 h-6" strokeWidth={3} />
+                      <motion.span
+                        key={`done-${s.id}`}
+                        initial={reduceMotion ? false : { scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{
+                          type: 'spring',
+                          stiffness: 260,
+                          damping: 18,
+                        }}
+                        className="flex items-center justify-center"
+                      >
+                        <Check className="w-6 h-6" strokeWidth={3} />
+                      </motion.span>
                     ) : (
                       s.id
                     )}
-                    {state === 'active' && (
+                    {state === 'active' && !reduceMotion && (
                       <motion.span
                         className="absolute -inset-1 rounded-full border-2 opacity-0"
                         style={{ borderColor: '#DC4E59' }}

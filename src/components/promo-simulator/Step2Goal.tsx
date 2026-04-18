@@ -1,3 +1,4 @@
+import { motion, useReducedMotion } from 'motion/react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { GOALS, GOAL_DESCRIPTIONS, type Goal } from '@/lib/promo-simulator/taxonomy'
 import type { SimulatorState } from '@/lib/promo-simulator/state'
@@ -8,6 +9,7 @@ interface Step2GoalProps {
 }
 
 export function Step2Goal({ state, onChange }: Step2GoalProps) {
+  const reduceMotion = useReducedMotion()
   const pick = (g: Goal) => {
     if (state.goal === g) {
       onChange({ goal: g })
@@ -27,14 +29,17 @@ export function Step2Goal({ state, onChange }: Step2GoalProps) {
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {GOALS.map((g) => {
+          {GOALS.map((g, i) => {
             const isActive = state.goal === g
             return (
-              <button
+              <motion.button
                 type="button"
                 key={g}
+                initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.06, duration: 0.3 }}
                 onClick={() => pick(g)}
-                className="text-right rounded-[16px] border-2 p-5 transition-all hover:-translate-y-0.5"
+                className="text-right rounded-[16px] border-2 p-5 transition-all hover:-translate-y-0.5 hover:shadow-[0_6px_18px_rgba(220,78,89,0.10)]"
                 style={{
                   background: isActive ? 'rgba(16, 185, 129, 0.07)' : '#FFFFFF',
                   borderColor: isActive ? '#10B981' : '#FFE8DE',
@@ -60,7 +65,7 @@ export function Step2Goal({ state, onChange }: Step2GoalProps) {
                 <p className="text-[16px] text-[#4A5568] leading-relaxed">
                   {GOAL_DESCRIPTIONS[g]}
                 </p>
-              </button>
+              </motion.button>
             )
           })}
         </div>

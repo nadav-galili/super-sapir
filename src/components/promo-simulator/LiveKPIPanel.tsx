@@ -4,6 +4,8 @@ import { getKpiStatusColor } from '@/lib/colors'
 import { formatCurrency } from '@/lib/format'
 import { calcMetrics, statusLabel, statusRatio } from '@/lib/promo-simulator/calc'
 import type { SimulatorState } from '@/lib/promo-simulator/state'
+import { useAnimatedCounter } from '@/hooks/useAnimatedCounter'
+import { useDebouncedValue } from '@/hooks/useDebouncedValue'
 
 interface LiveKPIPanelProps {
   state: SimulatorState
@@ -17,6 +19,15 @@ export function LiveKPIPanel({ state }: LiveKPIPanelProps) {
   const coverageColor = getKpiStatusColor(coverageRatio)
   const roiColor = getKpiStatusColor(m.roi >= 0 ? 1 : 0.5)
   const profitColor = getKpiStatusColor(profitDelta >= 0 ? 1 : 0.5)
+
+  // Debounce raw metric values by ~250ms so rapid slider drags don't thrash
+  // the counter animations — the counter settles to the final value instead.
+  const roiTarget = useDebouncedValue(m.roi, 250)
+  const profitTarget = useDebouncedValue(profitDelta, 250)
+  const coverageTarget = useDebouncedValue(m.stockCoverage, 250)
+  const roiAnim = useAnimatedCounter(roiTarget, 800)
+  const profitAnim = useAnimatedCounter(profitTarget, 800)
+  const coverageAnim = useAnimatedCounter(coverageTarget, 800)
 
   return (
     <motion.div
@@ -54,19 +65,19 @@ export function LiveKPIPanel({ state }: LiveKPIPanelProps) {
             <Row
               icon={<TrendingUp className="w-4 h-4" />}
               label="ROI חזוי"
-              value={`${m.roi}%`}
+              value={`${roiAnim}%`}
               color={roiColor}
             />
             <Row
               icon={<PiggyBank className="w-4 h-4" />}
               label="רווח מול בסיס"
-              value={`${profitDelta >= 0 ? '+' : ''}${formatCurrency(profitDelta)}`}
+              value={`${profitAnim >= 0 ? '+' : ''}${formatCurrency(profitAnim)}`}
               color={profitColor}
             />
             <Row
               icon={<Package className="w-4 h-4" />}
               label="כיסוי מלאי"
-              value={`${m.stockCoverage}%`}
+              value={`${coverageAnim}%`}
               color={coverageColor}
             />
           </div>

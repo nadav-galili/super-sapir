@@ -1,3 +1,4 @@
+import { motion, useReducedMotion } from 'motion/react'
 import { Star, ArrowLeft } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { purposeMap, type Goal } from '@/lib/promo-simulator/taxonomy'
@@ -25,6 +26,7 @@ function Stars({ count }: { count: 1 | 2 | 3 }) {
 }
 
 export function Step3PromoType({ state, onChange }: Step3PromoTypeProps) {
+  const reduceMotion = useReducedMotion()
   const goal = state.goal as Goal | ''
 
   if (!goal) {
@@ -71,14 +73,17 @@ export function Step3PromoType({ state, onChange }: Step3PromoTypeProps) {
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {options.map((p) => {
+          {options.map((p, i) => {
             const isActive = state.promoType === p.name
             return (
-              <button
+              <motion.button
                 type="button"
                 key={p.name}
+                initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.06, duration: 0.3 }}
                 onClick={() => onChange({ promoType: p.name })}
-                className="text-right rounded-[16px] border-2 p-5 transition-all hover:-translate-y-0.5"
+                className="text-right rounded-[16px] border-2 p-5 transition-all hover:-translate-y-0.5 hover:shadow-[0_6px_18px_rgba(220,78,89,0.10)]"
                 style={{
                   background: isActive ? 'rgba(220, 78, 89, 0.06)' : '#FFFFFF',
                   borderColor: isActive ? '#DC4E59' : '#FFE8DE',
@@ -103,7 +108,7 @@ export function Step3PromoType({ state, onChange }: Step3PromoTypeProps) {
                 <p className="text-[16px] text-[#4A5568] leading-relaxed">
                   {p.reason}
                 </p>
-              </button>
+              </motion.button>
             )
           })}
         </div>
