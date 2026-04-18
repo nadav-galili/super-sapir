@@ -1,0 +1,167 @@
+import { Check, HelpCircle } from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { getKpiStatusColor } from '@/lib/colors'
+import { calcMetrics, statusLabel, statusRatio } from '@/lib/promo-simulator/calc'
+import type { SimulatorState } from '@/lib/promo-simulator/state'
+
+interface Step7ControlProps {
+  state: SimulatorState
+  onChange: (update: Partial<SimulatorState>) => void
+}
+
+const CHECKS: {
+  field: 'controlPrice' | 'controlStock' | 'controlDisplay'
+  label: string
+}[] = [
+  { field: 'controlPrice', label: 'המחיר מוצג נכון' },
+  { field: 'controlStock', label: 'אין חוסר מלאי' },
+  { field: 'controlDisplay', label: 'יש נראות מספקת' },
+]
+
+export function Step7Control({ state, onChange }: Step7ControlProps) {
+  const m = calcMetrics(state)
+  const statusColor = getKpiStatusColor(statusRatio(m.status))
+  const pace = Math.min(
+    100,
+    Math.round((m.promoUnits / Math.max(m.breakEvenUnits, 1)) * 100),
+  )
+  const paceFinite = Number.isFinite(pace) ? pace : 0
+  const paceColor = getKpiStatusColor(Math.min(paceFinite / 100, 1))
+  const readinessCount = [
+    state.signage,
+    state.shelf,
+    state.training,
+    state.cashierBrief,
+  ].filter(Boolean).length
+  const readinessColor = getKpiStatusColor(readinessCount / 4)
+
+  return (
+    <div className="space-y-4">
+      <Card className="border-[#FFE8DE] rounded-[16px]">
+        <CardHeader>
+          <CardTitle className="text-2xl text-[#2D3748]">בקרה</CardTitle>
+          <p className="text-lg text-[#4A5568]">
+            ווידוא תקינות בזמן הרצה — מחיר, מלאי, נראות
+          </p>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {CHECKS.map((c) => {
+              const checked = Boolean(state[c.field])
+              return (
+                <button
+                  type="button"
+                  key={c.field}
+                  onClick={() => onChange({ [c.field]: !checked })}
+                  className="text-right rounded-[16px] border-2 p-4 transition-all hover:-translate-y-0.5 flex items-center gap-3"
+                  style={{
+                    background: checked
+                      ? 'rgba(16, 185, 129, 0.06)'
+                      : '#FFFFFF',
+                    borderColor: checked ? '#10B981' : '#FFE8DE',
+                  }}
+                >
+                  <span
+                    className="w-6 h-6 shrink-0 rounded-[6px] border-2 flex items-center justify-center transition-colors"
+                    style={{
+                      background: checked ? '#10B981' : '#FFFFFF',
+                      borderColor: checked ? '#10B981' : '#A0AEC0',
+                    }}
+                  >
+                    {checked && (
+                      <Check
+                        className="w-4 h-4 text-white"
+                        strokeWidth={3}
+                      />
+                    )}
+                  </span>
+                  <p className="text-xl font-semibold text-[#2D3748]">
+                    {c.label}
+                  </p>
+                </button>
+              )
+            })}
+
+            <div
+              className="rounded-[16px] border-2 p-4 flex items-start gap-3"
+              style={{
+                borderColor: '#6C5CE7',
+                background: '#6C5CE70D',
+              }}
+            >
+              <span
+                className="w-8 h-8 shrink-0 rounded-[10px] flex items-center justify-center"
+                style={{
+                  background: 'linear-gradient(135deg, #6C5CE7, #8B7FED)',
+                }}
+              >
+                <HelpCircle className="w-4 h-4 text-white" />
+              </span>
+              <div>
+                <p className="text-xl font-semibold text-[#2D3748]">
+                  שאלה להתבוננות
+                </p>
+                <p className="text-[16px] text-[#4A5568] mt-1 leading-relaxed">
+                  האם המבצע מתקשר בצורה ברורה הזדמנות של &quot;כאן ועכשיו&quot;?
+                  ללקוח צריך להיות ברור שמדובר בחלון זמן מוגבל ושהערך המיידי
+                  משמעותי.
+                </p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <KpiCard
+          title="סטטוס מבצע"
+          value={statusLabel(m.status)}
+          color={statusColor}
+          sub="הערכה כללית"
+        />
+        <KpiCard
+          title="קצב מול תחזית"
+          value={`${paceFinite}%`}
+          color={paceColor}
+          sub="מכר בפועל מול break-even"
+        />
+        <KpiCard
+          title="מוכנות תפעולית"
+          value={`${readinessCount}/4`}
+          color={readinessColor}
+          sub="שילוט / מדף / הדרכה / קופאים"
+        />
+      </div>
+    </div>
+  )
+}
+
+function KpiCard({
+  title,
+  value,
+  sub,
+  color,
+}: {
+  title: string
+  value: string
+  sub: string
+  color: string
+}) {
+  return (
+    <Card className="border-[#FFE8DE] rounded-[16px]">
+      <CardContent className="p-5">
+        <p className="text-[15px] font-medium text-[#A0AEC0] uppercase tracking-wide">
+          {title}
+        </p>
+        <p
+          className="text-3xl font-bold mt-1"
+          style={{ color }}
+          dir="ltr"
+        >
+          {value}
+        </p>
+        <p className="text-[15px] text-[#4A5568] mt-1">{sub}</p>
+      </CardContent>
+    </Card>
+  )
+}
