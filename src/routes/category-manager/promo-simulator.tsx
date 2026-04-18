@@ -6,6 +6,8 @@ import { PageContainer } from '@/components/layout/PageContainer'
 import { Stepper } from '@/components/promo-simulator/Stepper'
 import { StepPlaceholder } from '@/components/promo-simulator/StepPlaceholder'
 import { Step1Brief } from '@/components/promo-simulator/Step1Brief'
+import { Step2Goal } from '@/components/promo-simulator/Step2Goal'
+import { Step3PromoType } from '@/components/promo-simulator/Step3PromoType'
 import {
   createDefaultState,
   decodeState,
@@ -101,6 +103,10 @@ function PromoSimulatorPage() {
         >
           {state.step === 1 ? (
             <Step1Brief state={state} onChange={setState} />
+          ) : state.step === 2 ? (
+            <Step2Goal state={state} onChange={setState} />
+          ) : state.step === 3 ? (
+            <Step3PromoType state={state} onChange={setState} />
           ) : (
             <StepPlaceholder
               stepNumber={stepMeta.id}
