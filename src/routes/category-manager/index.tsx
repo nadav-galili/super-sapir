@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
-import { createFileRoute } from '@tanstack/react-router'
-import { Megaphone, LayoutGrid, Truck, Store } from 'lucide-react'
+import { createFileRoute, Link } from '@tanstack/react-router'
+import { Megaphone, LayoutGrid, Truck, Store, Sparkles } from 'lucide-react'
 import { TimePeriodFilter, getPeriodMultiplier, getPeriodJitter, type TimePeriod } from '@/components/dashboard/TimePeriodFilter'
 import { PeriodMultiplierProvider } from '@/contexts/PeriodContext'
 import { PageContainer } from '@/components/layout/PageContainer'
@@ -107,6 +107,19 @@ function CategoryManagerPage() {
         targetSales={totalTargetSales}
         branchCount={allBranches.length}
         categoryCount={categorySnapshots.length}
+        cta={
+          <Link
+            to="/category-manager/promo-simulator"
+            className="inline-flex items-center gap-2 rounded-[10px] px-6 py-3 text-lg font-semibold text-white shadow-lg transition-transform hover:-translate-y-0.5"
+            style={{
+              background: 'linear-gradient(135deg, #DC4E59, #E8777F)',
+              boxShadow: '0 10px 25px rgba(220, 78, 89, 0.35)',
+            }}
+          >
+            <Sparkles className="w-5 h-5" />
+            סימולטור מבצע חדש
+          </Link>
+        }
       />
 
       <ChainAIBriefing />

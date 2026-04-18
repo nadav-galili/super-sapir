@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { motion } from 'motion/react'
 import { useAnimatedCounter } from '@/hooks/useAnimatedCounter'
 import { formatCurrencyShort } from '@/lib/format'
@@ -9,6 +10,7 @@ interface HeroBannerProps {
   targetSales: number
   branchCount: number
   categoryCount: number
+  cta?: ReactNode
 }
 
 const GAUGE_SIZE = 180
@@ -108,7 +110,7 @@ function StatPill({ label, value, delay, mono }: StatPillProps) {
   )
 }
 
-export function HeroBanner({ totalSales, targetSales, branchCount, categoryCount }: HeroBannerProps) {
+export function HeroBanner({ totalSales, targetSales, branchCount, categoryCount, cta }: HeroBannerProps) {
   const ratio = targetSales > 0 ? totalSales / targetSales : 1
   const animatedSales = useAnimatedCounter(totalSales, 1600, 200)
 
@@ -186,6 +188,17 @@ export function HeroBanner({ totalSales, targetSales, branchCount, categoryCount
             <StatPill label="סניפים" value={branchCount} delay={0.55} />
             <StatPill label="קטגוריות" value={categoryCount} delay={0.65} />
           </div>
+
+          {cta && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.75 }}
+              className="mt-6"
+            >
+              {cta}
+            </motion.div>
+          )}
         </div>
 
         {/* Left (RTL) — Big gauge */}

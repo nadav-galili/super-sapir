@@ -15,6 +15,7 @@ import { Route as DivisionManagerIndexRouteImport } from './routes/division-mana
 import { Route as CategoryManagerIndexRouteImport } from './routes/category-manager/index'
 import { Route as StoreManagerBranchIdRouteImport } from './routes/store-manager/$branchId'
 import { Route as DivisionManagerRegionIdRouteImport } from './routes/division-manager/$regionId'
+import { Route as CategoryManagerPromoSimulatorRouteImport } from './routes/category-manager/promo-simulator'
 import { Route as CategoryManagerCategoryIdRouteImport } from './routes/category-manager/$categoryId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -47,6 +48,12 @@ const DivisionManagerRegionIdRoute = DivisionManagerRegionIdRouteImport.update({
   path: '/division-manager/$regionId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CategoryManagerPromoSimulatorRoute =
+  CategoryManagerPromoSimulatorRouteImport.update({
+    id: '/category-manager/promo-simulator',
+    path: '/category-manager/promo-simulator',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const CategoryManagerCategoryIdRoute =
   CategoryManagerCategoryIdRouteImport.update({
     id: '/category-manager/$categoryId',
@@ -57,6 +64,7 @@ const CategoryManagerCategoryIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/category-manager/$categoryId': typeof CategoryManagerCategoryIdRoute
+  '/category-manager/promo-simulator': typeof CategoryManagerPromoSimulatorRoute
   '/division-manager/$regionId': typeof DivisionManagerRegionIdRoute
   '/store-manager/$branchId': typeof StoreManagerBranchIdRoute
   '/category-manager/': typeof CategoryManagerIndexRoute
@@ -66,6 +74,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/category-manager/$categoryId': typeof CategoryManagerCategoryIdRoute
+  '/category-manager/promo-simulator': typeof CategoryManagerPromoSimulatorRoute
   '/division-manager/$regionId': typeof DivisionManagerRegionIdRoute
   '/store-manager/$branchId': typeof StoreManagerBranchIdRoute
   '/category-manager': typeof CategoryManagerIndexRoute
@@ -76,6 +85,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/category-manager/$categoryId': typeof CategoryManagerCategoryIdRoute
+  '/category-manager/promo-simulator': typeof CategoryManagerPromoSimulatorRoute
   '/division-manager/$regionId': typeof DivisionManagerRegionIdRoute
   '/store-manager/$branchId': typeof StoreManagerBranchIdRoute
   '/category-manager/': typeof CategoryManagerIndexRoute
@@ -87,6 +97,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/category-manager/$categoryId'
+    | '/category-manager/promo-simulator'
     | '/division-manager/$regionId'
     | '/store-manager/$branchId'
     | '/category-manager/'
@@ -96,6 +107,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/category-manager/$categoryId'
+    | '/category-manager/promo-simulator'
     | '/division-manager/$regionId'
     | '/store-manager/$branchId'
     | '/category-manager'
@@ -105,6 +117,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/category-manager/$categoryId'
+    | '/category-manager/promo-simulator'
     | '/division-manager/$regionId'
     | '/store-manager/$branchId'
     | '/category-manager/'
@@ -115,6 +128,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CategoryManagerCategoryIdRoute: typeof CategoryManagerCategoryIdRoute
+  CategoryManagerPromoSimulatorRoute: typeof CategoryManagerPromoSimulatorRoute
   DivisionManagerRegionIdRoute: typeof DivisionManagerRegionIdRoute
   StoreManagerBranchIdRoute: typeof StoreManagerBranchIdRoute
   CategoryManagerIndexRoute: typeof CategoryManagerIndexRoute
@@ -166,6 +180,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DivisionManagerRegionIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/category-manager/promo-simulator': {
+      id: '/category-manager/promo-simulator'
+      path: '/category-manager/promo-simulator'
+      fullPath: '/category-manager/promo-simulator'
+      preLoaderRoute: typeof CategoryManagerPromoSimulatorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/category-manager/$categoryId': {
       id: '/category-manager/$categoryId'
       path: '/category-manager/$categoryId'
@@ -179,6 +200,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CategoryManagerCategoryIdRoute: CategoryManagerCategoryIdRoute,
+  CategoryManagerPromoSimulatorRoute: CategoryManagerPromoSimulatorRoute,
   DivisionManagerRegionIdRoute: DivisionManagerRegionIdRoute,
   StoreManagerBranchIdRoute: StoreManagerBranchIdRoute,
   CategoryManagerIndexRoute: CategoryManagerIndexRoute,
