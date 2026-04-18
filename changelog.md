@@ -8,6 +8,23 @@
 
 ## 2026-04-18
 
+### Category-manager hero — background image
+
+- `HeroBanner` gained an optional `backgroundImage?: string` prop. When provided, the image is rendered as a `bg-cover bg-center` layer under the gradient, and the gradient switches to a neutral dark-slate overlay (`rgba(17,24,39,0.70) → rgba(45,55,72,0.55)`) so white text and the gauge stay readable without red tinting. When omitted, the original dark→red gradient behaviour is unchanged — no regression for other consumers.
+- `/category-manager` passes `backgroundImage="/hero/category-manager.png"` (asset in `public/hero/`).
+- **Files:** `src/components/dashboard/HeroBanner.tsx`, `src/routes/category-manager/index.tsx`, `public/hero/category-manager.png` (new)
+
+### Ubiquitous Language — shared domain glossary
+
+- New `context.md` at repo root: a DDD-style glossary of the retail analytics domain. Defines canonical terms, organizational hierarchy (**Chain → Region → Branch → Department → Category → Item**), roles (**Store Manager**, **Region Manager**, **Category Manager**), metrics, alerts, HR, and aliases to avoid. Includes a dev ↔ domain-expert example dialogue and a "Flagged ambiguities" section calling out known code debt (current `DepartmentMetrics` / `CategorySummary` types actually describe Departments; Category as a sub-level under Department is not yet modelled; "Region" is canonical, "Division" is banned in new code).
+- `CLAUDE.md` already references `context.md` (added in an earlier commit this day).
+- **Files:** `context.md` (new)
+
+### Sandcastle prompt — use /update-docs-and-commit
+
+- `.sandcastle/prompt.md` step 4d now instructs the Sandcastle agent to commit by invoking the `/update-docs-and-commit` slash command (which updates `changelog.md` + stages + commits in one step), instead of hand-rolling `git commit` and separately editing `changelog.md`. The rule that commit messages reference the issue number (e.g. `Fix #13: ...`) is preserved. Step 5 (the separate changelog instruction) was removed as redundant.
+- **Files:** `.sandcastle/prompt.md`
+
 ### Domain-typed KPI color resolvers (#40)
 
 - Replaced the four generic color helpers (`getKpiStatusColor`, `getTargetStatusColor`, `getDeltaStatusColor`, `getMarginColor`) with one resolver per KPI domain. Thresholds and direction now live inside the resolver whose name matches the KPI's meaning; call sites no longer pass `lowerIsBetter` or `deadBand` flags.

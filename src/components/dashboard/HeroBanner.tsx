@@ -11,6 +11,7 @@ interface HeroBannerProps {
   branchCount: number;
   categoryCount: number;
   cta?: ReactNode;
+  backgroundImage?: string;
 }
 
 const GAUGE_SIZE = 180;
@@ -143,6 +144,7 @@ export function HeroBanner({
   branchCount,
   categoryCount,
   cta,
+  backgroundImage,
 }: HeroBannerProps) {
   const animatedSales = useAnimatedCounter(totalSales, 1600, 200);
 
@@ -153,12 +155,21 @@ export function HeroBanner({
       transition={{ duration: 0.5 }}
       className="relative rounded-[20px] overflow-hidden shadow-xl"
     >
-      {/* Clean gradient background */}
+      {/* Background image (optional) */}
+      {backgroundImage && (
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(${backgroundImage})` }}
+          aria-hidden
+        />
+      )}
+      {/* Gradient — full color when no image, darkened overlay on top of image */}
       <div
         className="absolute inset-0"
         style={{
-          background:
-            "linear-gradient(135deg, #2D3748 0%, #3D3050 45%, #DC4E59 100%)",
+          background: backgroundImage
+            ? "linear-gradient(135deg, rgba(17,24,39,0.70) 0%, rgba(45,55,72,0.55) 100%)"
+            : "linear-gradient(135deg, #2D3748 0%, #3D3050 45%, #DC4E59 100%)",
         }}
       />
       {/* Subtle decorative shapes */}
