@@ -1,19 +1,29 @@
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
-} from 'recharts'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { motion } from 'motion/react'
-import { formatCurrencyShort } from '@/lib/format'
-import { getDeltaStatusColor } from '@/lib/colors'
-import type { DepartmentMetrics } from '@/data/types'
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Cell,
+} from "recharts";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { motion } from "motion/react";
+import { formatCurrencyShort } from "@/lib/format";
+import { getGrowthColor } from "@/lib/kpi/resolvers";
+import type { DepartmentMetrics } from "@/data/types";
 
 interface DepartmentBarChartProps {
-  data: DepartmentMetrics[]
-  title?: string
+  data: DepartmentMetrics[];
+  title?: string;
 }
 
-export function DepartmentBarChart({ data, title = 'פילוח לפי מחלקה' }: DepartmentBarChartProps) {
-  const sorted = [...data].sort((a, b) => b.sales - a.sales)
+export function DepartmentBarChart({
+  data,
+  title = "פילוח לפי מחלקה",
+}: DepartmentBarChartProps) {
+  const sorted = [...data].sort((a, b) => b.sales - a.sales);
 
   return (
     <motion.div
@@ -33,8 +43,16 @@ export function DepartmentBarChart({ data, title = 'פילוח לפי מחלקה
                 layout="vertical"
                 margin={{ top: 5, right: 30, left: 80, bottom: 5 }}
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" horizontal={false} />
-                <XAxis type="number" tickFormatter={(v: number) => formatCurrencyShort(v)} tick={{ fontSize: 11 }} />
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="#e5e7eb"
+                  horizontal={false}
+                />
+                <XAxis
+                  type="number"
+                  tickFormatter={(v: number) => formatCurrencyShort(v)}
+                  tick={{ fontSize: 11 }}
+                />
                 <YAxis
                   type="category"
                   dataKey="name"
@@ -42,12 +60,22 @@ export function DepartmentBarChart({ data, title = 'פילוח לפי מחלקה
                   width={75}
                 />
                 <Tooltip
-                  formatter={(value) => [formatCurrencyShort(value as number), 'מכירות']}
-                  contentStyle={{ direction: 'rtl', borderRadius: '8px' }}
+                  formatter={(value) => [
+                    formatCurrencyShort(value as number),
+                    "מכירות",
+                  ]}
+                  contentStyle={{ direction: "rtl", borderRadius: "8px" }}
                 />
-                <Bar dataKey="sales" radius={[0, 4, 4, 0]} animationDuration={1200}>
+                <Bar
+                  dataKey="sales"
+                  radius={[0, 4, 4, 0]}
+                  animationDuration={1200}
+                >
                   {sorted.map((entry, i) => (
-                    <Cell key={i} fill={getDeltaStatusColor(entry.yoyChange)} />
+                    <Cell
+                      key={i}
+                      fill={getGrowthColor({ changePercent: entry.yoyChange })}
+                    />
                   ))}
                 </Bar>
               </BarChart>
@@ -56,5 +84,5 @@ export function DepartmentBarChart({ data, title = 'פילוח לפי מחלקה
         </CardContent>
       </Card>
     </motion.div>
-  )
+  );
 }

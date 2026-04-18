@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState } from "react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -6,110 +6,139 @@ import {
   flexRender,
   type SortingState,
   type ColumnDef,
-} from '@tanstack/react-table'
-import { Link } from '@tanstack/react-router'
-import { motion } from 'motion/react'
-import { ArrowUpDown, ExternalLink } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { formatCurrencyShort, formatPercent } from '@/lib/format'
-import { getTargetStatusColor, getDeltaStatusColor } from '@/lib/colors'
-import type { Branch } from '@/data/types'
+} from "@tanstack/react-table";
+import { Link } from "@tanstack/react-router";
+import { motion } from "motion/react";
+import { ArrowUpDown, ExternalLink } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { formatCurrencyShort, formatPercent } from "@/lib/format";
+import { getGrowthColor, getQualityColor } from "@/lib/kpi/resolvers";
+import type { Branch } from "@/data/types";
 
 interface BranchRankingTableProps {
-  branches: Branch[]
-  title?: string
+  branches: Branch[];
+  title?: string;
 }
 
-export function BranchRankingTable({ branches, title = 'דירוג סניפים' }: BranchRankingTableProps) {
-  const [sorting, setSorting] = useState<SortingState>([{ id: 'totalSales', desc: true }])
+export function BranchRankingTable({
+  branches,
+  title = "דירוג סניפים",
+}: BranchRankingTableProps) {
+  const [sorting, setSorting] = useState<SortingState>([
+    { id: "totalSales", desc: true },
+  ]);
 
-  const columns = useMemo<ColumnDef<Branch>[]>(() => [
-    {
-      id: 'rank',
-      header: '#',
-      cell: ({ row }) => (
-        <Badge
-          variant={row.index < 3 ? 'default' : 'secondary'}
-          className="w-7 h-7 rounded-full flex items-center justify-center p-0"
-        >
-          {row.index + 1}
-        </Badge>
-      ),
-      enableSorting: false,
-      size: 50,
-    },
-    {
-      accessorKey: 'name',
-      header: 'סניף',
-      cell: ({ row }) => (
-        <div className="flex items-center gap-2">
-          <span className="font-medium">{row.original.name}</span>
-          <span className="text-xs text-muted-foreground">#{row.original.branchNumber}</span>
-        </div>
-      ),
-    },
-    {
-      id: 'totalSales',
-      accessorFn: (row) => row.metrics.totalSales,
-      header: ({ column }) => (
-        <button className="flex items-center gap-1" onClick={() => column.toggleSorting()}>
-          מכירות <ArrowUpDown className="w-3 h-3" />
-        </button>
-      ),
-      cell: ({ getValue }) => (
-        <span className="font-semibold" dir="ltr">{formatCurrencyShort(getValue() as number)}</span>
-      ),
-    },
-    {
-      id: 'qualityScore',
-      accessorFn: (row) => row.metrics.qualityScore,
-      header: ({ column }) => (
-        <button className="flex items-center gap-1" onClick={() => column.toggleSorting()}>
-          איכות <ArrowUpDown className="w-3 h-3" />
-        </button>
-      ),
-      cell: ({ getValue }) => {
-        const score = getValue() as number
-        return (
-          <span className="font-semibold" style={{ color: getTargetStatusColor(score, 100) }} dir="ltr">
-            {score}
-          </span>
-        )
+  const columns = useMemo<ColumnDef<Branch>[]>(
+    () => [
+      {
+        id: "rank",
+        header: "#",
+        cell: ({ row }) => (
+          <Badge
+            variant={row.index < 3 ? "default" : "secondary"}
+            className="w-7 h-7 rounded-full flex items-center justify-center p-0"
+          >
+            {row.index + 1}
+          </Badge>
+        ),
+        enableSorting: false,
+        size: 50,
       },
-    },
-    {
-      id: 'yoyGrowth',
-      accessorFn: (row) => row.metrics.yoyGrowth,
-      header: ({ column }) => (
-        <button className="flex items-center gap-1" onClick={() => column.toggleSorting()}>
-          צמיחה <ArrowUpDown className="w-3 h-3" />
-        </button>
-      ),
-      cell: ({ getValue }) => {
-        const growth = getValue() as number
-        return (
-          <span style={{ color: getDeltaStatusColor(growth) }} dir="ltr">
-            {growth >= 0 ? '+' : ''}{formatPercent(growth)}
-          </span>
-        )
+      {
+        accessorKey: "name",
+        header: "סניף",
+        cell: ({ row }) => (
+          <div className="flex items-center gap-2">
+            <span className="font-medium">{row.original.name}</span>
+            <span className="text-xs text-muted-foreground">
+              #{row.original.branchNumber}
+            </span>
+          </div>
+        ),
       },
-    },
-    {
-      id: 'actions',
-      header: '',
-      cell: ({ row }) => (
-        <Link
-          to="/store-manager/$branchId"
-          params={{ branchId: row.original.id }}
-          className="text-blue-500 hover:text-blue-700"
-        >
-          <ExternalLink className="w-4 h-4" />
-        </Link>
-      ),
-      size: 40,
-    },
-  ], [])
+      {
+        id: "totalSales",
+        accessorFn: (row) => row.metrics.totalSales,
+        header: ({ column }) => (
+          <button
+            className="flex items-center gap-1"
+            onClick={() => column.toggleSorting()}
+          >
+            מכירות <ArrowUpDown className="w-3 h-3" />
+          </button>
+        ),
+        cell: ({ getValue }) => (
+          <span className="font-semibold" dir="ltr">
+            {formatCurrencyShort(getValue() as number)}
+          </span>
+        ),
+      },
+      {
+        id: "qualityScore",
+        accessorFn: (row) => row.metrics.qualityScore,
+        header: ({ column }) => (
+          <button
+            className="flex items-center gap-1"
+            onClick={() => column.toggleSorting()}
+          >
+            איכות <ArrowUpDown className="w-3 h-3" />
+          </button>
+        ),
+        cell: ({ getValue }) => {
+          const score = getValue() as number;
+          return (
+            <span
+              className="font-semibold"
+              style={{ color: getQualityColor({ score }) }}
+              dir="ltr"
+            >
+              {score}
+            </span>
+          );
+        },
+      },
+      {
+        id: "yoyGrowth",
+        accessorFn: (row) => row.metrics.yoyGrowth,
+        header: ({ column }) => (
+          <button
+            className="flex items-center gap-1"
+            onClick={() => column.toggleSorting()}
+          >
+            צמיחה <ArrowUpDown className="w-3 h-3" />
+          </button>
+        ),
+        cell: ({ getValue }) => {
+          const growth = getValue() as number;
+          return (
+            <span
+              style={{ color: getGrowthColor({ changePercent: growth }) }}
+              dir="ltr"
+            >
+              {growth >= 0 ? "+" : ""}
+              {formatPercent(growth)}
+            </span>
+          );
+        },
+      },
+      {
+        id: "actions",
+        header: "",
+        cell: ({ row }) => (
+          <Link
+            to="/store-manager/$branchId"
+            params={{ branchId: row.original.id }}
+            className="text-blue-500 hover:text-blue-700"
+          >
+            <ExternalLink className="w-4 h-4" />
+          </Link>
+        ),
+        size: 40,
+      },
+    ],
+    []
+  );
 
   const table = useReactTable({
     data: branches,
@@ -118,7 +147,7 @@ export function BranchRankingTable({ branches, title = 'דירוג סניפים'
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-  })
+  });
 
   return (
     <motion.div
@@ -134,11 +163,19 @@ export function BranchRankingTable({ branches, title = 'דירוג סניפים'
           <div className="overflow-auto">
             <table className="w-full text-sm">
               <thead>
-                {table.getHeaderGroups().map(hg => (
+                {table.getHeaderGroups().map((hg) => (
                   <tr key={hg.id} className="border-b">
-                    {hg.headers.map(header => (
-                      <th key={header.id} className="px-3 py-2 text-right font-medium text-muted-foreground">
-                        {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                    {hg.headers.map((header) => (
+                      <th
+                        key={header.id}
+                        className="px-3 py-2 text-right font-medium text-muted-foreground"
+                      >
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
                       </th>
                     ))}
                   </tr>
@@ -153,9 +190,12 @@ export function BranchRankingTable({ branches, title = 'דירוג סניפים'
                     transition={{ delay: i * 0.05 }}
                     className="border-b hover:bg-accent/50 transition-colors"
                   >
-                    {row.getVisibleCells().map(cell => (
+                    {row.getVisibleCells().map((cell) => (
                       <td key={cell.id} className="px-3 py-2.5">
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
                       </td>
                     ))}
                   </motion.tr>
@@ -166,5 +206,5 @@ export function BranchRankingTable({ branches, title = 'דירוג סניפים'
         </CardContent>
       </Card>
     </motion.div>
-  )
+  );
 }

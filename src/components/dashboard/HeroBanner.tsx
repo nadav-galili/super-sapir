@@ -1,42 +1,43 @@
-import type { ReactNode } from 'react'
-import { motion } from 'motion/react'
-import { useAnimatedCounter } from '@/hooks/useAnimatedCounter'
-import { formatCurrencyShort } from '@/lib/format'
-import { getKpiStatusColor } from '@/lib/colors'
-import { Activity } from 'lucide-react'
+import type { ReactNode } from "react";
+import { motion } from "motion/react";
+import { useAnimatedCounter } from "@/hooks/useAnimatedCounter";
+import { formatCurrencyShort } from "@/lib/format";
+import { getSalesColor } from "@/lib/kpi/resolvers";
+import { Activity } from "lucide-react";
 
 interface HeroBannerProps {
-  totalSales: number
-  targetSales: number
-  branchCount: number
-  categoryCount: number
-  cta?: ReactNode
+  totalSales: number;
+  targetSales: number;
+  branchCount: number;
+  categoryCount: number;
+  cta?: ReactNode;
 }
 
-const GAUGE_SIZE = 180
-const GAUGE_STROKE = 14
-const GAUGE_R = (GAUGE_SIZE - GAUGE_STROKE) / 2
+const GAUGE_SIZE = 180;
+const GAUGE_STROKE = 14;
+const GAUGE_R = (GAUGE_SIZE - GAUGE_STROKE) / 2;
 
 const TICK_MARKS = Array.from({ length: 40 }, (_, i) => {
-  const angle = (i / 40) * 360 - 90
-  const rad = (angle * Math.PI) / 180
+  const angle = (i / 40) * 360 - 90;
+  const rad = (angle * Math.PI) / 180;
   return {
     x1: GAUGE_SIZE / 2 + (GAUGE_R + 4) * Math.cos(rad),
     y1: GAUGE_SIZE / 2 + (GAUGE_R + 4) * Math.sin(rad),
     x2: GAUGE_SIZE / 2 + (GAUGE_R + 8) * Math.cos(rad),
     y2: GAUGE_SIZE / 2 + (GAUGE_R + 8) * Math.sin(rad),
-  }
-})
+  };
+});
 
-function BigGauge({ ratio }: { ratio: number }) {
-  const size = GAUGE_SIZE
-  const r = GAUGE_R
-  const circumference = 2 * Math.PI * r
-  const offset = circumference - (Math.min(ratio, 1) * circumference)
-  const pct = Math.round(ratio * 100)
-  const animatedPct = useAnimatedCounter(pct, 1800, 300)
+function BigGauge({ actual, target }: { actual: number; target: number }) {
+  const ratio = target > 0 ? actual / target : 1;
+  const size = GAUGE_SIZE;
+  const r = GAUGE_R;
+  const circumference = 2 * Math.PI * r;
+  const offset = circumference - Math.min(ratio, 1) * circumference;
+  const pct = Math.round(ratio * 100);
+  const animatedPct = useAnimatedCounter(pct, 1800, 300);
 
-  const color = getKpiStatusColor(ratio)
+  const color = getSalesColor({ actual, target });
 
   return (
     <div className="relative" style={{ width: size, height: size }}>
@@ -45,7 +46,7 @@ function BigGauge({ ratio }: { ratio: number }) {
         className="absolute -inset-3 rounded-full border-2 opacity-0"
         style={{ borderColor: color }}
         animate={{ opacity: [0, 0.3, 0], scale: [0.95, 1.05, 0.95] }}
-        transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
       />
       {/* Glow */}
       <div
@@ -53,45 +54,66 @@ function BigGauge({ ratio }: { ratio: number }) {
         style={{ background: color }}
       />
 
-      <svg className="w-full h-full -rotate-90 relative z-10" viewBox={`0 0 ${size} ${size}`}>
+      <svg
+        className="w-full h-full -rotate-90 relative z-10"
+        viewBox={`0 0 ${size} ${size}`}
+      >
         {/* Track */}
         <circle
-          cx={size / 2} cy={size / 2} r={r}
-          fill="none" stroke="rgba(255,255,255,0.1)"
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          fill="none"
+          stroke="rgba(255,255,255,0.1)"
           strokeWidth={GAUGE_STROKE}
         />
         {TICK_MARKS.map((t, i) => (
           <line
-            key={i} x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2}
-            stroke="rgba(255,255,255,0.08)" strokeWidth={1}
+            key={i}
+            x1={t.x1}
+            y1={t.y1}
+            x2={t.x2}
+            y2={t.y2}
+            stroke="rgba(255,255,255,0.08)"
+            strokeWidth={1}
           />
         ))}
         {/* Progress */}
         <motion.circle
-          cx={size / 2} cy={size / 2} r={r}
-          fill="none" stroke={color}
-          strokeWidth={GAUGE_STROKE} strokeLinecap="round"
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          fill="none"
+          stroke={color}
+          strokeWidth={GAUGE_STROKE}
+          strokeLinecap="round"
           strokeDasharray={circumference}
           initial={{ strokeDashoffset: circumference }}
           animate={{ strokeDashoffset: offset }}
-          transition={{ duration: 1.8, delay: 0.4, ease: 'easeOut' }}
+          transition={{ duration: 1.8, delay: 0.4, ease: "easeOut" }}
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
-        <span className="text-6xl font-bold font-mono text-white tracking-tight" dir="ltr">
-          {animatedPct}<span className="text-3xl text-white/60">%</span>
+        <span
+          className="text-6xl font-bold font-mono text-white tracking-tight"
+          dir="ltr"
+        >
+          {animatedPct}
+          <span className="text-3xl text-white/60">%</span>
         </span>
-        <span className="text-base text-white/50 mt-1 tracking-wide">עמידה ביעד</span>
+        <span className="text-base text-white/50 mt-1 tracking-wide">
+          עמידה ביעד
+        </span>
       </div>
     </div>
-  )
+  );
 }
 
 interface StatPillProps {
-  label: string
-  value: string | number
-  delay: number
-  mono?: boolean
+  label: string;
+  value: string | number;
+  delay: number;
+  mono?: boolean;
 }
 
 function StatPill({ label, value, delay, mono }: StatPillProps) {
@@ -102,17 +124,27 @@ function StatPill({ label, value, delay, mono }: StatPillProps) {
       transition={{ delay }}
       className="bg-white/[0.07] backdrop-blur-md rounded-[14px] px-5 py-3 border border-white/[0.08] hover:bg-white/[0.12] transition-colors"
     >
-      <p className="text-[16px] text-white/40 uppercase tracking-wider">{label}</p>
-      <p className={`text-2xl font-bold text-white mt-0.5 ${mono ? 'font-mono' : ''}`} dir="ltr">
+      <p className="text-[16px] text-white/40 uppercase tracking-wider">
+        {label}
+      </p>
+      <p
+        className={`text-2xl font-bold text-white mt-0.5 ${mono ? "font-mono" : ""}`}
+        dir="ltr"
+      >
         {value}
       </p>
     </motion.div>
-  )
+  );
 }
 
-export function HeroBanner({ totalSales, targetSales, branchCount, categoryCount, cta }: HeroBannerProps) {
-  const ratio = targetSales > 0 ? totalSales / targetSales : 1
-  const animatedSales = useAnimatedCounter(totalSales, 1600, 200)
+export function HeroBanner({
+  totalSales,
+  targetSales,
+  branchCount,
+  categoryCount,
+  cta,
+}: HeroBannerProps) {
+  const animatedSales = useAnimatedCounter(totalSales, 1600, 200);
 
   return (
     <motion.div
@@ -124,21 +156,28 @@ export function HeroBanner({ totalSales, targetSales, branchCount, categoryCount
       {/* Clean gradient background */}
       <div
         className="absolute inset-0"
-        style={{ background: 'linear-gradient(135deg, #2D3748 0%, #3D3050 45%, #DC4E59 100%)' }}
+        style={{
+          background:
+            "linear-gradient(135deg, #2D3748 0%, #3D3050 45%, #DC4E59 100%)",
+        }}
       />
       {/* Subtle decorative shapes */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div
           className="absolute -top-20 -left-20 w-72 h-72 rounded-full opacity-[0.06]"
-          style={{ background: 'radial-gradient(circle, #FFFFFF 0%, transparent 70%)' }}
+          style={{
+            background: "radial-gradient(circle, #FFFFFF 0%, transparent 70%)",
+          }}
         />
         <div
           className="absolute -bottom-16 right-1/4 w-96 h-96 rounded-full opacity-[0.04]"
-          style={{ background: 'radial-gradient(circle, #FFFFFF 0%, transparent 70%)' }}
+          style={{
+            background: "radial-gradient(circle, #FFFFFF 0%, transparent 70%)",
+          }}
         />
         <div
           className="absolute top-1/2 left-1/3 w-40 h-40 rounded-full opacity-[0.03]"
-          style={{ background: '#FFFFFF' }}
+          style={{ background: "#FFFFFF" }}
         />
       </div>
 
@@ -184,7 +223,12 @@ export function HeroBanner({ totalSales, targetSales, branchCount, categoryCount
 
           {/* Stat pills */}
           <div className="flex flex-wrap gap-3">
-            <StatPill label="מכירות רשת" value={formatCurrencyShort(animatedSales)} delay={0.45} mono />
+            <StatPill
+              label="מכירות רשת"
+              value={formatCurrencyShort(animatedSales)}
+              delay={0.45}
+              mono
+            />
             <StatPill label="סניפים" value={branchCount} delay={0.55} />
             <StatPill label="קטגוריות" value={categoryCount} delay={0.65} />
           </div>
@@ -205,12 +249,17 @@ export function HeroBanner({ totalSales, targetSales, branchCount, categoryCount
         <motion.div
           initial={{ opacity: 0, scale: 0.7 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.25, type: 'spring', stiffness: 180, damping: 18 }}
+          transition={{
+            delay: 0.25,
+            type: "spring",
+            stiffness: 180,
+            damping: 18,
+          }}
           className="shrink-0"
         >
-          <BigGauge ratio={ratio} />
+          <BigGauge actual={totalSales} target={targetSales} />
         </motion.div>
       </div>
     </motion.div>
-  )
+  );
 }

@@ -3,7 +3,7 @@
 import { motion } from "motion/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { BranchFullReport } from "@/data/hadera-real";
-import { getDeltaStatusColor } from "@/lib/colors";
+import { getCostDeltaColor } from "@/lib/kpi/resolvers";
 import { BAR_GRADIENTS } from "./bar-gradients";
 
 export interface OverviewExpenseTableProps {
@@ -61,7 +61,7 @@ export function OverviewExpenseTable({ expenses }: OverviewExpenseTableProps) {
                 style={{
                   color:
                     pctChange !== 0
-                      ? getDeltaStatusColor(pctChange, { lowerIsBetter: true })
+                      ? getCostDeltaColor({ changePercent: pctChange })
                       : "#A0AEC0",
                 }}
                 dir="ltr"

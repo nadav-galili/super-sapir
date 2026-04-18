@@ -1,39 +1,69 @@
-import { ScatterChart, Scatter, XAxis, YAxis, ZAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
-import { useNavigate } from '@tanstack/react-router'
-import { motion } from 'motion/react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { formatCurrencyShort } from '@/lib/format'
-import { getDeltaStatusColor } from '@/lib/colors'
-import type { CategorySummary } from '@/data/mock-categories'
+import {
+  ScatterChart,
+  Scatter,
+  XAxis,
+  YAxis,
+  ZAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Cell,
+} from "recharts";
+import { useNavigate } from "@tanstack/react-router";
+import { motion } from "motion/react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatCurrencyShort } from "@/lib/format";
+import { getGrowthColor } from "@/lib/kpi/resolvers";
+import type { CategorySummary } from "@/data/mock-categories";
 
 interface CategoryBubbleChartProps {
-  data: CategorySummary[]
+  data: CategorySummary[];
 }
 
 interface BubbleTooltipProps {
-  active?: boolean
-  payload?: Array<{ payload: CategorySummary & { z: number } }>
+  active?: boolean;
+  payload?: Array<{ payload: CategorySummary & { z: number } }>;
 }
 
 function CustomTooltip({ active, payload }: BubbleTooltipProps) {
-  if (!active || !payload?.[0]) return null
-  const d = payload[0].payload
+  if (!active || !payload?.[0]) return null;
+  const d = payload[0].payload;
   return (
-    <div className="bg-white rounded-[10px] border border-[#FFE8DE] p-3 shadow-sm" dir="rtl">
+    <div
+      className="bg-white rounded-[10px] border border-[#FFE8DE] p-3 shadow-sm"
+      dir="rtl"
+    >
       <p className="font-semibold text-[#2D3748] mb-1">{d.name}</p>
-      <p className="text-sm text-[#4A5568]">מכירות: <span className="font-mono" dir="ltr">{formatCurrencyShort(d.sales)}</span></p>
-      <p className="text-sm text-[#4A5568]">רווח גולמי: <span className="font-mono" dir="ltr">{d.grossMarginPercent}%</span></p>
-      <p className="text-sm" style={{ color: getDeltaStatusColor(d.yoyChange) }}>
-        צמיחה: <span className="font-mono" dir="ltr">{d.yoyChange > 0 ? '+' : ''}{d.yoyChange}%</span>
+      <p className="text-sm text-[#4A5568]">
+        מכירות:{" "}
+        <span className="font-mono" dir="ltr">
+          {formatCurrencyShort(d.sales)}
+        </span>
+      </p>
+      <p className="text-sm text-[#4A5568]">
+        רווח גולמי:{" "}
+        <span className="font-mono" dir="ltr">
+          {d.grossMarginPercent}%
+        </span>
+      </p>
+      <p
+        className="text-sm"
+        style={{ color: getGrowthColor({ changePercent: d.yoyChange }) }}
+      >
+        צמיחה:{" "}
+        <span className="font-mono" dir="ltr">
+          {d.yoyChange > 0 ? "+" : ""}
+          {d.yoyChange}%
+        </span>
       </p>
     </div>
-  )
+  );
 }
 
 export function CategoryBubbleChart({ data }: CategoryBubbleChartProps) {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
-  const chartData = data.map(d => ({
+  const chartData = data.map((d) => ({
     id: d.id,
     name: d.name,
     sales: d.sales,
@@ -42,8 +72,8 @@ export function CategoryBubbleChart({ data }: CategoryBubbleChartProps) {
     x: d.sales,
     y: d.grossMarginPercent,
     z: Math.max(Math.abs(d.yoyChange) * 80, 200),
-    color: getDeltaStatusColor(d.yoyChange),
-  }))
+    color: getGrowthColor({ changePercent: d.yoyChange }),
+  }));
 
   return (
     <motion.div
@@ -60,7 +90,9 @@ export function CategoryBubbleChart({ data }: CategoryBubbleChartProps) {
         <CardContent>
           <div dir="ltr" className="h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
-              <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+              <ScatterChart
+                margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
+              >
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                 <XAxis
                   type="number"
@@ -84,17 +116,28 @@ export function CategoryBubbleChart({ data }: CategoryBubbleChartProps) {
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   onClick={(entry: any) => {
                     if (entry?.id) {
-                      navigate({ to: '/category-manager/$categoryId', params: { categoryId: entry.id } })
+                      navigate({
+                        to: "/category-manager/$categoryId",
+                        params: { categoryId: entry.id },
+                      });
                     }
                   }}
                   cursor="pointer"
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   shape={(props: any) => {
-                    const { cx, cy, fill, payload } = props
-                    const r = Math.sqrt(payload.z) / 2
+                    const { cx, cy, fill, payload } = props;
+                    const r = Math.sqrt(payload.z) / 2;
                     return (
                       <g>
-                        <circle cx={cx} cy={cy} r={r} fill={fill} fillOpacity={0.7} stroke={fill} strokeWidth={1} />
+                        <circle
+                          cx={cx}
+                          cy={cy}
+                          r={r}
+                          fill={fill}
+                          fillOpacity={0.7}
+                          stroke={fill}
+                          strokeWidth={1}
+                        />
                         <text
                           x={cx}
                           y={cy - r - 6}
@@ -106,7 +149,7 @@ export function CategoryBubbleChart({ data }: CategoryBubbleChartProps) {
                           {payload.name}
                         </text>
                       </g>
-                    )
+                    );
                   }}
                 >
                   {chartData.map((entry) => (
@@ -125,5 +168,5 @@ export function CategoryBubbleChart({ data }: CategoryBubbleChartProps) {
         </CardContent>
       </Card>
     </motion.div>
-  )
+  );
 }

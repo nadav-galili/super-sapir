@@ -29,7 +29,7 @@ export function InventoryView({ report }: InventoryViewProps) {
             ),
       trendLabel: `יעד: ${ops.avgDaysOfInventory.target} ימים`,
       target: ops.avgDaysOfInventory.target,
-      lowerIsBetter: true,
+      domain: "cost",
     },
     {
       label: "פריטי מלאי גבוה",
@@ -38,7 +38,7 @@ export function InventoryView({ report }: InventoryViewProps) {
       trend: report.compliance.highInventory.met ? 0 : -11.7,
       trendLabel: `יעד: ${report.compliance.highInventory.target}`,
       target: report.compliance.highInventory.target,
-      lowerIsBetter: true,
+      domain: "cost",
     },
     {
       label: "חסרי פעילות",
@@ -47,7 +47,7 @@ export function InventoryView({ report }: InventoryViewProps) {
       trend: -report.compliance.missingActivities.deviation,
       trendLabel: `יעד: ${report.compliance.missingActivities.timeTarget}`,
       target: report.compliance.missingActivities.fixedTarget,
-      lowerIsBetter: true,
+      domain: "cost",
     },
   ];
 

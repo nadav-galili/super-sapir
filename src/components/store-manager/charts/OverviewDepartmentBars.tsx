@@ -3,7 +3,7 @@
 import { motion } from "motion/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { DepartmentSales } from "@/data/hadera-real";
-import { getDeltaStatusColor } from "@/lib/colors";
+import { getGrowthColor } from "@/lib/kpi/resolvers";
 import { BAR_GRADIENTS } from "./bar-gradients";
 
 export interface OverviewDepartmentBarsProps {
@@ -46,7 +46,9 @@ export function OverviewDepartmentBars({
             </span>
             <span
               className="text-[11px] w-14 text-left tabular-nums"
-              style={{ color: getDeltaStatusColor(dept.yoyChangePercent) }}
+              style={{
+                color: getGrowthColor({ changePercent: dept.yoyChangePercent }),
+              }}
               dir="ltr"
             >
               {dept.yoyChangePercent > 0

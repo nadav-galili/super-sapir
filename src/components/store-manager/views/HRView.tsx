@@ -36,7 +36,7 @@ export function HRView({ report }: HRViewProps) {
       trend: 0.9,
       trendLabel: `יעד: ${hr.salaryTarget}%`,
       target: hr.salaryTarget,
-      lowerIsBetter: true,
+      domain: "cost",
     },
     {
       label: "עלות שכר בש״ח",
@@ -51,7 +51,7 @@ export function HRView({ report }: HRViewProps) {
             ).toFixed(1)
           : 0,
       trendLabel: "",
-      lowerIsBetter: true,
+      domain: "cost",
     },
     {
       label: "תחלופה שנתית",
@@ -59,7 +59,7 @@ export function HRView({ report }: HRViewProps) {
       format: "number",
       trend: -2.3,
       trendLabel: `דירוג #${hr.turnoverRanking}`,
-      lowerIsBetter: true,
+      domain: "cost",
     },
   ];
   return (

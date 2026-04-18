@@ -1,34 +1,48 @@
-import { Check, HelpCircle } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { getKpiStatusColor } from '@/lib/colors'
-import { statusLabel, statusRatio, type PromoMetrics } from '@/lib/promo-simulator/calc'
-import type { ControlSlice, SliceSetter } from '@/lib/promo-simulator/state'
+import { Check, HelpCircle } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getProgressColor, getStatusColor } from "@/lib/kpi/resolvers";
+import { statusLabel, type PromoMetrics } from "@/lib/promo-simulator/calc";
+import type { ControlSlice, SliceSetter } from "@/lib/promo-simulator/state";
 
 interface Step7ControlProps {
-  control: ControlSlice
-  metrics: PromoMetrics
-  readinessCount: number
-  onChange: SliceSetter<ControlSlice>
+  control: ControlSlice;
+  metrics: PromoMetrics;
+  readinessCount: number;
+  onChange: SliceSetter<ControlSlice>;
 }
 
 const CHECKS: {
-  field: 'controlPrice' | 'controlStock' | 'controlDisplay'
-  label: string
+  field: "controlPrice" | "controlStock" | "controlDisplay";
+  label: string;
 }[] = [
-  { field: 'controlPrice', label: 'המחיר מוצג נכון' },
-  { field: 'controlStock', label: 'אין חוסר מלאי' },
-  { field: 'controlDisplay', label: 'יש נראות מספקת' },
-]
+  { field: "controlPrice", label: "המחיר מוצג נכון" },
+  { field: "controlStock", label: "אין חוסר מלאי" },
+  { field: "controlDisplay", label: "יש נראות מספקת" },
+];
 
-export function Step7Control({ control, metrics: m, readinessCount, onChange }: Step7ControlProps) {
-  const statusColor = getKpiStatusColor(statusRatio(m.status))
+export function Step7Control({
+  control,
+  metrics: m,
+  readinessCount,
+  onChange,
+}: Step7ControlProps) {
+  const statusColor = getStatusColor({
+    status:
+      m.status === "worthIt"
+        ? "green"
+        : m.status === "needsImprovement"
+          ? "yellow"
+          : "red",
+  });
   const pace = Math.min(
     100,
-    Math.round((m.promoUnits / Math.max(m.breakEvenUnits, 1)) * 100),
-  )
-  const paceFinite = Number.isFinite(pace) ? pace : 0
-  const paceColor = getKpiStatusColor(Math.min(paceFinite / 100, 1))
-  const readinessColor = getKpiStatusColor(readinessCount / 4)
+    Math.round((m.promoUnits / Math.max(m.breakEvenUnits, 1)) * 100)
+  );
+  const paceFinite = Number.isFinite(pace) ? pace : 0;
+  const paceColor = getProgressColor({ percent: paceFinite });
+  const readinessColor = getProgressColor({
+    percent: (readinessCount / 4) * 100,
+  });
 
   return (
     <div className="space-y-4">
@@ -42,7 +56,7 @@ export function Step7Control({ control, metrics: m, readinessCount, onChange }: 
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {CHECKS.map((c) => {
-              const checked = Boolean(control[c.field])
+              const checked = Boolean(control[c.field]);
               return (
                 <button
                   type="button"
@@ -51,43 +65,40 @@ export function Step7Control({ control, metrics: m, readinessCount, onChange }: 
                   className="text-right rounded-[16px] border-2 p-4 transition-all hover:-translate-y-0.5 flex items-center gap-3"
                   style={{
                     background: checked
-                      ? 'rgba(16, 185, 129, 0.06)'
-                      : '#FFFFFF',
-                    borderColor: checked ? '#10B981' : '#FFE8DE',
+                      ? "rgba(16, 185, 129, 0.06)"
+                      : "#FFFFFF",
+                    borderColor: checked ? "#10B981" : "#FFE8DE",
                   }}
                 >
                   <span
                     className="w-6 h-6 shrink-0 rounded-[6px] border-2 flex items-center justify-center transition-colors"
                     style={{
-                      background: checked ? '#10B981' : '#FFFFFF',
-                      borderColor: checked ? '#10B981' : '#A0AEC0',
+                      background: checked ? "#10B981" : "#FFFFFF",
+                      borderColor: checked ? "#10B981" : "#A0AEC0",
                     }}
                   >
                     {checked && (
-                      <Check
-                        className="w-4 h-4 text-white"
-                        strokeWidth={3}
-                      />
+                      <Check className="w-4 h-4 text-white" strokeWidth={3} />
                     )}
                   </span>
                   <p className="text-xl font-semibold text-[#2D3748]">
                     {c.label}
                   </p>
                 </button>
-              )
+              );
             })}
 
             <div
               className="rounded-[16px] border-2 p-4 flex items-start gap-3"
               style={{
-                borderColor: '#6C5CE7',
-                background: '#6C5CE70D',
+                borderColor: "#6C5CE7",
+                background: "#6C5CE70D",
               }}
             >
               <span
                 className="w-8 h-8 shrink-0 rounded-[10px] flex items-center justify-center"
                 style={{
-                  background: 'linear-gradient(135deg, #6C5CE7, #8B7FED)',
+                  background: "linear-gradient(135deg, #6C5CE7, #8B7FED)",
                 }}
               >
                 <HelpCircle className="w-4 h-4 text-white" />
@@ -128,7 +139,7 @@ export function Step7Control({ control, metrics: m, readinessCount, onChange }: 
         />
       </div>
     </div>
-  )
+  );
 }
 
 function KpiCard({
@@ -137,10 +148,10 @@ function KpiCard({
   sub,
   color,
 }: {
-  title: string
-  value: string
-  sub: string
-  color: string
+  title: string;
+  value: string;
+  sub: string;
+  color: string;
 }) {
   return (
     <Card className="border-[#FFE8DE] rounded-[16px]">
@@ -148,15 +159,11 @@ function KpiCard({
         <p className="text-[15px] font-medium text-[#A0AEC0] uppercase tracking-wide">
           {title}
         </p>
-        <p
-          className="text-3xl font-bold mt-1"
-          style={{ color }}
-          dir="ltr"
-        >
+        <p className="text-3xl font-bold mt-1" style={{ color }} dir="ltr">
           {value}
         </p>
         <p className="text-[15px] text-[#4A5568] mt-1">{sub}</p>
       </CardContent>
     </Card>
-  )
+  );
 }

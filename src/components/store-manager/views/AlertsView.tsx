@@ -17,7 +17,7 @@ export function AlertsView({ report }: AlertsViewProps) {
       trend: -10,
       trendLabel: `יעד: ${report.compliance.redAlerts.target}`,
       target: report.compliance.redAlerts.target,
-      lowerIsBetter: true,
+      domain: "cost",
     },
     {
       label: "חותמות אדומות",
@@ -26,7 +26,7 @@ export function AlertsView({ report }: AlertsViewProps) {
       trend: -report.compliance.redAlerts.rate,
       trendLabel: "",
       target: report.compliance.redAlerts.target,
-      lowerIsBetter: true,
+      domain: "cost",
     },
     {
       label: "דיווחי מוקד",

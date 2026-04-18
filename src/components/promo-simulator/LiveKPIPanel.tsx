@@ -1,48 +1,63 @@
-import { motion } from 'motion/react'
-import { Activity, TrendingUp, PiggyBank, Package } from 'lucide-react'
-import { getKpiStatusColor } from '@/lib/colors'
-import { formatCurrency } from '@/lib/format'
-import { statusLabel, statusRatio, type PromoMetrics } from '@/lib/promo-simulator/calc'
-import { useDebouncedValue } from '@/hooks/useDebouncedValue'
-import { NumberTicker } from '@/components/ui/number-ticker'
+import { motion } from "motion/react";
+import { Activity, TrendingUp, PiggyBank, Package } from "lucide-react";
+import {
+  getGrowthColor,
+  getPromotionColor,
+  getStatusColor,
+  getSupplyColor,
+} from "@/lib/kpi/resolvers";
+import { formatCurrency } from "@/lib/format";
+import { statusLabel, type PromoMetrics } from "@/lib/promo-simulator/calc";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { NumberTicker } from "@/components/ui/number-ticker";
 
 interface LiveKPIPanelProps {
-  metrics: PromoMetrics
+  metrics: PromoMetrics;
 }
 
 export function LiveKPIPanel({ metrics: m }: LiveKPIPanelProps) {
-  const statusColor = getKpiStatusColor(statusRatio(m.status))
-  const profitDelta = m.promoProfit - m.baseProfit
-  const coverageRatio = Math.min(m.stockCoverage / 100, 1)
-  const coverageColor = getKpiStatusColor(coverageRatio)
-  const roiColor = getKpiStatusColor(m.roi >= 0 ? 1 : 0.5)
-  const profitColor = getKpiStatusColor(profitDelta >= 0 ? 1 : 0.5)
+  const statusColor = getStatusColor({
+    status:
+      m.status === "worthIt"
+        ? "green"
+        : m.status === "needsImprovement"
+          ? "yellow"
+          : "red",
+  });
+  const profitDelta = m.promoProfit - m.baseProfit;
+  const coverageColor = getSupplyColor({ ratePercent: m.stockCoverage });
+  const roiColor = getPromotionColor({ roiPercent: m.roi });
+  const profitColor = getGrowthColor({
+    changePercent: profitDelta >= 0 ? 100 : -100,
+  });
 
   // Debounce raw metric values by ~250ms so rapid slider drags settle to a
   // single ticker animation toward the final value, not a chase of intermediates.
-  const roiTarget = useDebouncedValue(m.roi, 250)
-  const profitTarget = useDebouncedValue(profitDelta, 250)
-  const coverageTarget = useDebouncedValue(m.stockCoverage, 250)
+  const roiTarget = useDebouncedValue(m.roi, 250);
+  const profitTarget = useDebouncedValue(profitDelta, 250);
+  const coverageTarget = useDebouncedValue(m.stockCoverage, 250);
 
   return (
     <motion.div
       initial={{ opacity: 0, x: -12 }}
       animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.4, ease: 'easeOut' }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
       className="lg:sticky lg:top-[120px]"
     >
       <div className="rounded-[16px] border border-[#FFE8DE] bg-white shadow-sm overflow-hidden">
         <div
           className="h-1 w-full"
           style={{
-            background: 'linear-gradient(90deg, #DC4E59, #E8777F)',
+            background: "linear-gradient(90deg, #DC4E59, #E8777F)",
           }}
         />
         <div className="p-5 space-y-4">
           <div className="flex items-center gap-2">
             <span
               className="w-7 h-7 rounded-[10px] flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, #DC4E59, #E8777F)' }}
+              style={{
+                background: "linear-gradient(135deg, #DC4E59, #E8777F)",
+              }}
             >
               <Activity className="w-4 h-4 text-white" />
             </span>
@@ -71,7 +86,7 @@ export function LiveKPIPanel({ metrics: m }: LiveKPIPanelProps) {
             >
               <NumberTicker
                 value={profitTarget}
-                format={(n) => `${n >= 0 ? '+' : ''}${formatCurrency(n)}`}
+                format={(n) => `${n >= 0 ? "+" : ""}${formatCurrency(n)}`}
               />
             </Row>
             <Row
@@ -85,7 +100,7 @@ export function LiveKPIPanel({ metrics: m }: LiveKPIPanelProps) {
         </div>
       </div>
     </motion.div>
-  )
+  );
 }
 
 function Row({
@@ -94,10 +109,10 @@ function Row({
   color,
   children,
 }: {
-  icon: React.ReactNode
-  label: string
-  color: string
-  children: React.ReactNode
+  icon: React.ReactNode;
+  label: string;
+  color: string;
+  children: React.ReactNode;
 }) {
   return (
     <div className="flex items-center justify-between gap-3 rounded-[10px] bg-[#FDF8F6] px-3 py-2.5">
@@ -105,13 +120,9 @@ function Row({
         <span style={{ color }}>{icon}</span>
         {label}
       </span>
-      <span
-        className="text-xl font-mono font-bold"
-        style={{ color }}
-        dir="ltr"
-      >
+      <span className="text-xl font-mono font-bold" style={{ color }} dir="ltr">
         {children}
       </span>
     </div>
-  )
+  );
 }

@@ -4,7 +4,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { BranchFullReport } from "@/data/hadera-real";
 import { WORKING_DAYS_PER_MONTH } from "@/data/constants";
-import { getDeltaStatusColor } from "@/lib/colors";
+import { getGrowthColor } from "@/lib/kpi/resolvers";
 import { MiniStatTile } from "../MiniStatTile";
 
 const PRODUCTIVITY_BASELINE = 420;
@@ -84,7 +84,9 @@ export function BranchPerformanceCard({ report }: BranchPerformanceCardProps) {
                 item.change !== null ? (
                   <span
                     className="text-xs font-semibold"
-                    style={{ color: getDeltaStatusColor(item.change) }}
+                    style={{
+                      color: getGrowthColor({ changePercent: item.change }),
+                    }}
                     dir="ltr"
                   >
                     {item.change > 0 ? "▲" : "▼"}

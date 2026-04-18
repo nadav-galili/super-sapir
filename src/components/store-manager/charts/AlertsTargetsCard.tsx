@@ -1,10 +1,11 @@
 // Overview: alerts & targets — 8 KPIs each rendered as a progress bar
-// with a target-line overlay. Status color/legend comes from the shared
-// `getTargetStatusColor` utility so every bar uses the same thresholds.
+// with a target-line overlay. Each row declares its domain (sales =
+// higher-is-better, cost = lower-is-better) so the right resolver from
+// `@/lib/kpi/resolvers` is picked — no direction flags at call sites.
 import { motion } from "motion/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { BranchFullReport } from "@/data/hadera-real";
-import { getTargetStatusColor } from "@/lib/colors";
+import { getCostColor, getSalesColor } from "@/lib/kpi/resolvers";
 
 export interface AlertsTargetsCardProps {
   report: BranchFullReport;
@@ -14,7 +15,7 @@ interface KpiRow {
   label: string;
   actual: number;
   target: number;
-  lowerIsBetter?: boolean;
+  domain: "sales" | "cost";
 }
 
 export function AlertsTargetsCard({ report }: AlertsTargetsCardProps) {
@@ -23,48 +24,49 @@ export function AlertsTargetsCard({ report }: AlertsTargetsCardProps) {
       label: "אחוז עלות שכר",
       actual: report.hr.salaryCostPercent,
       target: report.hr.salaryTarget,
-      lowerIsBetter: true,
+      domain: "cost",
     },
     {
       label: "Eyedo משימות",
       actual: report.operations.qualityScore.current,
       target: report.operations.qualityScore.target,
+      domain: "sales",
     },
     {
       label: "מלאי גבוה",
       actual: report.compliance.highInventory.actual,
       target: report.compliance.highInventory.target,
-      lowerIsBetter: true,
+      domain: "cost",
     },
     {
       label: "חותמות אדומות",
       actual: report.compliance.redAlerts.redSubscriptions,
       target: report.compliance.redAlerts.target,
-      lowerIsBetter: true,
+      domain: "cost",
     },
     {
       label: "חסרי פעילות",
       actual: report.compliance.missingActivities.actual,
       target: report.compliance.missingActivities.fixedTarget,
-      lowerIsBetter: true,
+      domain: "cost",
     },
     {
       label: "חזרות",
       actual: report.compliance.returns.actual,
       target: report.compliance.returns.target,
-      lowerIsBetter: true,
+      domain: "cost",
     },
     {
       label: "פחת בשר %",
       actual: report.operations.meatWaste,
       target: 5,
-      lowerIsBetter: true,
+      domain: "cost",
     },
     {
       label: "תלונות לקוח",
       actual: report.operations.customerComplaints.current,
       target: report.operations.customerComplaints.target,
-      lowerIsBetter: true,
+      domain: "cost",
     },
   ];
 
@@ -89,9 +91,10 @@ export function AlertsTargetsCard({ report }: AlertsTargetsCardProps) {
       </CardHeader>
       <CardContent className="space-y-3">
         {kpis.map((kpi, i) => {
-          const statusColor = getTargetStatusColor(kpi.actual, kpi.target, {
-            lowerIsBetter: kpi.lowerIsBetter,
-          });
+          const statusColor =
+            kpi.domain === "cost"
+              ? getCostColor({ actual: kpi.actual, target: kpi.target })
+              : getSalesColor({ actual: kpi.actual, target: kpi.target });
           const rawMax = Math.max(kpi.actual, kpi.target);
           const maxVal = rawMax > 0 ? rawMax * 1.15 : 1;
           const actualPct = (kpi.actual / maxVal) * 100;

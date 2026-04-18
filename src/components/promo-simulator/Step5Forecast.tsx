@@ -1,28 +1,39 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { formatCurrency, formatNumber } from '@/lib/format'
-import { getKpiStatusColor, KPI_STATUS } from '@/lib/colors'
-import { UpliftChart } from './UpliftChart'
-import type { PromoMetrics } from '@/lib/promo-simulator/calc'
-import type { ForecastSlice, SliceSetter } from '@/lib/promo-simulator/state'
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatCurrency, formatNumber } from "@/lib/format";
+import { KPI_STATUS } from "@/lib/colors";
+import {
+  getPromotionColor,
+  getSalesColor,
+  getSupplyColor,
+  getUpliftColor,
+} from "@/lib/kpi/resolvers";
+import { UpliftChart } from "./UpliftChart";
+import type { PromoMetrics } from "@/lib/promo-simulator/calc";
+import type { ForecastSlice, SliceSetter } from "@/lib/promo-simulator/state";
 
 interface Step5ForecastProps {
-  forecast: ForecastSlice
-  metrics: PromoMetrics
-  onChange: SliceSetter<ForecastSlice>
+  forecast: ForecastSlice;
+  metrics: PromoMetrics;
+  onChange: SliceSetter<ForecastSlice>;
 }
 
-const LABEL = 'text-[15px] font-medium text-[#4A5568] mb-1.5 block'
+const LABEL = "text-[15px] font-medium text-[#4A5568] mb-1.5 block";
 const INPUT_CLS =
-  'flex h-10 w-full items-center rounded-[10px] border border-[#FFE8DE] bg-white px-3 py-2 text-[16px] text-[#2D3748] shadow-sm transition-colors hover:bg-[#FDF8F6] focus:outline-none focus:ring-2 focus:ring-[#DC4E59]/20 focus:border-[#DC4E59]/40 font-mono'
+  "flex h-10 w-full items-center rounded-[10px] border border-[#FFE8DE] bg-white px-3 py-2 text-[16px] text-[#2D3748] shadow-sm transition-colors hover:bg-[#FDF8F6] focus:outline-none focus:ring-2 focus:ring-[#DC4E59]/20 focus:border-[#DC4E59]/40 font-mono";
 
 interface KpiCardProps {
-  title: string
-  value: string
-  sub: string
-  accent?: string
+  title: string;
+  value: string;
+  sub: string;
+  accent?: string;
 }
 
-function KpiCard({ title, value, sub, accent = KPI_STATUS.good }: KpiCardProps) {
+function KpiCard({
+  title,
+  value,
+  sub,
+  accent = KPI_STATUS.good,
+}: KpiCardProps) {
   return (
     <Card className="border-[#FFE8DE] rounded-[16px]">
       <CardContent className="p-5 min-w-0">
@@ -36,37 +47,46 @@ function KpiCard({ title, value, sub, accent = KPI_STATUS.good }: KpiCardProps) 
         >
           {value}
         </p>
-        <p className="text-[15px] text-[#4A5568] mt-1 whitespace-nowrap truncate" dir="ltr">
+        <p
+          className="text-[15px] text-[#4A5568] mt-1 whitespace-nowrap truncate"
+          dir="ltr"
+        >
           {sub}
         </p>
       </CardContent>
     </Card>
-  )
+  );
 }
 
-export function Step5Forecast({ forecast, metrics: m, onChange }: Step5ForecastProps) {
+export function Step5Forecast({
+  forecast,
+  metrics: m,
+  onChange,
+}: Step5ForecastProps) {
   const breakEvenStr = Number.isFinite(m.breakEvenUnits)
     ? formatNumber(m.breakEvenUnits)
-    : '—'
-  const coverageColor = getKpiStatusColor(Math.min(m.stockCoverage / 100, 1))
-  const roiColor =
-    m.roi >= 15 ? KPI_STATUS.good : m.roi >= 0 ? KPI_STATUS.warning : KPI_STATUS.bad
-  const revenueColor = getKpiStatusColor(
-    m.baseRevenue > 0 ? m.promoRevenue / m.baseRevenue : 1
-  )
-  const profitColor = getKpiStatusColor(
-    m.baseProfit > 0 ? m.promoProfit / m.baseProfit : m.promoProfit > 0 ? 1 : 0.5
-  )
-  const upliftColor = getKpiStatusColor(
-    forecast.upliftPct >= 15 ? 1 : forecast.upliftPct >= 5 ? 0.9 : 0.7
-  )
+    : "—";
+  const coverageColor = getSupplyColor({ ratePercent: m.stockCoverage });
+  const roiColor = getPromotionColor({ roiPercent: m.roi });
+  const revenueColor = getSalesColor({
+    actual: m.promoRevenue,
+    target: m.baseRevenue,
+  });
+  const profitColor =
+    m.baseProfit > 0
+      ? getSalesColor({ actual: m.promoProfit, target: m.baseProfit })
+      : m.promoProfit > 0
+        ? KPI_STATUS.good
+        : KPI_STATUS.bad;
+  const upliftColor = getUpliftColor({ upliftPercent: forecast.upliftPct });
   const breakEvenColor = Number.isFinite(m.breakEvenUnits)
-    ? getKpiStatusColor(
-        m.breakEvenUnits > 0 && m.promoUnits > 0
-          ? Math.min(m.promoUnits / m.breakEvenUnits, 2)
-          : 0.5
-      )
-    : KPI_STATUS.bad
+    ? m.breakEvenUnits > 0 && m.promoUnits > 0
+      ? getSalesColor({
+          actual: m.promoUnits,
+          target: m.breakEvenUnits,
+        })
+      : KPI_STATUS.bad
+    : KPI_STATUS.bad;
 
   return (
     <div className="space-y-4">
@@ -138,7 +158,7 @@ export function Step5Forecast({ forecast, metrics: m, onChange }: Step5ForecastP
                 </label>
                 <span
                   className="text-xl font-mono font-bold"
-                  style={{ color: '#DC4E59' }}
+                  style={{ color: "#DC4E59" }}
                   dir="ltr"
                 >
                   {forecast.upliftPct}%
@@ -222,5 +242,5 @@ export function Step5Forecast({ forecast, metrics: m, onChange }: Step5ForecastP
 
       <UpliftChart metrics={m} durationWeeks={forecast.durationWeeks} />
     </div>
-  )
+  );
 }

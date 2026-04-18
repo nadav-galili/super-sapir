@@ -8,6 +8,22 @@
 
 ## 2026-04-18
 
+### Domain-typed KPI color resolvers (#40)
+
+- Replaced the four generic color helpers (`getKpiStatusColor`, `getTargetStatusColor`, `getDeltaStatusColor`, `getMarginColor`) with one resolver per KPI domain. Thresholds and direction now live inside the resolver whose name matches the KPI's meaning; call sites no longer pass `lowerIsBetter` or `deadBand` flags.
+- New `src/lib/kpi/` module:
+  - `types.ts` — input shapes: `SalesKPI`, `CostKPI`, `QualityKPI`, `MarginKPI`, `SupplyKPI`, `BasketKPI`, `PromotionKPI`, `GrowthKPI`, `CostDeltaKPI`, `ProgressKPI`, `UpliftKPI`, `StatusKPI`.
+  - `resolvers.ts` — `getSalesColor`, `getCostColor`, `getQualityColor`, `getMarginColor`, `getSupplyColor`, `getPromotionColor`, `getUpliftColor`, `getProgressColor`, `getGrowthColor`, `getBasketColor`, `getCostDeltaColor`, `getStatusColor`. Each returns a color from the shared `KPI_STATUS` palette (or `PALETTE.muted` for a zero target).
+  - `resolvers.test.ts` — 35 tests covering every threshold boundary per domain.
+- `src/lib/colors.ts` trimmed to just the design-system constants (`KPI_STATUS`, `PALETTE`, `CHART_COLORS`, `GRADIENT_PRESETS`). The old `colors.test.ts` is gone — its coverage moved to `resolvers.test.ts`.
+- `KPICardData` swapped its `lowerIsBetter?: boolean` field for a `domain?: 'sales' | 'cost'` discriminator; `KPICard` routes internally to `getSalesColor` + `getGrowthColor` (default) or `getCostColor` + `getCostDeltaColor`. All KPI-card callers updated.
+- `AlertsTargetsCard` rows swapped `lowerIsBetter` flags for a `domain: 'sales' | 'cost'` field on each row.
+- `BigGauge` in `HeroBanner` and `DarkGauge` in `KPIGaugeRow` now accept `{ actual, target }` instead of a pre-computed ratio, so the gauge color stays in sync with a single domain resolver.
+- Promo-simulator: `LiveKPIPanel`, `Step5Forecast`, `Step7Control` migrated. `statusRatio(PromoStatus)` helper in `calc.ts` removed — status now maps directly to `getStatusColor({ status: 'green' | 'yellow' | 'red' })`.
+- `CLAUDE.md` Design System section updated — "KPI status colors must come from a domain-typed resolver in `src/lib/kpi/resolvers.ts`" (replaces the old pointer to `getKpiStatusColor`).
+- All 130 vitest tests pass; `tsc --noEmit` clean; `bun run build` clean; lint count unchanged at 39 errors + 3 warnings (same baseline as post-#39).
+- **Files:** `src/lib/kpi/types.ts`, `src/lib/kpi/resolvers.ts`, `src/lib/kpi/resolvers.test.ts` (new); `src/lib/colors.ts` (trimmed), `src/lib/colors.test.ts` (deleted); `src/data/types.ts` (KPICardData); `src/components/dashboard/{HeroBanner,KPIGaugeRow,FormatsOverview,KPICard,CategoryDonut,CategorySpotlight,HeroItemCards}.tsx`; `src/components/charts/{CategoryBubbleChart,DepartmentBarChart,QualityGauge}.tsx`; `src/components/tables/BranchRankingTable.tsx`; `src/components/map/BranchMarker.tsx`; `src/components/store-manager/TargetBars.tsx`; `src/components/store-manager/charts/{AlertsTargetsCard,OverviewDepartmentBars,OverviewExpenseTable,BranchPerformanceCard}.tsx`; `src/components/promo-simulator/{LiveKPIPanel,Step5Forecast,Step7Control}.tsx`; `src/lib/promo-simulator/calc.ts`; `src/routes/category-manager/$categoryId.tsx`; `src/components/store-manager/views/{HRView,AlertsView,InventoryView}.tsx`; `CLAUDE.md`.
+
 ### AI engine deepening — Ports & Adapters + useAIInsight (#39)
 
 - Three per-surface hooks (`useAIAnalysis`, `useCategoryAIAnalysis`, `useChainAIAnalysis`) collapsed into one generic `useAIInsight(build, options?)`. Each surface now calls a small builder (`buildStoreInsight`, `buildCategoryInsight`, `buildChainInsight`) to produce an `AIBuildResult<TPayload>` — cache key + payload + system prompt + user prompt — and hands that to the hook. Zero duplicated SSE-parsing, cache-management or AbortController lifecycle left.
