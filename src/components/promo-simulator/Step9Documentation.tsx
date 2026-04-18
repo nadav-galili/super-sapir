@@ -1,12 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { calcMetrics, statusLabel } from '@/lib/promo-simulator/calc'
+import { statusLabel, type PromoMetrics } from '@/lib/promo-simulator/calc'
 import { formatCurrency } from '@/lib/format'
 import { PromoSummaryCard } from './PromoSummaryCard'
 import type { SimulatorState } from '@/lib/promo-simulator/state'
 
 interface Step9DocumentationProps {
   state: SimulatorState
-  onChange: (update: Partial<SimulatorState>) => void
+  metrics: PromoMetrics
+  onChange: (update: Partial<Pick<SimulatorState, 'documentation'>>) => void
 }
 
 const TABLE_HEADERS = [
@@ -23,9 +24,9 @@ const TABLE_HEADERS = [
 
 export function Step9Documentation({
   state,
+  metrics: m,
   onChange,
 }: Step9DocumentationProps) {
-  const m = calcMetrics(state)
   const benefitMeaning = state.conditionText || state.benefitText
     ? `${statusLabel(m.status)} · רווח ${formatCurrency(m.promoProfit)}`
     : '—'
@@ -74,7 +75,7 @@ export function Step9Documentation({
           </CardContent>
         </Card>
 
-        <PromoSummaryCard state={state} />
+        <PromoSummaryCard state={state} metrics={m} />
       </div>
 
       <Card className="border-[#FFE8DE] rounded-[16px]">

@@ -9,16 +9,12 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { getCategorySummaries } from '@/data/mock-categories'
-import {
-  SALES_ARENAS,
-  SEGMENTS,
-  DURATION_WEEKS_OPTIONS,
-} from '@/lib/promo-simulator/taxonomy'
-import type { SimulatorState } from '@/lib/promo-simulator/state'
+import { usePromoTaxonomy } from '@/contexts/PromoTaxonomyContext'
+import type { BriefSlice, SliceSetter } from '@/lib/promo-simulator/state'
 
 interface Step1BriefProps {
-  state: SimulatorState
-  onChange: (update: Partial<SimulatorState>) => void
+  brief: BriefSlice
+  onChange: SliceSetter<BriefSlice>
 }
 
 const LABEL =
@@ -56,8 +52,9 @@ function InfoCard({
   )
 }
 
-export function Step1Brief({ state, onChange }: Step1BriefProps) {
+export function Step1Brief({ brief, onChange }: Step1BriefProps) {
   const categories = useMemo(() => getCategorySummaries(), [])
+  const { segments, salesArenas, durationWeeksOptions } = usePromoTaxonomy()
 
   return (
     <div className="space-y-6">
@@ -77,7 +74,7 @@ export function Step1Brief({ state, onChange }: Step1BriefProps) {
                 קטגוריה
               </label>
               <Select
-                value={state.category}
+                value={brief.category}
                 onValueChange={(v) => onChange({ category: v })}
               >
                 <SelectTrigger id="f-category" className="text-[16px]">
@@ -102,16 +99,16 @@ export function Step1Brief({ state, onChange }: Step1BriefProps) {
                 סגמנט
               </label>
               <Select
-                value={state.segment || undefined}
+                value={brief.segment || undefined}
                 onValueChange={(v) =>
-                  onChange({ segment: v as SimulatorState['segment'] })
+                  onChange({ segment: v as BriefSlice['segment'] })
                 }
               >
                 <SelectTrigger id="f-segment" className="text-[16px]">
                   <SelectValue placeholder="בחר סגמנט" />
                 </SelectTrigger>
                 <SelectContent>
-                  {SEGMENTS.map((s) => (
+                  {segments.map((s) => (
                     <SelectItem key={s} value={s} className="text-[16px]">
                       {s}
                     </SelectItem>
@@ -127,7 +124,7 @@ export function Step1Brief({ state, onChange }: Step1BriefProps) {
               <input
                 id="f-product"
                 type="text"
-                value={state.product}
+                value={brief.product}
                 onChange={(e) => onChange({ product: e.target.value })}
                 placeholder="שם המוצר"
                 className={INPUT_CLS}
@@ -139,16 +136,16 @@ export function Step1Brief({ state, onChange }: Step1BriefProps) {
                 זירה
               </label>
               <Select
-                value={state.salesArena || undefined}
+                value={brief.salesArena || undefined}
                 onValueChange={(v) =>
-                  onChange({ salesArena: v as SimulatorState['salesArena'] })
+                  onChange({ salesArena: v as BriefSlice['salesArena'] })
                 }
               >
                 <SelectTrigger id="f-arena" className="text-[16px]">
                   <SelectValue placeholder="בחר זירה" />
                 </SelectTrigger>
                 <SelectContent>
-                  {SALES_ARENAS.map((s) => (
+                  {salesArenas.map((s) => (
                     <SelectItem key={s} value={s} className="text-[16px]">
                       {s}
                     </SelectItem>
@@ -164,7 +161,7 @@ export function Step1Brief({ state, onChange }: Step1BriefProps) {
               <input
                 id="f-retailer"
                 type="text"
-                value={state.retailer}
+                value={brief.retailer}
                 onChange={(e) => onChange({ retailer: e.target.value })}
                 className={INPUT_CLS}
               />
@@ -177,7 +174,7 @@ export function Step1Brief({ state, onChange }: Step1BriefProps) {
               <input
                 id="f-start"
                 type="date"
-                value={state.startDate}
+                value={brief.startDate}
                 onChange={(e) => onChange({ startDate: e.target.value })}
                 className={INPUT_CLS}
                 dir="ltr"
@@ -189,14 +186,14 @@ export function Step1Brief({ state, onChange }: Step1BriefProps) {
                 משך מבצע
               </label>
               <Select
-                value={String(state.durationWeeks)}
+                value={String(brief.durationWeeks)}
                 onValueChange={(v) => onChange({ durationWeeks: Number(v) })}
               >
                 <SelectTrigger id="f-duration" className="text-[16px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {DURATION_WEEKS_OPTIONS.map((o) => (
+                  {durationWeeksOptions.map((o) => (
                     <SelectItem
                       key={o.value}
                       value={String(o.value)}
@@ -216,7 +213,7 @@ export function Step1Brief({ state, onChange }: Step1BriefProps) {
               <input
                 id="f-owner"
                 type="text"
-                value={state.salesOwner}
+                value={brief.salesOwner}
                 onChange={(e) => onChange({ salesOwner: e.target.value })}
                 placeholder="שם האחראי"
                 className={INPUT_CLS}

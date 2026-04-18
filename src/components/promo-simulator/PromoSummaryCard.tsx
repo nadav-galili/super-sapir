@@ -1,10 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { calcMetrics, statusLabel } from '@/lib/promo-simulator/calc'
+import { statusLabel, type PromoMetrics } from '@/lib/promo-simulator/calc'
 import { formatCurrency } from '@/lib/format'
 import type { SimulatorState } from '@/lib/promo-simulator/state'
 
 interface PromoSummaryCardProps {
   state: SimulatorState
+  metrics: PromoMetrics
 }
 
 function Row({ label, value }: { label: string; value: string }) {
@@ -18,8 +19,7 @@ function Row({ label, value }: { label: string; value: string }) {
   )
 }
 
-export function PromoSummaryCard({ state }: PromoSummaryCardProps) {
-  const m = calcMetrics(state)
+export function PromoSummaryCard({ state, metrics: m }: PromoSummaryCardProps) {
   const conditionBenefit = [state.conditionText, state.benefitText]
     .filter(Boolean)
     .join(' → ')

@@ -8,6 +8,15 @@
 
 ## 2026-04-18
 
+### Promo Simulator — usePromoSimulator hook + taxonomy context (#36)
+- New `usePromoSimulator(search)` hook owns the full state boundary: URL search-param codec, defaults (incl. top-selling category pre-fill), memoized `metrics` (via `calcMetrics`) and `narrative` (via `narrativeFor`), and actions (`jumpToStep`, `goBack`, `goNext`, `restart`, `resetStep`, `finish`). Step components no longer call `calcMetrics` / `narrativeFor` directly.
+- New `PromoTaxonomyContext` exposes goals, promo types, segments, sales arenas, duration options, and step metadata as a single provided value at the route root, so step components consume what they need via `usePromoTaxonomy()`.
+- `src/lib/promo-simulator/state.ts` gained scoped slice types (`BriefSlice`, `TermsSlice`, `ForecastSlice`, `ImplementationSlice`, `ControlSlice`) and `SliceSetter<T>` — each step now receives only the slice it needs plus a typed setter, instead of the full `SimulatorState`.
+- `LiveKPIPanel` / `AINarrative` / `UpliftChart` / `PromoSummaryCard` / `PromoFullReport` / `SuccessScreen` rewired to receive `metrics` / `paragraphs` as props rather than recomputing from state.
+- `src/routes/category-manager/promo-simulator.tsx` trimmed to a thin orchestrator that wires the hook + context provider, threads scoped slices into each step, and owns navigation chrome.
+- Added `src/hooks/usePromoSimulator.test.ts` (boundary contract via pure codec / metrics / narrative / step-jump) and `src/lib/promo-simulator/narrative.test.ts` (goal templates, discount thresholds, status interpretation).
+- **Files:** `src/hooks/usePromoSimulator.ts` (new), `src/hooks/usePromoSimulator.test.ts` (new), `src/contexts/PromoTaxonomyContext.tsx` (new), `src/lib/promo-simulator/narrative.test.ts` (new), `src/lib/promo-simulator/state.ts`, `src/routes/category-manager/promo-simulator.tsx`, all nine `Step*.tsx` under `src/components/promo-simulator/`, plus `LiveKPIPanel.tsx`, `AINarrative.tsx`, `UpliftChart.tsx`, `PromoSummaryCard.tsx`, `PromoFullReport.tsx`, `SuccessScreen.tsx`
+
 ### Promo simulator polish — Magic UI primitives
 - Added 4 Magic UI primitives under `src/components/ui/`: `number-ticker`, `border-beam`, `confetti`, `shimmer-button`. All are single-file, palette-aware, and respect `useReducedMotion`.
 - `LiveKPIPanel` numeric values (ROI %, profit-vs-base ₪, stock coverage %) replaced with `<NumberTicker>` wrapped in `dir="ltr"` rows; debounced 250ms upstream so slider drags settle to one ticker animation toward the final value.

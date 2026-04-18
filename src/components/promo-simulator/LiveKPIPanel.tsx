@@ -2,17 +2,15 @@ import { motion } from 'motion/react'
 import { Activity, TrendingUp, PiggyBank, Package } from 'lucide-react'
 import { getKpiStatusColor } from '@/lib/colors'
 import { formatCurrency } from '@/lib/format'
-import { calcMetrics, statusLabel, statusRatio } from '@/lib/promo-simulator/calc'
-import type { SimulatorState } from '@/lib/promo-simulator/state'
+import { statusLabel, statusRatio, type PromoMetrics } from '@/lib/promo-simulator/calc'
 import { useDebouncedValue } from '@/hooks/useDebouncedValue'
 import { NumberTicker } from '@/components/ui/number-ticker'
 
 interface LiveKPIPanelProps {
-  state: SimulatorState
+  metrics: PromoMetrics
 }
 
-export function LiveKPIPanel({ state }: LiveKPIPanelProps) {
-  const m = calcMetrics(state)
+export function LiveKPIPanel({ metrics: m }: LiveKPIPanelProps) {
   const statusColor = getKpiStatusColor(statusRatio(m.status))
   const profitDelta = m.promoProfit - m.baseProfit
   const coverageRatio = Math.min(m.stockCoverage / 100, 1)

@@ -1,12 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { calcMetrics, statusLabel } from '@/lib/promo-simulator/calc'
+import { statusLabel, type PromoMetrics, type PromoStatus } from '@/lib/promo-simulator/calc'
 import { formatCurrency, formatNumber } from '@/lib/format'
 import type { SimulatorState } from '@/lib/promo-simulator/state'
-import type { PromoStatus } from '@/lib/promo-simulator/calc'
 
 interface Step8AnalysisProps {
-  state: SimulatorState
-  onChange: (update: Partial<SimulatorState>) => void
+  analysisNote: string
+  metrics: PromoMetrics
+  onChange: (update: Partial<Pick<SimulatorState, 'analysisNote'>>) => void
 }
 
 const STATUS_BADGE: Record<
@@ -77,8 +77,7 @@ function MetricCard({
   )
 }
 
-export function Step8Analysis({ state, onChange }: Step8AnalysisProps) {
-  const m = calcMetrics(state)
+export function Step8Analysis({ analysisNote, metrics: m, onChange }: Step8AnalysisProps) {
   const profitDelta = m.promoProfit - m.baseProfit
   const breakEvenDelta = Number.isFinite(m.breakEvenUnits)
     ? m.promoUnits - m.breakEvenUnits
@@ -145,7 +144,7 @@ export function Step8Analysis({ state, onChange }: Step8AnalysisProps) {
             </label>
             <textarea
               id="analysis-note"
-              value={state.analysisNote}
+              value={analysisNote}
               onChange={(e) => onChange({ analysisNote: e.target.value })}
               placeholder="כתוב כאן את ההערכה שלך — למשל: האם המבצע מאזן בין גידול נפח לרווחיות? מה הסיכונים? מה נדרש כדי לעבור לסטטוס 'כדאי'?"
               className="w-full min-h-[260px] rounded-[10px] border border-[#FFE8DE] bg-white p-4 text-[16px] text-[#2D3748] shadow-sm transition-colors hover:bg-[#FDF8F6] focus:outline-none focus:ring-2 focus:ring-[#DC4E59]/20 focus:border-[#DC4E59]/40 leading-relaxed resize-y"

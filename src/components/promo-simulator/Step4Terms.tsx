@@ -1,29 +1,27 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { promoDetails } from '@/lib/promo-simulator/taxonomy'
-import { calcMetrics } from '@/lib/promo-simulator/calc'
+import { usePromoTaxonomy } from '@/contexts/PromoTaxonomyContext'
 import { formatCurrency } from '@/lib/format'
-import type { SimulatorState } from '@/lib/promo-simulator/state'
+import type { PromoMetrics } from '@/lib/promo-simulator/calc'
+import type { SliceSetter, TermsSlice } from '@/lib/promo-simulator/state'
 
 interface Step4TermsProps {
-  state: SimulatorState
-  onChange: (update: Partial<SimulatorState>) => void
+  terms: TermsSlice
+  metrics: PromoMetrics
+  onChange: SliceSetter<TermsSlice>
 }
 
 const LABEL = 'text-[15px] font-medium text-[#4A5568] mb-1.5 block'
 const INPUT_CLS =
   'flex h-10 w-full items-center rounded-[10px] border border-[#FFE8DE] bg-white px-3 py-2 text-[16px] text-[#2D3748] shadow-sm transition-colors hover:bg-[#FDF8F6] focus:outline-none focus:ring-2 focus:ring-[#DC4E59]/20 focus:border-[#DC4E59]/40'
 
-export function Step4Terms({ state, onChange }: Step4TermsProps) {
-  const details = state.promoType
-    ? promoDetails[state.promoType]
-    : undefined
+export function Step4Terms({ terms, metrics: m, onChange }: Step4TermsProps) {
+  const { promoDetails } = usePromoTaxonomy()
+  const details = terms.promoType ? promoDetails[terms.promoType] : undefined
 
   const conditionLabel = details?.conditionLabel ?? 'תנאי'
   const conditionPlaceholder = details?.conditionPlaceholder ?? 'למשל: ביחידה בודדת'
   const benefitLabel = details?.benefitLabel ?? 'הטבה'
   const benefitPlaceholder = details?.benefitPlaceholder ?? 'למשל: 25% הנחה'
-
-  const m = calcMetrics(state)
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -40,7 +38,7 @@ export function Step4Terms({ state, onChange }: Step4TermsProps) {
             <div
               className="flex h-10 w-full items-center rounded-[10px] border border-[#FFE8DE] bg-[#FDF8F6] px-3 text-[16px] text-[#2D3748]"
             >
-              {state.promoType || (
+              {terms.promoType || (
                 <span className="text-[#A0AEC0]">טרם נבחר</span>
               )}
             </div>
@@ -53,7 +51,7 @@ export function Step4Terms({ state, onChange }: Step4TermsProps) {
             <input
               id="f-condition"
               type="text"
-              value={state.conditionText}
+              value={terms.conditionText}
               onChange={(e) => onChange({ conditionText: e.target.value })}
               placeholder={conditionPlaceholder}
               className={INPUT_CLS}
@@ -67,7 +65,7 @@ export function Step4Terms({ state, onChange }: Step4TermsProps) {
             <input
               id="f-benefit"
               type="text"
-              value={state.benefitText}
+              value={terms.benefitText}
               onChange={(e) => onChange({ benefitText: e.target.value })}
               placeholder={benefitPlaceholder}
               className={INPUT_CLS}
@@ -84,7 +82,7 @@ export function Step4Terms({ state, onChange }: Step4TermsProps) {
                 style={{ color: '#2EC4D5' }}
                 dir="ltr"
               >
-                {state.discountPct}%
+                {terms.discountPct}%
               </span>
             </div>
             <input
@@ -93,13 +91,13 @@ export function Step4Terms({ state, onChange }: Step4TermsProps) {
               min={0}
               max={50}
               step={1}
-              value={state.discountPct}
+              value={terms.discountPct}
               onChange={(e) =>
                 onChange({ discountPct: Number(e.target.value) })
               }
               className="w-full h-2 rounded-[5px] accent-[#2EC4D5]"
               style={{
-                background: `linear-gradient(90deg, #2EC4D5 0%, #2EC4D5 ${(state.discountPct / 50) * 100}%, #FFE8DE ${(state.discountPct / 50) * 100}%, #FFE8DE 100%)`,
+                background: `linear-gradient(90deg, #2EC4D5 0%, #2EC4D5 ${(terms.discountPct / 50) * 100}%, #FFE8DE ${(terms.discountPct / 50) * 100}%, #FFE8DE 100%)`,
               }}
               dir="ltr"
             />
@@ -119,7 +117,7 @@ export function Step4Terms({ state, onChange }: Step4TermsProps) {
           </CardHeader>
           <CardContent>
             <dl className="divide-y divide-[#FFF0EA]">
-              <Row label="מחיר רגיל" value={formatCurrency(state.unitPrice)} />
+              <Row label="מחיר רגיל" value={formatCurrency(terms.unitPrice)} />
               <Row
                 label="מחיר אפקטיבי אחרי הנחה"
                 value={formatCurrency(m.effectivePrice)}
@@ -128,7 +126,7 @@ export function Step4Terms({ state, onChange }: Step4TermsProps) {
               <Row label="רווח ליחידה" value={formatCurrency(m.unitMargin)} />
               <Row
                 label="משמעות ההטבה"
-                value={`${state.discountPct}% הנחה`}
+                value={`${terms.discountPct}% הנחה`}
               />
             </dl>
           </CardContent>

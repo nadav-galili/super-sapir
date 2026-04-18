@@ -1,12 +1,14 @@
 import { motion, useReducedMotion } from 'motion/react'
 import { Star, ArrowLeft } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { purposeMap, type Goal } from '@/lib/promo-simulator/taxonomy'
+import { usePromoTaxonomy } from '@/contexts/PromoTaxonomyContext'
+import type { Goal } from '@/lib/promo-simulator/taxonomy'
 import type { SimulatorState } from '@/lib/promo-simulator/state'
 
 interface Step3PromoTypeProps {
-  state: SimulatorState
-  onChange: (update: Partial<SimulatorState>) => void
+  goal: SimulatorState['goal']
+  promoType: string
+  onChange: (update: Partial<Pick<SimulatorState, 'promoType'>>) => void
 }
 
 function Stars({ count }: { count: 1 | 2 | 3 }) {
@@ -25,9 +27,10 @@ function Stars({ count }: { count: 1 | 2 | 3 }) {
   )
 }
 
-export function Step3PromoType({ state, onChange }: Step3PromoTypeProps) {
+export function Step3PromoType({ goal: goalProp, promoType, onChange }: Step3PromoTypeProps) {
   const reduceMotion = useReducedMotion()
-  const goal = state.goal as Goal | ''
+  const { purposeMap } = usePromoTaxonomy()
+  const goal = goalProp as Goal | ''
 
   if (!goal) {
     return (
@@ -74,7 +77,7 @@ export function Step3PromoType({ state, onChange }: Step3PromoTypeProps) {
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {options.map((p, i) => {
-            const isActive = state.promoType === p.name
+            const isActive = promoType === p.name
             return (
               <motion.button
                 type="button"

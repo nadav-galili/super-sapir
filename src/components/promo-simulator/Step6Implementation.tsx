@@ -1,10 +1,10 @@
 import { Check, Monitor, Box, Users } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import type { SimulatorState } from '@/lib/promo-simulator/state'
+import type { ImplementationSlice, SliceSetter } from '@/lib/promo-simulator/state'
 
 interface Step6ImplementationProps {
-  state: SimulatorState
-  onChange: (update: Partial<SimulatorState>) => void
+  impl: ImplementationSlice
+  onChange: SliceSetter<ImplementationSlice>
 }
 
 const CHECKS: {
@@ -53,7 +53,7 @@ const TIPS: { icon: typeof Monitor; title: string; body: string }[] = [
 ]
 
 export function Step6Implementation({
-  state,
+  impl,
   onChange,
 }: Step6ImplementationProps) {
   return (
@@ -67,7 +67,7 @@ export function Step6Implementation({
       <CardContent className="space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {CHECKS.map((c) => {
-            const checked = Boolean(state[c.field])
+            const checked = Boolean(impl[c.field])
             return (
               <button
                 type="button"

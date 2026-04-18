@@ -10,16 +10,15 @@ import {
   Legend,
 } from 'recharts'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { calcMetrics } from '@/lib/promo-simulator/calc'
-import type { SimulatorState } from '@/lib/promo-simulator/state'
+import type { PromoMetrics } from '@/lib/promo-simulator/calc'
 
 interface UpliftChartProps {
-  state: SimulatorState
+  metrics: PromoMetrics
+  durationWeeks: number
 }
 
-export function UpliftChart({ state }: UpliftChartProps) {
-  const m = calcMetrics(state)
-  const weeks = Math.max(1, state.durationWeeks || 2)
+export function UpliftChart({ metrics: m, durationWeeks }: UpliftChartProps) {
+  const weeks = Math.max(1, durationWeeks || 2)
   const baseRevenuePerWeek = Math.round(m.baseRevenue / weeks)
   const promoRevenuePerWeek = Math.round(m.promoRevenue / weeks)
 

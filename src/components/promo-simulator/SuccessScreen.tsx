@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useMemo, useRef } from 'react'
 import { Link } from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'motion/react'
 import {
@@ -12,6 +12,7 @@ import {
 import { PromoSummaryCard } from './PromoSummaryCard'
 import { PromoFullReport } from './PromoFullReport'
 import { exportElementToPdf } from '@/lib/promo-simulator/export-pdf'
+import { calcMetrics } from '@/lib/promo-simulator/calc'
 import type { SimulatorState } from '@/lib/promo-simulator/state'
 import { ConfettiBurst } from '@/components/ui/confetti'
 import { BorderBeam } from '@/components/ui/border-beam'
@@ -43,6 +44,7 @@ export function SuccessScreen({ state, onRestart }: SuccessScreenProps) {
   const [isExporting, setIsExporting] = useState(false)
   const reportRef = useRef<HTMLDivElement | null>(null)
   const reduceMotion = useReducedMotion()
+  const metrics = useMemo(() => calcMetrics(state), [state])
 
   const showToast = useCallback((text: string) => {
     setToastText(text)
@@ -159,7 +161,7 @@ export function SuccessScreen({ state, onRestart }: SuccessScreenProps) {
             colorFrom="#DC4E59"
             colorTo="#E8777F"
           />
-          <PromoSummaryCard state={state} />
+          <PromoSummaryCard state={state} metrics={metrics} />
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -221,7 +223,7 @@ export function SuccessScreen({ state, onRestart }: SuccessScreenProps) {
         }}
       >
         <div ref={reportRef}>
-          <PromoFullReport state={state} />
+          <PromoFullReport state={state} metrics={metrics} />
         </div>
       </div>
     </div>

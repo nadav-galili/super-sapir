@@ -1,13 +1,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { calcMetrics } from '@/lib/promo-simulator/calc'
 import { formatCurrency, formatNumber } from '@/lib/format'
 import { getKpiStatusColor, KPI_STATUS } from '@/lib/colors'
 import { UpliftChart } from './UpliftChart'
-import type { SimulatorState } from '@/lib/promo-simulator/state'
+import type { PromoMetrics } from '@/lib/promo-simulator/calc'
+import type { ForecastSlice, SliceSetter } from '@/lib/promo-simulator/state'
 
 interface Step5ForecastProps {
-  state: SimulatorState
-  onChange: (update: Partial<SimulatorState>) => void
+  forecast: ForecastSlice
+  metrics: PromoMetrics
+  onChange: SliceSetter<ForecastSlice>
 }
 
 const LABEL = 'text-[15px] font-medium text-[#4A5568] mb-1.5 block'
@@ -43,8 +44,7 @@ function KpiCard({ title, value, sub, accent = KPI_STATUS.good }: KpiCardProps) 
   )
 }
 
-export function Step5Forecast({ state, onChange }: Step5ForecastProps) {
-  const m = calcMetrics(state)
+export function Step5Forecast({ forecast, metrics: m, onChange }: Step5ForecastProps) {
   const breakEvenStr = Number.isFinite(m.breakEvenUnits)
     ? formatNumber(m.breakEvenUnits)
     : '—'
@@ -58,7 +58,7 @@ export function Step5Forecast({ state, onChange }: Step5ForecastProps) {
     m.baseProfit > 0 ? m.promoProfit / m.baseProfit : m.promoProfit > 0 ? 1 : 0.5
   )
   const upliftColor = getKpiStatusColor(
-    state.upliftPct >= 15 ? 1 : state.upliftPct >= 5 ? 0.9 : 0.7
+    forecast.upliftPct >= 15 ? 1 : forecast.upliftPct >= 5 ? 0.9 : 0.7
   )
   const breakEvenColor = Number.isFinite(m.breakEvenUnits)
     ? getKpiStatusColor(
@@ -89,7 +89,7 @@ export function Step5Forecast({ state, onChange }: Step5ForecastProps) {
                 id="f-base-units"
                 type="number"
                 min={0}
-                value={state.baseUnits}
+                value={forecast.baseUnits}
                 onChange={(e) =>
                   onChange({ baseUnits: Number(e.target.value) || 0 })
                 }
@@ -106,7 +106,7 @@ export function Step5Forecast({ state, onChange }: Step5ForecastProps) {
                 type="number"
                 min={0}
                 step={0.1}
-                value={state.unitPrice}
+                value={forecast.unitPrice}
                 onChange={(e) =>
                   onChange({ unitPrice: Number(e.target.value) || 0 })
                 }
@@ -123,7 +123,7 @@ export function Step5Forecast({ state, onChange }: Step5ForecastProps) {
                 type="number"
                 min={0}
                 step={0.1}
-                value={state.unitCost}
+                value={forecast.unitCost}
                 onChange={(e) =>
                   onChange({ unitCost: Number(e.target.value) || 0 })
                 }
@@ -141,7 +141,7 @@ export function Step5Forecast({ state, onChange }: Step5ForecastProps) {
                   style={{ color: '#DC4E59' }}
                   dir="ltr"
                 >
-                  {state.upliftPct}%
+                  {forecast.upliftPct}%
                 </span>
               </div>
               <input
@@ -150,13 +150,13 @@ export function Step5Forecast({ state, onChange }: Step5ForecastProps) {
                 min={0}
                 max={80}
                 step={1}
-                value={state.upliftPct}
+                value={forecast.upliftPct}
                 onChange={(e) =>
                   onChange({ upliftPct: Number(e.target.value) })
                 }
                 className="w-full h-2 rounded-[5px] accent-[#DC4E59]"
                 style={{
-                  background: `linear-gradient(90deg, #DC4E59 0%, #DC4E59 ${(state.upliftPct / 80) * 100}%, #FFE8DE ${(state.upliftPct / 80) * 100}%, #FFE8DE 100%)`,
+                  background: `linear-gradient(90deg, #DC4E59 0%, #DC4E59 ${(forecast.upliftPct / 80) * 100}%, #FFE8DE ${(forecast.upliftPct / 80) * 100}%, #FFE8DE 100%)`,
                 }}
                 dir="ltr"
               />
@@ -169,7 +169,7 @@ export function Step5Forecast({ state, onChange }: Step5ForecastProps) {
                 id="f-stock"
                 type="number"
                 min={0}
-                value={state.stockUnits}
+                value={forecast.stockUnits}
                 onChange={(e) =>
                   onChange({ stockUnits: Number(e.target.value) || 0 })
                 }
@@ -220,7 +220,7 @@ export function Step5Forecast({ state, onChange }: Step5ForecastProps) {
         </div>
       </div>
 
-      <UpliftChart state={state} />
+      <UpliftChart metrics={m} durationWeeks={forecast.durationWeeks} />
     </div>
   )
 }

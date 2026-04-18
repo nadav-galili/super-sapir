@@ -2,15 +2,12 @@ import { motion } from 'motion/react'
 import { Sparkles } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { TypingText } from '@/components/ui/typing-text'
-import { narrativeFor } from '@/lib/promo-simulator/narrative'
-import type { SimulatorState } from '@/lib/promo-simulator/state'
 
 interface AINarrativeProps {
-  state: SimulatorState
+  paragraphs: string[]
 }
 
-export function AINarrative({ state }: AINarrativeProps) {
-  const paragraphs = narrativeFor(state)
+export function AINarrative({ paragraphs }: AINarrativeProps) {
   const joined = paragraphs.join('\n')
 
   if (paragraphs.length === 0) return null

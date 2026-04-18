@@ -1,9 +1,10 @@
-import { calcMetrics, statusLabel } from '@/lib/promo-simulator/calc'
+import { statusLabel, type PromoMetrics } from '@/lib/promo-simulator/calc'
 import { formatCurrency, formatNumber } from '@/lib/format'
 import type { SimulatorState } from '@/lib/promo-simulator/state'
 
 interface PromoFullReportProps {
   state: SimulatorState
+  metrics: PromoMetrics
 }
 
 function Row({ label, value }: { label: string; value: string }) {
@@ -49,8 +50,7 @@ function formatDateHe(iso: string): string {
   })
 }
 
-export function PromoFullReport({ state }: PromoFullReportProps) {
-  const m = calcMetrics(state)
+export function PromoFullReport({ state, metrics: m }: PromoFullReportProps) {
   const conditionBenefit = [state.conditionText, state.benefitText]
     .filter(Boolean)
     .join(' → ')

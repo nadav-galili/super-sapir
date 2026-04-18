@@ -1,6 +1,61 @@
 // Promo Simulator — state type, defaults, URL codec
 import type { Goal, SalesArena, Segment, StepId } from './taxonomy'
 
+/**
+ * Scoped slice types — each step consumes only the fields it owns,
+ * not the entire SimulatorState. Keeps step components unaware of
+ * fields they don't read or write.
+ */
+export interface BriefSlice {
+  category: string
+  segment: Segment | ''
+  product: string
+  salesArena: SalesArena | ''
+  retailer: string
+  startDate: string
+  durationWeeks: number
+  salesOwner: string
+}
+
+export interface TermsSlice {
+  promoType: string
+  conditionText: string
+  benefitText: string
+  discountPct: number
+  unitPrice: number
+  unitCost: number
+}
+
+export interface ForecastSlice {
+  baseUnits: number
+  unitPrice: number
+  unitCost: number
+  upliftPct: number
+  stockUnits: number
+  discountPct: number
+  durationWeeks: number
+}
+
+export interface ImplementationSlice {
+  signage: boolean
+  shelf: boolean
+  training: boolean
+  cashierBrief: boolean
+}
+
+export interface ControlSlice {
+  controlPrice: boolean
+  controlStock: boolean
+  controlDisplay: boolean
+}
+
+/**
+ * A typed setter scoped to a specific slice. Step components receive this
+ * instead of a full-state setter, so they can only write fields that
+ * belong to their slice.
+ */
+export type SliceSetter<T> = (update: Partial<T>) => void
+
 export interface SimulatorState {
   step: StepId
   // Step 1 — brief

@@ -1,17 +1,19 @@
 import { motion, useReducedMotion } from 'motion/react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { GOALS, GOAL_DESCRIPTIONS, type Goal } from '@/lib/promo-simulator/taxonomy'
+import { usePromoTaxonomy } from '@/contexts/PromoTaxonomyContext'
+import type { Goal } from '@/lib/promo-simulator/taxonomy'
 import type { SimulatorState } from '@/lib/promo-simulator/state'
 
 interface Step2GoalProps {
-  state: SimulatorState
-  onChange: (update: Partial<SimulatorState>) => void
+  goal: SimulatorState['goal']
+  onChange: (update: Partial<Pick<SimulatorState, 'goal' | 'promoType'>>) => void
 }
 
-export function Step2Goal({ state, onChange }: Step2GoalProps) {
+export function Step2Goal({ goal, onChange }: Step2GoalProps) {
   const reduceMotion = useReducedMotion()
+  const { goals, goalDescriptions } = usePromoTaxonomy()
   const pick = (g: Goal) => {
-    if (state.goal === g) {
+    if (goal === g) {
       onChange({ goal: g })
       return
     }
@@ -29,8 +31,8 @@ export function Step2Goal({ state, onChange }: Step2GoalProps) {
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {GOALS.map((g, i) => {
-            const isActive = state.goal === g
+          {goals.map((g, i) => {
+            const isActive = goal === g
             return (
               <motion.button
                 type="button"
@@ -63,7 +65,7 @@ export function Step2Goal({ state, onChange }: Step2GoalProps) {
                   </span>
                 </div>
                 <p className="text-[16px] text-[#4A5568] leading-relaxed">
-                  {GOAL_DESCRIPTIONS[g]}
+                  {goalDescriptions[g]}
                 </p>
               </motion.button>
             )

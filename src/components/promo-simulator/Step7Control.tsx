@@ -1,12 +1,14 @@
 import { Check, HelpCircle } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getKpiStatusColor } from '@/lib/colors'
-import { calcMetrics, statusLabel, statusRatio } from '@/lib/promo-simulator/calc'
-import type { SimulatorState } from '@/lib/promo-simulator/state'
+import { statusLabel, statusRatio, type PromoMetrics } from '@/lib/promo-simulator/calc'
+import type { ControlSlice, SliceSetter } from '@/lib/promo-simulator/state'
 
 interface Step7ControlProps {
-  state: SimulatorState
-  onChange: (update: Partial<SimulatorState>) => void
+  control: ControlSlice
+  metrics: PromoMetrics
+  readinessCount: number
+  onChange: SliceSetter<ControlSlice>
 }
 
 const CHECKS: {
@@ -18,8 +20,7 @@ const CHECKS: {
   { field: 'controlDisplay', label: 'יש נראות מספקת' },
 ]
 
-export function Step7Control({ state, onChange }: Step7ControlProps) {
-  const m = calcMetrics(state)
+export function Step7Control({ control, metrics: m, readinessCount, onChange }: Step7ControlProps) {
   const statusColor = getKpiStatusColor(statusRatio(m.status))
   const pace = Math.min(
     100,
@@ -27,12 +28,6 @@ export function Step7Control({ state, onChange }: Step7ControlProps) {
   )
   const paceFinite = Number.isFinite(pace) ? pace : 0
   const paceColor = getKpiStatusColor(Math.min(paceFinite / 100, 1))
-  const readinessCount = [
-    state.signage,
-    state.shelf,
-    state.training,
-    state.cashierBrief,
-  ].filter(Boolean).length
   const readinessColor = getKpiStatusColor(readinessCount / 4)
 
   return (
@@ -47,7 +42,7 @@ export function Step7Control({ state, onChange }: Step7ControlProps) {
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {CHECKS.map((c) => {
-              const checked = Boolean(state[c.field])
+              const checked = Boolean(control[c.field])
               return (
                 <button
                   type="button"
