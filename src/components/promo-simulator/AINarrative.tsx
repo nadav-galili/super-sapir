@@ -11,6 +11,7 @@ interface AINarrativeProps {
 
 export function AINarrative({ state }: AINarrativeProps) {
   const paragraphs = narrativeFor(state)
+  const joined = paragraphs.join('\n')
 
   if (paragraphs.length === 0) return null
 
@@ -47,14 +48,23 @@ export function AINarrative({ state }: AINarrativeProps) {
             >
               AI
             </span>
+            {/* "מנסח…" briefly flashes when narrative content changes via key-driven CSS animation */}
+            <span
+              key={joined}
+              className="narrative-flash text-[15px] text-[#6C5CE7] font-medium me-auto"
+            >
+              מנסח…
+            </span>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
+          {/* key={joined} forces remount on content change so the one-shot shimmer animation
+              re-fires for ~600ms then settles to plain prose. No React state needed. */}
+          <div key={joined} className="space-y-3">
             {paragraphs.map((p) => (
               <p
                 key={p}
-                className="text-[18px] text-[#4A5568] leading-relaxed"
+                className="narrative-shimmer-text text-[18px] leading-relaxed"
               >
                 <TypingText text={p} speed={10} />
               </p>

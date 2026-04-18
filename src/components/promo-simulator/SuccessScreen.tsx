@@ -13,6 +13,8 @@ import { PromoSummaryCard } from './PromoSummaryCard'
 import { PromoFullReport } from './PromoFullReport'
 import { exportElementToPdf } from '@/lib/promo-simulator/export-pdf'
 import type { SimulatorState } from '@/lib/promo-simulator/state'
+import { ConfettiBurst } from '@/components/ui/confetti'
+import { BorderBeam } from '@/components/ui/border-beam'
 
 function safeFileSegment(s: string): string {
   return s
@@ -100,6 +102,12 @@ export function SuccessScreen({ state, onRestart }: SuccessScreenProps) {
 
   return (
     <div className="min-h-[calc(100vh-120px)] flex flex-col items-center justify-start pt-8 pb-12 px-4">
+      <ConfettiBurst
+        particleCount={180}
+        ticks={100}
+        spread={90}
+        origin={{ x: 0.5, y: 0.18 }}
+      />
       <div className="w-full max-w-3xl space-y-6">
         <div className="text-center space-y-4">
           <motion.div
@@ -143,7 +151,16 @@ export function SuccessScreen({ state, onRestart }: SuccessScreenProps) {
           </motion.p>
         </div>
 
-        <PromoSummaryCard state={state} />
+        <div className="relative rounded-[16px]">
+          <BorderBeam
+            size={220}
+            duration={14}
+            borderWidth={1.5}
+            colorFrom="#DC4E59"
+            colorTo="#E8777F"
+          />
+          <PromoSummaryCard state={state} />
+        </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {actions.map((a, i) => {

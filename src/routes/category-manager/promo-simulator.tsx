@@ -17,6 +17,8 @@ import { Step9Documentation } from '@/components/promo-simulator/Step9Documentat
 import { SuccessScreen } from '@/components/promo-simulator/SuccessScreen'
 import { LiveKPIPanel } from '@/components/promo-simulator/LiveKPIPanel'
 import { AINarrative } from '@/components/promo-simulator/AINarrative'
+import { BorderBeam } from '@/components/ui/border-beam'
+import { ShimmerButton } from '@/components/ui/shimmer-button'
 import {
   createDefaultState,
   decodeState,
@@ -105,8 +107,9 @@ function PromoSimulatorPage() {
   const sliceNum = SLICE_BY_STEP[state.step]
   const showLiveKpi = state.step >= 4 && state.step <= 7
   const showNarrative = state.step >= 2 && state.step <= 5
+  const showStepBeam = state.step >= 4 && state.step <= 7
 
-  const stepContent =
+  const rawStepContent =
     state.step === 1 ? (
       <Step1Brief state={state} onChange={setState} />
     ) : state.step === 2 ? (
@@ -132,6 +135,21 @@ function PromoSimulatorPage() {
         sliceNumber={sliceNum}
       />
     )
+
+  const stepContent = showStepBeam ? (
+    <div className="relative rounded-[16px]">
+      <BorderBeam
+        size={220}
+        duration={10}
+        borderWidth={1.5}
+        colorFrom="#DC4E59"
+        colorTo="#E8777F"
+      />
+      {rawStepContent}
+    </div>
+  ) : (
+    rawStepContent
+  )
 
   if (state.completed) {
     return (
@@ -202,17 +220,14 @@ function PromoSimulatorPage() {
               <ArrowRight className="w-4 h-4" />
               חזרה
             </button>
-            <button
+            <ShimmerButton
               type="button"
               onClick={state.step === 9 ? finish : goNext}
-              className="inline-flex items-center gap-2 rounded-[10px] px-6 py-2.5 text-[16px] font-semibold text-white shadow-md transition-transform hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed"
-              style={{
-                background: 'linear-gradient(135deg, #DC4E59, #E8777F)',
-              }}
+              shimmerColor="rgba(255,255,255,0.35)"
             >
               {state.step === 9 ? 'סיום' : 'המשך'}
               <ArrowLeft className="w-4 h-4" />
-            </button>
+            </ShimmerButton>
           </div>
         </div>
       </PageContainer>

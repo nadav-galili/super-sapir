@@ -100,6 +100,61 @@
   animation: shimmer 2.5s ease-in-out infinite;
 }
 
+/* Narrative one-shot shimmer — runs for 600ms when content changes via key remount */
+@keyframes narrative-text-shimmer {
+  0% {
+    background-position: -200% 0;
+    color: transparent;
+  }
+  85% {
+    background-position: 200% 0;
+    color: transparent;
+  }
+  100% {
+    background-image: none;
+    color: #4A5568;
+  }
+}
+
+.narrative-shimmer-text {
+  background-image: linear-gradient(
+    90deg,
+    #4A5568 0%,
+    #4A5568 38%,
+    #6C5CE7 50%,
+    #4A5568 62%,
+    #4A5568 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: narrative-text-shimmer 600ms ease-out 1 forwards;
+}
+
+@keyframes narrative-flash {
+  0%   { opacity: 0; }
+  10%  { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.narrative-flash {
+  opacity: 0;
+  animation: narrative-flash 600ms ease-out 1 forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .narrative-shimmer-text {
+    animation: none;
+    background-image: none;
+    color: #4A5568;
+  }
+  .narrative-flash {
+    animation: none;
+    opacity: 0;
+  }
+}
+
 /* AI streaming cursor */
 @keyframes cursorBlink {
   0%, 100% { opacity: 1; }

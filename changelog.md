@@ -8,6 +8,18 @@
 
 ## 2026-04-18
 
+### Promo simulator polish — Magic UI primitives
+- Added 4 Magic UI primitives under `src/components/ui/`: `number-ticker`, `border-beam`, `confetti`, `shimmer-button`. All are single-file, palette-aware, and respect `useReducedMotion`.
+- `LiveKPIPanel` numeric values (ROI %, profit-vs-base ₪, stock coverage %) replaced with `<NumberTicker>` wrapped in `dir="ltr"` rows; debounced 250ms upstream so slider drags settle to one ticker animation toward the final value.
+- Active step main panel wrapped in `<BorderBeam colorFrom=#DC4E59 colorTo=#E8777F size=220 duration=10>` on steps 4–7 only (the decision steps with LiveKPI). Steps 1–3 and 8–9 stay calm.
+- Primary continue/finish button is now `<ShimmerButton>` reskinned to the warm primary gradient (`#DC4E59 → #E8777F`) with 35%-white sheen sweep; preserves `onClick`/`disabled` and the `ArrowLeft` (forward in RTL) icon.
+- `SuccessScreen` fires `<ConfettiBurst>` exactly once on mount (180 particles, ~1.6s spread, brand colors `#DC4E59 / #2EC4D5 / #6C5CE7 / #F6B93B`); the `PromoSummaryCard` is wrapped in a calmer `BorderBeam duration=14`. No tilt/parallax — would break html2canvas PDF export.
+- `AINarrative` swapped state-driven shimmer for key-driven CSS animations (`narrative-shimmer-text`, `narrative-flash`) — each paragraph's gradient sheen runs once for ~600ms when content changes, then settles to plain `#4A5568` text. No setState-in-effect.
+- Tailwind config gained `border-beam`, `shimmer-sweep`, and `narrative-shimmer` keyframes plus matching animation utilities. `global.css` gained the `narrative-shimmer-text` and `narrative-flash` one-shot classes (reduced-motion aware).
+- All KPI status colors continue to flow through `getKpiStatusColor(ratio)` — no hardcoded thresholds. Font-size floor (15px / 18px) preserved.
+- Installed `canvas-confetti@1.9.4` + `@types/canvas-confetti@1.9.0` via Bun.
+- **Files:** `src/components/ui/number-ticker.tsx` (new), `border-beam.tsx` (new), `confetti.tsx` (new), `shimmer-button.tsx` (new), `tailwind.config.ts`, `src/global.css`, `src/components/promo-simulator/LiveKPIPanel.tsx`, `AINarrative.tsx`, `SuccessScreen.tsx`, `src/routes/category-manager/promo-simulator.tsx`, `package.json`, `decisions/2026-04-18-magicui-wow-polish.md` (new)
+
 ### Promo Simulator — Slice 9: Polish pass (#34)
 - Step transitions use `AnimatePresence` mode="wait" for fade+slide in/out
 - Completed stepper circles spring-scale their check icons in

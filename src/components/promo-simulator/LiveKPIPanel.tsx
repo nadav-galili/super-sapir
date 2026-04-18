@@ -4,8 +4,8 @@ import { getKpiStatusColor } from '@/lib/colors'
 import { formatCurrency } from '@/lib/format'
 import { calcMetrics, statusLabel, statusRatio } from '@/lib/promo-simulator/calc'
 import type { SimulatorState } from '@/lib/promo-simulator/state'
-import { useAnimatedCounter } from '@/hooks/useAnimatedCounter'
 import { useDebouncedValue } from '@/hooks/useDebouncedValue'
+import { NumberTicker } from '@/components/ui/number-ticker'
 
 interface LiveKPIPanelProps {
   state: SimulatorState
@@ -20,14 +20,11 @@ export function LiveKPIPanel({ state }: LiveKPIPanelProps) {
   const roiColor = getKpiStatusColor(m.roi >= 0 ? 1 : 0.5)
   const profitColor = getKpiStatusColor(profitDelta >= 0 ? 1 : 0.5)
 
-  // Debounce raw metric values by ~250ms so rapid slider drags don't thrash
-  // the counter animations — the counter settles to the final value instead.
+  // Debounce raw metric values by ~250ms so rapid slider drags settle to a
+  // single ticker animation toward the final value, not a chase of intermediates.
   const roiTarget = useDebouncedValue(m.roi, 250)
   const profitTarget = useDebouncedValue(profitDelta, 250)
   const coverageTarget = useDebouncedValue(m.stockCoverage, 250)
-  const roiAnim = useAnimatedCounter(roiTarget, 800)
-  const profitAnim = useAnimatedCounter(profitTarget, 800)
-  const coverageAnim = useAnimatedCounter(coverageTarget, 800)
 
   return (
     <motion.div
@@ -65,21 +62,27 @@ export function LiveKPIPanel({ state }: LiveKPIPanelProps) {
             <Row
               icon={<TrendingUp className="w-4 h-4" />}
               label="ROI חזוי"
-              value={`${roiAnim}%`}
               color={roiColor}
-            />
+            >
+              <NumberTicker value={roiTarget} suffix="%" />
+            </Row>
             <Row
               icon={<PiggyBank className="w-4 h-4" />}
               label="רווח מול בסיס"
-              value={`${profitAnim >= 0 ? '+' : ''}${formatCurrency(profitAnim)}`}
               color={profitColor}
-            />
+            >
+              <NumberTicker
+                value={profitTarget}
+                format={(n) => `${n >= 0 ? '+' : ''}${formatCurrency(n)}`}
+              />
+            </Row>
             <Row
               icon={<Package className="w-4 h-4" />}
               label="כיסוי מלאי"
-              value={`${coverageAnim}%`}
               color={coverageColor}
-            />
+            >
+              <NumberTicker value={coverageTarget} suffix="%" />
+            </Row>
           </div>
         </div>
       </div>
@@ -90,13 +93,13 @@ export function LiveKPIPanel({ state }: LiveKPIPanelProps) {
 function Row({
   icon,
   label,
-  value,
   color,
+  children,
 }: {
   icon: React.ReactNode
   label: string
-  value: string
   color: string
+  children: React.ReactNode
 }) {
   return (
     <div className="flex items-center justify-between gap-3 rounded-[10px] bg-[#FDF8F6] px-3 py-2.5">
@@ -109,7 +112,7 @@ function Row({
         style={{ color }}
         dir="ltr"
       >
-        {value}
+        {children}
       </span>
     </div>
   )
