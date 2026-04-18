@@ -17,7 +17,10 @@
       "mcp__claude_ai_Notion__notion-move-pages",
       "Bash(gh repo *)",
       "Bash(gh label *)",
-      "Bash(kill 38604 38635 38664 38665 39089)"
+      "Bash(kill 38604 38635 38664 38665 39089)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(gh api *)"
     ]
   }
 }
