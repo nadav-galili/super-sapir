@@ -12,6 +12,9 @@ import { Step4Terms } from '@/components/promo-simulator/Step4Terms'
 import { Step5Forecast } from '@/components/promo-simulator/Step5Forecast'
 import { Step6Implementation } from '@/components/promo-simulator/Step6Implementation'
 import { Step7Control } from '@/components/promo-simulator/Step7Control'
+import { Step8Analysis } from '@/components/promo-simulator/Step8Analysis'
+import { Step9Documentation } from '@/components/promo-simulator/Step9Documentation'
+import { SuccessScreen } from '@/components/promo-simulator/SuccessScreen'
 import { LiveKPIPanel } from '@/components/promo-simulator/LiveKPIPanel'
 import {
   createDefaultState,
@@ -84,6 +87,10 @@ function PromoSimulatorPage() {
     })
   }, [navigate])
 
+  const finish = useCallback(() => {
+    setState({ completed: true })
+  }, [setState])
+
   const resetStep = useCallback(() => {
     const fresh = createDefaultState({ defaultCategory: defaults.category })
     const keep: Partial<SimulatorState> = { step: state.step }
@@ -112,6 +119,10 @@ function PromoSimulatorPage() {
       <Step6Implementation state={state} onChange={setState} />
     ) : state.step === 7 ? (
       <Step7Control state={state} onChange={setState} />
+    ) : state.step === 8 ? (
+      <Step8Analysis state={state} onChange={setState} />
+    ) : state.step === 9 ? (
+      <Step9Documentation state={state} onChange={setState} />
     ) : (
       <StepPlaceholder
         stepNumber={stepMeta.id}
@@ -119,6 +130,16 @@ function PromoSimulatorPage() {
         sliceNumber={sliceNum}
       />
     )
+
+  if (state.completed) {
+    return (
+      <div className="min-h-screen bg-[#FDF8F6]">
+        <PageContainer>
+          <SuccessScreen state={state} onRestart={restart} />
+        </PageContainer>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-[#FDF8F6]">
@@ -172,14 +193,13 @@ function PromoSimulatorPage() {
             </button>
             <button
               type="button"
-              onClick={goNext}
-              disabled={state.step === 9}
+              onClick={state.step === 9 ? finish : goNext}
               className="inline-flex items-center gap-2 rounded-[10px] px-6 py-2.5 text-[16px] font-semibold text-white shadow-md transition-transform hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed"
               style={{
                 background: 'linear-gradient(135deg, #DC4E59, #E8777F)',
               }}
             >
-              המשך
+              {state.step === 9 ? 'סיום' : 'המשך'}
               <ArrowLeft className="w-4 h-4" />
             </button>
           </div>
