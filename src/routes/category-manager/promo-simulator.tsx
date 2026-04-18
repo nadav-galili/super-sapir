@@ -8,6 +8,8 @@ import { StepPlaceholder } from '@/components/promo-simulator/StepPlaceholder'
 import { Step1Brief } from '@/components/promo-simulator/Step1Brief'
 import { Step2Goal } from '@/components/promo-simulator/Step2Goal'
 import { Step3PromoType } from '@/components/promo-simulator/Step3PromoType'
+import { Step4Terms } from '@/components/promo-simulator/Step4Terms'
+import { LiveKPIPanel } from '@/components/promo-simulator/LiveKPIPanel'
 import {
   createDefaultState,
   decodeState,
@@ -90,6 +92,24 @@ function PromoSimulatorPage() {
 
   const stepMeta = STEPS[state.step - 1]
   const sliceNum = SLICE_BY_STEP[state.step]
+  const showLiveKpi = state.step >= 4 && state.step <= 7
+
+  const stepContent =
+    state.step === 1 ? (
+      <Step1Brief state={state} onChange={setState} />
+    ) : state.step === 2 ? (
+      <Step2Goal state={state} onChange={setState} />
+    ) : state.step === 3 ? (
+      <Step3PromoType state={state} onChange={setState} />
+    ) : state.step === 4 ? (
+      <Step4Terms state={state} onChange={setState} />
+    ) : (
+      <StepPlaceholder
+        stepNumber={stepMeta.id}
+        title={stepMeta.title}
+        sliceNumber={sliceNum}
+      />
+    )
 
   return (
     <div className="min-h-screen bg-[#FDF8F6]">
@@ -101,18 +121,13 @@ function PromoSimulatorPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.25, ease: 'easeOut' }}
         >
-          {state.step === 1 ? (
-            <Step1Brief state={state} onChange={setState} />
-          ) : state.step === 2 ? (
-            <Step2Goal state={state} onChange={setState} />
-          ) : state.step === 3 ? (
-            <Step3PromoType state={state} onChange={setState} />
+          {showLiveKpi ? (
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr,320px] gap-4 items-start">
+              <div>{stepContent}</div>
+              <LiveKPIPanel state={state} />
+            </div>
           ) : (
-            <StepPlaceholder
-              stepNumber={stepMeta.id}
-              title={stepMeta.title}
-              sliceNumber={sliceNum}
-            />
+            stepContent
           )}
         </motion.div>
 
