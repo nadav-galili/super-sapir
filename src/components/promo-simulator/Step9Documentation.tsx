@@ -1,52 +1,56 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { statusLabel, type PromoMetrics } from '@/lib/promo-simulator/calc'
-import { formatCurrency } from '@/lib/format'
-import { PromoSummaryCard } from './PromoSummaryCard'
-import type { SimulatorState } from '@/lib/promo-simulator/state'
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { statusLabel, type PromoMetrics } from "@/lib/promo-simulator/calc";
+import { formatCurrency } from "@/lib/format";
+import { PromoSummaryCard } from "./PromoSummaryCard";
+import type { SimulatorState } from "@/lib/promo-simulator/state";
+import { findSegmentById } from "@/data/mock-taxonomy";
 
 interface Step9DocumentationProps {
-  state: SimulatorState
-  metrics: PromoMetrics
-  onChange: (update: Partial<Pick<SimulatorState, 'documentation'>>) => void
+  state: SimulatorState;
+  metrics: PromoMetrics;
+  onChange: (update: Partial<Pick<SimulatorState, "documentation">>) => void;
 }
 
 const TABLE_HEADERS = [
-  'סוג מבצע',
-  'זירה',
-  'קהל יעד',
-  'התניה',
-  'הטבה',
-  'משמעות ההטבה',
-  'תקופה',
-  'עלות מימוש',
-  'גידול ריאלי',
-] as const
+  "סוג מבצע",
+  "זירה",
+  "קהל יעד",
+  "התניה",
+  "הטבה",
+  "משמעות ההטבה",
+  "תקופה",
+  "עלות מימוש",
+  "גידול ריאלי",
+] as const;
 
 export function Step9Documentation({
   state,
   metrics: m,
   onChange,
 }: Step9DocumentationProps) {
-  const benefitMeaning = state.conditionText || state.benefitText
-    ? `${statusLabel(m.status)} · רווח ${formatCurrency(m.promoProfit)}`
-    : '—'
+  const benefitMeaning =
+    state.conditionText || state.benefitText
+      ? `${statusLabel(m.status)} · רווח ${formatCurrency(m.promoProfit)}`
+      : "—";
   const period = state.startDate
     ? `${state.startDate} · ${state.durationWeeks} שבועות`
-    : '—'
-  const cost = formatCurrency(m.investment)
-  const realGrowth = `+${state.upliftPct}%`
+    : "—";
+  const cost = formatCurrency(m.investment);
+  const realGrowth = `+${state.upliftPct}%`;
+
+  const segmentLabel = findSegmentById(state.segment)?.nameHe ?? state.segment;
 
   const row: string[] = [
-    state.promoType || '—',
-    state.salesArena || '—',
-    state.segment || '—',
-    state.conditionText || '—',
-    state.benefitText || '—',
+    state.promoType || "—",
+    state.salesArena || "—",
+    segmentLabel || "—",
+    state.conditionText || "—",
+    state.benefitText || "—",
     benefitMeaning,
     period,
     cost,
     realGrowth,
-  ]
+  ];
 
   return (
     <div className="space-y-4">
@@ -116,5 +120,5 @@ export function Step9Documentation({
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

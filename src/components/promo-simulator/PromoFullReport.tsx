@@ -1,10 +1,16 @@
-import { statusLabel, type PromoMetrics } from '@/lib/promo-simulator/calc'
-import { formatCurrency, formatNumber } from '@/lib/format'
-import type { SimulatorState } from '@/lib/promo-simulator/state'
+import { statusLabel, type PromoMetrics } from "@/lib/promo-simulator/calc";
+import { formatCurrency, formatNumber } from "@/lib/format";
+import type { SimulatorState } from "@/lib/promo-simulator/state";
+import { findSegmentById } from "@/data/mock-taxonomy";
+
+function resolveSegmentLabel(segmentId: string): string {
+  if (!segmentId) return "";
+  return findSegmentById(segmentId)?.nameHe ?? segmentId;
+}
 
 interface PromoFullReportProps {
-  state: SimulatorState
-  metrics: PromoMetrics
+  state: SimulatorState;
+  metrics: PromoMetrics;
 }
 
 function Row({ label, value }: { label: string; value: string }) {
@@ -12,18 +18,18 @@ function Row({ label, value }: { label: string; value: string }) {
     <div className="flex items-start justify-between gap-4 py-2 border-b border-[#FFF0EA] last:border-b-0">
       <span className="text-[14px] text-[#4A5568] shrink-0">{label}</span>
       <span className="text-[14px] font-semibold text-[#2D3748] text-left break-words">
-        {value || '—'}
+        {value || "—"}
       </span>
     </div>
-  )
+  );
 }
 
 function Section({
   title,
   children,
 }: {
-  title: string
-  children: React.ReactNode
+  title: string;
+  children: React.ReactNode;
 }) {
   return (
     <section className="rounded-[12px] border border-[#FFE8DE] bg-white p-5 break-inside-avoid">
@@ -32,71 +38,67 @@ function Section({
       </h2>
       <div className="space-y-0">{children}</div>
     </section>
-  )
+  );
 }
 
 function boolLabel(v: boolean): string {
-  return v ? 'כן' : 'לא'
+  return v ? "כן" : "לא";
 }
 
 function formatDateHe(iso: string): string {
-  if (!iso) return ''
-  const d = new Date(iso)
-  if (Number.isNaN(d.getTime())) return iso
-  return d.toLocaleDateString('he-IL', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  })
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString("he-IL", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
 }
 
 export function PromoFullReport({ state, metrics: m }: PromoFullReportProps) {
   const conditionBenefit = [state.conditionText, state.benefitText]
     .filter(Boolean)
-    .join(' → ')
+    .join(" → ");
   const breakEvenStr = Number.isFinite(m.breakEvenUnits)
     ? formatNumber(m.breakEvenUnits)
-    : '—'
-  const generatedAt = new Date().toLocaleString('he-IL', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
+    : "—";
+  const generatedAt = new Date().toLocaleString("he-IL", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 
   return (
     <div
       dir="rtl"
       className="bg-[#FDF8F6] p-8 space-y-4"
-      style={{ width: 800, fontFamily: 'Rubik, sans-serif' }}
+      style={{ width: 800, fontFamily: "Rubik, sans-serif" }}
     >
       <header className="space-y-1 pb-4 border-b border-[#FFE8DE]">
         <h1 className="text-[28px] font-bold text-[#2D3748]">תיק מבצע</h1>
         <p className="text-[14px] text-[#4A5568]">
-          סימולטור מבצעים · {state.retailer || 'סופר ספיר'} · הופק {generatedAt}
+          סימולטור מבצעים · {state.retailer || "סופר ספיר"} · הופק {generatedAt}
         </p>
         {(state.product || state.category) && (
           <p className="text-[16px] font-semibold text-[#DC4E59]">
-            {[state.category, state.product].filter(Boolean).join(' · ')}
+            {[state.category, state.product].filter(Boolean).join(" · ")}
           </p>
         )}
       </header>
 
       <Section title="רקע / בריף">
         <Row label="קטגוריה" value={state.category} />
-        <Row label="סגמנט" value={state.segment} />
+        <Row label="סגמנט" value={resolveSegmentLabel(state.segment)} />
         <Row label="מוצר" value={state.product} />
         <Row label="זירת מכירה" value={state.salesArena} />
         <Row label="רשת" value={state.retailer} />
         <Row label="תאריך תחילת מבצע" value={formatDateHe(state.startDate)} />
         <Row
           label="משך המבצע"
-          value={
-            state.durationWeeks
-              ? `${state.durationWeeks} שבועות`
-              : ''
-          }
+          value={state.durationWeeks ? `${state.durationWeeks} שבועות` : ""}
         />
         <Row label="אחראי מכירות" value={state.salesOwner} />
       </Section>
@@ -114,12 +116,18 @@ export function PromoFullReport({ state, metrics: m }: PromoFullReportProps) {
       </Section>
 
       <Section title="יעדים ותחזית">
-        <Row label="מכר בסיסי צפוי (יחידות)" value={formatNumber(state.baseUnits)} />
+        <Row
+          label="מכר בסיסי צפוי (יחידות)"
+          value={formatNumber(state.baseUnits)}
+        />
         <Row label="מחיר רגיל ליחידה" value={formatCurrency(state.unitPrice)} />
         <Row label="עלות ליחידה" value={formatCurrency(state.unitCost)} />
         <Row label="גידול צפוי במכר" value={`${state.upliftPct}%`} />
         <Row label="מלאי זמין ליחידות" value={formatNumber(state.stockUnits)} />
-        <Row label="מחיר אפקטיבי ליחידה" value={formatCurrency(m.effectivePrice)} />
+        <Row
+          label="מחיר אפקטיבי ליחידה"
+          value={formatCurrency(m.effectivePrice)}
+        />
         <Row label="רווח ליחידה" value={formatCurrency(m.unitMargin)} />
       </Section>
 
@@ -174,5 +182,5 @@ export function PromoFullReport({ state, metrics: m }: PromoFullReportProps) {
         RetailSkillz Analytics · תיק מבצע הופק אוטומטית מהסימולטור
       </footer>
     </div>
-  )
+  );
 }

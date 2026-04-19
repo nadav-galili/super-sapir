@@ -6,6 +6,24 @@
 
 ---
 
+## 2026-04-19
+
+### Promo Simulator — cascading Category/Segment/Product + per-step validation
+
+Replaced the promo simulator's hardcoded segment list and free-text product input with a cascading Category → Segment → Product picker, and gated step advancement on per-step required-field validation. Aligned the simulator with the glossary's Department → Category → Item hierarchy (UI labels stay: קטגוריה / סגמנט / מוצר).
+
+- **New mock taxonomy.** Seeded `src/data/mock-taxonomy.ts` with 3–8 Hebrew segments for every Department in `DEPARTMENT_NAMES` (14 departments, 68 segments). Exposes `getSegmentsByDepartmentId`, `getSegmentsByDepartmentName`, `findSegmentById`. Segment ids like `dairy-milk`, `grocery-coffee-tea` are used as the stored state value; Hebrew label is resolved on read.
+- **Item catalogue expansion.** Retrofitted `src/data/mock-items.ts`: added `segmentId` to all existing 25 items and authored ~175 additional SKUs so every segment has 3–6 items. Added `getItemsByDepartment` and `getItemsBySegment`. All existing consumers (`HeroItemCards`) continue to work — the addition is purely additive.
+- **Step 1 cascading dropdowns.** `Step1Brief` now: (a) filters Segment options by the chosen Department via `getSegmentsByDepartmentName`, (b) converts Product from a free-text `<input>` into a Select filtered by the chosen Segment, (c) disables Segment until Category is picked and Product until Segment is picked, with helpful placeholder copy. Downstream fields reset to empty on parent change (hard reset, handled in `setState`).
+- **Per-step validation library.** New `src/lib/promo-simulator/validation.ts`: `missingFieldsForStep`, `isStepValid`, `earliestIncompleteStep`. Required per matrix — step 1: category, segment, product, salesArena, startDate, durationWeeks, salesOwner · step 2: goal · step 3: promoType · step 4: conditionText, benefitText, unitPrice>0, unitCost>0, discountPct>0 · step 5: baseUnits>0, upliftPct>0, stockUnits>0. Steps 6–9 are skippable by product decision.
+- **Gated navigation.** `usePromoSimulator.goNext()` refuses to advance when the current step has missing fields. `canJumpToStep` blocks forward Stepper jumps past the earliest incomplete step (backward jumps stay free). Hook now also exposes `missingFields` and `currentStepValid`.
+- **Invalid-state UI.** המשך button renders visually disabled with greyed styling when the current step is invalid, and a rose-red helper line appears under it listing the missing fields in Hebrew (`חסר למילוי: …`). Clicking the disabled-looking button (or attempting a forward stepper jump) reveals per-field rose-red borders on Step 1's empty required fields via an `errorKeys` prop; errors auto-clear on step change.
+- **Terminology alignment.** `PromoFullReport` and `Step9Documentation` now resolve stored `segmentId` → Hebrew label via `findSegmentById` when rendering the summary rows.
+- **Tests.** Updated `usePromoSimulator.test.ts` to assert the new forward-jump blocking contract (blocks past earliest-incomplete; allows jumps once every prior required step is valid). All 131 tests pass.
+- **Files:** `src/data/mock-taxonomy.ts` (new), `src/data/mock-items.ts`, `src/lib/promo-simulator/validation.ts` (new), `src/lib/promo-simulator/taxonomy.ts`, `src/lib/promo-simulator/state.ts` (unchanged — Segment type broadened via `taxonomy.ts`), `src/contexts/PromoTaxonomyContext.tsx`, `src/hooks/usePromoSimulator.ts`, `src/hooks/usePromoSimulator.test.ts`, `src/components/promo-simulator/Step1Brief.tsx`, `src/components/promo-simulator/PromoFullReport.tsx`, `src/components/promo-simulator/Step9Documentation.tsx`, `src/routes/category-manager/promo-simulator.tsx`.
+
+---
+
 ## 2026-04-18
 
 ### Category-manager page — full premium design pass (design-taste-frontend)

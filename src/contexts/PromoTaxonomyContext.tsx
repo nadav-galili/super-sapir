@@ -8,7 +8,7 @@
 // root, so step components consume what they need via `usePromoTaxonomy()`.
 // The taxonomy is still static data; the context simply makes the dependency
 // relationship explicit and single-sourced.
-import { createContext, useContext } from 'react'
+import { createContext, useContext } from "react";
 import {
   DURATION_WEEKS_OPTIONS,
   GOALS,
@@ -16,24 +16,21 @@ import {
   promoDetails,
   purposeMap,
   SALES_ARENAS,
-  SEGMENTS,
   STEPS,
   type Goal,
   type PromoDetails,
   type PromoTypeInfo,
   type SalesArena,
-  type Segment,
-} from '@/lib/promo-simulator/taxonomy'
+} from "@/lib/promo-simulator/taxonomy";
 
 export interface PromoTaxonomy {
-  goals: Goal[]
-  goalDescriptions: Record<Goal, string>
-  purposeMap: Record<Goal, PromoTypeInfo[]>
-  promoDetails: Record<string, PromoDetails>
-  salesArenas: readonly SalesArena[]
-  segments: readonly Segment[]
-  durationWeeksOptions: typeof DURATION_WEEKS_OPTIONS
-  steps: typeof STEPS
+  goals: Goal[];
+  goalDescriptions: Record<Goal, string>;
+  purposeMap: Record<Goal, PromoTypeInfo[]>;
+  promoDetails: Record<string, PromoDetails>;
+  salesArenas: readonly SalesArena[];
+  durationWeeksOptions: typeof DURATION_WEEKS_OPTIONS;
+  steps: typeof STEPS;
 }
 
 export const DEFAULT_PROMO_TAXONOMY: PromoTaxonomy = {
@@ -42,15 +39,16 @@ export const DEFAULT_PROMO_TAXONOMY: PromoTaxonomy = {
   purposeMap,
   promoDetails,
   salesArenas: SALES_ARENAS,
-  segments: SEGMENTS,
   durationWeeksOptions: DURATION_WEEKS_OPTIONS,
   steps: STEPS,
-}
+};
 
-const PromoTaxonomyContext = createContext<PromoTaxonomy>(DEFAULT_PROMO_TAXONOMY)
+const PromoTaxonomyContext = createContext<PromoTaxonomy>(
+  DEFAULT_PROMO_TAXONOMY
+);
 
-export const PromoTaxonomyProvider = PromoTaxonomyContext.Provider
+export const PromoTaxonomyProvider = PromoTaxonomyContext.Provider;
 
 export function usePromoTaxonomy(): PromoTaxonomy {
-  return useContext(PromoTaxonomyContext)
+  return useContext(PromoTaxonomyContext);
 }

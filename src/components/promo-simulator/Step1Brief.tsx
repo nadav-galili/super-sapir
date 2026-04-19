@@ -1,36 +1,42 @@
-import { useMemo } from 'react'
-import { Archive, Database, BookOpen } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useMemo } from "react";
+import { Archive, Database, BookOpen } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { getCategorySummaries } from '@/data/mock-categories'
-import { usePromoTaxonomy } from '@/contexts/PromoTaxonomyContext'
-import type { BriefSlice, SliceSetter } from '@/lib/promo-simulator/state'
+} from "@/components/ui/select";
+import { getCategorySummaries } from "@/data/mock-categories";
+import { getSegmentsByDepartmentName } from "@/data/mock-taxonomy";
+import { getItemsBySegment } from "@/data/mock-items";
+import { DEPARTMENT_NAMES } from "@/data/constants";
+import { usePromoTaxonomy } from "@/contexts/PromoTaxonomyContext";
+import type { BriefSlice, SliceSetter } from "@/lib/promo-simulator/state";
 
 interface Step1BriefProps {
-  brief: BriefSlice
-  onChange: SliceSetter<BriefSlice>
+  brief: BriefSlice;
+  onChange: SliceSetter<BriefSlice>;
+  errorKeys?: ReadonlySet<keyof BriefSlice>;
 }
 
-const LABEL =
-  'text-[15px] font-medium text-[#4A5568] mb-1.5 block'
+const LABEL = "text-[15px] font-medium text-[#4A5568] mb-1.5 block";
 
 const INPUT_CLS =
-  'flex h-10 w-full items-center rounded-[10px] border border-[#FFE8DE] bg-white px-3 py-2 text-[16px] text-[#2D3748] shadow-sm transition-colors hover:bg-[#FDF8F6] focus:outline-none focus:ring-2 focus:ring-[#DC4E59]/20 focus:border-[#DC4E59]/40'
+  "flex h-10 w-full items-center rounded-[10px] border border-[#FFE8DE] bg-white px-3 py-2 text-[16px] text-[#2D3748] shadow-sm transition-colors hover:bg-[#FDF8F6] focus:outline-none focus:ring-2 focus:ring-[#DC4E59]/20 focus:border-[#DC4E59]/40";
+
+const ERROR_RING =
+  "border-[#F43F5E] focus:border-[#F43F5E] focus:ring-[#F43F5E]/25";
 
 function InfoCard({
   icon: Icon,
   title,
   description,
 }: {
-  icon: typeof Archive
-  title: string
-  description: string
+  icon: typeof Archive;
+  title: string;
+  description: string;
 }) {
   return (
     <Card className="border-[#FFE8DE] rounded-[16px] bg-white">
@@ -38,7 +44,7 @@ function InfoCard({
         <CardTitle className="text-xl flex items-center gap-2 text-[#2D3748]">
           <span
             className="w-8 h-8 rounded-[10px] flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg, #2EC4D5, #5DD8E3)' }}
+            style={{ background: "linear-gradient(135deg, #2EC4D5, #5DD8E3)" }}
           >
             <Icon className="w-4 h-4 text-white" />
           </span>
@@ -49,20 +55,39 @@ function InfoCard({
         <p className="text-lg text-[#4A5568] leading-relaxed">{description}</p>
       </CardContent>
     </Card>
-  )
+  );
 }
 
-export function Step1Brief({ brief, onChange }: Step1BriefProps) {
-  const categories = useMemo(() => getCategorySummaries(), [])
-  const { segments, salesArenas, durationWeeksOptions } = usePromoTaxonomy()
+export function Step1Brief({ brief, onChange, errorKeys }: Step1BriefProps) {
+  const categories = useMemo(() => getCategorySummaries(), []);
+  const { salesArenas, durationWeeksOptions } = usePromoTaxonomy();
+
+  // Segments depend on the chosen Category (Department).
+  const segments = useMemo(
+    () => getSegmentsByDepartmentName(brief.category, DEPARTMENT_NAMES),
+    [brief.category]
+  );
+
+  // Products depend on the chosen Segment.
+  const products = useMemo(
+    () => (brief.segment ? getItemsBySegment(brief.segment) : []),
+    [brief.segment]
+  );
+
+  const hasError = (k: keyof BriefSlice) => errorKeys?.has(k) ?? false;
+  const triggerCls = (k: keyof BriefSlice) =>
+    `text-[16px] ${hasError(k) ? ERROR_RING : ""}`;
+  const inputCls = (k: keyof BriefSlice) =>
+    `${INPUT_CLS} ${hasError(k) ? ERROR_RING : ""}`;
+
+  const segmentDisabled = !brief.category;
+  const productDisabled = !brief.segment;
 
   return (
     <div className="space-y-6">
       <Card className="border-[#FFE8DE] rounded-[16px]">
         <CardHeader>
-          <CardTitle className="text-2xl text-[#2D3748]">
-            רקע / בריף
-          </CardTitle>
+          <CardTitle className="text-2xl text-[#2D3748]">רקע / בריף</CardTitle>
           <p className="text-lg text-[#4A5568]">
             פרטי המבצע, הקטגוריה, הקמעונאי ולוח הזמנים
           </p>
@@ -77,7 +102,10 @@ export function Step1Brief({ brief, onChange }: Step1BriefProps) {
                 value={brief.category}
                 onValueChange={(v) => onChange({ category: v })}
               >
-                <SelectTrigger id="f-category" className="text-[16px]">
+                <SelectTrigger
+                  id="f-category"
+                  className={triggerCls("category")}
+                >
                   <SelectValue placeholder="בחר קטגוריה" />
                 </SelectTrigger>
                 <SelectContent>
@@ -100,17 +128,20 @@ export function Step1Brief({ brief, onChange }: Step1BriefProps) {
               </label>
               <Select
                 value={brief.segment || undefined}
-                onValueChange={(v) =>
-                  onChange({ segment: v as BriefSlice['segment'] })
-                }
+                onValueChange={(v) => onChange({ segment: v })}
+                disabled={segmentDisabled}
               >
-                <SelectTrigger id="f-segment" className="text-[16px]">
-                  <SelectValue placeholder="בחר סגמנט" />
+                <SelectTrigger id="f-segment" className={triggerCls("segment")}>
+                  <SelectValue
+                    placeholder={
+                      segmentDisabled ? "בחר קטגוריה קודם" : "בחר סגמנט"
+                    }
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   {segments.map((s) => (
-                    <SelectItem key={s} value={s} className="text-[16px]">
-                      {s}
+                    <SelectItem key={s.id} value={s.id} className="text-[16px]">
+                      {s.nameHe}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -121,14 +152,30 @@ export function Step1Brief({ brief, onChange }: Step1BriefProps) {
               <label className={LABEL} htmlFor="f-product">
                 מוצר
               </label>
-              <input
-                id="f-product"
-                type="text"
-                value={brief.product}
-                onChange={(e) => onChange({ product: e.target.value })}
-                placeholder="שם המוצר"
-                className={INPUT_CLS}
-              />
+              <Select
+                value={brief.product || undefined}
+                onValueChange={(v) => onChange({ product: v })}
+                disabled={productDisabled}
+              >
+                <SelectTrigger id="f-product" className={triggerCls("product")}>
+                  <SelectValue
+                    placeholder={
+                      productDisabled ? "בחר סגמנט קודם" : "בחר מוצר"
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {products.map((p) => (
+                    <SelectItem
+                      key={p.id}
+                      value={p.nameHe}
+                      className="text-[16px]"
+                    >
+                      {p.nameHe}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
@@ -138,10 +185,13 @@ export function Step1Brief({ brief, onChange }: Step1BriefProps) {
               <Select
                 value={brief.salesArena || undefined}
                 onValueChange={(v) =>
-                  onChange({ salesArena: v as BriefSlice['salesArena'] })
+                  onChange({ salesArena: v as BriefSlice["salesArena"] })
                 }
               >
-                <SelectTrigger id="f-arena" className="text-[16px]">
+                <SelectTrigger
+                  id="f-arena"
+                  className={triggerCls("salesArena")}
+                >
                   <SelectValue placeholder="בחר זירה" />
                 </SelectTrigger>
                 <SelectContent>
@@ -176,7 +226,7 @@ export function Step1Brief({ brief, onChange }: Step1BriefProps) {
                 type="date"
                 value={brief.startDate}
                 onChange={(e) => onChange({ startDate: e.target.value })}
-                className={INPUT_CLS}
+                className={inputCls("startDate")}
                 dir="ltr"
               />
             </div>
@@ -189,7 +239,10 @@ export function Step1Brief({ brief, onChange }: Step1BriefProps) {
                 value={String(brief.durationWeeks)}
                 onValueChange={(v) => onChange({ durationWeeks: Number(v) })}
               >
-                <SelectTrigger id="f-duration" className="text-[16px]">
+                <SelectTrigger
+                  id="f-duration"
+                  className={triggerCls("durationWeeks")}
+                >
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -216,7 +269,7 @@ export function Step1Brief({ brief, onChange }: Step1BriefProps) {
                 value={brief.salesOwner}
                 onChange={(e) => onChange({ salesOwner: e.target.value })}
                 placeholder="שם האחראי"
-                className={INPUT_CLS}
+                className={inputCls("salesOwner")}
               />
             </div>
           </div>
@@ -241,5 +294,5 @@ export function Step1Brief({ brief, onChange }: Step1BriefProps) {
         />
       </div>
     </div>
-  )
+  );
 }
