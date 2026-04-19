@@ -23,6 +23,11 @@ function getTargetPct(s: ChainSupplier) {
 }
 
 // ─── Sort header cell ─────────────────────────────────────────────────────────
+// Alignment note: body cells in this table have no explicit text-align, so
+// they render at the RTL start (right). Headers use `text-start` +
+// `justify-start` so the header label sits directly above the numeric value
+// in every column (previously headers were text-end / justify-end, which
+// pushed them to the left while values stayed on the right — misaligned).
 function SortableHeader({
   children,
   column,
@@ -37,7 +42,7 @@ function SortableHeader({
   const active = sortKey === column;
   return (
     <th
-      className="py-3 px-4 text-end font-medium cursor-pointer select-none transition-colors"
+      className="py-3 px-4 text-start font-medium cursor-pointer select-none transition-colors"
       style={{
         fontSize: 15,
         letterSpacing: "0.08em",
@@ -46,7 +51,7 @@ function SortableHeader({
       }}
       onClick={() => onSort(column)}
     >
-      <span className="inline-flex items-center gap-1.5 justify-end">
+      <span className="inline-flex items-center gap-1.5 justify-start">
         {children}
       </span>
     </th>
@@ -280,46 +285,49 @@ export function SuppliersTable() {
                 </>
               );
 
+              // Row-level accent + shimmer are applied via tr box-shadow /
+              // animated backgroundColor, NOT via an extra absolute <td>.
+              // An extra <td colSpan={5}> (even with display:block) breaks
+              // table column layout, causing the header cells to drift out
+              // of alignment with the body cells.
               if (isTopRank) {
                 return (
                   <motion.tr
                     key={sup.id}
                     initial={{ opacity: 0, x: 10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{
-                      type: "spring",
-                      stiffness: 100,
-                      damping: 20,
-                      delay: i * 0.06,
+                    animate={{
+                      opacity: 1,
+                      x: 0,
+                      backgroundColor: [
+                        "rgba(220,78,89,0.04)",
+                        "rgba(220,78,89,0.09)",
+                        "rgba(220,78,89,0.04)",
+                      ],
                     }}
-                    className="relative"
+                    transition={{
+                      opacity: {
+                        type: "spring",
+                        stiffness: 100,
+                        damping: 20,
+                        delay: i * 0.06,
+                      },
+                      x: {
+                        type: "spring",
+                        stiffness: 100,
+                        damping: 20,
+                        delay: i * 0.06,
+                      },
+                      backgroundColor: {
+                        duration: 5,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                      },
+                    }}
+                    // inset box-shadow: 2px accent strip on the left visual
+                    // edge (RTL inline-end). 2px offset from the right draws
+                    // the strip on the opposite edge.
+                    style={{ boxShadow: "inset 2px 0 0 0 #DC4E59" }}
                   >
-                    {/* Perpetual shimmer: opacity oscillates 0.04 → 0.08 → 0.04 */}
-                    <td
-                      colSpan={5}
-                      className="absolute inset-0 pointer-events-none"
-                      aria-hidden
-                      style={{ padding: 0, border: "none", display: "block" }}
-                    >
-                      <motion.div
-                        className="absolute inset-0"
-                        animate={{ opacity: [0.04, 0.08, 0.04] }}
-                        transition={{
-                          duration: 5,
-                          repeat: Infinity,
-                          ease: "easeInOut",
-                        }}
-                        style={{
-                          background:
-                            "linear-gradient(90deg, transparent 0%, rgba(220,78,89,0.5) 50%, transparent 100%)",
-                        }}
-                      />
-                      {/* 2px RTL-start (inline-end) accent strip */}
-                      <div
-                        className="absolute top-0 end-0 bottom-0 w-0.5 bg-[#DC4E59]"
-                        style={{ borderRadius: 2 }}
-                      />
-                    </td>
                     {rowCells}
                   </motion.tr>
                 );
@@ -336,20 +344,8 @@ export function SuppliersTable() {
                     damping: 20,
                     delay: i * 0.06,
                   }}
-                  className="relative group hover:bg-[#FDF8F6] transition-colors"
+                  className="transition-all hover:bg-[#FDF8F6] hover:shadow-[inset_2px_0_0_0_#DC4E59]"
                 >
-                  {/* 2px RTL-start accent strip on hover */}
-                  <td
-                    colSpan={5}
-                    className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity"
-                    aria-hidden
-                    style={{ padding: 0, border: "none", display: "block" }}
-                  >
-                    <div
-                      className="absolute top-0 end-0 bottom-0 w-0.5 bg-[#DC4E59]"
-                      style={{ borderRadius: 2 }}
-                    />
-                  </td>
                   {rowCells}
                 </motion.tr>
               );

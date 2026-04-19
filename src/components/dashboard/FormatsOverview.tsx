@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { motion } from "motion/react";
-import { TrendingUp, TrendingDown } from "lucide-react";
+import { TrendingUp, TrendingDown, Target } from "lucide-react";
 import { getSalesColor } from "@/lib/kpi/resolvers";
 import { formatCurrencyShort } from "@/lib/format";
 import {
@@ -219,19 +219,28 @@ export function FormatsOverview({ period }: { period: TimePeriod }) {
   );
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <FormatCard
-        title="חנויות גדולות"
-        branchCount={bigBranches.length}
-        kpis={bigKpis}
-        delay={0.1}
-      />
-      <FormatCard
-        title="חנויות עיר"
-        branchCount={cityBranches.length}
-        kpis={cityKpis}
-        delay={0.2}
-      />
+    <div className="space-y-3">
+      <div className="flex items-center gap-2 text-[15px] text-[#4A5568]">
+        <Target className="w-4 h-4 text-[#DC4E59]" />
+        <span>
+          הפסים מציגים ביצוע בפועל מול היעד — אורך הפס = אחוז עמידה ביעד
+          התקופתי.
+        </span>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <FormatCard
+          title="חנויות גדולות"
+          branchCount={bigBranches.length}
+          kpis={bigKpis}
+          delay={0.1}
+        />
+        <FormatCard
+          title="חנויות עיר"
+          branchCount={cityBranches.length}
+          kpis={cityKpis}
+          delay={0.2}
+        />
+      </div>
     </div>
   );
 }
