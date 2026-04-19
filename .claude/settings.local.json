@@ -20,7 +20,8 @@
       "Bash(kill 38604 38635 38664 38665 39089)",
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
-      "Bash(gh api *)"
+      "Bash(gh api *)",
+      "Bash(bun x *)"
     ]
   }
 }
