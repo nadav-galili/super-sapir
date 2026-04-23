@@ -6,6 +6,54 @@
 
 ---
 
+## 2026-04-23
+
+### Promo Simulator — terminology & copy fixes
+
+- Renamed the "מבצע צלב-קטגוריה" promo type to "מבצע חוצה קטגוריות" — the "צלב" root literally means "cross" (as in the Christian cross) and was culturally awkward. Affected: `taxonomy.ts` (promo list + copy key), and the same terminology in `narrative.ts`. "שיעור ההצלבה" in the narrative body was replaced with the cleaner "שיעור הצירוף לסל".
+- Shortened the `AINarrative` section title from "ניתוח AI — פרשנות יועץ" to simply "הסבר" (a more direct label that reflects how the block is actually used in the simulator).
+
+### Promo Simulator — remove "מותג פרטי" KPI (chain has no private label)
+
+- Dropped the 5 `private-label` ("מותג פרטי") entries from `getCategoryKpis` in `src/data/mock-promo-history.ts` — affected categories: מכולת, נון-פוד, לחם ומאפים, תינוקות, אורגני ובריאות. Those categories now surface 5 KPIs each; the rest still carry 6. `BackgroundDataSheet`'s hero + compact-grid layout adapts automatically to the new count.
+
+### Promo Simulator Step 1 — premium sheet refactor + read-only category manager
+
+Applied the `design-taste-frontend` skill (DESIGN_VARIANCE=8, MOTION_INTENSITY=6, VISUAL_DENSITY=4) to both Step 1 side sheets, and converted the category-manager field from an editable input to a read-only display.
+
+- **ArchiveSheet — full visual rebuild.** Replaced uniform-card layout with asymmetric bento: accent pill tag + big display title (`text-5xl tracking-tight leading-[1.05]`) on one side, meta chip on the other. Added an inline summary rail (`border-y`, no boxes) showing total / avg uplift / success rate in monospace tracking-tight. Historical promo rows now have a 3px vertical outcome-accent bar on the RTL-start edge (no full card tint), split into asymmetric stats: a huge monospace uplift number on one side, a `divide-x rtl:divide-x-reverse` 3-up stats row on the other (יחידות / פדיון / ROI — all `font-mono`). Metadata line is inline dots-separated (no stat boxes). Learnings moved from a grey box to a `border-s-2 border-[#DC4E59]/30` quoted blockquote with a `Quote` icon. Featured (first) promo gets a larger treatment (bigger display + bigger uplift). Buy-and-get tiles use a 2px top gradient stripe + inline condition→benefit pills. All cards have diffusion shadows (`shadow-[0_20px_40px_-24px_rgba(220,78,89,0.18)]`), spring hover lift (`whileHover={{ y: -2 }}`, stiffness 200 damping 22), and Framer Motion staggered entrance (stiffness 120 damping 22, 60ms stagger).
+- **BackgroundDataSheet — asymmetric bento KPIs.** Same header treatment (accent pill + display title). Replaced the flat 3-column KPI grid with a bento: one Featured KPI with a hero treatment (`text-6xl font-mono`, "מדד מוביל" label, wider layout) + the remaining 5 KPIs in a responsive 2/3-col compact grid. All KPIs have a short vertical accent rule on the start edge in traffic-light color. Historical promos use the same `divide-x` 4-up stats row pattern as ArchiveSheet for consistency. Same staggered Motion orchestration.
+- **Typography consistency**: monospace on every number, `tracking-tight` on displays, `uppercase tracking-[0.12em]` on stat labels (label/caps style), `leading-relaxed` on body, `max-w-[54ch]` on paragraphs.
+- **Anti-AI-tells applied**: no 3-equal-card feature row (replaced with bento), no centered hero, no gradient text on headers, no neon glow (diffusion shadows only, tinted to accent).
+- **Scroll + overflow**: both sheets use `h-screen max-h-screen overflow-y-auto p-0` with inner `px-8 pb-20 pt-10 md:px-12` so content breathes and the bottom never clips.
+- **Category manager field is now read-only.** Removed the text input in favor of a readonly display (`READONLY_CLS`) — the manager is determined by the chosen category via `CATEGORY_MANAGERS` and should not be hand-edited. Shows a muted placeholder "ייבחר אוטומטית לפי הקטגוריה" until a category is picked.
+- **Files:** `src/components/promo-simulator/ArchiveSheet.tsx`, `src/components/promo-simulator/BackgroundDataSheet.tsx`, `src/components/promo-simulator/Step1Brief.tsx`.
+
+### Promo Simulator Step 1 — archive narrowed to promotions, data sheet scroll fix
+
+Follow-up fixes to the Phase 1 rollout.
+
+- **ArchiveSheet is now promotion-only.** Removed the 4-card YTD strip (YTD sales, YTD growth, chain growth, vs-chain) and the 12-month grouped bar chart (sales/target/last year) — those belonged to the category dashboard, not to an archive of past promotions. Dropped the now-unused Recharts imports and the `getCategoryYtdStats` call. The sheet now shows only: header + "מבצעים קודמים" list + "מבצעי קנה וקבל ברשת בקטגוריה" grid. Header title changed to "ארכיון מבצעים — {category}" and subtitle focuses on learnings from prior promos.
+- **BackgroundDataSheet overflow fix.** The sheet was cut off at the bottom with no scroll reachable. Added `h-screen max-h-screen` to explicitly bind the sheet height to the viewport so `overflow-y-auto` has a concrete constraint to scroll against, plus `pb-16` so the last card isn't flush against the bottom edge. Same classes applied to ArchiveSheet for consistency.
+- **Files:** `src/components/promo-simulator/ArchiveSheet.tsx`, `src/components/promo-simulator/BackgroundDataSheet.tsx`.
+
+### Promo Simulator Step 1 — category manager, end date, archive/data sheets, format field
+
+Phase 1 overhaul driven by a team of parallel agents (mock data + two sheet components). All 131 tests pass; typecheck clean.
+
+- **Field rename: `salesOwner` → `categoryManager`.** Renamed across `BriefSlice`, `SimulatorState`, `SimulatorSearch`, URL codec (`decodeState`/`encodeState`/`validateSimulatorSearch`), validation, route, `PromoFullReport`, and test fixture. Label changed from "אחראי מכירות" to "מנהל קטגוריה". The field auto-populates based on the chosen category via `CATEGORY_MANAGERS` (hardcoded Hebrew names for all 14 categories). Still editable — the user can override.
+- **End date field.** Added a read-only "תאריך סיום" display next to "תאריך התחלה". Dynamically computed as `startDate + durationWeeks * 7` via a local `computeEndDate` helper. Renders `dir="ltr"` in the warm readonly style.
+- **Product no longer required.** Removed `product` from `missingFieldsForStep(1)`. Product select placeholder now reads "בחר מוצר — או השאר ריק לכל הסגמנט" and the label is suffixed with "(אופציונלי)". A manager can run a promo for a whole segment.
+- **Format (פורמט) replaces Arena (זירה).** `SALES_ARENAS` updated from `["מאורגן", "פרטי", "On The Go"]` to `["שכונתי", "גדול", "כלל הרשת"]`. Label "זירה" → "פורמט" in Step1Brief, validation missing-fields, `Step9Documentation` table header, and `PromoFullReport` row. Test fixture updated.
+- **Removed "מאגר ידע" card.** Info cards grid is now 2 columns. `BookOpen` import removed.
+- **Archive & Data cards are clickable.** Both `ClickableInfoCard`s open full-width side sheets. Disabled (with explanatory copy) until a category is selected.
+- **New `ArchiveSheet` component** (`src/components/promo-simulator/ArchiveSheet.tsx`). For the chosen category/product: 4 YTD KPI strip (YTD sales, YTD growth, chain YTD growth, vs-chain diff) colored via `getGrowthColor`; 12-month grouped Recharts bar chart (sales / target / last year) wrapped in `dir="ltr"`; historical promo cards (product-match first, then category) with type chip, date range, uplift colored via `getUpliftColor`, revenue/ROI/outcome badge, learnings text; buy-and-get section listing chain "קנה X קבל Y" promos involving the category.
+- **New `BackgroundDataSheet` component** (`src/components/promo-simulator/BackgroundDataSheet.tsx`). For the chosen category: 6 KPIs in a responsive 1/2/3-col grid, each with label / value (status-colored) / trend arrow / delta / optional benchmark / description. Plus the first 2 historical promos with full stats strip (base→actual, uplift, revenue, ROI) and outcome badge + learnings.
+- **New mock data module** (`src/data/mock-promo-history.ts`). 46 historical promotions across all 14 categories (mix of product-level and category-wide, varied outcomes), `CATEGORY_MANAGERS` map, `ytdStatsList` with realistic 12-month seasonality benchmarked against a 6.4% chain YTD growth, 32 buy-and-get promos, and `getCategoryKpis` returning 6 curated KPIs per category (fresh categories lean on waste/turnover; grocery on promo share/price index; etc.). Pure data file, no side effects.
+- **Files:** `src/data/mock-promo-history.ts` (new), `src/components/promo-simulator/ArchiveSheet.tsx` (new), `src/components/promo-simulator/BackgroundDataSheet.tsx` (new), `src/components/promo-simulator/Step1Brief.tsx`, `src/lib/promo-simulator/state.ts`, `src/lib/promo-simulator/taxonomy.ts`, `src/lib/promo-simulator/validation.ts`, `src/components/promo-simulator/PromoFullReport.tsx`, `src/components/promo-simulator/Step9Documentation.tsx`, `src/routes/category-manager/promo-simulator.tsx`, `src/hooks/usePromoSimulator.test.ts`.
+
+---
+
 ## 2026-04-19
 
 ### Promo Simulator — cascading Category/Segment/Product + per-step validation

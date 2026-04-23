@@ -1,5 +1,5 @@
-import { useMemo } from "react";
-import { Archive, Database, BookOpen } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Archive, Database } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
@@ -12,7 +12,10 @@ import { getCategorySummaries } from "@/data/mock-categories";
 import { getSegmentsByDepartmentName } from "@/data/mock-taxonomy";
 import { getItemsBySegment } from "@/data/mock-items";
 import { DEPARTMENT_NAMES } from "@/data/constants";
+import { CATEGORY_MANAGERS } from "@/data/mock-promo-history";
 import { usePromoTaxonomy } from "@/contexts/PromoTaxonomyContext";
+import { ArchiveSheet } from "./ArchiveSheet";
+import { BackgroundDataSheet } from "./BackgroundDataSheet";
 import type { BriefSlice, SliceSetter } from "@/lib/promo-simulator/state";
 
 interface Step1BriefProps {
@@ -29,38 +32,71 @@ const INPUT_CLS =
 const ERROR_RING =
   "border-[#F43F5E] focus:border-[#F43F5E] focus:ring-[#F43F5E]/25";
 
-function InfoCard({
-  icon: Icon,
-  title,
-  description,
-}: {
+const READONLY_CLS =
+  "flex h-10 w-full items-center rounded-[10px] border border-[#FFE8DE] bg-[#FDF8F6] px-3 py-2 text-[16px] text-[#2D3748] shadow-sm";
+
+// Compute end date = startDate + durationWeeks * 7 (YYYY-MM-DD).
+function computeEndDate(startDate: string, durationWeeks: number): string {
+  if (!startDate || !Number.isFinite(durationWeeks) || durationWeeks <= 0)
+    return "";
+  const d = new Date(startDate);
+  if (Number.isNaN(d.getTime())) return "";
+  d.setDate(d.getDate() + Math.round(durationWeeks * 7));
+  return d.toISOString().slice(0, 10);
+}
+
+interface ClickableInfoCardProps {
   icon: typeof Archive;
   title: string;
   description: string;
-}) {
+  onClick: () => void;
+  disabled?: boolean;
+}
+
+function ClickableInfoCard({
+  icon: Icon,
+  title,
+  description,
+  onClick,
+  disabled,
+}: ClickableInfoCardProps) {
   return (
-    <Card className="border-[#FFE8DE] rounded-[16px] bg-white">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-xl flex items-center gap-2 text-[#2D3748]">
-          <span
-            className="w-8 h-8 rounded-[10px] flex items-center justify-center"
-            style={{ background: "linear-gradient(135deg, #2EC4D5, #5DD8E3)" }}
-          >
-            <Icon className="w-4 h-4 text-white" />
-          </span>
-          {title}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p className="text-lg text-[#4A5568] leading-relaxed">{description}</p>
-      </CardContent>
-    </Card>
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className="text-right w-full disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[#DC4E59]/20 rounded-[16px]"
+    >
+      <Card className="border-[#FFE8DE] rounded-[16px] bg-white transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(220,78,89,0.08)]">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-xl flex items-center gap-2 text-[#2D3748]">
+            <span
+              className="w-8 h-8 rounded-[10px] flex items-center justify-center"
+              style={{
+                background: "linear-gradient(135deg, #2EC4D5, #5DD8E3)",
+              }}
+            >
+              <Icon className="w-4 h-4 text-white" />
+            </span>
+            {title}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-lg text-[#4A5568] leading-relaxed">
+            {description}
+          </p>
+        </CardContent>
+      </Card>
+    </button>
   );
 }
 
 export function Step1Brief({ brief, onChange, errorKeys }: Step1BriefProps) {
   const categories = useMemo(() => getCategorySummaries(), []);
   const { salesArenas, durationWeeksOptions } = usePromoTaxonomy();
+
+  const [archiveOpen, setArchiveOpen] = useState(false);
+  const [dataOpen, setDataOpen] = useState(false);
 
   // Segments depend on the chosen Category (Department).
   const segments = useMemo(
@@ -74,6 +110,22 @@ export function Step1Brief({ brief, onChange, errorKeys }: Step1BriefProps) {
     [brief.segment]
   );
 
+  // Auto-populate category manager based on chosen category.
+  useEffect(() => {
+    const mapped = brief.category
+      ? (CATEGORY_MANAGERS[brief.category] ?? "")
+      : "";
+    if (mapped && mapped !== brief.categoryManager) {
+      onChange({ categoryManager: mapped });
+    }
+    if (!brief.category && brief.categoryManager) {
+      onChange({ categoryManager: "" });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [brief.category]);
+
+  const endDate = computeEndDate(brief.startDate, brief.durationWeeks);
+
   const hasError = (k: keyof BriefSlice) => errorKeys?.has(k) ?? false;
   const triggerCls = (k: keyof BriefSlice) =>
     `text-[16px] ${hasError(k) ? ERROR_RING : ""}`;
@@ -82,6 +134,7 @@ export function Step1Brief({ brief, onChange, errorKeys }: Step1BriefProps) {
 
   const segmentDisabled = !brief.category;
   const productDisabled = !brief.segment;
+  const infoCardsDisabled = !brief.category;
 
   return (
     <div className="space-y-6">
@@ -150,7 +203,10 @@ export function Step1Brief({ brief, onChange, errorKeys }: Step1BriefProps) {
 
             <div>
               <label className={LABEL} htmlFor="f-product">
-                מוצר
+                מוצר{" "}
+                <span className="text-[13px] text-[#A0AEC0] font-normal">
+                  (אופציונלי)
+                </span>
               </label>
               <Select
                 value={brief.product || undefined}
@@ -160,7 +216,9 @@ export function Step1Brief({ brief, onChange, errorKeys }: Step1BriefProps) {
                 <SelectTrigger id="f-product" className={triggerCls("product")}>
                   <SelectValue
                     placeholder={
-                      productDisabled ? "בחר סגמנט קודם" : "בחר מוצר"
+                      productDisabled
+                        ? "בחר סגמנט קודם"
+                        : "בחר מוצר — או השאר ריק לכל הסגמנט"
                     }
                   />
                 </SelectTrigger>
@@ -180,7 +238,7 @@ export function Step1Brief({ brief, onChange, errorKeys }: Step1BriefProps) {
 
             <div>
               <label className={LABEL} htmlFor="f-arena">
-                זירה
+                פורמט
               </label>
               <Select
                 value={brief.salesArena || undefined}
@@ -192,7 +250,7 @@ export function Step1Brief({ brief, onChange, errorKeys }: Step1BriefProps) {
                   id="f-arena"
                   className={triggerCls("salesArena")}
                 >
-                  <SelectValue placeholder="בחר זירה" />
+                  <SelectValue placeholder="בחר פורמט" />
                 </SelectTrigger>
                 <SelectContent>
                   {salesArenas.map((s) => (
@@ -232,6 +290,21 @@ export function Step1Brief({ brief, onChange, errorKeys }: Step1BriefProps) {
             </div>
 
             <div>
+              <label className={LABEL} htmlFor="f-end">
+                תאריך סיום
+              </label>
+              <div
+                id="f-end"
+                className={READONLY_CLS}
+                dir="ltr"
+                aria-readonly="true"
+                aria-label="תאריך סיום מחושב לפי משך המבצע"
+              >
+                {endDate || "—"}
+              </div>
+            </div>
+
+            <div>
               <label className={LABEL} htmlFor="f-duration">
                 משך מבצע
               </label>
@@ -260,39 +333,62 @@ export function Step1Brief({ brief, onChange, errorKeys }: Step1BriefProps) {
             </div>
 
             <div>
-              <label className={LABEL} htmlFor="f-owner">
-                אחראי מכירות
+              <label className={LABEL} htmlFor="f-manager">
+                מנהל קטגוריה
               </label>
-              <input
-                id="f-owner"
-                type="text"
-                value={brief.salesOwner}
-                onChange={(e) => onChange({ salesOwner: e.target.value })}
-                placeholder="שם האחראי"
-                className={inputCls("salesOwner")}
-              />
+              <div
+                id="f-manager"
+                className={READONLY_CLS}
+                aria-readonly="true"
+                aria-label="מנהל הקטגוריה מוגדר אוטומטית לפי הקטגוריה הנבחרת"
+              >
+                {brief.categoryManager || (
+                  <span className="text-[#A0AEC0]">
+                    ייבחר אוטומטית לפי הקטגוריה
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <InfoCard
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <ClickableInfoCard
           icon={Archive}
           title="ארכיון"
-          description="שלוף מבצעים דומים מהעבר כדי ללמוד מה עבד ומה לא — וקבל נקודת פתיחה מהירה."
+          description={
+            infoCardsDisabled
+              ? "בחר קטגוריה כדי לראות מבצעים דומים מהעבר"
+              : "שלוף מבצעים דומים מהעבר, סקור ביצועים ו-YTD מול הרשת, וקבל נקודת פתיחה מהירה."
+          }
+          onClick={() => setArchiveOpen(true)}
+          disabled={infoCardsDisabled}
         />
-        <InfoCard
+        <ClickableInfoCard
           icon={Database}
           title="נתונים / רקע"
-          description="הנתונים המוצגים מתבססים על ביצועי קטגוריה ברשת, לפי סניף, סגמנט ותקופה."
-        />
-        <InfoCard
-          icon={BookOpen}
-          title="מאגר ידע"
-          description="המערכת מכירה את סוגי המבצעים, ההשפעות הצפויות והטריגרים לצריכה בקטגוריות מזון."
+          description={
+            infoCardsDisabled
+              ? "בחר קטגוריה כדי לראות KPI-ים ומבצעים לדוגמה"
+              : "KPI-ים מובילים שמנהלי קטגוריה עוקבים אחריהם, עם מבצעים היסטוריים לדוגמה."
+          }
+          onClick={() => setDataOpen(true)}
+          disabled={infoCardsDisabled}
         />
       </div>
+
+      <ArchiveSheet
+        open={archiveOpen}
+        onOpenChange={setArchiveOpen}
+        category={brief.category}
+        product={brief.product}
+      />
+      <BackgroundDataSheet
+        open={dataOpen}
+        onOpenChange={setDataOpen}
+        category={brief.category}
+      />
     </div>
   );
 }

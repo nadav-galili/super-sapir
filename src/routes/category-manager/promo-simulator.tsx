@@ -120,7 +120,7 @@ function PromoSimulatorPage() {
           retailer: state.retailer,
           startDate: state.startDate,
           durationWeeks: state.durationWeeks,
-          salesOwner: state.salesOwner,
+          categoryManager: state.categoryManager,
         }}
         onChange={setState}
         errorKeys={briefErrorKeys}

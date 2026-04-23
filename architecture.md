@@ -77,6 +77,7 @@
 │   │   ├── mock-chain-promotions.ts    # Chain-wide promotion data with daily series
 │   │   ├── mock-items.ts               # Individual product data (stockout, top sales, promo) — tagged with segmentId
 │   │   ├── mock-taxonomy.ts             # Department → Segment taxonomy (drives promo-simulator cascades)
+│   │   ├── mock-promo-history.ts        # Historical promos, category managers, buy-and-get promos, per-category KPIs (promo-simulator sheets)
 │   │   ├── mock-regions.ts             # Region aggregates (North, Center, South)
 │   │   ├── mock-suppliers.ts           # Top suppliers with target/sales/margin
 │   │   ├── supplier-logos.ts           # Supplier → logo path mapping
@@ -125,13 +126,13 @@
 
 ## Route Map
 
-| Route                               | Page                            | Key Components                                                                                                             |
-| ----------------------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `/`                                 | Home                            | RoleCard                                                                                                                   |
-| `/store-manager`                    | Store manager (Hadera default)  | BranchInfoBar, KPIGrid, view system via `?view=`                                                                           |
-| `/store-manager/$branchId`          | Store manager (any branch)      | Same as above, uses getBranchReport() adapter from `src/data/`                                                             |
-| `/division-manager`                 | Division manager                | IsraelMap, BranchRankingTable, RegionDonutChart                                                                            |
-| `/division-manager/$regionId`       | Region drill-down               | Region-filtered branch list                                                                                                |
-| `/category-manager`                 | Trade management (ניהול סחר)    | HeroBanner, ChainAIBriefing, QuickStatCards, KPIGaugeRow, tabs (categories/suppliers/promotions)                           |
-| `/category-manager/$categoryId`     | Category drill-down             | KPIGrid, CategoryAIBriefing, CategorySuppliersDashboard, PromotionCard, alerts table                                       |
-| `/category-manager/promo-simulator` | Promo simulator (9-step wizard) | Stepper, Step1Brief (cascading Category→Segment→Product), Step2–9, LiveKPIPanel, AINarrative (templated), PromoSummaryCard |
+| Route                               | Page                            | Key Components                                                                                                                                                                                                               |
+| ----------------------------------- | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/`                                 | Home                            | RoleCard                                                                                                                                                                                                                     |
+| `/store-manager`                    | Store manager (Hadera default)  | BranchInfoBar, KPIGrid, view system via `?view=`                                                                                                                                                                             |
+| `/store-manager/$branchId`          | Store manager (any branch)      | Same as above, uses getBranchReport() adapter from `src/data/`                                                                                                                                                               |
+| `/division-manager`                 | Division manager                | IsraelMap, BranchRankingTable, RegionDonutChart                                                                                                                                                                              |
+| `/division-manager/$regionId`       | Region drill-down               | Region-filtered branch list                                                                                                                                                                                                  |
+| `/category-manager`                 | Trade management (ניהול סחר)    | HeroBanner, ChainAIBriefing, QuickStatCards, KPIGaugeRow, tabs (categories/suppliers/promotions)                                                                                                                             |
+| `/category-manager/$categoryId`     | Category drill-down             | KPIGrid, CategoryAIBriefing, CategorySuppliersDashboard, PromotionCard, alerts table                                                                                                                                         |
+| `/category-manager/promo-simulator` | Promo simulator (9-step wizard) | Stepper, Step1Brief (cascading Category→Segment→Product, auto-populated categoryManager, end-date display, ArchiveSheet + BackgroundDataSheet side sheets), Step2–9, LiveKPIPanel, AINarrative (templated), PromoSummaryCard |

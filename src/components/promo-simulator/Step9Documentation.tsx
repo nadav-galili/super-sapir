@@ -13,7 +13,7 @@ interface Step9DocumentationProps {
 
 const TABLE_HEADERS = [
   "סוג מבצע",
-  "זירה",
+  "פורמט",
   "קהל יעד",
   "התניה",
   "הטבה",

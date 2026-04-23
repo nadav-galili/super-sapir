@@ -93,14 +93,14 @@ export function PromoFullReport({ state, metrics: m }: PromoFullReportProps) {
         <Row label="קטגוריה" value={state.category} />
         <Row label="סגמנט" value={resolveSegmentLabel(state.segment)} />
         <Row label="מוצר" value={state.product} />
-        <Row label="זירת מכירה" value={state.salesArena} />
+        <Row label="פורמט" value={state.salesArena} />
         <Row label="רשת" value={state.retailer} />
         <Row label="תאריך תחילת מבצע" value={formatDateHe(state.startDate)} />
         <Row
           label="משך המבצע"
           value={state.durationWeeks ? `${state.durationWeeks} שבועות` : ""}
         />
-        <Row label="אחראי מכירות" value={state.salesOwner} />
+        <Row label="מנהל קטגוריה" value={state.categoryManager} />
       </Section>
 
       <Section title="מטרה וסוג מבצע">
