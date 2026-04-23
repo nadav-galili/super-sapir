@@ -153,10 +153,10 @@ export function HeroBanner({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      className="relative rounded-[20px] overflow-hidden shadow-[0_20px_40px_-15px_rgba(15,23,42,0.25)]"
+      className="relative z-20 rounded-[20px] shadow-[0_20px_40px_-15px_rgba(15,23,42,0.25)]"
     >
       <div
-        className="relative overflow-hidden p-6 sm:p-8 lg:p-10"
+        className="relative overflow-hidden rounded-[20px] p-6 sm:p-8 lg:p-10"
         style={{
           background:
             "radial-gradient(circle at 18% 18%, rgba(46,196,213,0.16) 0%, transparent 28%), radial-gradient(circle at 82% 12%, rgba(220,78,89,0.18) 0%, transparent 24%), linear-gradient(145deg, #0F172A 0%, #111B2E 48%, #0B1220 100%)",
@@ -282,9 +282,6 @@ export function HeroBanner({
                   <h2 className="mt-1 text-2xl font-bold leading-tight text-white">
                     מצב הרשת במבט אחד
                   </h2>
-                </div>
-                <div className="hidden rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-white/60 sm:block">
-                  יעד חודשי
                 </div>
               </div>
 
