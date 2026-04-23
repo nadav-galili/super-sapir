@@ -8,192 +8,213 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as StoreManagerIndexRouteImport } from './routes/store-manager/index'
-import { Route as DivisionManagerIndexRouteImport } from './routes/division-manager/index'
-import { Route as CategoryManagerIndexRouteImport } from './routes/category-manager/index'
-import { Route as StoreManagerBranchIdRouteImport } from './routes/store-manager/$branchId'
-import { Route as DivisionManagerRegionIdRouteImport } from './routes/division-manager/$regionId'
-import { Route as CategoryManagerPromoSimulatorRouteImport } from './routes/category-manager/promo-simulator'
-import { Route as CategoryManagerCategoryIdRouteImport } from './routes/category-manager/$categoryId'
+import { Route as rootRouteImport } from "./routes/__root";
+import { Route as IndexRouteImport } from "./routes/index";
+import { Route as StoreManagerIndexRouteImport } from "./routes/store-manager/index";
+import { Route as DivisionManagerIndexRouteImport } from "./routes/division-manager/index";
+import { Route as CategoryManagerIndexRouteImport } from "./routes/category-manager/index";
+import { Route as StoreManagerBranchIdRouteImport } from "./routes/store-manager/$branchId";
+import { Route as DivisionManagerRegionIdRouteImport } from "./routes/division-manager/$regionId";
+import { Route as CategoryManagerPromoSimulatorRouteImport } from "./routes/category-manager/promo-simulator";
+import { Route as CategoryManagerCategoryIdRouteImport } from "./routes/category-manager/$categoryId";
+import { Route as CategoryManagerSuppliersSupplierIdRouteImport } from "./routes/category-manager/suppliers/$supplierId";
 
 const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+  id: "/",
+  path: "/",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const StoreManagerIndexRoute = StoreManagerIndexRouteImport.update({
-  id: '/store-manager/',
-  path: '/store-manager/',
+  id: "/store-manager/",
+  path: "/store-manager/",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const DivisionManagerIndexRoute = DivisionManagerIndexRouteImport.update({
-  id: '/division-manager/',
-  path: '/division-manager/',
+  id: "/division-manager/",
+  path: "/division-manager/",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const CategoryManagerIndexRoute = CategoryManagerIndexRouteImport.update({
-  id: '/category-manager/',
-  path: '/category-manager/',
+  id: "/category-manager/",
+  path: "/category-manager/",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const StoreManagerBranchIdRoute = StoreManagerBranchIdRouteImport.update({
-  id: '/store-manager/$branchId',
-  path: '/store-manager/$branchId',
+  id: "/store-manager/$branchId",
+  path: "/store-manager/$branchId",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const DivisionManagerRegionIdRoute = DivisionManagerRegionIdRouteImport.update({
-  id: '/division-manager/$regionId',
-  path: '/division-manager/$regionId',
+  id: "/division-manager/$regionId",
+  path: "/division-manager/$regionId",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const CategoryManagerPromoSimulatorRoute =
   CategoryManagerPromoSimulatorRouteImport.update({
-    id: '/category-manager/promo-simulator',
-    path: '/category-manager/promo-simulator',
+    id: "/category-manager/promo-simulator",
+    path: "/category-manager/promo-simulator",
     getParentRoute: () => rootRouteImport,
-  } as any)
+  } as any);
 const CategoryManagerCategoryIdRoute =
   CategoryManagerCategoryIdRouteImport.update({
-    id: '/category-manager/$categoryId',
-    path: '/category-manager/$categoryId',
+    id: "/category-manager/$categoryId",
+    path: "/category-manager/$categoryId",
     getParentRoute: () => rootRouteImport,
-  } as any)
+  } as any);
+const CategoryManagerSuppliersSupplierIdRoute =
+  CategoryManagerSuppliersSupplierIdRouteImport.update({
+    id: "/category-manager/suppliers/$supplierId",
+    path: "/category-manager/suppliers/$supplierId",
+    getParentRoute: () => rootRouteImport,
+  } as any);
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/category-manager/$categoryId': typeof CategoryManagerCategoryIdRoute
-  '/category-manager/promo-simulator': typeof CategoryManagerPromoSimulatorRoute
-  '/division-manager/$regionId': typeof DivisionManagerRegionIdRoute
-  '/store-manager/$branchId': typeof StoreManagerBranchIdRoute
-  '/category-manager/': typeof CategoryManagerIndexRoute
-  '/division-manager/': typeof DivisionManagerIndexRoute
-  '/store-manager/': typeof StoreManagerIndexRoute
+  "/": typeof IndexRoute;
+  "/category-manager/$categoryId": typeof CategoryManagerCategoryIdRoute;
+  "/category-manager/promo-simulator": typeof CategoryManagerPromoSimulatorRoute;
+  "/division-manager/$regionId": typeof DivisionManagerRegionIdRoute;
+  "/store-manager/$branchId": typeof StoreManagerBranchIdRoute;
+  "/category-manager/": typeof CategoryManagerIndexRoute;
+  "/division-manager/": typeof DivisionManagerIndexRoute;
+  "/store-manager/": typeof StoreManagerIndexRoute;
+  "/category-manager/suppliers/$supplierId": typeof CategoryManagerSuppliersSupplierIdRoute;
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/category-manager/$categoryId': typeof CategoryManagerCategoryIdRoute
-  '/category-manager/promo-simulator': typeof CategoryManagerPromoSimulatorRoute
-  '/division-manager/$regionId': typeof DivisionManagerRegionIdRoute
-  '/store-manager/$branchId': typeof StoreManagerBranchIdRoute
-  '/category-manager': typeof CategoryManagerIndexRoute
-  '/division-manager': typeof DivisionManagerIndexRoute
-  '/store-manager': typeof StoreManagerIndexRoute
+  "/": typeof IndexRoute;
+  "/category-manager/$categoryId": typeof CategoryManagerCategoryIdRoute;
+  "/category-manager/promo-simulator": typeof CategoryManagerPromoSimulatorRoute;
+  "/division-manager/$regionId": typeof DivisionManagerRegionIdRoute;
+  "/store-manager/$branchId": typeof StoreManagerBranchIdRoute;
+  "/category-manager": typeof CategoryManagerIndexRoute;
+  "/division-manager": typeof DivisionManagerIndexRoute;
+  "/store-manager": typeof StoreManagerIndexRoute;
+  "/category-manager/suppliers/$supplierId": typeof CategoryManagerSuppliersSupplierIdRoute;
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/category-manager/$categoryId': typeof CategoryManagerCategoryIdRoute
-  '/category-manager/promo-simulator': typeof CategoryManagerPromoSimulatorRoute
-  '/division-manager/$regionId': typeof DivisionManagerRegionIdRoute
-  '/store-manager/$branchId': typeof StoreManagerBranchIdRoute
-  '/category-manager/': typeof CategoryManagerIndexRoute
-  '/division-manager/': typeof DivisionManagerIndexRoute
-  '/store-manager/': typeof StoreManagerIndexRoute
+  __root__: typeof rootRouteImport;
+  "/": typeof IndexRoute;
+  "/category-manager/$categoryId": typeof CategoryManagerCategoryIdRoute;
+  "/category-manager/promo-simulator": typeof CategoryManagerPromoSimulatorRoute;
+  "/division-manager/$regionId": typeof DivisionManagerRegionIdRoute;
+  "/store-manager/$branchId": typeof StoreManagerBranchIdRoute;
+  "/category-manager/": typeof CategoryManagerIndexRoute;
+  "/division-manager/": typeof DivisionManagerIndexRoute;
+  "/store-manager/": typeof StoreManagerIndexRoute;
+  "/category-manager/suppliers/$supplierId": typeof CategoryManagerSuppliersSupplierIdRoute;
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
+  fileRoutesByFullPath: FileRoutesByFullPath;
   fullPaths:
-    | '/'
-    | '/category-manager/$categoryId'
-    | '/category-manager/promo-simulator'
-    | '/division-manager/$regionId'
-    | '/store-manager/$branchId'
-    | '/category-manager/'
-    | '/division-manager/'
-    | '/store-manager/'
-  fileRoutesByTo: FileRoutesByTo
+    | "/"
+    | "/category-manager/$categoryId"
+    | "/category-manager/promo-simulator"
+    | "/division-manager/$regionId"
+    | "/store-manager/$branchId"
+    | "/category-manager/"
+    | "/division-manager/"
+    | "/store-manager/"
+    | "/category-manager/suppliers/$supplierId";
+  fileRoutesByTo: FileRoutesByTo;
   to:
-    | '/'
-    | '/category-manager/$categoryId'
-    | '/category-manager/promo-simulator'
-    | '/division-manager/$regionId'
-    | '/store-manager/$branchId'
-    | '/category-manager'
-    | '/division-manager'
-    | '/store-manager'
+    | "/"
+    | "/category-manager/$categoryId"
+    | "/category-manager/promo-simulator"
+    | "/division-manager/$regionId"
+    | "/store-manager/$branchId"
+    | "/category-manager"
+    | "/division-manager"
+    | "/store-manager"
+    | "/category-manager/suppliers/$supplierId";
   id:
-    | '__root__'
-    | '/'
-    | '/category-manager/$categoryId'
-    | '/category-manager/promo-simulator'
-    | '/division-manager/$regionId'
-    | '/store-manager/$branchId'
-    | '/category-manager/'
-    | '/division-manager/'
-    | '/store-manager/'
-  fileRoutesById: FileRoutesById
+    | "__root__"
+    | "/"
+    | "/category-manager/$categoryId"
+    | "/category-manager/promo-simulator"
+    | "/division-manager/$regionId"
+    | "/store-manager/$branchId"
+    | "/category-manager/"
+    | "/division-manager/"
+    | "/store-manager/"
+    | "/category-manager/suppliers/$supplierId";
+  fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  CategoryManagerCategoryIdRoute: typeof CategoryManagerCategoryIdRoute
-  CategoryManagerPromoSimulatorRoute: typeof CategoryManagerPromoSimulatorRoute
-  DivisionManagerRegionIdRoute: typeof DivisionManagerRegionIdRoute
-  StoreManagerBranchIdRoute: typeof StoreManagerBranchIdRoute
-  CategoryManagerIndexRoute: typeof CategoryManagerIndexRoute
-  DivisionManagerIndexRoute: typeof DivisionManagerIndexRoute
-  StoreManagerIndexRoute: typeof StoreManagerIndexRoute
+  IndexRoute: typeof IndexRoute;
+  CategoryManagerCategoryIdRoute: typeof CategoryManagerCategoryIdRoute;
+  CategoryManagerPromoSimulatorRoute: typeof CategoryManagerPromoSimulatorRoute;
+  DivisionManagerRegionIdRoute: typeof DivisionManagerRegionIdRoute;
+  StoreManagerBranchIdRoute: typeof StoreManagerBranchIdRoute;
+  CategoryManagerIndexRoute: typeof CategoryManagerIndexRoute;
+  DivisionManagerIndexRoute: typeof DivisionManagerIndexRoute;
+  StoreManagerIndexRoute: typeof StoreManagerIndexRoute;
+  CategoryManagerSuppliersSupplierIdRoute: typeof CategoryManagerSuppliersSupplierIdRoute;
 }
 
-declare module '@tanstack/react-router' {
+declare module "@tanstack/react-router" {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/store-manager/': {
-      id: '/store-manager/'
-      path: '/store-manager'
-      fullPath: '/store-manager/'
-      preLoaderRoute: typeof StoreManagerIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/division-manager/': {
-      id: '/division-manager/'
-      path: '/division-manager'
-      fullPath: '/division-manager/'
-      preLoaderRoute: typeof DivisionManagerIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/category-manager/': {
-      id: '/category-manager/'
-      path: '/category-manager'
-      fullPath: '/category-manager/'
-      preLoaderRoute: typeof CategoryManagerIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/store-manager/$branchId': {
-      id: '/store-manager/$branchId'
-      path: '/store-manager/$branchId'
-      fullPath: '/store-manager/$branchId'
-      preLoaderRoute: typeof StoreManagerBranchIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/division-manager/$regionId': {
-      id: '/division-manager/$regionId'
-      path: '/division-manager/$regionId'
-      fullPath: '/division-manager/$regionId'
-      preLoaderRoute: typeof DivisionManagerRegionIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/category-manager/promo-simulator': {
-      id: '/category-manager/promo-simulator'
-      path: '/category-manager/promo-simulator'
-      fullPath: '/category-manager/promo-simulator'
-      preLoaderRoute: typeof CategoryManagerPromoSimulatorRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/category-manager/$categoryId': {
-      id: '/category-manager/$categoryId'
-      path: '/category-manager/$categoryId'
-      fullPath: '/category-manager/$categoryId'
-      preLoaderRoute: typeof CategoryManagerCategoryIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
+    "/": {
+      id: "/";
+      path: "/";
+      fullPath: "/";
+      preLoaderRoute: typeof IndexRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/store-manager/": {
+      id: "/store-manager/";
+      path: "/store-manager";
+      fullPath: "/store-manager/";
+      preLoaderRoute: typeof StoreManagerIndexRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/division-manager/": {
+      id: "/division-manager/";
+      path: "/division-manager";
+      fullPath: "/division-manager/";
+      preLoaderRoute: typeof DivisionManagerIndexRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/category-manager/": {
+      id: "/category-manager/";
+      path: "/category-manager";
+      fullPath: "/category-manager/";
+      preLoaderRoute: typeof CategoryManagerIndexRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/store-manager/$branchId": {
+      id: "/store-manager/$branchId";
+      path: "/store-manager/$branchId";
+      fullPath: "/store-manager/$branchId";
+      preLoaderRoute: typeof StoreManagerBranchIdRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/division-manager/$regionId": {
+      id: "/division-manager/$regionId";
+      path: "/division-manager/$regionId";
+      fullPath: "/division-manager/$regionId";
+      preLoaderRoute: typeof DivisionManagerRegionIdRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/category-manager/promo-simulator": {
+      id: "/category-manager/promo-simulator";
+      path: "/category-manager/promo-simulator";
+      fullPath: "/category-manager/promo-simulator";
+      preLoaderRoute: typeof CategoryManagerPromoSimulatorRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/category-manager/$categoryId": {
+      id: "/category-manager/$categoryId";
+      path: "/category-manager/$categoryId";
+      fullPath: "/category-manager/$categoryId";
+      preLoaderRoute: typeof CategoryManagerCategoryIdRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/category-manager/suppliers/$supplierId": {
+      id: "/category-manager/suppliers/$supplierId";
+      path: "/category-manager/suppliers/$supplierId";
+      fullPath: "/category-manager/suppliers/$supplierId";
+      preLoaderRoute: typeof CategoryManagerSuppliersSupplierIdRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
   }
 }
 
@@ -206,7 +227,9 @@ const rootRouteChildren: RootRouteChildren = {
   CategoryManagerIndexRoute: CategoryManagerIndexRoute,
   DivisionManagerIndexRoute: DivisionManagerIndexRoute,
   StoreManagerIndexRoute: StoreManagerIndexRoute,
-}
+  CategoryManagerSuppliersSupplierIdRoute:
+    CategoryManagerSuppliersSupplierIdRoute,
+};
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>()
+  ._addFileTypes<FileRouteTypes>();

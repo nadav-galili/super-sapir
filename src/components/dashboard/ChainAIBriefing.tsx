@@ -21,6 +21,49 @@ const STATUS_CONFIG: Record<
   green: { label: "תקין", color: KPI_STATUS.good, bg: `${KPI_STATUS.good}1F` },
 };
 
+function LinkedRecommendation({
+  row,
+  animate,
+}: {
+  row: InsightRow;
+  animate: boolean;
+}) {
+  if (animate || !row.entity?.href || !row.entity.name) {
+    return <TypingText text={row.recommendation} animate={animate} />;
+  }
+
+  const entityIndex = row.recommendation.indexOf(row.entity.name);
+  if (entityIndex < 0) {
+    return (
+      <>
+        {row.recommendation}{" "}
+        <a
+          href={row.entity.href}
+          className="font-semibold text-[#DC4E59] underline decoration-[#DC4E59]/35 decoration-2 underline-offset-4 transition-colors hover:text-[#c9444f] hover:decoration-[#DC4E59]"
+        >
+          {row.entity.name}
+        </a>
+      </>
+    );
+  }
+
+  const before = row.recommendation.slice(0, entityIndex);
+  const after = row.recommendation.slice(entityIndex + row.entity.name.length);
+
+  return (
+    <>
+      {before}
+      <a
+        href={row.entity.href}
+        className="font-semibold text-[#DC4E59] underline decoration-[#DC4E59]/35 decoration-2 underline-offset-4 transition-colors hover:text-[#c9444f] hover:decoration-[#DC4E59]"
+      >
+        {row.entity.name}
+      </a>
+      {after}
+    </>
+  );
+}
+
 // ─── RTL shimmer skeleton row ─────────────────────────────────────
 // Moves right → left to match Hebrew reading direction.
 
@@ -188,7 +231,7 @@ interface ChainAIBriefingProps {
 }
 
 export function ChainAIBriefing({
-  periodKey = "current-month-to-date",
+  periodKey = "current-month-to-date-v2",
   periodLabel = "החודש הנוכחי עד היום",
   multiplier,
 }: ChainAIBriefingProps) {
@@ -341,8 +384,8 @@ export function ChainAIBriefing({
                           </td>
                           <td className="py-3 px-3 align-top">
                             <span className="text-[18px] text-[#4A5568] leading-relaxed">
-                              <TypingText
-                                text={row.recommendation}
+                              <LinkedRecommendation
+                                row={row}
                                 animate={isStreaming}
                               />
                             </span>

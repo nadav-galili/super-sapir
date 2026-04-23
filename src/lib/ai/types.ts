@@ -6,6 +6,11 @@ export interface InsightRow {
   subject: string;
   recommendation: string;
   status: "red" | "yellow" | "green";
+  entity?: {
+    type: "supplier" | "category" | "promotion";
+    name: string;
+    href: string;
+  };
 }
 
 /** Output shape stored in cache. One row per insight. */

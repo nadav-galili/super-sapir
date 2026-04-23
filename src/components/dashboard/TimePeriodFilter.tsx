@@ -69,12 +69,14 @@ interface TimePeriodFilterProps {
   value: TimePeriod;
   onChange: (period: TimePeriod) => void;
   variant?: "light" | "dark";
+  panelPlacement?: "side-start" | "side-end" | "bottom";
 }
 
 export function TimePeriodFilter({
   value,
   onChange,
   variant = "light",
+  panelPlacement = "side-start",
 }: TimePeriodFilterProps) {
   const [showDropdown, setShowDropdown] = useState(false);
   const isDark = variant === "dark";
@@ -131,6 +133,13 @@ export function TimePeriodFilter({
     setActiveType("range");
     setShowDropdown(false);
   }
+
+  const panelPlacementClass =
+    panelPlacement === "bottom"
+      ? "sm:top-full sm:mt-3 sm:end-0 sm:w-[360px]"
+      : panelPlacement === "side-end"
+        ? "sm:top-0 sm:mt-0 sm:start-auto sm:end-[calc(100%+12px)] sm:w-[360px]"
+        : "sm:top-0 sm:mt-0 sm:end-auto sm:start-[calc(100%+12px)] sm:w-[360px]";
 
   return (
     <div className="relative z-30">
@@ -190,7 +199,7 @@ export function TimePeriodFilter({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.18 }}
-            className="absolute top-full mt-3 end-0 z-[80] w-[min(92vw,340px)] rounded-[16px] border border-[#FFE8DE] bg-white p-4 shadow-[0_20px_40px_-18px_rgba(45,55,72,0.24)] sm:top-0 sm:mt-0 sm:end-auto sm:start-[calc(100%+12px)] sm:w-[360px]"
+            className={`absolute top-full mt-3 end-0 z-[80] w-[min(92vw,340px)] rounded-[16px] border border-[#FFE8DE] bg-white p-4 shadow-[0_20px_40px_-18px_rgba(45,55,72,0.24)] ${panelPlacementClass}`}
           >
             <div className="mb-3">
               <p className="text-[11px] font-semibold tracking-[0.12em] text-[#A0AEC0]">
