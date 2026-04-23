@@ -55,7 +55,7 @@ export function Step9Documentation({
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Card className="border-[#FFE8DE] rounded-[16px]">
+        <Card className="border-[#E7E0D8] rounded-[16px]">
           <CardHeader>
             <CardTitle className="text-2xl text-[#2D3748]">תיעוד</CardTitle>
             <p className="text-lg text-[#4A5568]">
@@ -74,7 +74,7 @@ export function Step9Documentation({
               value={state.documentation}
               onChange={(e) => onChange({ documentation: e.target.value })}
               placeholder="תעד כאן את ההחלטות, ההנחות, והאחראים. לדוגמה: מטרה עסקית, הצדקה לבחירת סוג המבצע, סיכונים מזוהים, תוכנית מעקב."
-              className="w-full min-h-[300px] rounded-[10px] border border-[#FFE8DE] bg-white p-4 text-[16px] text-[#2D3748] shadow-sm transition-colors hover:bg-[#FDF8F6] focus:outline-none focus:ring-2 focus:ring-[#DC4E59]/20 focus:border-[#DC4E59]/40 leading-relaxed resize-y"
+              className="w-full min-h-[300px] rounded-[10px] border border-[#E7E0D8] bg-white p-4 text-[16px] text-[#2D3748] shadow-sm transition-colors hover:bg-[#FAF8F5] focus:outline-none focus:ring-2 focus:ring-[#DC4E59]/20 focus:border-[#DC4E59]/40 leading-relaxed resize-y"
             />
           </CardContent>
         </Card>
@@ -82,7 +82,7 @@ export function Step9Documentation({
         <PromoSummaryCard state={state} metrics={m} />
       </div>
 
-      <Card className="border-[#FFE8DE] rounded-[16px]">
+      <Card className="border-[#E7E0D8] rounded-[16px]">
         <CardHeader>
           <CardTitle className="text-xl text-[#2D3748]">
             טבלת סיכום מבצע
@@ -96,7 +96,7 @@ export function Step9Documentation({
                   {TABLE_HEADERS.map((h) => (
                     <th
                       key={h}
-                      className="text-[15px] font-semibold text-[#A0AEC0] uppercase tracking-wide px-3 py-2 border-b border-[#FFF0EA]"
+                      className="text-[15px] font-semibold text-[#A0AEC0] uppercase tracking-wide px-3 py-2 border-b border-[#F1EBE3]"
                     >
                       {h}
                     </th>
@@ -108,7 +108,7 @@ export function Step9Documentation({
                   {row.map((cell, i) => (
                     <td
                       key={i}
-                      className="text-[16px] text-[#2D3748] px-3 py-3 border-b border-[#FFF0EA] align-top"
+                      className="text-[16px] text-[#2D3748] px-3 py-3 border-b border-[#F1EBE3] align-top"
                     >
                       {cell}
                     </td>

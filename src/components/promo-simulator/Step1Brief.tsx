@@ -27,13 +27,13 @@ interface Step1BriefProps {
 const LABEL = "text-[15px] font-medium text-[#4A5568] mb-1.5 block";
 
 const INPUT_CLS =
-  "flex h-10 w-full items-center rounded-[10px] border border-[#FFE8DE] bg-white px-3 py-2 text-[16px] text-[#2D3748] shadow-sm transition-colors hover:bg-[#FDF8F6] focus:outline-none focus:ring-2 focus:ring-[#DC4E59]/20 focus:border-[#DC4E59]/40";
+  "flex h-10 w-full items-center rounded-[10px] border border-[#E7E0D8] bg-white px-3 py-2 text-[16px] text-[#2D3748] shadow-sm transition-colors hover:bg-[#FAF8F5] focus:outline-none focus:ring-2 focus:ring-[#DC4E59]/20 focus:border-[#DC4E59]/40";
 
 const ERROR_RING =
   "border-[#F43F5E] focus:border-[#F43F5E] focus:ring-[#F43F5E]/25";
 
 const READONLY_CLS =
-  "flex h-10 w-full items-center rounded-[10px] border border-[#FFE8DE] bg-[#FDF8F6] px-3 py-2 text-[16px] text-[#2D3748] shadow-sm";
+  "flex h-10 w-full items-center rounded-[10px] border border-[#E7E0D8] bg-[#FAF8F5] px-3 py-2 text-[16px] text-[#2D3748] shadow-sm";
 
 // Compute end date = startDate + durationWeeks * 7 (YYYY-MM-DD).
 function computeEndDate(startDate: string, durationWeeks: number): string {
@@ -67,7 +67,7 @@ function ClickableInfoCard({
       disabled={disabled}
       className="text-right w-full disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[#DC4E59]/20 rounded-[16px]"
     >
-      <Card className="border-[#FFE8DE] rounded-[16px] bg-white transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(220,78,89,0.08)]">
+      <Card className="border-[#E7E0D8] rounded-[16px] bg-white transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(220,78,89,0.08)]">
         <CardHeader className="pb-2">
           <CardTitle className="text-xl flex items-center gap-2 text-[#2D3748]">
             <span
@@ -138,7 +138,7 @@ export function Step1Brief({ brief, onChange, errorKeys }: Step1BriefProps) {
 
   return (
     <div className="space-y-6">
-      <Card className="border-[#FFE8DE] rounded-[16px]">
+      <Card className="border-[#E7E0D8] rounded-[16px]">
         <CardHeader>
           <CardTitle className="text-2xl text-[#2D3748]">רקע / בריף</CardTitle>
           <p className="text-lg text-[#4A5568]">

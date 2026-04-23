@@ -8,6 +8,37 @@
 
 ## 2026-04-23
 
+### Promo Simulator — step reorder (Analysis → step 6) + "תחזית והערכה"
+
+- **Reordered the 9-step wizard** so the Analysis step runs immediately after Forecast (step 5) instead of after Control. New order: 1 בריף → 2 מטרה → 3 סוג מבצע → 4 התניה והטבה → 5 יעדים/תחזית → **6 תחזית והערכה** → 7 יישום בשטח → 8 בקרה → 9 תיעוד. The quantitative arc (forecast → assess) now sits together before the operational checklist.
+- **Step renamed** from "ניתוח והערכה" to "תחזית והערכה" — in the `STEPS` taxonomy array and in the inline section header inside the component.
+- **Files renamed via `git mv`** (history preserved): `Step8Analysis.tsx → Step6Analysis.tsx`, `Step6Implementation.tsx → Step7Implementation.tsx`, `Step7Control.tsx → Step8Control.tsx`. Inner `function`/`interface`/`Props` identifiers renamed to match. Route imports + the `state.step === N` render switch rewired.
+- `showLiveKpi` / `showNarrative` / `showStepBeam` ranges (4–7, 2–5, 4–7) unchanged — they still select the quantitative phases; with the reorder, Analysis (6) is now covered by the live-KPI panel and border beam (the most data-relevant context for it), while Control (8) is a pure readiness checklist without beam/KPI.
+
+### Promo Simulator — page palette preview (less-pink warm neutral)
+
+Targeted preview applied **only to the promo-simulator scope** (20 files in `src/components/promo-simulator/` + the route file). The rest of the app still uses the original warm palette so they can be A/B compared.
+
+- Page bg `#FDF8F6` → `#FAF8F5` (warm off-white, no peach undertone)
+- Borders `#FFE8DE` → `#E7E0D8` (warm beige, no salmon)
+- Light fills `#FFF0EA` → `#F1EBE3` (warm cream)
+- Section separators `#F5E6DE` → `#E7E0D8` (unified with borders)
+- Card shadows `rgba(220, 78, 89, …)` → `rgba(30, 41, 59, …)` so the drop no longer bleeds the accent red into the surface
+- Brand accent `#DC4E59` kept — still the single signal color. No CLAUDE.md palette change yet; that's a separate decision if the preview lands.
+
+### Promo Simulator — UpliftChart color refactor (design-taste-frontend)
+
+Rebuilt the Phase 5 forecast chart per the design skill (LILA ban, desaturated accents, no pale bars).
+
+- **Dropped violet `#6C5CE7`** from cumulative line + dots (design-taste skill's explicit LILA ban).
+- **Base bars** now `#0F766E` (deep desaturated teal) — complementary to the brand red, crisp and visible. No pale greys, no pink.
+- **Promo bars** kept `#DC4E59` (brand accent).
+- **Cumulative line** `#1E293B` (slate ink) with `strokeDasharray="6 4"`, dots `r=3.5` matching. Activates to `r=5` on hover.
+- **Grid** softened to `rgba(30, 41, 59, 0.07)`, axes `#64748B`.
+- Tooltip tightened: monospace font stack, slate drop-shadow, rounded-[12px], Hebrew direction, he-IL currency format.
+- Default Recharts legend suppressed in favour of three **custom chip-style legend entries** in the card header (matches the simulator's chip vocabulary).
+- Structural reshape: card uses a 3px accent rule on the RTL-start edge, bold `tracking-tight` title with uppercase caps-label above, diffusion shadow tinted to slate.
+
 ### Promo Simulator — terminology & copy fixes
 
 - Renamed the "מבצע צלב-קטגוריה" promo type to "מבצע חוצה קטגוריות" — the "צלב" root literally means "cross" (as in the Christian cross) and was culturally awkward. Affected: `taxonomy.ts` (promo list + copy key), and the same terminology in `narrative.ts`. "שיעור ההצלבה" in the narrative body was replaced with the cleaner "שיעור הצירוף לסל".

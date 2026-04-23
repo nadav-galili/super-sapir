@@ -8,108 +8,184 @@ import {
   Tooltip,
   ResponsiveContainer,
   Legend,
-} from 'recharts'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import type { PromoMetrics } from '@/lib/promo-simulator/calc'
+} from "recharts";
+import { TrendingUp } from "lucide-react";
+import type { PromoMetrics } from "@/lib/promo-simulator/calc";
 
 interface UpliftChartProps {
-  metrics: PromoMetrics
-  durationWeeks: number
+  metrics: PromoMetrics;
+  durationWeeks: number;
 }
 
-export function UpliftChart({ metrics: m, durationWeeks }: UpliftChartProps) {
-  const weeks = Math.max(1, durationWeeks || 2)
-  const baseRevenuePerWeek = Math.round(m.baseRevenue / weeks)
-  const promoRevenuePerWeek = Math.round(m.promoRevenue / weeks)
+// Palette — brand red + desaturated deep teal (complementary) + slate ink line.
+// No pink, no violet, no pale greys.
+const COLOR_PROMO = "#DC4E59";
+const COLOR_BASE = "#0F766E";
+const COLOR_CUMULATIVE = "#1E293B";
+const COLOR_GRID = "rgba(30, 41, 59, 0.07)";
+const COLOR_AXIS = "#64748B";
 
-  // Generate series: weekly revenue + cumulative promo line
+const currencyFmt = new Intl.NumberFormat("he-IL", {
+  style: "currency",
+  currency: "ILS",
+  maximumFractionDigits: 0,
+});
+
+export function UpliftChart({ metrics: m, durationWeeks }: UpliftChartProps) {
+  const weeks = Math.max(1, durationWeeks || 2);
+  const baseRevenuePerWeek = Math.round(m.baseRevenue / weeks);
+  const promoRevenuePerWeek = Math.round(m.promoRevenue / weeks);
+
   const data = Array.from({ length: weeks }, (_, i) => {
-    const cum = promoRevenuePerWeek * (i + 1)
+    const cum = promoRevenuePerWeek * (i + 1);
     return {
       week: `שבוע ${i + 1}`,
       base: baseRevenuePerWeek,
       promo: promoRevenuePerWeek,
       cumulative: cum,
-    }
-  })
+    };
+  });
 
   return (
-    <Card className="border-[#FFE8DE] rounded-[16px]">
-      <CardHeader>
-        <CardTitle className="text-xl text-[#2D3748]">
-          תחזית פדיון לפי שבוע
-        </CardTitle>
-        <p className="text-[16px] text-[#4A5568]">
-          השוואת בסיס למבצע לאורך תקופת הקמפיין
-        </p>
-      </CardHeader>
-      <CardContent>
-        <div dir="ltr" className="h-[280px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart
-              data={data}
-              margin={{ top: 10, right: 16, left: 0, bottom: 0 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.04)" />
-              <XAxis
-                dataKey="week"
-                tick={{ fontSize: 16, fill: '#4A5568' }}
-              />
-              <YAxis
-                tickFormatter={(v: number) =>
-                  v >= 1000 ? `${Math.round(v / 1000)}K` : `${v}`
-                }
-                tick={{ fontSize: 16, fill: '#A0AEC0' }}
-                width={64}
-              />
-              <Tooltip
-                formatter={(value, name) => {
-                  const label =
-                    name === 'base'
-                      ? 'בסיס'
-                      : name === 'promo'
-                        ? 'מבצע'
-                        : 'מצטבר'
-                  return [`₪${Number(value).toLocaleString()}`, String(label)]
-                }}
-                contentStyle={{
-                  direction: 'rtl',
-                  borderRadius: '10px',
-                  border: '1px solid #FFE8DE',
-                  fontSize: 18,
-                }}
-              />
-              <Legend
-                formatter={(v: string) =>
-                  v === 'base' ? 'בסיס' : v === 'promo' ? 'מבצע' : 'מצטבר'
-                }
-                iconType="circle"
-                wrapperStyle={{ fontSize: 16, paddingTop: 8 }}
-              />
-              <Bar
-                dataKey="base"
-                fill="rgba(160, 174, 192, 0.5)"
-                radius={[4, 4, 0, 0]}
-                animationDuration={600}
-              />
-              <Bar
-                dataKey="promo"
-                fill="rgba(220, 78, 89, 0.75)"
-                radius={[4, 4, 0, 0]}
-                animationDuration={700}
-              />
-              <Line
-                type="monotone"
-                dataKey="cumulative"
-                stroke="#6C5CE7"
-                strokeWidth={2}
-                dot={{ r: 4, fill: '#6C5CE7' }}
-                animationDuration={900}
-              />
-            </ComposedChart>
-          </ResponsiveContainer>
+    <section className="relative overflow-hidden rounded-[16px] border border-[#E7E0D8] bg-white p-6 shadow-[0_20px_40px_-28px_rgba(220,78,89,0.16)]">
+      {/* Accent rule on start edge */}
+      <span
+        aria-hidden
+        className="absolute inset-y-6 right-0 w-[3px] rounded-full"
+        style={{ backgroundColor: COLOR_PROMO }}
+      />
+
+      <header className="mb-5 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <div className="inline-flex items-center gap-2 text-[15px] uppercase tracking-[0.14em] text-[#A0AEC0]">
+            <TrendingUp className="h-4 w-4" />
+            תחזית פדיון
+          </div>
+          <h3 className="mt-2 text-3xl font-bold tracking-tight text-[#2D3748]">
+            פדיון שבועי לאורך הקמפיין
+          </h3>
+          <p className="mt-1 text-[16px] text-[#4A5568]">
+            השוואת בסיס למבצע, ומצטבר לאורך{" "}
+            <span dir="ltr" className="font-mono">
+              {weeks}
+            </span>{" "}
+            שבועות
+          </p>
         </div>
-      </CardContent>
-    </Card>
-  )
+
+        {/* Compact legend chips — replaces Recharts default Legend */}
+        <div className="flex flex-wrap items-center gap-2 text-[15px] text-[#4A5568]">
+          <LegendChip dotClass="bg-[#0F766E]" label="בסיס" />
+          <LegendChip dotClass="bg-[#DC4E59]" label="מבצע" />
+          <LegendChip
+            dotClass=""
+            label="מצטבר"
+            customDot={
+              <span
+                aria-hidden
+                className="inline-block h-[2px] w-4 rounded-full"
+                style={{ backgroundColor: COLOR_CUMULATIVE }}
+              />
+            }
+          />
+        </div>
+      </header>
+
+      <div dir="ltr" className="h-[280px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <ComposedChart
+            data={data}
+            margin={{ top: 8, right: 12, left: 0, bottom: 0 }}
+          >
+            <CartesianGrid strokeDasharray="3 3" stroke={COLOR_GRID} />
+            <XAxis
+              dataKey="week"
+              tick={{ fontSize: 15, fill: "#4A5568" }}
+              axisLine={{ stroke: COLOR_GRID }}
+              tickLine={{ stroke: COLOR_GRID }}
+            />
+            <YAxis
+              tickFormatter={(v: number) =>
+                v >= 1000 ? `${Math.round(v / 1000)}K` : `${v}`
+              }
+              tick={{ fontSize: 15, fill: COLOR_AXIS }}
+              axisLine={{ stroke: COLOR_GRID }}
+              tickLine={{ stroke: COLOR_GRID }}
+              width={60}
+            />
+            <Tooltip
+              cursor={{ fill: "rgba(220, 78, 89, 0.04)" }}
+              formatter={(value, name) => {
+                const label =
+                  name === "base"
+                    ? "בסיס"
+                    : name === "promo"
+                      ? "מבצע"
+                      : "מצטבר";
+                return [currencyFmt.format(Number(value)), String(label)];
+              }}
+              contentStyle={{
+                direction: "rtl",
+                borderRadius: "12px",
+                border: "1px solid #E7E0D8",
+                fontSize: 16,
+                fontFamily:
+                  'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
+                boxShadow: "0 10px 24px -12px rgba(45, 55, 72, 0.16)",
+              }}
+              labelStyle={{
+                color: "#2D3748",
+                fontWeight: 600,
+                fontFamily: "inherit",
+                marginBottom: 4,
+              }}
+            />
+            {/* Hide default Recharts legend — we render our own chips above */}
+            <Legend content={() => null} />
+            <Bar
+              dataKey="base"
+              fill={COLOR_BASE}
+              radius={[4, 4, 0, 0]}
+              animationDuration={600}
+            />
+            <Bar
+              dataKey="promo"
+              fill={COLOR_PROMO}
+              radius={[4, 4, 0, 0]}
+              animationDuration={700}
+            />
+            <Line
+              type="monotone"
+              dataKey="cumulative"
+              stroke={COLOR_CUMULATIVE}
+              strokeWidth={2}
+              strokeDasharray="6 4"
+              dot={{ r: 3.5, fill: COLOR_CUMULATIVE, strokeWidth: 0 }}
+              activeDot={{ r: 5, fill: COLOR_CUMULATIVE, strokeWidth: 0 }}
+              animationDuration={900}
+            />
+          </ComposedChart>
+        </ResponsiveContainer>
+      </div>
+    </section>
+  );
+}
+
+function LegendChip({
+  dotClass,
+  label,
+  customDot,
+}: {
+  dotClass: string;
+  label: string;
+  customDot?: React.ReactNode;
+}) {
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-[20px] border border-[#E7E0D8] bg-[#FAF8F5] px-3 py-1">
+      {customDot ?? (
+        <span aria-hidden className={`h-2 w-2 rounded-full ${dotClass}`} />
+      )}
+      <span>{label}</span>
+    </span>
+  );
 }

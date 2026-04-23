@@ -282,9 +282,9 @@ export const STEPS = [
   { id: 3, title: "סוג מבצע" },
   { id: 4, title: "התניה והטבה" },
   { id: 5, title: "יעדים / תחזית" },
-  { id: 6, title: "יישום בשטח" },
-  { id: 7, title: "בקרה" },
-  { id: 8, title: "ניתוח והערכה" },
+  { id: 6, title: "תחזית והערכה" },
+  { id: 7, title: "יישום בשטח" },
+  { id: 8, title: "בקרה" },
   { id: 9, title: "תיעוד" },
 ] as const;
 

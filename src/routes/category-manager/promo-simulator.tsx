@@ -16,9 +16,9 @@ import { Step2Goal } from "@/components/promo-simulator/Step2Goal";
 import { Step3PromoType } from "@/components/promo-simulator/Step3PromoType";
 import { Step4Terms } from "@/components/promo-simulator/Step4Terms";
 import { Step5Forecast } from "@/components/promo-simulator/Step5Forecast";
-import { Step6Implementation } from "@/components/promo-simulator/Step6Implementation";
-import { Step7Control } from "@/components/promo-simulator/Step7Control";
-import { Step8Analysis } from "@/components/promo-simulator/Step8Analysis";
+import { Step6Analysis } from "@/components/promo-simulator/Step6Analysis";
+import { Step7Implementation } from "@/components/promo-simulator/Step7Implementation";
+import { Step8Control } from "@/components/promo-simulator/Step8Control";
 import { Step9Documentation } from "@/components/promo-simulator/Step9Documentation";
 import { SuccessScreen } from "@/components/promo-simulator/SuccessScreen";
 import { LiveKPIPanel } from "@/components/promo-simulator/LiveKPIPanel";
@@ -161,7 +161,13 @@ function PromoSimulatorPage() {
         onChange={setState}
       />
     ) : state.step === 6 ? (
-      <Step6Implementation
+      <Step6Analysis
+        analysisNote={state.analysisNote}
+        metrics={metrics}
+        onChange={setState}
+      />
+    ) : state.step === 7 ? (
+      <Step7Implementation
         impl={{
           signage: state.signage,
           shelf: state.shelf,
@@ -170,8 +176,8 @@ function PromoSimulatorPage() {
         }}
         onChange={setState}
       />
-    ) : state.step === 7 ? (
-      <Step7Control
+    ) : state.step === 8 ? (
+      <Step8Control
         control={{
           controlPrice: state.controlPrice,
           controlStock: state.controlStock,
@@ -186,12 +192,6 @@ function PromoSimulatorPage() {
             state.cashierBrief,
           ].filter(Boolean).length
         }
-        onChange={setState}
-      />
-    ) : state.step === 8 ? (
-      <Step8Analysis
-        analysisNote={state.analysisNote}
-        metrics={metrics}
         onChange={setState}
       />
     ) : state.step === 9 ? (
@@ -222,7 +222,7 @@ function PromoSimulatorPage() {
   if (state.completed) {
     return (
       <PromoTaxonomyProvider value={DEFAULT_PROMO_TAXONOMY}>
-        <div className="min-h-screen bg-[#FDF8F6]">
+        <div className="min-h-screen bg-[#FAF8F5]">
           <PageContainer>
             <SuccessScreen state={state} onRestart={restart} />
           </PageContainer>
@@ -236,7 +236,7 @@ function PromoSimulatorPage() {
 
   return (
     <PromoTaxonomyProvider value={DEFAULT_PROMO_TAXONOMY}>
-      <div className="min-h-screen bg-[#FDF8F6]">
+      <div className="min-h-screen bg-[#FAF8F5]">
         <Stepper current={state.step} onJump={handleJump} />
         <PageContainer>
           <AnimatePresence mode="wait">
@@ -269,7 +269,7 @@ function PromoSimulatorPage() {
               <button
                 type="button"
                 onClick={restart}
-                className="inline-flex items-center gap-2 rounded-[10px] border border-[#FFE8DE] bg-white px-4 py-2 text-[16px] font-medium text-[#4A5568] transition-colors hover:bg-[#FDF8F6]"
+                className="inline-flex items-center gap-2 rounded-[10px] border border-[#E7E0D8] bg-white px-4 py-2 text-[16px] font-medium text-[#4A5568] transition-colors hover:bg-[#FAF8F5]"
               >
                 <Home className="w-4 h-4" />
                 לתחילת הסימולטור
@@ -277,7 +277,7 @@ function PromoSimulatorPage() {
               <button
                 type="button"
                 onClick={resetStep}
-                className="inline-flex items-center gap-2 rounded-[10px] border border-[#FFE8DE] bg-white px-4 py-2 text-[16px] font-medium text-[#4A5568] transition-colors hover:bg-[#FDF8F6]"
+                className="inline-flex items-center gap-2 rounded-[10px] border border-[#E7E0D8] bg-white px-4 py-2 text-[16px] font-medium text-[#4A5568] transition-colors hover:bg-[#FAF8F5]"
               >
                 <RotateCcw className="w-4 h-4" />
                 איפוס השלב
@@ -290,7 +290,7 @@ function PromoSimulatorPage() {
                   type="button"
                   onClick={goBack}
                   disabled={state.step === 1}
-                  className="inline-flex items-center gap-2 rounded-[10px] border border-[#FFE8DE] bg-white px-5 py-2.5 text-[16px] font-medium text-[#4A5568] transition-colors hover:bg-[#FDF8F6] disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="inline-flex items-center gap-2 rounded-[10px] border border-[#E7E0D8] bg-white px-5 py-2.5 text-[16px] font-medium text-[#4A5568] transition-colors hover:bg-[#FAF8F5] disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   <ArrowRight className="w-4 h-4" />
                   חזרה
@@ -300,7 +300,7 @@ function PromoSimulatorPage() {
                     type="button"
                     onClick={handleNext}
                     aria-disabled="true"
-                    className="inline-flex items-center gap-2 rounded-[10px] border border-[#FFE8DE] bg-white px-5 py-2.5 text-[16px] font-medium text-[#A0AEC0] cursor-not-allowed opacity-60"
+                    className="inline-flex items-center gap-2 rounded-[10px] border border-[#E7E0D8] bg-white px-5 py-2.5 text-[16px] font-medium text-[#A0AEC0] cursor-not-allowed opacity-60"
                   >
                     המשך
                     <ArrowLeft className="w-4 h-4" />

@@ -15,7 +15,7 @@ interface PromoFullReportProps {
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-start justify-between gap-4 py-2 border-b border-[#FFF0EA] last:border-b-0">
+    <div className="flex items-start justify-between gap-4 py-2 border-b border-[#F1EBE3] last:border-b-0">
       <span className="text-[14px] text-[#4A5568] shrink-0">{label}</span>
       <span className="text-[14px] font-semibold text-[#2D3748] text-left break-words">
         {value || "—"}
@@ -32,8 +32,8 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-[12px] border border-[#FFE8DE] bg-white p-5 break-inside-avoid">
-      <h2 className="text-[18px] font-bold text-[#2D3748] mb-3 pb-2 border-b border-[#FFE8DE]">
+    <section className="rounded-[12px] border border-[#E7E0D8] bg-white p-5 break-inside-avoid">
+      <h2 className="text-[18px] font-bold text-[#2D3748] mb-3 pb-2 border-b border-[#E7E0D8]">
         {title}
       </h2>
       <div className="space-y-0">{children}</div>
@@ -74,10 +74,10 @@ export function PromoFullReport({ state, metrics: m }: PromoFullReportProps) {
   return (
     <div
       dir="rtl"
-      className="bg-[#FDF8F6] p-8 space-y-4"
+      className="bg-[#FAF8F5] p-8 space-y-4"
       style={{ width: 800, fontFamily: "Rubik, sans-serif" }}
     >
-      <header className="space-y-1 pb-4 border-b border-[#FFE8DE]">
+      <header className="space-y-1 pb-4 border-b border-[#E7E0D8]">
         <h1 className="text-[28px] font-bold text-[#2D3748]">תיק מבצע</h1>
         <p className="text-[14px] text-[#4A5568]">
           סימולטור מבצעים · {state.retailer || "סופר ספיר"} · הופק {generatedAt}
@@ -160,7 +160,7 @@ export function PromoFullReport({ state, metrics: m }: PromoFullReportProps) {
       {(state.analysisNote || state.documentation) && (
         <Section title="ניתוח ותיעוד">
           {state.analysisNote && (
-            <div className="py-2 border-b border-[#FFF0EA]">
+            <div className="py-2 border-b border-[#F1EBE3]">
               <p className="text-[14px] text-[#4A5568] mb-1">הערות ניתוח</p>
               <p className="text-[14px] text-[#2D3748] whitespace-pre-wrap">
                 {state.analysisNote}

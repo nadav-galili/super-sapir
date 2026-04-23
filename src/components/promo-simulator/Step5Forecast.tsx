@@ -19,7 +19,7 @@ interface Step5ForecastProps {
 
 const LABEL = "text-[15px] font-medium text-[#4A5568] mb-1.5 block";
 const INPUT_CLS =
-  "flex h-10 w-full items-center rounded-[10px] border border-[#FFE8DE] bg-white px-3 py-2 text-[16px] text-[#2D3748] shadow-sm transition-colors hover:bg-[#FDF8F6] focus:outline-none focus:ring-2 focus:ring-[#DC4E59]/20 focus:border-[#DC4E59]/40 font-mono";
+  "flex h-10 w-full items-center rounded-[10px] border border-[#E7E0D8] bg-white px-3 py-2 text-[16px] text-[#2D3748] shadow-sm transition-colors hover:bg-[#FAF8F5] focus:outline-none focus:ring-2 focus:ring-[#DC4E59]/20 focus:border-[#DC4E59]/40 font-mono";
 
 interface KpiCardProps {
   title: string;
@@ -35,7 +35,7 @@ function KpiCard({
   accent = KPI_STATUS.good,
 }: KpiCardProps) {
   return (
-    <Card className="border-[#FFE8DE] rounded-[16px]">
+    <Card className="border-[#E7E0D8] rounded-[16px]">
       <CardContent className="p-5 min-w-0">
         <p className="text-[15px] font-medium text-[#A0AEC0] uppercase tracking-wide whitespace-nowrap truncate">
           {title}
@@ -91,7 +91,7 @@ export function Step5Forecast({
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Card className="border-[#FFE8DE] rounded-[16px]">
+        <Card className="border-[#E7E0D8] rounded-[16px]">
           <CardHeader>
             <CardTitle className="text-2xl text-[#2D3748]">
               יעדים / תחזית
@@ -176,7 +176,7 @@ export function Step5Forecast({
                 }
                 className="w-full h-2 rounded-[5px] accent-[#DC4E59]"
                 style={{
-                  background: `linear-gradient(90deg, #DC4E59 0%, #DC4E59 ${(forecast.upliftPct / 80) * 100}%, #FFE8DE ${(forecast.upliftPct / 80) * 100}%, #FFE8DE 100%)`,
+                  background: `linear-gradient(90deg, #DC4E59 0%, #DC4E59 ${(forecast.upliftPct / 80) * 100}%, #E7E0D8 ${(forecast.upliftPct / 80) * 100}%, #E7E0D8 100%)`,
                 }}
                 dir="ltr"
               />

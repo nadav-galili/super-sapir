@@ -80,7 +80,7 @@ function FeaturedKpi({ kpi }: { kpi: CategoryKpi }) {
   return (
     <motion.div
       variants={item}
-      className="relative overflow-hidden rounded-[16px] border border-[#FFE8DE] bg-white p-8 shadow-[0_24px_48px_-28px_rgba(220,78,89,0.22)]"
+      className="relative overflow-hidden rounded-[16px] border border-[#E7E0D8] bg-white p-8 shadow-[0_24px_48px_-28px_rgba(220,78,89,0.22)]"
     >
       {/* Accent rule on start edge */}
       <span
@@ -130,7 +130,7 @@ function CompactKpi({ kpi }: { kpi: CategoryKpi }) {
       variants={item}
       whileHover={{ y: -2 }}
       transition={{ type: "spring", stiffness: 200, damping: 22 }}
-      className="relative overflow-hidden rounded-[16px] border border-[#FFE8DE] bg-white p-6"
+      className="relative overflow-hidden rounded-[16px] border border-[#E7E0D8] bg-white p-6"
     >
       <span
         aria-hidden
@@ -170,7 +170,7 @@ function PromoRow({ promo }: { promo: HistoricalPromotion }) {
       variants={item}
       whileHover={{ y: -2 }}
       transition={{ type: "spring", stiffness: 200, damping: 22 }}
-      className="relative overflow-hidden rounded-[16px] border border-[#FFE8DE] bg-white p-7"
+      className="relative overflow-hidden rounded-[16px] border border-[#E7E0D8] bg-white p-7"
     >
       <span
         aria-hidden
@@ -184,7 +184,7 @@ function PromoRow({ promo }: { promo: HistoricalPromotion }) {
             {promo.name}
           </h4>
           <div className="mt-2 flex flex-wrap items-center gap-2 text-[15px]">
-            <span className="rounded-[20px] bg-[#FFF0EA] px-3 py-1 font-medium text-[#DC4E59]">
+            <span className="rounded-[20px] bg-[#F1EBE3] px-3 py-1 font-medium text-[#DC4E59]">
               {promo.promoType}
             </span>
             <span dir="ltr" className="font-mono text-[#4A5568]">
@@ -207,7 +207,7 @@ function PromoRow({ promo }: { promo: HistoricalPromotion }) {
         </span>
       </header>
 
-      <dl className="mt-6 grid grid-cols-2 divide-x divide-[#FFE8DE] rtl:divide-x-reverse md:grid-cols-4">
+      <dl className="mt-6 grid grid-cols-2 divide-x divide-[#E7E0D8] rtl:divide-x-reverse md:grid-cols-4">
         <div className="px-4 first:ps-0">
           <dt className="text-[15px] uppercase tracking-[0.12em] text-[#A0AEC0]">
             יחידות
@@ -286,7 +286,7 @@ export function BackgroundDataSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="left"
-        className="w-full sm:max-w-[860px] h-screen max-h-screen overflow-y-auto p-0 bg-[#FDF8F6]"
+        className="w-full sm:max-w-[860px] h-screen max-h-screen overflow-y-auto p-0 bg-[#FAF8F5]"
       >
         {!hasCategory ? (
           <div className="flex h-full flex-col items-center justify-center gap-3 px-8 text-center">
@@ -311,7 +311,7 @@ export function BackgroundDataSheet({
               className="grid gap-6 md:grid-cols-[minmax(0,1fr)_auto] md:items-end"
             >
               <div>
-                <div className="inline-flex items-center gap-2 rounded-[20px] border border-[#FFE8DE] bg-white/60 px-3 py-1 text-[15px] font-medium text-[#DC4E59] shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] backdrop-blur">
+                <div className="inline-flex items-center gap-2 rounded-[20px] border border-[#E7E0D8] bg-white/60 px-3 py-1 text-[15px] font-medium text-[#DC4E59] shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] backdrop-blur">
                   <Database className="h-4 w-4" />
                   נתונים / רקע
                 </div>
@@ -324,7 +324,7 @@ export function BackgroundDataSheet({
                 </p>
               </div>
 
-              <div className="inline-flex items-center gap-2 rounded-[20px] border border-[#FFE8DE] bg-white px-4 py-2 text-[15px] text-[#4A5568]">
+              <div className="inline-flex items-center gap-2 rounded-[20px] border border-[#E7E0D8] bg-white px-4 py-2 text-[15px] text-[#4A5568]">
                 <span dir="ltr" className="font-mono font-semibold">
                   {kpis.length}
                 </span>
@@ -348,7 +348,7 @@ export function BackgroundDataSheet({
               </div>
 
               {kpis.length === 0 ? (
-                <div className="rounded-[16px] border border-dashed border-[#FFE8DE] bg-white/60 px-6 py-14 text-center text-lg text-[#A0AEC0]">
+                <div className="rounded-[16px] border border-dashed border-[#E7E0D8] bg-white/60 px-6 py-14 text-center text-lg text-[#A0AEC0]">
                   אין מדדים זמינים.
                 </div>
               ) : (
@@ -381,7 +381,7 @@ export function BackgroundDataSheet({
               </div>
 
               {promos.length === 0 ? (
-                <div className="rounded-[16px] border border-dashed border-[#FFE8DE] bg-white/60 px-6 py-14 text-center text-lg text-[#A0AEC0]">
+                <div className="rounded-[16px] border border-dashed border-[#E7E0D8] bg-white/60 px-6 py-14 text-center text-lg text-[#A0AEC0]">
                   אין מבצעים היסטוריים זמינים בקטגוריה זו.
                 </div>
               ) : (

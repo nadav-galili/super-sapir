@@ -18,7 +18,7 @@ export function AINarrative({ paragraphs }: AINarrativeProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35 }}
     >
-      <Card className="border-[#FFE8DE] rounded-[16px] overflow-hidden">
+      <Card className="border-[#E7E0D8] rounded-[16px] overflow-hidden">
         <div
           className="h-1 w-full"
           style={{

@@ -1,47 +1,56 @@
-import { motion, useReducedMotion } from 'motion/react'
-import { Star, ArrowLeft } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { usePromoTaxonomy } from '@/contexts/PromoTaxonomyContext'
-import type { Goal } from '@/lib/promo-simulator/taxonomy'
-import type { SimulatorState } from '@/lib/promo-simulator/state'
+import { motion, useReducedMotion } from "motion/react";
+import { Star, ArrowLeft } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { usePromoTaxonomy } from "@/contexts/PromoTaxonomyContext";
+import type { Goal } from "@/lib/promo-simulator/taxonomy";
+import type { SimulatorState } from "@/lib/promo-simulator/state";
 
 interface Step3PromoTypeProps {
-  goal: SimulatorState['goal']
-  promoType: string
-  onChange: (update: Partial<Pick<SimulatorState, 'promoType'>>) => void
+  goal: SimulatorState["goal"];
+  promoType: string;
+  onChange: (update: Partial<Pick<SimulatorState, "promoType">>) => void;
 }
 
 function Stars({ count }: { count: 1 | 2 | 3 }) {
   return (
-    <div className="inline-flex items-center gap-0.5" aria-label={`דירוג ${count} מתוך 3`}>
+    <div
+      className="inline-flex items-center gap-0.5"
+      aria-label={`דירוג ${count} מתוך 3`}
+    >
       {[1, 2, 3].map((i) => (
         <Star
           key={i}
           className="w-4 h-4"
-          fill={i <= count ? '#F6B93B' : 'transparent'}
-          stroke={i <= count ? '#F6B93B' : '#A0AEC0'}
+          fill={i <= count ? "#F6B93B" : "transparent"}
+          stroke={i <= count ? "#F6B93B" : "#A0AEC0"}
           strokeWidth={1.5}
         />
       ))}
     </div>
-  )
+  );
 }
 
-export function Step3PromoType({ goal: goalProp, promoType, onChange }: Step3PromoTypeProps) {
-  const reduceMotion = useReducedMotion()
-  const { purposeMap } = usePromoTaxonomy()
-  const goal = goalProp as Goal | ''
+export function Step3PromoType({
+  goal: goalProp,
+  promoType,
+  onChange,
+}: Step3PromoTypeProps) {
+  const reduceMotion = useReducedMotion();
+  const { purposeMap } = usePromoTaxonomy();
+  const goal = goalProp as Goal | "";
 
   if (!goal) {
     return (
-      <Card className="border-[#FFE8DE] rounded-[16px]">
+      <Card className="border-[#E7E0D8] rounded-[16px]">
         <CardHeader>
-          <CardTitle className="text-2xl text-[#2D3748]">בחירת סוג מבצע</CardTitle>
+          <CardTitle className="text-2xl text-[#2D3748]">
+            בחירת סוג מבצע
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div
             className="rounded-[16px] border-2 border-dashed p-10 text-center"
-            style={{ borderColor: '#FFE8DE', background: '#FDF8F6' }}
+            style={{ borderColor: "#E7E0D8", background: "#FAF8F5" }}
           >
             <p className="text-xl font-semibold text-[#2D3748] mb-2">
               בחר מטרה בשלב הקודם כדי לקבל המלצות מותאמות
@@ -52,19 +61,21 @@ export function Step3PromoType({ goal: goalProp, promoType, onChange }: Step3Pro
           </div>
         </CardContent>
       </Card>
-    )
+    );
   }
 
-  const options = purposeMap[goal] ?? []
+  const options = purposeMap[goal] ?? [];
 
   return (
-    <Card className="border-[#FFE8DE] rounded-[16px]">
+    <Card className="border-[#E7E0D8] rounded-[16px]">
       <CardHeader>
         <div className="flex items-center justify-between gap-4 flex-wrap">
-          <CardTitle className="text-2xl text-[#2D3748]">בחירת סוג מבצע</CardTitle>
+          <CardTitle className="text-2xl text-[#2D3748]">
+            בחירת סוג מבצע
+          </CardTitle>
           <span
             className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[15px] font-semibold"
-            style={{ background: '#6C5CE71A', color: '#6C5CE7' }}
+            style={{ background: "#6C5CE71A", color: "#6C5CE7" }}
           >
             <ArrowLeft className="w-4 h-4" />
             מטרה: {goal}
@@ -77,7 +88,7 @@ export function Step3PromoType({ goal: goalProp, promoType, onChange }: Step3Pro
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {options.map((p, i) => {
-            const isActive = promoType === p.name
+            const isActive = promoType === p.name;
             return (
               <motion.button
                 type="button"
@@ -88,18 +99,18 @@ export function Step3PromoType({ goal: goalProp, promoType, onChange }: Step3Pro
                 onClick={() => onChange({ promoType: p.name })}
                 className="text-right rounded-[16px] border-2 p-5 transition-all hover:-translate-y-0.5 hover:shadow-[0_6px_18px_rgba(220,78,89,0.10)]"
                 style={{
-                  background: isActive ? 'rgba(220, 78, 89, 0.06)' : '#FFFFFF',
-                  borderColor: isActive ? '#DC4E59' : '#FFE8DE',
+                  background: isActive ? "rgba(220, 78, 89, 0.06)" : "#FFFFFF",
+                  borderColor: isActive ? "#DC4E59" : "#E7E0D8",
                   boxShadow: isActive
-                    ? '0 8px 20px rgba(220, 78, 89, 0.14)'
-                    : '0 2px 6px rgba(220, 78, 89, 0.04)',
+                    ? "0 8px 20px rgba(220, 78, 89, 0.14)"
+                    : "0 2px 6px rgba(220, 78, 89, 0.04)",
                 }}
               >
                 <div className="flex items-start justify-between gap-3 mb-2">
                   <h3 className="text-xl font-bold text-[#2D3748]">{p.name}</h3>
                   <span
                     className="shrink-0 inline-flex items-center gap-1 rounded-full px-3 py-1 text-[15px] font-mono font-semibold"
-                    style={{ background: '#2EC4D51A', color: '#2EC4D5' }}
+                    style={{ background: "#2EC4D51A", color: "#2EC4D5" }}
                     dir="ltr"
                   >
                     התאמה: {p.score}
@@ -112,10 +123,10 @@ export function Step3PromoType({ goal: goalProp, promoType, onChange }: Step3Pro
                   {p.reason}
                 </p>
               </motion.button>
-            )
+            );
           })}
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

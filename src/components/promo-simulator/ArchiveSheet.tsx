@@ -107,7 +107,7 @@ function SummaryRail({
   successRate: number;
 }) {
   return (
-    <div className="flex flex-wrap items-baseline gap-x-10 gap-y-4 border-y border-[#FFE8DE] py-5">
+    <div className="flex flex-wrap items-baseline gap-x-10 gap-y-4 border-y border-[#E7E0D8] py-5">
       <div>
         <div className="text-[15px] uppercase tracking-[0.12em] text-[#A0AEC0]">
           סה״כ מבצעים
@@ -164,7 +164,7 @@ function HistoricalPromoRow({
       variants={item}
       whileHover={{ y: -2 }}
       transition={{ type: "spring", stiffness: 200, damping: 22 }}
-      className="group relative overflow-hidden rounded-[16px] border border-[#FFE8DE] bg-white shadow-[0_20px_40px_-24px_rgba(220,78,89,0.18)]"
+      className="group relative overflow-hidden rounded-[16px] border border-[#E7E0D8] bg-white shadow-[0_20px_40px_-24px_rgba(220,78,89,0.18)]"
     >
       {/* Accent bar on RTL-start (right) edge */}
       <span
@@ -189,7 +189,7 @@ function HistoricalPromoRow({
           </div>
 
           <div className="flex shrink-0 flex-wrap items-center gap-2">
-            <span className="rounded-[20px] border border-[#FFE8DE] bg-[#FDF8F6] px-3 py-1 text-[15px] font-medium text-[#4A5568]">
+            <span className="rounded-[20px] border border-[#E7E0D8] bg-[#FAF8F5] px-3 py-1 text-[15px] font-medium text-[#4A5568]">
               {promo.promoType}
             </span>
             <span
@@ -255,7 +255,7 @@ function HistoricalPromoRow({
             </div>
           </div>
 
-          <dl className="grid grid-cols-3 divide-x divide-[#FFE8DE] rtl:divide-x-reverse">
+          <dl className="grid grid-cols-3 divide-x divide-[#E7E0D8] rtl:divide-x-reverse">
             <div className="px-4 first:ps-0">
               <dt className="text-[15px] uppercase tracking-[0.12em] text-[#A0AEC0]">
                 יחידות
@@ -315,7 +315,7 @@ function BuyAndGetTile({ promo }: { promo: BuyAndGetPromo }) {
       variants={item}
       whileHover={{ y: -2 }}
       transition={{ type: "spring", stiffness: 200, damping: 22 }}
-      className="relative overflow-hidden rounded-[16px] border border-[#FFE8DE] bg-white"
+      className="relative overflow-hidden rounded-[16px] border border-[#E7E0D8] bg-white"
     >
       {/* 2px accent stripe on top */}
       <span
@@ -344,7 +344,7 @@ function BuyAndGetTile({ promo }: { promo: BuyAndGetPromo }) {
 
         {/* Condition → benefit */}
         <div className="mt-4 flex flex-wrap items-center gap-2 text-[16px]">
-          <span className="rounded-[20px] bg-[#FDF8F6] px-3 py-1 font-medium text-[#4A5568]">
+          <span className="rounded-[20px] bg-[#FAF8F5] px-3 py-1 font-medium text-[#4A5568]">
             {promo.condition}
           </span>
           <ArrowLeft className="h-4 w-4 text-[#A0AEC0]" />
@@ -362,7 +362,7 @@ function BuyAndGetTile({ promo }: { promo: BuyAndGetPromo }) {
           </span>
         </div>
 
-        <dl className="mt-5 grid grid-cols-2 divide-x divide-[#FFE8DE] rtl:divide-x-reverse">
+        <dl className="mt-5 grid grid-cols-2 divide-x divide-[#E7E0D8] rtl:divide-x-reverse">
           <div className="px-4 first:ps-0">
             <dt className="text-[15px] uppercase tracking-[0.12em] text-[#A0AEC0]">
               פדיון
@@ -402,7 +402,7 @@ export function ArchiveSheet({
       <Sheet open={open} onOpenChange={onOpenChange}>
         <SheetContent
           side="left"
-          className="w-full sm:max-w-[960px] h-screen max-h-screen overflow-y-auto p-0 bg-[#FDF8F6]"
+          className="w-full sm:max-w-[960px] h-screen max-h-screen overflow-y-auto p-0 bg-[#FAF8F5]"
         >
           <div className="flex h-full flex-col items-center justify-center gap-3 px-8 text-center">
             <Archive className="h-10 w-10 text-[#A0AEC0]" />
@@ -437,7 +437,7 @@ export function ArchiveSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="left"
-        className="w-full sm:max-w-[960px] h-screen max-h-screen overflow-y-auto p-0 bg-[#FDF8F6]"
+        className="w-full sm:max-w-[960px] h-screen max-h-screen overflow-y-auto p-0 bg-[#FAF8F5]"
       >
         <motion.div
           initial="hidden"
@@ -451,7 +451,7 @@ export function ArchiveSheet({
             className="grid gap-6 md:grid-cols-[minmax(0,1fr)_auto] md:items-end"
           >
             <div>
-              <div className="inline-flex items-center gap-2 rounded-[20px] border border-[#FFE8DE] bg-white/60 px-3 py-1 text-[15px] font-medium text-[#DC4E59] shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] backdrop-blur">
+              <div className="inline-flex items-center gap-2 rounded-[20px] border border-[#E7E0D8] bg-white/60 px-3 py-1 text-[15px] font-medium text-[#DC4E59] shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] backdrop-blur">
                 <Archive className="h-4 w-4" />
                 ארכיון מבצעים
               </div>
@@ -473,7 +473,7 @@ export function ArchiveSheet({
               )}
             </div>
 
-            <div className="inline-flex items-center gap-2 rounded-[20px] border border-[#FFE8DE] bg-white px-4 py-2 text-[15px] text-[#4A5568] shadow-[0_1px_0_rgba(220,78,89,0.04)]">
+            <div className="inline-flex items-center gap-2 rounded-[20px] border border-[#E7E0D8] bg-white px-4 py-2 text-[15px] text-[#4A5568] shadow-[0_1px_0_rgba(220,78,89,0.04)]">
               <Sparkles className="h-4 w-4 text-[#DC4E59]" />
               <span dir="ltr" className="font-mono font-semibold">
                 {promotions.length + buyAndGet.length}
@@ -505,7 +505,7 @@ export function ArchiveSheet({
             </div>
 
             {promotions.length === 0 ? (
-              <div className="rounded-[16px] border border-dashed border-[#FFE8DE] bg-white/60 px-6 py-14 text-center">
+              <div className="rounded-[16px] border border-dashed border-[#E7E0D8] bg-white/60 px-6 py-14 text-center">
                 <Archive className="mx-auto h-8 w-8 text-[#A0AEC0]" />
                 <div className="mt-3 text-lg text-[#4A5568]">
                   אין מבצעים היסטוריים זמינים לקטגוריה זו.
@@ -535,7 +535,7 @@ export function ArchiveSheet({
                   <span className="text-[#4A5568]">{category}</span>
                 </p>
               </div>
-              <span className="rounded-[20px] border border-[#FFE8DE] bg-white px-3 py-1 text-[15px] font-medium text-[#4A5568]">
+              <span className="rounded-[20px] border border-[#E7E0D8] bg-white px-3 py-1 text-[15px] font-medium text-[#4A5568]">
                 <span dir="ltr" className="font-mono">
                   {buyAndGet.length}
                 </span>{" "}
@@ -544,7 +544,7 @@ export function ArchiveSheet({
             </div>
 
             {buyAndGet.length === 0 ? (
-              <div className="rounded-[16px] border border-dashed border-[#FFE8DE] bg-white/60 px-6 py-14 text-center text-lg text-[#A0AEC0]">
+              <div className="rounded-[16px] border border-dashed border-[#E7E0D8] bg-white/60 px-6 py-14 text-center text-lg text-[#A0AEC0]">
                 לא נמצאו מבצעי "קנה וקבל" לקטגוריה זו.
               </div>
             ) : (

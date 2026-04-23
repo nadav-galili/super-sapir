@@ -44,7 +44,7 @@ export function LiveKPIPanel({ metrics: m }: LiveKPIPanelProps) {
       transition={{ duration: 0.4, ease: "easeOut" }}
       className="lg:sticky lg:top-[120px]"
     >
-      <div className="rounded-[16px] border border-[#FFE8DE] bg-white shadow-sm overflow-hidden">
+      <div className="rounded-[16px] border border-[#E7E0D8] bg-white shadow-sm overflow-hidden">
         <div
           className="h-1 w-full"
           style={{
@@ -115,7 +115,7 @@ function Row({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-[10px] bg-[#FDF8F6] px-3 py-2.5">
+    <div className="flex items-center justify-between gap-3 rounded-[10px] bg-[#FAF8F5] px-3 py-2.5">
       <span className="inline-flex items-center gap-2 text-[15px] font-medium text-[#4A5568]">
         <span style={{ color }}>{icon}</span>
         {label}
