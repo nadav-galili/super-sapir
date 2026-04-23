@@ -11,7 +11,7 @@
 ### Promo Simulator — terminology & copy fixes
 
 - Renamed the "מבצע צלב-קטגוריה" promo type to "מבצע חוצה קטגוריות" — the "צלב" root literally means "cross" (as in the Christian cross) and was culturally awkward. Affected: `taxonomy.ts` (promo list + copy key), and the same terminology in `narrative.ts`. "שיעור ההצלבה" in the narrative body was replaced with the cleaner "שיעור הצירוף לסל".
-- Shortened the `AINarrative` section title from "ניתוח AI — פרשנות יועץ" to simply "הסבר" (a more direct label that reflects how the block is actually used in the simulator).
+- Shortened the `AINarrative` section title from "ניתוח AI — פרשנות יועץ" to "יועץ אישי" (a more direct label that reflects how the block reads across steps 2–5).
 
 ### Promo Simulator — remove "מותג פרטי" KPI (chain has no private label)
 

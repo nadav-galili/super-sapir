@@ -35,7 +35,7 @@ export function AINarrative({ paragraphs }: AINarrativeProps) {
             >
               <Sparkles className="w-4 h-4 text-white" />
             </div>
-            הסבר
+            יועץ אישי
             <span
               className="text-[15px] font-medium px-2 py-0.5 rounded-full"
               style={{
