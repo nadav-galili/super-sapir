@@ -182,14 +182,14 @@ function SignalSidebar({
 // ─── Main component ───────────────────────────────────────────────
 
 interface ChainAIBriefingProps {
-  periodKey: string;
-  periodLabel: string;
-  multiplier: number;
+  periodKey?: string;
+  periodLabel?: string;
+  multiplier?: number;
 }
 
 export function ChainAIBriefing({
-  periodKey,
-  periodLabel,
+  periodKey = "current-month-to-date",
+  periodLabel = "החודש הנוכחי עד היום",
   multiplier,
 }: ChainAIBriefingProps) {
   const { rows, isLoading, isStreaming, error, retry } = useAIInsight(

@@ -330,6 +330,10 @@ function getPeriodBaseShare(period: TimePeriod): number {
   return 1;
 }
 
+export function getPeriodTargetShare(period: TimePeriod): number {
+  return getPeriodBaseShare(period);
+}
+
 function getPeriodPerformanceFactor(period: TimePeriod): number {
   if (period.type === "yearly") return 1;
 
@@ -382,4 +386,62 @@ export function getPeriodJitter(period: TimePeriod, index: number): number {
   }
   const hash = Math.sin(seed * 7919 + 104729) * 0.5 + 0.5;
   return 0.92 + hash * 0.16;
+}
+
+function getPeriodSeed(period: TimePeriod): number {
+  if (period.type === "yearly") return 0;
+  if (period.type === "monthly" && period.month) return period.month * 97;
+  if (period.type === "range" && period.fromDate && period.toDate) {
+    return `${period.fromDate}:${period.toDate}`
+      .split("")
+      .reduce((sum, ch, index) => sum + ch.charCodeAt(0) * (index + 5), 0);
+  }
+  return 0;
+}
+
+const KPI_STATUS_FACTORS = {
+  strong: [1.06, 1.02, 1.04, 1.08, 1.03],
+  good: [1.01, 0.99, 1.0, 1.02, 0.98],
+  medium: [0.95, 0.94, 0.955, 0.93, 0.9],
+  weak: [0.88, 0.87, 0.91, 0.84, 0.8],
+};
+
+const MONTHLY_STATUS_PATTERNS = [
+  ["good", "strong", "medium", "good", "weak"],
+  ["medium", "good", "good", "weak", "strong"],
+  ["good", "weak", "strong", "medium", "good"],
+  ["strong", "medium", "good", "good", "weak"],
+  ["good", "good", "weak", "strong", "medium"],
+  ["weak", "strong", "medium", "good", "good"],
+  ["good", "medium", "good", "weak", "strong"],
+  ["strong", "good", "weak", "medium", "good"],
+  ["medium", "good", "strong", "good", "weak"],
+  ["good", "weak", "medium", "strong", "good"],
+  ["strong", "good", "good", "medium", "weak"],
+  ["good", "medium", "weak", "good", "strong"],
+] as const;
+
+type KpiStatus = keyof typeof KPI_STATUS_FACTORS;
+
+/**
+ * Shapes each selected period into a realistic KPI mix:
+ * mostly successful, with one medium KPI and sometimes one weak KPI.
+ */
+export function getPeriodKpiFactor(period: TimePeriod, index: number): number {
+  if (period.type === "yearly")
+    return [1.01, 0.99, 1.0, 1.02, 0.97][index] ?? 1;
+
+  const seed = getPeriodSeed(period);
+  const pattern =
+    period.type === "monthly" && period.month
+      ? MONTHLY_STATUS_PATTERNS[period.month - 1]
+      : MONTHLY_STATUS_PATTERNS[
+          Math.abs(seed) % MONTHLY_STATUS_PATTERNS.length
+        ];
+  const status = (pattern[index] ?? "good") as KpiStatus;
+  const base = KPI_STATUS_FACTORS[status][index] ?? 1;
+  const microVariance =
+    (Math.sin((seed + index * 43) * 157) * 0.5 + 0.5) * 0.025;
+
+  return +(base + microVariance).toFixed(3);
 }

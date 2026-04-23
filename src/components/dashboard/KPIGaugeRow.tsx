@@ -16,7 +16,7 @@ interface GaugeKPI {
   label: string;
   value: number;
   target: number;
-  format: "currency" | "percent";
+  format: "currency" | "percent" | "number";
 }
 
 interface KPIGaugeRowProps {
@@ -39,7 +39,7 @@ function resolveKpiColor(item: GaugeKPI): string {
   if (label === "ציון איכות") {
     return getQualityColor({ score: value, maxScore: target });
   }
-  // סל ממוצע ללקוח + מכירות מבצעים → sales/target ratio resolver
+  // סל ממוצע ללקוח + מכירות מבצעים + לקוחות → sales/target ratio resolver
   return getSalesColor({ actual: value, target });
 }
 
@@ -164,7 +164,9 @@ function GaugeCell({ item, index, size, compact = false }: GaugeCellProps) {
   const formattedValue =
     item.format === "currency"
       ? formatCurrencyShort(animated)
-      : `${typeof animated === "number" ? animated.toFixed(item.value % 1 !== 0 ? 1 : 0) : animated}%`;
+      : item.format === "number"
+        ? Math.round(animated).toLocaleString("he-IL")
+        : `${typeof animated === "number" ? animated.toFixed(item.value % 1 !== 0 ? 1 : 0) : animated}%`;
 
   return (
     <motion.div

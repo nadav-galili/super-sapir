@@ -5,7 +5,7 @@ import {
   TimePeriodFilter,
   getPeriodMultiplier,
   getPeriodTargetMultiplier,
-  getPeriodJitter,
+  getPeriodKpiFactor,
   getPeriodLabel,
   type TimePeriod,
 } from "@/components/dashboard/TimePeriodFilter";
@@ -15,7 +15,6 @@ import {
 } from "@/contexts/PeriodContext";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { HeroBanner } from "@/components/dashboard/HeroBanner";
-import { QuickStatCards } from "@/components/dashboard/QuickStatCards";
 import { KPIGaugeRow } from "@/components/dashboard/KPIGaugeRow";
 import { CategorySpotlight } from "@/components/dashboard/CategorySpotlight";
 import { CategoryDonut } from "@/components/dashboard/CategoryDonut";
@@ -40,8 +39,6 @@ function CategoryManagerPage() {
   const [period, setPeriod] = useState<TimePeriod>({ type: "yearly" });
   const multiplier = getPeriodMultiplier(period);
   const targetMultiplier = getPeriodTargetMultiplier(period);
-  const periodLabel = getPeriodLabel(period);
-  const periodKey = `${period.type}-${period.month ?? 0}-${period.fromDate ?? "0"}-${period.toDate ?? "0"}`;
 
   const promotions = useMemo(() => {
     if (multiplier === 1) return rawPromotions;
@@ -80,11 +77,11 @@ function CategoryManagerPage() {
         return sum + b.departments.reduce((ds, d) => ds + d.targetSales, 0);
       }, 0) * targetMultiplier;
 
-    const j0 = getPeriodJitter(period, 0);
-    const j1 = getPeriodJitter(period, 1);
-    const j2 = getPeriodJitter(period, 2);
-    const j3 = getPeriodJitter(period, 3);
-    const j4 = getPeriodJitter(period, 4);
+    const j0 = getPeriodKpiFactor(period, 0);
+    const j1 = getPeriodKpiFactor(period, 1);
+    const j2 = getPeriodKpiFactor(period, 2);
+    const j3 = getPeriodKpiFactor(period, 3);
+    const j4 = getPeriodKpiFactor(period, 4);
 
     const avgGrossMargin =
       (allBranches.reduce((sum, b) => {
@@ -106,10 +103,13 @@ function CategoryManagerPage() {
       (allBranches.reduce((sum, b) => sum + b.metrics.supplyRate, 0) /
         allBranches.length) *
       j2;
-    const avgQuality =
-      (allBranches.reduce((sum, b) => sum + b.metrics.qualityScore, 0) /
-        allBranches.length) *
+    const totalCustomers =
+      allBranches.reduce((sum, b) => sum + b.metrics.customersPerDay, 0) *
+      m *
       j3;
+    const targetCustomers =
+      allBranches.reduce((sum, b) => sum + b.metrics.customersPerDay, 0) *
+      targetMultiplier;
 
     const totalPromoSales =
       allBranches.reduce((sum, b) => {
@@ -147,10 +147,10 @@ function CategoryManagerPage() {
           format: "percent" as const,
         },
         {
-          label: "ציון איכות",
-          value: +avgQuality.toFixed(0),
-          target: 100,
-          format: "percent" as const,
+          label: "לקוחות",
+          value: Math.round(totalCustomers),
+          target: Math.max(1, Math.round(targetCustomers)),
+          format: "number" as const,
         },
         {
           label: "מכירות מבצעים",
@@ -196,13 +196,7 @@ function CategoryManagerPage() {
             }
           />
 
-          <ChainAIBriefing
-            periodKey={periodKey}
-            periodLabel={periodLabel}
-            multiplier={multiplier}
-          />
-
-          <QuickStatCards />
+          <ChainAIBriefing />
 
           <Tabs defaultValue="formats" dir="rtl">
             <div className="flex items-center justify-between gap-4 flex-wrap border-b border-[#FFE8DE]">
