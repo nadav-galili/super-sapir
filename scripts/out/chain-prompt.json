@@ -1,0 +1,313 @@
+{
+  "cacheKey": "chain:trade-manager",
+  "systemPrompt": "אתה יועץ אנליטיקה בכיר למנהל המסחר של רשת סופר ספיר. אתה מנתח את ביצועי הרשת כולה ומספק תובנות אסטרטגיות ממוקדות פעולה בעברית.\n\nפורמט פלט: שורת JSON אחת לכל פריט (JSONL). כל שורה חייבת להיות אובייקט JSON תקין ושלם.\nאין לעטוף באובייקט חיצוני. אין markdown. אין טקסט מלבד שורות ה-JSON.\n\nפלט בדיוק 4 שורות, כל שורה מייצגת נושא שונה לניתוח.\n\nפורמט כל שורה:\n{\"type\":\"insight\",\"subject\":\"נושא הניתוח\",\"recommendation\":\"המלצה קונקרטית לפעולה\",\"status\":\"red\"}\n\nערכי status (רמזור):\n- \"red\" — דחוף, דורש טיפול מיידי\n- \"yellow\" — בינוני, דורש תשומת לב\n- \"green\" — מצב טוב, להמשיך במסלול\n\nכללים:\n- פלט רק שורות JSON, ללא טקסט נוסף\n- אובייקט JSON אחד בכל שורה\n- כל הטקסט בעברית\n- אל תתייחס לסניפים בודדים — מנהל המסחר מתעניין בקטגוריות, ספקים, מבצעים ומגמות ברמת הרשת\n- התמקד ב: ביצועי קטגוריות, יחסי ספקים ותנאי סחר, אפקטיביות מבצעים, רווחיות גולמית, חוסרים וזמינות מדף\n- ציין שמות קטגוריות, ספקים ומבצעים ספציפיים עם מספרים\n- הצע פעולות קונקרטיות שמנהל מסחר יכול לנקוט (משא ומתן מול ספקים, שינוי מיקס מבצעים, הרחבת קטגוריה, וכו׳)\n- נושא = תחום אסטרטגי (לדוגמה: רווחיות ספקים, אפקטיביות מבצעים, חוסרים במדף, צמיחת קטגוריה)\n- המלצה = פעולה ספציפית עם מספרים ופרטים\n- ודא שיש מגוון סטטוסים (לא הכל אדום או ירוק)\n\nשפה ונימה:\n- השתמש בשפה מקצועית, מכבדת ועניינית\n- אין להשתמש במילים פוגעניות, משפילות או שליליות כמו: מפגר, כושל, נכשל, גרוע, איום, עלוב\n- במקום \"מפגר ביעד\" אמור \"לא עומד ביעד\" או \"מתחת ליעד\"\n- במקום \"כושל\" אמור \"דורש שיפור\" או \"מציג ביצועים נמוכים\"\n- שמור על טון בונה ומכוון לפתרון — לא ביקורתי או שיפוטי",
+  "userPrompt": "נתח את ביצועי רשת סופר ספיר כולה מנקודת המבט של מנהל המסחר. התמקד בקטגוריות, ספקים ומבצעים — סיכונים, הזדמנויות, ופעולות אסטרטגיות.\n\n{\n  \"chainSummary\": {\n    \"branchCount\": 12,\n    \"totalSales\": \"117.6M ₪\",\n    \"totalTarget\": \"115.4M ₪\",\n    \"targetAchievement\": \"101.9%\",\n    \"avgGrossMargin\": \"28.9%\",\n    \"avgSupplyRate\": \"96.5%\",\n    \"avgQualityScore\": 72\n  },\n  \"categories\": [\n    {\n      \"name\": \"מכולת\",\n      \"sales\": \"26.4M ₪\",\n      \"share\": \"23.7%\",\n      \"yoyChange\": \"+4.1%\",\n      \"grossMargin\": \"24.7%\",\n      \"stockoutRate\": \"1.8%\",\n      \"targetAchievement\": \"101.4%\"\n    },\n    {\n      \"name\": \"ירקות\",\n      \"sales\": \"17.9M ₪\",\n      \"share\": \"16.1%\",\n      \"yoyChange\": \"+4.1%\",\n      \"grossMargin\": \"32%\",\n      \"stockoutRate\": \"3.2%\",\n      \"targetAchievement\": \"96.3%\"\n    },\n    {\n      \"name\": \"מוצרי חלב\",\n      \"sales\": \"16.4M ₪\",\n      \"share\": \"14.7%\",\n      \"yoyChange\": \"+11.4%\",\n      \"grossMargin\": \"26.1%\",\n      \"stockoutRate\": \"2%\",\n      \"targetAchievement\": \"94.6%\"\n    },\n    {\n      \"name\": \"נון-פוד\",\n      \"sales\": \"11.8M ₪\",\n      \"share\": \"10.6%\",\n      \"yoyChange\": \"+4%\",\n      \"grossMargin\": \"34.4%\",\n      \"stockoutRate\": \"1.6%\",\n      \"targetAchievement\": \"101.0%\"\n    },\n    {\n      \"name\": \"שתיה\",\n      \"sales\": \"11.2M ₪\",\n      \"share\": \"10.1%\",\n      \"yoyChange\": \"+7.1%\",\n      \"grossMargin\": \"28%\",\n      \"stockoutRate\": \"1.6%\",\n      \"targetAchievement\": \"98.9%\"\n    },\n    {\n      \"name\": \"קפואים\",\n      \"sales\": \"10.9M ₪\",\n      \"share\": \"9.8%\",\n      \"yoyChange\": \"+1.3%\",\n      \"grossMargin\": \"27.8%\",\n      \"stockoutRate\": \"1.8%\",\n      \"targetAchievement\": \"103.4%\"\n    },\n    {\n      \"name\": \"מוצרים לבית\",\n      \"sales\": \"4.0M ₪\",\n      \"share\": \"3.6%\",\n      \"yoyChange\": \"+62.6%\",\n      \"grossMargin\": \"37.5%\",\n      \"stockoutRate\": \"0.8%\",\n      \"targetAchievement\": \"64.8%\"\n    },\n    {\n      \"name\": \"בשר טרי\",\n      \"sales\": \"2.8M ₪\",\n      \"share\": \"2.5%\",\n      \"yoyChange\": \"-21.8%\",\n      \"grossMargin\": \"28.1%\",\n      \"stockoutRate\": \"3.8%\",\n      \"targetAchievement\": \"88.9%\"\n    },\n    {\n      \"name\": \"לחם ומאפים\",\n      \"sales\": \"2.6M ₪\",\n      \"share\": \"2.3%\",\n      \"yoyChange\": \"+14.9%\",\n      \"grossMargin\": \"33.8%\",\n      \"stockoutRate\": \"2.9%\",\n      \"targetAchievement\": \"91.7%\"\n    },\n    {\n      \"name\": \"תינוקות\",\n      \"sales\": \"2.0M ₪\",\n      \"share\": \"1.8%\",\n      \"yoyChange\": \"+22%\",\n      \"grossMargin\": \"30.7%\",\n      \"stockoutRate\": \"2.3%\",\n      \"targetAchievement\": \"85.0%\"\n    }\n  ],\n  \"suppliers\": [\n    {\n      \"name\": \"תנובה\",\n      \"sales\": \"18.4M ₪\",\n      \"targetAchievement\": \"96.9%\",\n      \"grossProfit\": \"24.2%\"\n    },\n    {\n      \"name\": \"שטראוס\",\n      \"sales\": \"14.8M ₪\",\n      \"targetAchievement\": \"104.6%\",\n      \"grossProfit\": \"27.8%\"\n    },\n    {\n      \"name\": \"אסם-נסטלה\",\n      \"sales\": \"12.3M ₪\",\n      \"targetAchievement\": \"93.9%\",\n      \"grossProfit\": \"26.1%\"\n    },\n    {\n      \"name\": \"יוניליוור\",\n      \"sales\": \"9.8M ₪\",\n      \"targetAchievement\": \"93.1%\",\n      \"grossProfit\": \"29.4%\"\n    },\n    {\n      \"name\": \"דיפלומט\",\n      \"sales\": \"8.6M ₪\",\n      \"targetAchievement\": \"105.4%\",\n      \"grossProfit\": \"22.6%\"\n    },\n    {\n      \"name\": \"סנו\",\n      \"sales\": \"7.1M ₪\",\n      \"targetAchievement\": \"94.9%\",\n      \"grossProfit\": \"31.2%\"\n    },\n    {\n      \"name\": \"עלית\",\n      \"sales\": \"7.0M ₪\",\n      \"targetAchievement\": \"108.6%\",\n      \"grossProfit\": \"33.5%\"\n    },\n    {\n      \"name\": \"שסטוביץ\",\n      \"sales\": \"5.4M ₪\",\n      \"targetAchievement\": \"93.6%\",\n      \"grossProfit\": \"18.9%\"\n    },\n    {\n      \"name\": \"P&G\",\n      \"sales\": \"4.9M ₪\",\n      \"targetAchievement\": \"93.7%\",\n      \"grossProfit\": \"28.7%\"\n    },\n    {\n      \"name\": \"קימברלי קלארק\",\n      \"sales\": \"4.2M ₪\",\n      \"targetAchievement\": \"105.3%\",\n      \"grossProfit\": \"21.3%\"\n    },\n    {\n      \"name\": \"אוסם\",\n      \"sales\": \"4.0M ₪\",\n      \"targetAchievement\": \"97.1%\",\n      \"grossProfit\": \"25.6%\"\n    },\n    {\n      \"name\": \"נסטלה ישראל\",\n      \"sales\": \"3.7M ₪\",\n      \"targetAchievement\": \"106.9%\",\n      \"grossProfit\": \"30.1%\"\n    }\n  ],\n  \"promotions\": [\n    {\n      \"name\": \"מבצע 1+1 שוקולד\",\n      \"type\": \"1+1\",\n      \"sales\": \"285K ₪\",\n      \"uplift\": \"62.3%\",\n      \"roi\": \"3.8\",\n      \"daysRemaining\": 4\n    },\n    {\n      \"name\": \"הנחה 30% חלב\",\n      \"type\": \"הנחה\",\n      \"sales\": \"257K ₪\",\n      \"uplift\": \"45.7%\",\n      \"roi\": \"2.9\",\n      \"daysRemaining\": 6\n    },\n    {\n      \"name\": \"חבילה משפחתית פסטה\",\n      \"type\": \"חבילה\",\n      \"sales\": \"198K ₪\",\n      \"uplift\": \"38.2%\",\n      \"roi\": \"2.4\",\n      \"daysRemaining\": 3\n    },\n    {\n      \"name\": \"מחיר מיוחד בשר טחון\",\n      \"type\": \"מחיר מיוחד\",\n      \"sales\": \"312K ₪\",\n      \"uplift\": \"55.8%\",\n      \"roi\": \"3.2\",\n      \"daysRemaining\": 5\n    },\n    {\n      \"name\": \"קנה 2 קבל 1 יוגורט\",\n      \"type\": \"קנה X קבל Y\",\n      \"sales\": \"176K ₪\",\n      \"uplift\": \"41.3%\",\n      \"roi\": \"2.1\",\n      \"daysRemaining\": 2\n    },\n    {\n      \"name\": \"1+1 נייר טואלט\",\n      \"type\": \"1+1\",\n      \"sales\": \"222K ₪\",\n      \"uplift\": \"72.1%\",\n      \"roi\": \"4.1\",\n      \"daysRemaining\": 7\n    },\n    {\n      \"name\": \"הנחה 25% שמן זית\",\n      \"type\": \"הנחה\",\n      \"sales\": \"189K ₪\",\n      \"uplift\": \"33.5%\",\n      \"roi\": \"2.2\",\n      \"daysRemaining\": 4\n    },\n    {\n      \"name\": \"מחיר מיוחד עוף שלם\",\n      \"type\": \"מחיר מיוחד\",\n      \"sales\": \"267K ₪\",\n      \"uplift\": \"48.9%\",\n      \"roi\": \"2.7\",\n      \"daysRemaining\": 3\n    },\n    {\n      \"name\": \"חבילה 3+1 מיץ\",\n      \"type\": \"חבילה\",\n      \"sales\": \"143K ₪\",\n      \"uplift\": \"29.4%\",\n      \"roi\": \"1.8\",\n      \"daysRemaining\": 5\n    },\n    {\n      \"name\": \"1+1 ביסקוויטים\",\n      \"type\": \"1+1\",\n      \"sales\": \"158K ₪\",\n      \"uplift\": \"58.7%\",\n      \"roi\": \"3.5\",\n      \"daysRemaining\": 6\n    },\n    {\n      \"name\": \"הנחה 20% גבינות\",\n      \"type\": \"הנחה\",\n      \"sales\": \"204K ₪\",\n      \"uplift\": \"36.8%\",\n      \"roi\": \"2.5\",\n      \"daysRemaining\": 4\n    },\n    {\n      \"name\": \"קנה 3 קבל 1 סבון\",\n      \"type\": \"קנה X קבל Y\",\n      \"sales\": \"135K ₪\",\n      \"uplift\": \"44.2%\",\n      \"roi\": \"2.0\",\n      \"daysRemaining\": 8\n    },\n    {\n      \"name\": \"מחיר מיוחד אורז\",\n      \"type\": \"מחיר מיוחד\",\n      \"sales\": \"119K ₪\",\n      \"uplift\": \"27.6%\",\n      \"roi\": \"1.6\",\n      \"daysRemaining\": 2\n    },\n    {\n      \"name\": \"חבילת ירקות שורש\",\n      \"type\": \"חבילה\",\n      \"sales\": \"96K ₪\",\n      \"uplift\": \"31.5%\",\n      \"roi\": \"1.9\",\n      \"daysRemaining\": 3\n    },\n    {\n      \"name\": \"1+1 קפה נמס\",\n      \"type\": \"1+1\",\n      \"sales\": \"232K ₪\",\n      \"uplift\": \"67.4%\",\n      \"roi\": \"3.9\",\n      \"daysRemaining\": 5\n    }\n  ],\n  \"anomalies\": [\n    \"קטגוריית מוצרים לבית מתחת ליעד (65% בלבד)\",\n    \"קטגוריית בשר טרי מתחת ליעד (89% בלבד)\",\n    \"קטגוריית תינוקות מתחת ליעד (85% בלבד)\",\n    \"קטגוריית מאפים — חוסרים גבוהים (4.1%)\",\n    \"קטגוריית דגים טריים — חוסרים גבוהים (4.7%)\",\n    \"ספק שסטוביץ — רווח גולמי נמוך (18.9%)\",\n    \"ספק ברמן — רווח גולמי נמוך (19.7%)\"\n  ]\n}",
+  "payload": {
+    "chainSummary": {
+      "branchCount": 12,
+      "totalSales": "117.6M ₪",
+      "totalTarget": "115.4M ₪",
+      "targetAchievement": "101.9%",
+      "avgGrossMargin": "28.9%",
+      "avgSupplyRate": "96.5%",
+      "avgQualityScore": 72
+    },
+    "categories": [
+      {
+        "name": "מכולת",
+        "sales": "26.4M ₪",
+        "share": "23.7%",
+        "yoyChange": "+4.1%",
+        "grossMargin": "24.7%",
+        "stockoutRate": "1.8%",
+        "targetAchievement": "101.4%"
+      },
+      {
+        "name": "ירקות",
+        "sales": "17.9M ₪",
+        "share": "16.1%",
+        "yoyChange": "+4.1%",
+        "grossMargin": "32%",
+        "stockoutRate": "3.2%",
+        "targetAchievement": "96.3%"
+      },
+      {
+        "name": "מוצרי חלב",
+        "sales": "16.4M ₪",
+        "share": "14.7%",
+        "yoyChange": "+11.4%",
+        "grossMargin": "26.1%",
+        "stockoutRate": "2%",
+        "targetAchievement": "94.6%"
+      },
+      {
+        "name": "נון-פוד",
+        "sales": "11.8M ₪",
+        "share": "10.6%",
+        "yoyChange": "+4%",
+        "grossMargin": "34.4%",
+        "stockoutRate": "1.6%",
+        "targetAchievement": "101.0%"
+      },
+      {
+        "name": "שתיה",
+        "sales": "11.2M ₪",
+        "share": "10.1%",
+        "yoyChange": "+7.1%",
+        "grossMargin": "28%",
+        "stockoutRate": "1.6%",
+        "targetAchievement": "98.9%"
+      },
+      {
+        "name": "קפואים",
+        "sales": "10.9M ₪",
+        "share": "9.8%",
+        "yoyChange": "+1.3%",
+        "grossMargin": "27.8%",
+        "stockoutRate": "1.8%",
+        "targetAchievement": "103.4%"
+      },
+      {
+        "name": "מוצרים לבית",
+        "sales": "4.0M ₪",
+        "share": "3.6%",
+        "yoyChange": "+62.6%",
+        "grossMargin": "37.5%",
+        "stockoutRate": "0.8%",
+        "targetAchievement": "64.8%"
+      },
+      {
+        "name": "בשר טרי",
+        "sales": "2.8M ₪",
+        "share": "2.5%",
+        "yoyChange": "-21.8%",
+        "grossMargin": "28.1%",
+        "stockoutRate": "3.8%",
+        "targetAchievement": "88.9%"
+      },
+      {
+        "name": "לחם ומאפים",
+        "sales": "2.6M ₪",
+        "share": "2.3%",
+        "yoyChange": "+14.9%",
+        "grossMargin": "33.8%",
+        "stockoutRate": "2.9%",
+        "targetAchievement": "91.7%"
+      },
+      {
+        "name": "תינוקות",
+        "sales": "2.0M ₪",
+        "share": "1.8%",
+        "yoyChange": "+22%",
+        "grossMargin": "30.7%",
+        "stockoutRate": "2.3%",
+        "targetAchievement": "85.0%"
+      }
+    ],
+    "suppliers": [
+      {
+        "name": "תנובה",
+        "sales": "18.4M ₪",
+        "targetAchievement": "96.9%",
+        "grossProfit": "24.2%"
+      },
+      {
+        "name": "שטראוס",
+        "sales": "14.8M ₪",
+        "targetAchievement": "104.6%",
+        "grossProfit": "27.8%"
+      },
+      {
+        "name": "אסם-נסטלה",
+        "sales": "12.3M ₪",
+        "targetAchievement": "93.9%",
+        "grossProfit": "26.1%"
+      },
+      {
+        "name": "יוניליוור",
+        "sales": "9.8M ₪",
+        "targetAchievement": "93.1%",
+        "grossProfit": "29.4%"
+      },
+      {
+        "name": "דיפלומט",
+        "sales": "8.6M ₪",
+        "targetAchievement": "105.4%",
+        "grossProfit": "22.6%"
+      },
+      {
+        "name": "סנו",
+        "sales": "7.1M ₪",
+        "targetAchievement": "94.9%",
+        "grossProfit": "31.2%"
+      },
+      {
+        "name": "עלית",
+        "sales": "7.0M ₪",
+        "targetAchievement": "108.6%",
+        "grossProfit": "33.5%"
+      },
+      {
+        "name": "שסטוביץ",
+        "sales": "5.4M ₪",
+        "targetAchievement": "93.6%",
+        "grossProfit": "18.9%"
+      },
+      {
+        "name": "P&G",
+        "sales": "4.9M ₪",
+        "targetAchievement": "93.7%",
+        "grossProfit": "28.7%"
+      },
+      {
+        "name": "קימברלי קלארק",
+        "sales": "4.2M ₪",
+        "targetAchievement": "105.3%",
+        "grossProfit": "21.3%"
+      },
+      {
+        "name": "אוסם",
+        "sales": "4.0M ₪",
+        "targetAchievement": "97.1%",
+        "grossProfit": "25.6%"
+      },
+      {
+        "name": "נסטלה ישראל",
+        "sales": "3.7M ₪",
+        "targetAchievement": "106.9%",
+        "grossProfit": "30.1%"
+      }
+    ],
+    "promotions": [
+      {
+        "name": "מבצע 1+1 שוקולד",
+        "type": "1+1",
+        "sales": "285K ₪",
+        "uplift": "62.3%",
+        "roi": "3.8",
+        "daysRemaining": 4
+      },
+      {
+        "name": "הנחה 30% חלב",
+        "type": "הנחה",
+        "sales": "257K ₪",
+        "uplift": "45.7%",
+        "roi": "2.9",
+        "daysRemaining": 6
+      },
+      {
+        "name": "חבילה משפחתית פסטה",
+        "type": "חבילה",
+        "sales": "198K ₪",
+        "uplift": "38.2%",
+        "roi": "2.4",
+        "daysRemaining": 3
+      },
+      {
+        "name": "מחיר מיוחד בשר טחון",
+        "type": "מחיר מיוחד",
+        "sales": "312K ₪",
+        "uplift": "55.8%",
+        "roi": "3.2",
+        "daysRemaining": 5
+      },
+      {
+        "name": "קנה 2 קבל 1 יוגורט",
+        "type": "קנה X קבל Y",
+        "sales": "176K ₪",
+        "uplift": "41.3%",
+        "roi": "2.1",
+        "daysRemaining": 2
+      },
+      {
+        "name": "1+1 נייר טואלט",
+        "type": "1+1",
+        "sales": "222K ₪",
+        "uplift": "72.1%",
+        "roi": "4.1",
+        "daysRemaining": 7
+      },
+      {
+        "name": "הנחה 25% שמן זית",
+        "type": "הנחה",
+        "sales": "189K ₪",
+        "uplift": "33.5%",
+        "roi": "2.2",
+        "daysRemaining": 4
+      },
+      {
+        "name": "מחיר מיוחד עוף שלם",
+        "type": "מחיר מיוחד",
+        "sales": "267K ₪",
+        "uplift": "48.9%",
+        "roi": "2.7",
+        "daysRemaining": 3
+      },
+      {
+        "name": "חבילה 3+1 מיץ",
+        "type": "חבילה",
+        "sales": "143K ₪",
+        "uplift": "29.4%",
+        "roi": "1.8",
+        "daysRemaining": 5
+      },
+      {
+        "name": "1+1 ביסקוויטים",
+        "type": "1+1",
+        "sales": "158K ₪",
+        "uplift": "58.7%",
+        "roi": "3.5",
+        "daysRemaining": 6
+      },
+      {
+        "name": "הנחה 20% גבינות",
+        "type": "הנחה",
+        "sales": "204K ₪",
+        "uplift": "36.8%",
+        "roi": "2.5",
+        "daysRemaining": 4
+      },
+      {
+        "name": "קנה 3 קבל 1 סבון",
+        "type": "קנה X קבל Y",
+        "sales": "135K ₪",
+        "uplift": "44.2%",
+        "roi": "2.0",
+        "daysRemaining": 8
+      },
+      {
+        "name": "מחיר מיוחד אורז",
+        "type": "מחיר מיוחד",
+        "sales": "119K ₪",
+        "uplift": "27.6%",
+        "roi": "1.6",
+        "daysRemaining": 2
+      },
+      {
+        "name": "חבילת ירקות שורש",
+        "type": "חבילה",
+        "sales": "96K ₪",
+        "uplift": "31.5%",
+        "roi": "1.9",
+        "daysRemaining": 3
+      },
+      {
+        "name": "1+1 קפה נמס",
+        "type": "1+1",
+        "sales": "232K ₪",
+        "uplift": "67.4%",
+        "roi": "3.9",
+        "daysRemaining": 5
+      }
+    ],
+    "anomalies": [
+      "קטגוריית מוצרים לבית מתחת ליעד (65% בלבד)",
+      "קטגוריית בשר טרי מתחת ליעד (89% בלבד)",
+      "קטגוריית תינוקות מתחת ליעד (85% בלבד)",
+      "קטגוריית מאפים — חוסרים גבוהים (4.1%)",
+      "קטגוריית דגים טריים — חוסרים גבוהים (4.7%)",
+      "ספק שסטוביץ — רווח גולמי נמוך (18.9%)",
+      "ספק ברמן — רווח גולמי נמוך (19.7%)"
+    ]
+  }
+}
