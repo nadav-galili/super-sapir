@@ -181,9 +181,20 @@ function SignalSidebar({
 
 // ─── Main component ───────────────────────────────────────────────
 
-export function ChainAIBriefing() {
-  const { rows, isLoading, isStreaming, error, retry } =
-    useAIInsight(buildChainInsight());
+interface ChainAIBriefingProps {
+  periodKey: string;
+  periodLabel: string;
+  multiplier: number;
+}
+
+export function ChainAIBriefing({
+  periodKey,
+  periodLabel,
+  multiplier,
+}: ChainAIBriefingProps) {
+  const { rows, isLoading, isStreaming, error, retry } = useAIInsight(
+    buildChainInsight({ periodKey, periodLabel, multiplier })
+  );
 
   const showShimmer = isLoading && !rows;
 

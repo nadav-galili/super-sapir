@@ -11,7 +11,8 @@ interface HeroBannerProps {
   branchCount: number;
   categoryCount: number;
   cta?: ReactNode;
-  backgroundImage?: string;
+  middleContent?: ReactNode;
+  periodControl?: ReactNode;
 }
 
 const GAUGE_SIZE = 200;
@@ -101,7 +102,7 @@ function BigGauge({ actual, target }: { actual: number; target: number }) {
           <span className="text-3xl text-white/60 ms-0.5">%</span>
         </span>
         <span className="text-[15px] text-white/70 mt-2 tracking-wide font-medium">
-          עמידה ביעד
+          עמידה ביעד מכירות
         </span>
       </div>
     </div>
@@ -142,7 +143,8 @@ export function HeroBanner({
   branchCount,
   categoryCount,
   cta,
-  backgroundImage,
+  middleContent,
+  periodControl,
 }: HeroBannerProps) {
   const animatedSales = useAnimatedCounter(totalSales, 1600, 200);
 
@@ -153,148 +155,145 @@ export function HeroBanner({
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       className="relative rounded-[20px] overflow-hidden shadow-[0_20px_40px_-15px_rgba(15,23,42,0.25)]"
     >
-      {/* Asymmetric split: content panel (RTL-start / right) + image zone (RTL-end / left) */}
-      <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_clamp(420px,42%,540px)]">
-        {/* Content panel — solid dark surface, all text lives here → guaranteed contrast */}
+      <div
+        className="relative overflow-hidden p-6 sm:p-8 lg:p-10"
+        style={{
+          background:
+            "radial-gradient(circle at 18% 18%, rgba(46,196,213,0.16) 0%, transparent 28%), radial-gradient(circle at 82% 12%, rgba(220,78,89,0.18) 0%, transparent 24%), linear-gradient(145deg, #0F172A 0%, #111B2E 48%, #0B1220 100%)",
+        }}
+      >
         <div
-          className="relative order-2 md:order-1 p-8 sm:p-10 md:p-12 flex flex-col justify-center min-h-[340px]"
+          className="pointer-events-none absolute inset-0 opacity-[0.18]"
           style={{
-            background:
-              "linear-gradient(180deg, #0F172A 0%, #111B2E 60%, #0F172A 100%)",
+            backgroundImage:
+              "linear-gradient(rgba(255,255,255,0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.045) 1px, transparent 1px)",
+            backgroundSize: "44px 44px",
           }}
-        >
-          {/* Live indicator — liquid glass (inner border + inset highlight) */}
-          <motion.div
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="inline-flex self-start items-center gap-2 bg-white/[0.04] backdrop-blur-xl rounded-full px-3 py-1.5 mb-6 border border-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
-          >
-            <motion.span
-              className="w-1.5 h-1.5 rounded-full bg-[#2EC4D5] relative"
-              animate={{
-                boxShadow: [
-                  "0 0 0 0 rgba(46,196,213,0.6)",
-                  "0 0 0 8px rgba(46,196,213,0)",
-                ],
-              }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
-            />
-            <span className="text-[15px] text-white/80 font-medium inline-flex items-center gap-1.5">
-              <Activity className="w-3.5 h-3.5" strokeWidth={2} />
-              נתונים בזמן אמת
-            </span>
-          </motion.div>
+          aria-hidden
+        />
+        <div className="relative grid grid-cols-1 gap-8 xl:grid-cols-[minmax(300px,0.82fr)_minmax(620px,1.18fr)] xl:items-center">
+          <div className="flex min-h-[360px] flex-col justify-center">
+            <div className="mb-6 flex flex-wrap items-center gap-3">
+              {/* Live indicator — liquid glass (inner border + inset highlight) */}
+              <motion.div
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="inline-flex items-center gap-2 bg-white/[0.04] backdrop-blur-xl rounded-full px-3 py-1.5 border border-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
+              >
+                <motion.span
+                  className="w-1.5 h-1.5 rounded-full bg-[#2EC4D5] relative"
+                  animate={{
+                    boxShadow: [
+                      "0 0 0 0 rgba(46,196,213,0.6)",
+                      "0 0 0 8px rgba(46,196,213,0)",
+                    ],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeOut",
+                  }}
+                />
+                <span className="text-[15px] text-white/80 font-medium inline-flex items-center gap-1.5">
+                  <Activity className="w-3.5 h-3.5" strokeWidth={2} />
+                  נתונים בזמן אמת
+                </span>
+              </motion.div>
 
-          <motion.h1
-            initial={{ opacity: 0, x: -16 }}
-            animate={{ opacity: 1, x: 0 }}
+              {periodControl}
+            </div>
+
+            <motion.h1
+              initial={{ opacity: 0, x: -16 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{
+                delay: 0.18,
+                type: "spring",
+                stiffness: 90,
+                damping: 18,
+              }}
+              className="text-5xl md:text-6xl font-bold text-white leading-[1.05] tracking-tight mb-3"
+            >
+              ניהול סחר
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              className="text-lg text-white/70 leading-relaxed max-w-[40ch] mb-7"
+            >
+              מבט מהיר על מצב הרשת עכשיו: מכירות, יעד, רווחיות, זמינות ואיכות.
+            </motion.p>
+
+            {/* Inline stats — divided, no card boxes (anti-card-overuse) */}
+            <div className="flex flex-wrap items-stretch divide-x divide-white/10 -mx-1 mb-7">
+              <InlineStat
+                label="מכירות רשת"
+                value={formatCurrencyShort(animatedSales)}
+                delay={0.4}
+                mono
+              />
+              <InlineStat label="סניפים" value={branchCount} delay={0.5} mono />
+              <InlineStat
+                label="קטגוריות"
+                value={categoryCount}
+                delay={0.6}
+                mono
+              />
+            </div>
+
+            {cta && (
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7 }}
+                className="self-start [&>*:active]:scale-[0.98] [&>*]:transition-transform"
+              >
+                {cta}
+              </motion.div>
+            )}
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{
-              delay: 0.18,
+              delay: 0.24,
               type: "spring",
               stiffness: 90,
               damping: 18,
             }}
-            className="text-5xl md:text-6xl font-bold text-white leading-[1.05] tracking-tight mb-3"
-          >
-            ניהול סחר
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="text-lg text-white/70 leading-relaxed max-w-[40ch] mb-7"
-          >
-            סקירת ביצועים כלל-רשתית לכל הקטגוריות והסניפים
-          </motion.p>
-
-          {/* Inline stats — divided, no card boxes (anti-card-overuse) */}
-          <div className="flex items-stretch divide-x divide-white/10 -mx-1 mb-7">
-            <InlineStat
-              label="מכירות רשת"
-              value={formatCurrencyShort(animatedSales)}
-              delay={0.4}
-              mono
-            />
-            <InlineStat label="סניפים" value={branchCount} delay={0.5} mono />
-            <InlineStat
-              label="קטגוריות"
-              value={categoryCount}
-              delay={0.6}
-              mono
-            />
-          </div>
-
-          {cta && (
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.7 }}
-              className="self-start [&>*:active]:scale-[0.98] [&>*]:transition-transform"
-            >
-              {cta}
-            </motion.div>
-          )}
-        </div>
-
-        {/* Image zone — gauge as glassmorphic overlay, image fades into panel seam */}
-        <div className="relative order-1 md:order-2 min-h-[260px] md:min-h-[420px] overflow-hidden">
-          {backgroundImage ? (
-            <div
-              className="absolute inset-0 bg-cover bg-center"
-              style={{ backgroundImage: `url(${backgroundImage})` }}
-              aria-hidden
-            />
-          ) : (
-            <div
-              className="absolute inset-0"
-              style={{
-                background: "linear-gradient(135deg, #1E293B 0%, #334155 100%)",
-              }}
-              aria-hidden
-            />
-          )}
-          {/* Fade the image into the panel seam (right side in RTL/ms direction on desktop, bottom on mobile) */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background:
-                "linear-gradient(to right, rgba(15,23,42,0) 55%, rgba(15,23,42,0.9) 100%)",
-            }}
-            aria-hidden
-          />
-          <div
-            className="absolute inset-0 pointer-events-none md:hidden"
-            style={{
-              background:
-                "linear-gradient(to bottom, rgba(15,23,42,0) 50%, rgba(15,23,42,0.95) 100%)",
-            }}
-            aria-hidden
-          />
-
-          {/* Gauge — liquid glass treatment */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.85 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{
-              delay: 0.25,
-              type: "spring",
-              stiffness: 140,
-              damping: 18,
-            }}
-            className="absolute inset-0 flex items-center justify-center p-6"
+            className="rounded-[22px] border border-white/10 bg-white/[0.045] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.09)]"
           >
             <div
-              className="relative rounded-full p-6 backdrop-blur-2xl border border-white/15"
+              className="rounded-[18px] border border-white/[0.08] p-4 sm:p-5"
               style={{
                 background:
-                  "radial-gradient(circle at 30% 20%, rgba(255,255,255,0.12) 0%, rgba(15,23,42,0.35) 60%)",
-                boxShadow:
-                  "inset 0 1px 0 rgba(255,255,255,0.15), 0 20px 50px -20px rgba(0,0,0,0.4)",
+                  "linear-gradient(150deg, rgba(255,255,255,0.075) 0%, rgba(255,255,255,0.025) 100%)",
               }}
             >
-              <BigGauge actual={totalSales} target={targetSales} />
+              <div className="mb-4 flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-[12px] font-semibold tracking-[0.12em] text-white/45">
+                    KPI COMMAND CENTER
+                  </p>
+                  <h2 className="mt-1 text-2xl font-bold leading-tight text-white">
+                    מצב הרשת במבט אחד
+                  </h2>
+                </div>
+                <div className="hidden rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-white/60 sm:block">
+                  יעד חודשי
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-[250px_minmax(0,1fr)] lg:items-center">
+                <div className="flex justify-center rounded-[18px] border border-white/10 bg-[#0F172A]/55 p-5">
+                  <BigGauge actual={totalSales} target={targetSales} />
+                </div>
+                {middleContent}
+              </div>
             </div>
           </motion.div>
         </div>

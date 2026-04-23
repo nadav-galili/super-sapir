@@ -4,7 +4,9 @@ import { Megaphone, LayoutGrid, Truck, Store, Sparkles } from "lucide-react";
 import {
   TimePeriodFilter,
   getPeriodMultiplier,
+  getPeriodTargetMultiplier,
   getPeriodJitter,
+  getPeriodLabel,
   type TimePeriod,
 } from "@/components/dashboard/TimePeriodFilter";
 import { PeriodMultiplierProvider } from "@/contexts/PeriodContext";
@@ -34,6 +36,9 @@ function CategoryManagerPage() {
   const [selectedPromoId, setSelectedPromoId] = useState(rawPromotions[0]?.id);
   const [period, setPeriod] = useState<TimePeriod>({ type: "yearly" });
   const multiplier = getPeriodMultiplier(period);
+  const targetMultiplier = getPeriodTargetMultiplier(period);
+  const periodLabel = getPeriodLabel(period);
+  const periodKey = `${period.type}-${period.month ?? 0}-${period.week ?? 0}`;
 
   const promotions = useMemo(() => {
     if (multiplier === 1) return rawPromotions;
@@ -70,7 +75,7 @@ function CategoryManagerPage() {
     const target =
       allBranches.reduce((sum, b) => {
         return sum + b.departments.reduce((ds, d) => ds + d.targetSales, 0);
-      }, 0) * m;
+      }, 0) * targetMultiplier;
 
     const j0 = getPeriodJitter(period, 0);
     const j2 = getPeriodJitter(period, 2);
@@ -151,7 +156,7 @@ function CategoryManagerPage() {
         },
       ],
     };
-  }, [multiplier, period]);
+  }, [multiplier, period, targetMultiplier]);
 
   return (
     <PeriodMultiplierProvider value={multiplier}>
@@ -161,7 +166,14 @@ function CategoryManagerPage() {
           targetSales={totalTargetSales}
           branchCount={allBranches.length}
           categoryCount={categorySnapshots.length}
-          backgroundImage="/hero/category-manager.png"
+          middleContent={<KPIGaugeRow items={gaugeKpis} variant="heroInline" />}
+          periodControl={
+            <TimePeriodFilter
+              value={period}
+              onChange={setPeriod}
+              variant="dark"
+            />
+          }
           cta={
             <Link
               to="/category-manager/promo-simulator"
@@ -177,11 +189,13 @@ function CategoryManagerPage() {
           }
         />
 
-        <ChainAIBriefing />
+        <ChainAIBriefing
+          periodKey={periodKey}
+          periodLabel={periodLabel}
+          multiplier={multiplier}
+        />
 
         <QuickStatCards />
-
-        <KPIGaugeRow items={gaugeKpis} />
 
         <Tabs defaultValue="formats" dir="rtl">
           <div className="flex items-center justify-between gap-4 flex-wrap border-b border-[#FFE8DE]">
@@ -215,7 +229,6 @@ function CategoryManagerPage() {
                 מבצעים
               </TabsTrigger>
             </TabsList>
-            <TimePeriodFilter value={period} onChange={setPeriod} />
           </div>
 
           <TabsContent value="formats" className="mt-4">

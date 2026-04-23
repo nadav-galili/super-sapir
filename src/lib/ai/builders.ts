@@ -357,29 +357,41 @@ function buildCategoryPayload(categoryId: string) {
 
 // ─── Chain builder ──────────────────────────────────────────────
 
-export type ChainBuilderInput = Record<string, never>;
+export interface ChainBuilderInput {
+  periodKey: string;
+  periodLabel: string;
+  multiplier?: number;
+}
 
-const CHAIN_CACHE_KEY = "chain:trade-manager";
-
-export function buildChainInsight(): AIBuildResult<
-  ReturnType<typeof buildChainPayload>
-> {
-  const payload = buildChainPayload();
+export function buildChainInsight({
+  periodKey,
+  periodLabel,
+  multiplier = 1,
+}: ChainBuilderInput): AIBuildResult<ReturnType<typeof buildChainPayload>> {
+  const payload = buildChainPayload({ periodLabel, multiplier });
   const userPrompt = `נתח את ביצועי רשת סופר ספיר כולה מנקודת המבט של מנהל המסחר. התמקד בקטגוריות, ספקים ומבצעים — סיכונים, הזדמנויות, ופעולות אסטרטגיות.\n\n${JSON.stringify(payload, null, 2)}`;
   return {
-    cacheKey: CHAIN_CACHE_KEY,
+    cacheKey: `chain:trade-manager:${periodKey}`,
     payload,
     systemPrompt: CHAIN_SYSTEM_PROMPT,
     userPrompt,
   };
 }
 
-function buildChainPayload() {
+function buildChainPayload({
+  periodLabel,
+  multiplier,
+}: {
+  periodLabel: string;
+  multiplier: number;
+}) {
   const branchCount = allBranches.length;
-  const totalSales = allBranches.reduce((s, b) => s + b.metrics.totalSales, 0);
-  const totalTarget = allBranches.reduce((s, b) => {
-    return s + b.departments.reduce((ds, d) => ds + d.targetSales, 0);
-  }, 0);
+  const totalSales =
+    allBranches.reduce((s, b) => s + b.metrics.totalSales, 0) * multiplier;
+  const totalTarget =
+    allBranches.reduce((s, b) => {
+      return s + b.departments.reduce((ds, d) => ds + d.targetSales, 0);
+    }, 0) * multiplier;
   const targetPct = totalTarget > 0 ? (totalSales / totalTarget) * 100 : 100;
   const avgGrossMargin = +(
     allBranches.reduce((s, b) => {
@@ -405,7 +417,7 @@ function buildChainPayload() {
   const categories = getCategorySummaries();
   const categorySummary = categories.slice(0, 10).map((c) => ({
     name: c.name,
-    sales: formatCurrencyShort(c.sales),
+    sales: formatCurrencyShort(c.sales * multiplier),
     share: `${c.sharePercent}%`,
     yoyChange: `${c.yoyChange > 0 ? "+" : ""}${c.yoyChange}%`,
     grossMargin: `${c.grossMarginPercent}%`,
@@ -419,7 +431,7 @@ function buildChainPayload() {
   const suppliers = getTopSuppliers();
   const supplierSummary = suppliers.slice(0, 12).map((s) => ({
     name: s.name,
-    sales: formatCurrencyShort(s.sales),
+    sales: formatCurrencyShort(s.sales * multiplier),
     targetAchievement:
       s.targetSales > 0
         ? `${((s.sales / s.targetSales) * 100).toFixed(1)}%`
@@ -431,7 +443,7 @@ function buildChainPayload() {
   const promoSummary = promotions.map((p) => ({
     name: p.name,
     type: p.promoType,
-    sales: formatCurrencyShort(p.sales),
+    sales: formatCurrencyShort(p.sales * multiplier),
     uplift: `${p.upliftPercent}%`,
     roi: p.roi.toFixed(1),
     daysRemaining: p.daysRemaining,
@@ -446,6 +458,7 @@ function buildChainPayload() {
   });
 
   return {
+    period: periodLabel,
     chainSummary: {
       branchCount,
       totalSales: formatCurrencyShort(totalSales),
