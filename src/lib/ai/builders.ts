@@ -416,7 +416,7 @@ export function buildChainInsight({
     actualMultiplier,
     targetMultiplier,
   });
-  const userPrompt = `נתח את ביצועי רשת סופר ספיר כולה מנקודת המבט של מנהל המסחר. התמקד בקטגוריות, ספקים ומבצעים — סיכונים, הזדמנויות, ופעולות אסטרטגיות.\n\n${JSON.stringify(payload, null, 2)}`;
+  const userPrompt = `נתח את ביצועי רשת סופר ספיר כולה מנקודת המבט של מנהל הסחר. התמקד בקטגוריות, ספקים ומבצעים — סיכונים, הזדמנויות, ופעולות אסטרטגיות.\n\n${JSON.stringify(payload, null, 2)}`;
   return {
     cacheKey: `chain:trade-manager:${periodKey}`,
     payload,

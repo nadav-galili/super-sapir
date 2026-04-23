@@ -235,7 +235,7 @@ export function FormatsOverview({ period }: { period: TimePeriod }) {
           delay={0.1}
         />
         <FormatCard
-          title="חנויות עיר"
+          title="חנויות שכונתיות"
           branchCount={cityBranches.length}
           kpis={cityKpis}
           delay={0.2}

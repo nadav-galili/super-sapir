@@ -165,7 +165,7 @@ function SignalSidebar({
           transition={{ delay: 0.22 }}
           className="text-[16px] text-[#A0AEC0] leading-snug"
         >
-          סקירת מנהל מסחר
+          סקירת מנהל סחר
         </motion.p>
       </div>
 
