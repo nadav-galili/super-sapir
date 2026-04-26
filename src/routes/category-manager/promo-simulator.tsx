@@ -236,95 +236,104 @@ function PromoSimulatorPage() {
   return (
     <PromoTaxonomyProvider value={DEFAULT_PROMO_TAXONOMY}>
       <div className="min-h-screen bg-[#FAF8F5]">
-        <Stepper current={state.step} onJump={handleJump} />
         <PageContainer>
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={state.step}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.25, ease: "easeOut" }}
-            >
-              {showLiveKpi ? (
-                <div className="grid grid-cols-1 lg:grid-cols-[1fr,320px] gap-4 items-start">
-                  <div className="space-y-4">
-                    {stepContent}
-                    {showNarrative && <AINarrative paragraphs={narrative} />}
-                  </div>
-                  <LiveKPIPanel metrics={metrics} />
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {stepContent}
-                  {showNarrative && <AINarrative paragraphs={narrative} />}
-                </div>
-              )}
-            </motion.div>
-          </AnimatePresence>
+          <div className="grid grid-cols-1 lg:grid-cols-[260px,1fr] gap-6 items-start">
+            <aside className="lg:sticky lg:top-4 self-start">
+              <Stepper current={state.step} onJump={handleJump} />
+            </aside>
 
-          <div className="flex items-center justify-between gap-4 flex-wrap pt-2">
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={restart}
-                className="inline-flex items-center gap-2 rounded-[10px] border border-[#E7E0D8] bg-white px-4 py-2 text-[16px] font-medium text-[#4A5568] transition-colors hover:bg-[#FAF8F5]"
-              >
-                <Home className="w-4 h-4" />
-                לתחילת הסימולטור
-              </button>
-              <button
-                type="button"
-                onClick={resetStep}
-                className="inline-flex items-center gap-2 rounded-[10px] border border-[#E7E0D8] bg-white px-4 py-2 text-[16px] font-medium text-[#4A5568] transition-colors hover:bg-[#FAF8F5]"
-              >
-                <RotateCcw className="w-4 h-4" />
-                איפוס השלב
-              </button>
-            </div>
-
-            <div className="flex flex-col items-end gap-2">
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={goBack}
-                  disabled={state.step === 1}
-                  className="inline-flex items-center gap-2 rounded-[10px] border border-[#E7E0D8] bg-white px-5 py-2.5 text-[16px] font-medium text-[#4A5568] transition-colors hover:bg-[#FAF8F5] disabled:opacity-40 disabled:cursor-not-allowed"
+            <div className="space-y-4">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={state.step}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.25, ease: "easeOut" }}
                 >
-                  <ArrowRight className="w-4 h-4" />
-                  חזרה
-                </button>
-                {nextDisabled ? (
+                  {showLiveKpi ? (
+                    <div className="grid grid-cols-1 xl:grid-cols-[1fr,320px] gap-4 items-start">
+                      <div className="space-y-4">
+                        {stepContent}
+                        {showNarrative && (
+                          <AINarrative paragraphs={narrative} />
+                        )}
+                      </div>
+                      <LiveKPIPanel metrics={metrics} />
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {stepContent}
+                      {showNarrative && <AINarrative paragraphs={narrative} />}
+                    </div>
+                  )}
+                </motion.div>
+              </AnimatePresence>
+
+              <div className="flex items-center justify-between gap-4 flex-wrap pt-2">
+                <div className="flex items-center gap-3">
                   <button
                     type="button"
-                    onClick={handleNext}
-                    aria-disabled="true"
-                    className="inline-flex items-center gap-2 rounded-[10px] border border-[#E7E0D8] bg-white px-5 py-2.5 text-[16px] font-medium text-[#A0AEC0] cursor-not-allowed opacity-60"
+                    onClick={restart}
+                    className="inline-flex items-center gap-2 rounded-[10px] border border-[#E7E0D8] bg-white px-4 py-2 text-[16px] font-medium text-[#4A5568] transition-colors hover:bg-[#FAF8F5]"
                   >
-                    המשך
-                    <ArrowLeft className="w-4 h-4" />
+                    <Home className="w-4 h-4" />
+                    לתחילת הסימולטור
                   </button>
-                ) : (
-                  <ShimmerButton
+                  <button
                     type="button"
-                    onClick={handleNext}
-                    shimmerColor="rgba(255,255,255,0.35)"
+                    onClick={resetStep}
+                    className="inline-flex items-center gap-2 rounded-[10px] border border-[#E7E0D8] bg-white px-4 py-2 text-[16px] font-medium text-[#4A5568] transition-colors hover:bg-[#FAF8F5]"
                   >
-                    {state.step === 9 ? "סיום" : "המשך"}
-                    <ArrowLeft className="w-4 h-4" />
-                  </ShimmerButton>
-                )}
-              </div>
-              {nextDisabled && missingLabels && (
-                <div
-                  className="flex items-center gap-1.5 text-[15px] text-[#F43F5E]"
-                  role="status"
-                  aria-live="polite"
-                >
-                  <AlertCircle className="w-4 h-4" />
-                  <span>חסר למילוי: {missingLabels}</span>
+                    <RotateCcw className="w-4 h-4" />
+                    איפוס השלב
+                  </button>
                 </div>
-              )}
+
+                <div className="flex flex-col items-end gap-2">
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={goBack}
+                      disabled={state.step === 1}
+                      className="inline-flex items-center gap-2 rounded-[10px] border border-[#E7E0D8] bg-white px-5 py-2.5 text-[16px] font-medium text-[#4A5568] transition-colors hover:bg-[#FAF8F5] disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      <ArrowRight className="w-4 h-4" />
+                      חזרה
+                    </button>
+                    {nextDisabled ? (
+                      <button
+                        type="button"
+                        onClick={handleNext}
+                        aria-disabled="true"
+                        className="inline-flex items-center gap-2 rounded-[10px] border border-[#E7E0D8] bg-white px-5 py-2.5 text-[16px] font-medium text-[#A0AEC0] cursor-not-allowed opacity-60"
+                      >
+                        המשך
+                        <ArrowLeft className="w-4 h-4" />
+                      </button>
+                    ) : (
+                      <ShimmerButton
+                        type="button"
+                        onClick={handleNext}
+                        shimmerColor="rgba(255,255,255,0.35)"
+                      >
+                        {state.step === 9 ? "סיום" : "המשך"}
+                        <ArrowLeft className="w-4 h-4" />
+                      </ShimmerButton>
+                    )}
+                  </div>
+                  {nextDisabled && missingLabels && (
+                    <div
+                      className="flex items-center gap-1.5 text-[15px] text-[#F43F5E]"
+                      role="status"
+                      aria-live="polite"
+                    >
+                      <AlertCircle className="w-4 h-4" />
+                      <span>חסר למילוי: {missingLabels}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </PageContainer>

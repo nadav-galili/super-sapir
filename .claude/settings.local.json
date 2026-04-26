@@ -21,7 +21,8 @@
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
       "Bash(gh api *)",
-      "Bash(bun x *)"
+      "Bash(bun x *)",
+      "mcp__plugin_compound-engineering_pw__browser_wait_for"
     ]
   }
 }

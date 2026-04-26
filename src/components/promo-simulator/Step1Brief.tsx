@@ -93,7 +93,7 @@ function ClickableInfoCard({
 
 export function Step1Brief({ brief, onChange, errorKeys }: Step1BriefProps) {
   const categories = useMemo(() => getCategorySummaries(), []);
-  const { salesArenas, durationWeeksOptions } = usePromoTaxonomy();
+  const { salesArenas } = usePromoTaxonomy();
 
   const [archiveOpen, setArchiveOpen] = useState(false);
   const [dataOpen, setDataOpen] = useState(false);
@@ -293,17 +293,33 @@ export function Step1Brief({ brief, onChange, errorKeys }: Step1BriefProps) {
               <label className={LABEL} htmlFor="f-end">
                 תאריך סיום
               </label>
-              <div
+              <input
                 id="f-end"
-                className={READONLY_CLS}
+                type="date"
+                value={endDate}
+                min={brief.startDate || undefined}
+                onChange={(e) => {
+                  const newEnd = e.target.value;
+                  if (!newEnd || !brief.startDate) return;
+                  const start = new Date(brief.startDate);
+                  const end = new Date(newEnd);
+                  if (
+                    Number.isNaN(start.getTime()) ||
+                    Number.isNaN(end.getTime())
+                  )
+                    return;
+                  const diffDays = Math.max(
+                    0,
+                    (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
+                  );
+                  onChange({ durationWeeks: diffDays / 7 });
+                }}
+                className={inputCls("durationWeeks")}
                 dir="ltr"
-                aria-readonly="true"
-                aria-label="תאריך סיום מחושב לפי משך המבצע"
-              >
-                {endDate || "—"}
-              </div>
+              />
             </div>
 
+            {/* Duration field hidden for now — end date is the source of truth.
             <div>
               <label className={LABEL} htmlFor="f-duration">
                 משך מבצע
@@ -331,6 +347,7 @@ export function Step1Brief({ brief, onChange, errorKeys }: Step1BriefProps) {
                 </SelectContent>
               </Select>
             </div>
+            */}
 
             <div>
               <label className={LABEL} htmlFor="f-manager">

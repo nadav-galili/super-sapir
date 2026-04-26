@@ -17,10 +17,9 @@ interface UpliftChartProps {
   durationWeeks: number;
 }
 
-// Palette — brand red + desaturated deep teal (complementary) + slate ink line.
-// No pink, no violet, no pale greys.
-const COLOR_PROMO = "#DC4E59";
-const COLOR_BASE = "#0F766E";
+// Palette — warm orange (promo) + bright blue (base) + slate ink line.
+const COLOR_PROMO = "#f18d62";
+const COLOR_BASE = "#159fe6";
 const COLOR_CUMULATIVE = "#1E293B";
 const COLOR_GRID = "rgba(30, 41, 59, 0.07)";
 const COLOR_AXIS = "#64748B";
@@ -75,8 +74,8 @@ export function UpliftChart({ metrics: m, durationWeeks }: UpliftChartProps) {
 
         {/* Compact legend chips — replaces Recharts default Legend */}
         <div className="flex flex-wrap items-center gap-2 text-[15px] text-[#4A5568]">
-          <LegendChip dotClass="bg-[#0F766E]" label="בסיס" />
-          <LegendChip dotClass="bg-[#DC4E59]" label="מבצע" />
+          <LegendChip dotClass="bg-[#159fe6]" label="בסיס" />
+          <LegendChip dotClass="bg-[#f18d62]" label="מבצע" />
           <LegendChip
             dotClass=""
             label="מצטבר"
@@ -114,7 +113,7 @@ export function UpliftChart({ metrics: m, durationWeeks }: UpliftChartProps) {
               width={60}
             />
             <Tooltip
-              cursor={{ fill: "rgba(220, 78, 89, 0.04)" }}
+              cursor={{ fill: "rgba(241, 141, 98, 0.06)" }}
               formatter={(value, name) => {
                 const label =
                   name === "base"

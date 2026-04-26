@@ -12,34 +12,32 @@ export function Stepper({ current, onJump }: StepperProps) {
   const reduceMotion = useReducedMotion();
 
   return (
-    <div className="sticky top-0 z-20 bg-[#FAF8F5]/95 backdrop-blur-sm border-b border-[#E7E0D8] py-4">
-      <div className="relative px-4 sm:px-6">
-        {/* Track line (full width behind circles). In RTL we visually go right->left. */}
-        <div className="absolute top-[28px] inset-x-8 h-[3px] bg-[#E7E0D8] rounded-full" />
+    <div className="rounded-[16px] border border-[#E7E0D8] bg-white/95 backdrop-blur-sm p-4 shadow-sm">
+      <div className="relative">
+        {/* Vertical track. In RTL the circles sit on the right of each row, so
+            the track aligns to the right side of the column. */}
+        <div className="absolute right-[23px] top-6 bottom-6 w-[3px] bg-[#E7E0D8] rounded-full" />
         <motion.div
-          className="absolute top-[28px] right-8 h-[3px] rounded-full"
-          style={{ background: "linear-gradient(270deg, #DC4E59, #E8777F)" }}
-          initial={{ width: 0 }}
-          animate={{ width: `calc(${progressPct}% * (100% - 64px) / 100%)` }}
+          className="absolute right-[23px] top-6 w-[3px] rounded-full"
+          style={{ background: "linear-gradient(180deg, #DC4E59, #E8777F)" }}
+          initial={{ height: 0 }}
+          animate={{ height: `calc(${progressPct}% * (100% - 48px) / 100%)` }}
           transition={{ duration: 0.4, ease: "easeOut" }}
         />
 
-        <ol className="relative flex items-start justify-between gap-1">
+        <ol className="relative flex flex-col gap-4">
           {STEPS.map((s) => {
             const state =
               s.id === current ? "active" : s.id < current ? "done" : "todo";
             return (
-              <li
-                key={s.id}
-                className="flex flex-col items-center gap-2 flex-1 min-w-0"
-              >
+              <li key={s.id}>
                 <button
                   type="button"
                   onClick={() => onJump(s.id as StepId)}
-                  className="group flex flex-col items-center gap-2 focus:outline-none"
+                  className="group flex items-center gap-3 w-full text-right focus:outline-none"
                 >
                   <span
-                    className="relative flex items-center justify-center w-[56px] h-[56px] rounded-full border-2 text-[18px] font-semibold font-mono transition-colors"
+                    className="relative flex items-center justify-center w-[48px] h-[48px] shrink-0 rounded-full border-2 text-[16px] font-semibold font-mono transition-colors"
                     style={{
                       background:
                         state === "active"
@@ -73,7 +71,7 @@ export function Stepper({ current, onJump }: StepperProps) {
                         }}
                         className="flex items-center justify-center"
                       >
-                        <Check className="w-6 h-6" strokeWidth={3} />
+                        <Check className="w-5 h-5" strokeWidth={3} />
                       </motion.span>
                     ) : (
                       s.id
@@ -95,7 +93,7 @@ export function Stepper({ current, onJump }: StepperProps) {
                     )}
                   </span>
                   <span
-                    className={`text-[15px] font-medium text-center leading-tight max-w-[10ch] ${
+                    className={`text-[16px] font-medium leading-tight flex-1 ${
                       state === "active"
                         ? "text-[#2D3748]"
                         : state === "done"

@@ -8,6 +8,28 @@
 
 ## 2026-04-26
 
+### Promo simulator — recolored Step 5 uplift chart (orange + blue)
+
+`UpliftChart.tsx` (rendered inside `Step5Forecast`): swapped the two bar fills to the new palette per request — `COLOR_BASE` from teal `#0F766E` → blue `#159fe6` (בסיס bars), `COLOR_PROMO` from brand red `#DC4E59` → warm orange `#f18d62` (מבצע bars). Updated the matching `LegendChip` Tailwind dot classes (`bg-[#159fe6]`, `bg-[#f18d62]`) and softened the Recharts tooltip cursor fill from `rgba(220,78,89,0.04)` to `rgba(241,141,98,0.06)` so the hover tint matches the new promo color. The vertical accent rule on the card's start edge (driven by `COLOR_PROMO`) now reads orange to stay consistent with the bar; the cumulative line stays slate-ink dashed; the card's outer drop-shadow keeps its red tint.
+
+### Promo simulator — editable end-date + vertical stepper
+
+Step 1 (בריף) and the wizard chrome on `/category-manager/promo-simulator` got two ergonomic fixes.
+
+- **End date is now a date picker, not a derived readonly field.** `Step1Brief.tsx` swapped the `READONLY_CLS` div for a `<input type="date">` bound to the existing computed end date (`startDate + durationWeeks*7`). On change, we re-compute `durationWeeks = (endDate − startDate) / 7` (fractional weeks allowed) and write that back through the slice setter, so downstream consumers (`Step5Forecast`, `UpliftChart`, `PromoFullReport`, URL codec) keep working unchanged. Input gets `min={startDate}` to block earlier picks. The `משך מבצע` Select is left in source as a JSX comment per the user's request — easy to re-enable later. Removed the now-unused `durationWeeksOptions` destructure.
+- **Stepper is now a vertical sticky column on the right-of-content.** `Stepper.tsx` rewritten from horizontal sticky-top to a vertical `<ol>` inside a bordered card: vertical track line + animated gradient fill, 48px circles with the same active/done/todo color states, label sits next to each circle (RTL: circle right, label left). Route layout `routes/category-manager/promo-simulator.tsx` wraps the stepper + content in a `lg:grid-cols-[260px,1fr]` grid; the stepper aside is `lg:sticky lg:top-4` so it tracks scroll. The Live KPI panel (steps 4–7) was bumped from `lg:` to `xl:` breakpoint so it doesn't crush against the stepper at mid widths.
+- Tests: 21 files / 146 tests still green; typecheck clean.
+
+Files: `src/components/promo-simulator/Step1Brief.tsx`, `src/components/promo-simulator/Stepper.tsx`, `src/routes/category-manager/promo-simulator.tsx`.
+
+### Promo video — added simulator showcase scene
+
+Extended `promo-video/` Remotion composition `CategoryManagerPromo` to include a new 8s scene showcasing `/category-manager/promo-simulator?categoryManager=אבי+לוי`. Captured 4 fresh full-page screenshots via Playwright (against `netlify dev` on :8888), driving simulator state via URL params: brief intake (step 1), live KPI + forecast chart + AI advisor (step 5), analysis verdict (step 6), and the "תיק מבצע מוכן" success screen. New scene cross-fades through the four steps inside a browser-chrome mock with a Ken-Burns zoom, animated step-dots progress indicator, and a numbered Hebrew caption per step ("בריף — מי, מה, מתי", "תחזית חיה — KPIs ויועץ AI", "תחזית והערכה — כדאיות במבט", "תיק מבצע מוכן — שיתוף וארכיון"). Wired between `FeaturesScene` and `MobileShowcaseScene` with fade-in / slide-from-left transitions; bumped composition `durationInFrames` 900 → 1170 (39s @ 30fps). Re-rendered to `out/promo.mp4` (11.8 MB).
+
+- New: `promo-video/src/scenes/SimulatorShowcaseScene.tsx`
+- Updated: `promo-video/src/CategoryManagerPromo.tsx`, `promo-video/src/Root.tsx`
+- New assets: `promo-video/public/screenshots/sim-step1-brief.png`, `sim-step5-forecast.png`, `sim-step6-analysis.png`, `sim-success.png`
+
 ### Monthly chart polish + division-manager consistency + map hover
 
 Follow-up tweaks after issues #42–#46 landed: finished the monthly chart visuals that issue #43 left rough, fixed a domain inconsistency in the division-manager data, and added branch-name hover labels to the map.
