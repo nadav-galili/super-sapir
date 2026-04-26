@@ -8,6 +8,14 @@
 
 ## 2026-04-26
 
+### Fix #45: Add `subActions` field end-to-end (schema → prompt → renderer)
+
+AI recommendations with multiple discrete sub-steps now render as scannable bulleted lists; recommendations without sub-steps render unchanged.
+
+- **Schema** — added optional `subActions?: string[]` to `InsightRow` in `src/lib/ai/types.ts`. The Netlify function's `formatSSEItem` already spreads unknown fields, so the type addition makes it explicit without changing the transport.
+- **Prompt** — added a `תתי-פעולות (subActions)` section to `STORE_SYSTEM_PROMPT`: when a recommendation has multiple discrete sub-steps populate the array (2–4 items recommended); when it's a single action, omit the field entirely (no empty arrays). Includes a worked example shaped like `{"recommendation":"להעמיק פעילות תחרותית במחלקת חלב","subActions":["פרסום בסביבת החנות","העמקת הנחות במוצרי משיכה","מבצעי סל"]}`.
+- **Renderer** — `StoreAIBriefing.tsx` renders `subActions` as a `<ul>` with `list-disc` bullets under the recommendation text. Typography matches the design system: 16px, body color `#4A5568`, muted bullet markers, `ps-5` indent (RTL logical), `mt-2 space-y-1` spacing. When `subActions` is absent or empty, no extra markup is emitted — zero layout shift for existing recommendations. Sub-actions also stream via the existing `TypingText` so they animate in like the parent text.
+
 ### Fix #44: Generic `MiniStatTile` `breakdown` prop wired for פריון לשעת עבודה
 
 The productivity tile in `BranchPerformanceCard` now exposes its full calculation always-visible — no hover, no click. Built as a generic mechanism so any future computed KPI can opt in.
