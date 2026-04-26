@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Calendar, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -85,12 +85,16 @@ export function TimePeriodFilter({
     value.type === "range" ? value : getDefaultRangePeriod()
   );
 
-  useEffect(() => {
+  // Sync local draft state from `value` prop without an effect — store the
+  // last-seen value and update during render if it changed.
+  const [prevValue, setPrevValue] = useState(value);
+  if (prevValue !== value) {
+    setPrevValue(value);
     setActiveType(value.type);
     if (value.type === "range") {
       setRangeDraft(value);
     }
-  }, [value]);
+  }
 
   function selectType(type: PeriodType) {
     setActiveType(type);

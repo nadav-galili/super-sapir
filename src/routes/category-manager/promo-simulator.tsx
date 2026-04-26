@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import {
@@ -67,15 +67,14 @@ function PromoSimulatorPage() {
   } = usePromoSimulator(search);
 
   // "Attempted advance" reveals per-field error rings. Reset on step change
-  // so each new step starts with a clean slate.
+  // so each new step starts with a clean slate. Uses React's recommended
+  // "store previous value during render" pattern instead of an effect.
   const [attempted, setAttempted] = useState(false);
-  const prevStepRef = useRef(state.step);
-  useEffect(() => {
-    if (prevStepRef.current !== state.step) {
-      setAttempted(false);
-      prevStepRef.current = state.step;
-    }
-  }, [state.step]);
+  const [prevStep, setPrevStep] = useState(state.step);
+  if (prevStep !== state.step) {
+    setPrevStep(state.step);
+    setAttempted(false);
+  }
 
   const briefErrorKeys =
     attempted && state.step === 1

@@ -6,7 +6,6 @@ import {
   getPeriodMultiplier,
   getPeriodTargetMultiplier,
   getPeriodKpiFactor,
-  getPeriodLabel,
   type TimePeriod,
 } from "@/components/dashboard/TimePeriodFilter";
 import {

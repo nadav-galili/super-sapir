@@ -6,6 +6,24 @@
 
 ---
 
+## 2026-04-26
+
+### Husky hook hardening + ESLint cleanup
+
+Mirrored the husky hook setup from `poker-league-hero` and tightened the lint gates. Pre-commit now runs `bunx lint-staged` (eslint --fix + prettier on staged files); pre-push runs `bun run typecheck && bun run test`.
+
+- **`.husky/pre-commit`** simplified from `lint-staged + typecheck + test` to just `bunx lint-staged` (heavy checks moved to pre-push for faster commits).
+- **`.husky/pre-push`** added with `bun run typecheck && bun run test`.
+- **`.lintstagedrc`** now lints TS/TSX with `eslint --fix` in addition to prettier formatting.
+- **`eslint.config.js`** — ignored `promo-video/**` (separate sub-project) and `src/routeTree.gen.ts`; configured `@typescript-eslint/no-unused-vars` to respect `_`-prefix convention; enabled `allowConstantExport` for `react-refresh/only-export-components` (cva variants); disabled the rule entirely for `src/routes/**` (TanStack Router file-based pattern).
+- **`src/hooks/use-mobile.tsx`** — refactored from `useEffect`/`setState` to `useSyncExternalStore` (correct subscription model for `matchMedia`).
+- **`src/components/dashboard/TimePeriodFilter.tsx`** — replaced effect-syncs-prop pattern with React's "store previous value during render" pattern. No more cascading renders.
+- **`src/routes/category-manager/promo-simulator.tsx`** — same store-during-render refactor for the per-step `attempted` reset; dropped `useEffect`/`useRef` imports.
+- Removed dead imports: `CategorySupplier` (CategorySuppliersDashboard), `AlertTriangle` (`$categoryId`), `getPeriodLabel` (category-manager index).
+- Final lint state: 0 errors, 13 benign warnings (TanStack Table react-compiler hints + cva variant exports in shadcn ui files).
+
+---
+
 ## 2026-04-23
 
 ### Promo Simulator — step reorder (Analysis → step 6) + "תחזית והערכה"
