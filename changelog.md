@@ -8,6 +8,13 @@
 
 ## 2026-04-26
 
+### Fix #44: Generic `MiniStatTile` `breakdown` prop wired for פריון לשעת עבודה
+
+The productivity tile in `BranchPerformanceCard` now exposes its full calculation always-visible — no hover, no click. Built as a generic mechanism so any future computed KPI can opt in.
+
+- **`MiniStatTile`** gained an optional `breakdown?: { formula: string; steps?: string[] }` prop. When present, `steps` render as small mono-font lines beneath the value (15px, muted `#A0AEC0`) and `formula` as the final mono-font line (15px, body `#4A5568`). When absent, the tile renders identically — no extra markup, no layout shift. Exported `MiniStatTileBreakdown` type for consumers.
+- **`BranchPerformanceCard`** wires `breakdown` only for the productivity tile, with `steps: ["{N} משרות × 22 ימים × 8 שעות = {totalHours} שעות"]` and `formula: "{totalSales} ÷ {totalHours} = ₪{productivity}/שעה"`. Other tiles (`% יישום משימות בEyedo`, `הכנסות למ"ר`, `אחוז עלות שכר`) are unchanged. Numbers formatted via `formatCurrencyShort` and `toLocaleString`.
+
 ### Fix #43: Monthly chart traffic-light bars + per-month target markers
 
 The store-overview monthly sales chart now visually communicates target performance per month.

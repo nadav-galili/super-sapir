@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { BranchFullReport } from "@/data/hadera-real";
 import { WORKING_DAYS_PER_MONTH } from "@/data/constants";
 import { getGrowthColor } from "@/lib/kpi/resolvers";
-import { MiniStatTile } from "../MiniStatTile";
+import { formatCurrencyShort } from "@/lib/format";
+import { MiniStatTile, type MiniStatTileBreakdown } from "../MiniStatTile";
 
 const PRODUCTIVITY_BASELINE = 420;
 
@@ -24,11 +25,19 @@ export function BranchPerformanceCard({ report }: BranchPerformanceCardProps) {
     100
   ).toFixed(1);
 
+  const productivityBreakdown: MiniStatTileBreakdown = {
+    steps: [
+      `${report.hr.actual} משרות × ${WORKING_DAYS_PER_MONTH} ימים × 8 שעות = ${totalWorkHours.toLocaleString()} שעות`,
+    ],
+    formula: `${formatCurrencyShort(report.sales.total.current)} ÷ ${totalWorkHours.toLocaleString()} = ₪${productivityPerHour.toLocaleString()}/שעה`,
+  };
+
   const items: {
     label: string;
     value: string;
     change: number | null;
     sub: string;
+    breakdown?: MiniStatTileBreakdown;
   }[] = [
     {
       label: "% יישום משימות בEyedo",
@@ -64,6 +73,7 @@ export function BranchPerformanceCard({ report }: BranchPerformanceCardProps) {
       value: `₪${productivityPerHour.toLocaleString()}`,
       change: productivityChange,
       sub: `${report.hr.actual} משרות`,
+      breakdown: productivityBreakdown,
     },
   ];
 
@@ -80,6 +90,7 @@ export function BranchPerformanceCard({ report }: BranchPerformanceCardProps) {
               label={item.label}
               value={item.value}
               subtitle={item.sub}
+              breakdown={item.breakdown}
               accessory={
                 item.change !== null ? (
                   <span
