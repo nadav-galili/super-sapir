@@ -8,6 +8,16 @@
 
 ## 2026-04-26
 
+### Monthly chart polish + division-manager consistency + map hover
+
+Follow-up tweaks after issues #42–#46 landed: finished the monthly chart visuals that issue #43 left rough, fixed a domain inconsistency in the division-manager data, and added branch-name hover labels to the map.
+
+- **`MonthlyComparisonChart` — custom tooltip, status dots, brighter bars.** The Recharts default tooltip was leaking Scatter X/Y entries into the popup (showing `NaNK₪` and a series mislabeled `2024`). Replaced it with a `MonthlyTooltip` component that reads everything from `payload[0].payload`, so the tooltip now shows month + year, current sales, last-year sales, target, and a verdict line in the status color (`מעל היעד +X%`, `על היעד ±X%`, or `מתחת ליעד -X%`). Bumped bar fill opacity from `33` (20%) to `80` (50%) so traffic-light differentiation reads at a glance, and added a 6px status dot on top of each bar via a hidden `<Scatter dataKey="current">` for an unmistakable verdict cue. Cursor hover-rectangle disabled.
+- **`hadera-real.ts` — softened December target so the chart shows variation.** With the original `total.target = 9_920_000` the chart's growth multiplier was 1.060 (6%) — every Hadera month fell below 99% of that derived target, so all 11 visible bars rendered red. Lowered `total.target` to `9_300_000` (a defensive ~0.6% decline target) and updated `total.vsTarget` from `-0.2` to `+6.5` so the "מכירות סניף" KPI card stays consistent. Mirrored both fields on `network`. The chart now shows a realistic mix: 🟢 March, October · 🟡 June, July, September, November · 🔴 January, February, April, May, August.
+- **`generators.ts` — `yoyGrowth` derived from `qualityScore`.** Before: `yoyGrowth` was an independent random draw, so a generated branch could land at quality 42 + growth +8% (domain-nonsense — bad service shouldn't grow). Now: `qualityBase = ((qualityScore - 40) / 55) × 14 - 6` mapped linearly into [-6%, +8%], plus ±3% noise from the existing seed. Low-quality branches genuinely decline, high-quality ones genuinely grow, and two same-quality branches still differ. The other independent draws (`complaints`, `customersPerDay`) are flagged as future correlation candidates but unchanged for now.
+- **`BranchMarker.tsx` — branch name on map hover.** Added a `<Tooltip>` from `react-leaflet` (separate from the existing click-Popup) that shows the branch name in a small label above the dot on mouseover. Click still opens the full popup with sales / quality / growth — both behaviors coexist.
+- **Removed `public/mockup-screen.png`** — unused asset.
+
 ### Fix #46: Ratify retail vocabulary in glossary + sweep UI labels + prompt vocab rules
 
 Established canonical Hebrew retail vocabulary across glossary, store-manager UI, and the AI prompt so the dashboard speaks one language end-to-end (`פחת`, `חריגות`, `הוצאות שכר`).

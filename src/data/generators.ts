@@ -57,12 +57,26 @@ function generateMetrics(
   scale: number
 ): BranchMetrics {
   const totalSales = variance(seed, 1, base.totalSales * scale, 0.15);
+  const qualityScore = clamp(
+    variance(seed, 4, base.qualityScore, 0.15),
+    40,
+    95
+  );
+
+  // Quality drives growth: a poorly-run branch loses customers, a strong
+  // one earns loyalty. Map quality [40, 95] linearly to a base growth of
+  // [-6%, +8%], then add ±3% noise so two branches with the same quality
+  // score still differ. Keeps the randomness real without producing the
+  // "quality 42, growth +8%" nonsense the data used to allow.
+  const qualityBase = ((qualityScore - 40) / 55) * 14 - 6;
+  const yoyGrowth = +(qualityBase + (rand(seed, 13) * 6 - 3)).toFixed(1);
+
   return {
     totalSales,
     networkSales: totalSales,
     avgBasket: variance(seed, 2, base.avgBasket, 0.2),
     customersPerDay: variance(seed, 3, base.customersPerDay * scale, 0.15),
-    qualityScore: clamp(variance(seed, 4, base.qualityScore, 0.15), 40, 95),
+    qualityScore,
     salaryCostPercent: +(
       base.salaryCostPercent +
       (rand(seed, 5) * 3 - 1.5)
@@ -77,7 +91,7 @@ function generateMetrics(
     overtimeHours: variance(seed, 10, base.overtimeHours, 0.3),
     turnoverRate: clamp(variance(seed, 11, base.turnoverRate, 0.3), 5, 30),
     totalEmployees: variance(seed, 12, base.totalEmployees * scale, 0.1),
-    yoyGrowth: +(rand(seed, 13) * 12 - 3).toFixed(1),
+    yoyGrowth,
   };
 }
 
