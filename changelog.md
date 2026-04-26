@@ -8,6 +8,15 @@
 
 ## 2026-04-26
 
+### Fix #42: Lock four canonical subjects + force specificity in store AI prompt
+
+Rewrote `STORE_SYSTEM_PROMPT` in `src/lib/ai/builders.ts` to mirror the strict-subjects pattern from `CHAIN_SYSTEM_PROMPT`. Every refresh of the store-overview AI insight now returns exactly four insights with locked verbatim subject names in fixed display order:
+`עמידה ביעדי מכירות` → `ניהול מלאי` → `עלויות כוח אדם` → `איכות ותפעול`.
+
+- Added a hard specificity rule forbidding generic phrasing (`נתח את מיקס המוצרים`, `בחן את הסניף`, `שפר את הביצועים`, `הסתכל על הנתונים`) — every recommendation must cite a named entity (department, category, supplier, month) drawn from the payload, or at minimum a concrete number.
+- Added per-subject "what to cite" guidance: `עמידה ביעדי מכירות` → departments above/below target from `deptsByShare`/`anomalies`; `ניהול מלאי` → departments where stockout/פחת is concentrated; `עלויות כוח אדם` → store-level (turnover %, staffing gap), no department citation expected; `איכות ותפעול` → specific compliance items (`redAlerts`, `customerComplaints`, `missingActivities`, `returns`).
+- No code paths or schemas changed; pure prompt-text edit. Tests + typecheck + build green.
+
 ### TDD policy added to CLAUDE.md
 
 Added a `## Testing — TDD Required` section to CLAUDE.md spelling out red-green-refactor with vertical/tracer-bullet slices, the good-vs-bad-test distinction, the horizontal-slicing anti-pattern, and which behaviors to prioritize testing in this repo (KPI resolvers, period math, simulator state). Removed the experimental PreToolUse hook in `.claude/settings.json` that previously injected a "TDD GATE" reminder on edits to test files — CLAUDE.md is the source of truth here and is the only thing that crosses into the sandcastle Docker container, where Claude Code runs as a fresh install with no user-scoped skills or plugins. One place to read the rule, works everywhere.
