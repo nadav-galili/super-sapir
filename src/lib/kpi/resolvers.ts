@@ -104,6 +104,24 @@ export function getCostDeltaColor({ changePercent }: CostDeltaKPI): string {
   return KPI_STATUS.warning;
 }
 
+// ─── Monthly-sales-vs-target traffic light ──────────────────────
+
+/**
+ * Per-month sales vs derived monthly target. Tighter band than the
+ * generic {@link getSalesColor} because each month is a small slice of
+ * the annual goal — being 5% off in a single month is far more
+ * informative than the loose ±5% band tolerance for full-year metrics.
+ *
+ * `<99%` → bad, `99–101%` → warning, `>101%` → good.
+ */
+export function getMonthlySalesColor({ actual, target }: SalesKPI): string {
+  if (target === 0) return PALETTE.muted;
+  const ratio = (actual / target) * 100;
+  if (ratio < 99) return KPI_STATUS.bad;
+  if (ratio > 101) return KPI_STATUS.good;
+  return KPI_STATUS.warning;
+}
+
 // ─── Status pass-through ────────────────────────────────────────
 
 /** Pre-classified tri-state status → KPI palette. */

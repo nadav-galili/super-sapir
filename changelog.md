@@ -8,6 +8,16 @@
 
 ## 2026-04-26
 
+### Fix #43: Monthly chart traffic-light bars + per-month target markers
+
+The store-overview monthly sales chart now visually communicates target performance per month.
+
+- **New pure module** `src/lib/monthly-targets.ts` — `deriveMonthlyTargets(months, annualTarget, annualLastYear)` annotates each `MonthlyDetail` row with a derived `target`, `vsTargetPercent`, and tri-state `status`. Per-month target = `lastYearSales × (annualTarget / annualLastYear)`, which preserves seasonality and sums to the annual target by construction. Degenerate inputs (zero target or zero lastYear) yield neutral rows.
+- **New resolver** `getMonthlySalesColor({ actual, target })` in `src/lib/kpi/resolvers.ts` — three-band traffic light (`<99%` red, `99–101%` yellow, `>101%` green). Tighter than the generic `getSalesColor` because each month is a small slice of the annual goal.
+- **`MonthlyComparisonChart`** now takes `annualTarget` and `annualLastYear` props, uses the derivation module to compute per-month targets/statuses, and colors each `<Bar>` via `<Cell>` based on the resolver. A small horizontal `<Scatter>` marker renders the target Y-value on each column. Existing last-year dashed line is unchanged. Axis/tooltip/legend font sizes bumped to the dashboard scale (16/18px) per CLAUDE.md.
+- **`OverviewView`** wires `s.total.target` and `s.total.lastYear` through to the chart.
+- **Tests** — TDD vertical slices: 7 tests for the derivation module (multiplier math, vs-target ratio, threshold boundaries 98.99/99/100/101/101.01, zero-target / zero-lastYear fallbacks, sum invariant within rounding tolerance) + 4 tests for the new resolver. Existing chart smoke test updated to pass the new required props. 142 tests passing.
+
 ### Fix #42: Lock four canonical subjects + force specificity in store AI prompt
 
 Rewrote `STORE_SYSTEM_PROMPT` in `src/lib/ai/builders.ts` to mirror the strict-subjects pattern from `CHAIN_SYSTEM_PROMPT`. Every refresh of the store-overview AI insight now returns exactly four insights with locked verbatim subject names in fixed display order:

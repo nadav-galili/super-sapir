@@ -10,6 +10,7 @@ import {
   getCostDeltaColor,
   getGrowthColor,
   getMarginColor,
+  getMonthlySalesColor,
   getProgressColor,
   getPromotionColor,
   getQualityColor,
@@ -200,6 +201,44 @@ describe("getCostDeltaColor", () => {
     expect(getCostDeltaColor({ changePercent: 0 })).toBe(KPI_STATUS.warning);
     expect(getCostDeltaColor({ changePercent: 1 })).toBe(KPI_STATUS.warning);
     expect(getCostDeltaColor({ changePercent: -1 })).toBe(KPI_STATUS.warning);
+  });
+});
+
+describe("getMonthlySalesColor", () => {
+  it("returns bad below 99% of target", () => {
+    expect(getMonthlySalesColor({ actual: 98.99, target: 100 })).toBe(
+      KPI_STATUS.bad
+    );
+    expect(getMonthlySalesColor({ actual: 50, target: 100 })).toBe(
+      KPI_STATUS.bad
+    );
+  });
+
+  it("returns warning between 99% and 101% inclusive", () => {
+    expect(getMonthlySalesColor({ actual: 99, target: 100 })).toBe(
+      KPI_STATUS.warning
+    );
+    expect(getMonthlySalesColor({ actual: 100, target: 100 })).toBe(
+      KPI_STATUS.warning
+    );
+    expect(getMonthlySalesColor({ actual: 101, target: 100 })).toBe(
+      KPI_STATUS.warning
+    );
+  });
+
+  it("returns good above 101% of target", () => {
+    expect(getMonthlySalesColor({ actual: 101.01, target: 100 })).toBe(
+      KPI_STATUS.good
+    );
+    expect(getMonthlySalesColor({ actual: 200, target: 100 })).toBe(
+      KPI_STATUS.good
+    );
+  });
+
+  it("returns muted when target is zero", () => {
+    expect(getMonthlySalesColor({ actual: 100, target: 0 })).toBe(
+      PALETTE.muted
+    );
   });
 });
 
