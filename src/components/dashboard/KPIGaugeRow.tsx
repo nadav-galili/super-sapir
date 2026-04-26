@@ -3,12 +3,7 @@ import { Target } from "lucide-react";
 import { useAnimatedCounter } from "@/hooks/useAnimatedCounter";
 import { formatCurrencyShort } from "@/lib/format";
 import { KPI_STATUS } from "@/lib/colors";
-import {
-  getSalesColor,
-  getMarginColor,
-  getSupplyColor,
-  getQualityColor,
-} from "@/lib/kpi/resolvers";
+import { getGaugeRatioColor } from "@/lib/kpi/resolvers";
 
 // ─── Public types (API unchanged) ────────────────────────────────
 
@@ -24,23 +19,16 @@ interface KPIGaugeRowProps {
   variant?: "standalone" | "heroInline";
 }
 
-// ─── Per-label resolver map ───────────────────────────────────────
-// Selects the semantically correct color resolver for each KPI so we
-// never hardcode thresholds or pass direction flags at the call site.
+// All gauges in this row are read the same way — by the visible
+// "% of target" arc on the gauge itself. Color comes from
+// `getGaugeRatioColor` so every meter answers the same question:
+// did we hit our target? Domain-specific resolvers (margin %, supply
+// rate, quality score) still live in `lib/kpi/resolvers` and remain
+// the right pick when a metric is rendered standalone, but for this
+// hero strip the unified band wins on legibility.
 
 function resolveKpiColor(item: GaugeKPI): string {
-  const { label, value, target } = item;
-  if (label === "רווח גולמי") {
-    return getMarginColor({ marginPercent: value });
-  }
-  if (label === "זמינות מדף") {
-    return getSupplyColor({ ratePercent: value });
-  }
-  if (label === "ציון איכות") {
-    return getQualityColor({ score: value, maxScore: target });
-  }
-  // סל ממוצע ללקוח + מכירות מבצעים + לקוחות → sales/target ratio resolver
-  return getSalesColor({ actual: value, target });
+  return getGaugeRatioColor({ actual: item.value, target: item.target });
 }
 
 // ─── Gauge SVG ────────────────────────────────────────────────────
@@ -280,21 +268,21 @@ export function KPIGaugeRow({
                 ease: "easeInOut",
               }}
             />
-            95%+
+            100%+
           </span>
           <span className="flex items-center gap-1.5">
             <span
               className="w-2 h-2 rounded-full shrink-0"
               style={{ backgroundColor: KPI_STATUS.warning }}
             />
-            85–95%
+            95–99%
           </span>
           <span className="flex items-center gap-1.5">
             <span
               className="w-2 h-2 rounded-full shrink-0"
               style={{ backgroundColor: KPI_STATUS.bad }}
             />
-            &lt;85%
+            &lt;95%
           </span>
         </div>
       </div>

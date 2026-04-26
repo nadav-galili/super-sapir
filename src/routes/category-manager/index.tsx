@@ -178,6 +178,7 @@ function CategoryManagerPage() {
                 value={period}
                 onChange={setPeriod}
                 variant="dark"
+                mode="inline"
               />
             }
             cta={

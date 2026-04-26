@@ -173,36 +173,37 @@ export function HeroBanner({
         />
         <div className="relative grid grid-cols-1 gap-8 xl:grid-cols-[minmax(300px,0.82fr)_minmax(620px,1.18fr)] xl:items-center">
           <div className="flex min-h-[360px] flex-col justify-center">
-            <div className="mb-6 flex flex-wrap items-center gap-3">
-              {/* Live indicator — liquid glass (inner border + inset highlight) */}
-              <motion.div
-                initial={{ opacity: 0, y: -4 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="inline-flex items-center gap-2 bg-white/[0.04] backdrop-blur-xl rounded-full px-3 py-1.5 border border-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
-              >
-                <motion.span
-                  className="w-1.5 h-1.5 rounded-full bg-[#2EC4D5] relative"
-                  animate={{
-                    boxShadow: [
-                      "0 0 0 0 rgba(46,196,213,0.6)",
-                      "0 0 0 8px rgba(46,196,213,0)",
-                    ],
-                  }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    ease: "easeOut",
-                  }}
-                />
-                <span className="text-[15px] text-white/80 font-medium inline-flex items-center gap-1.5">
-                  <Activity className="w-3.5 h-3.5" strokeWidth={2} />
-                  נתונים בזמן אמת
-                </span>
-              </motion.div>
+            {/* Top meta — live indicator on its own line so it doesn't
+                fight the taller period filter for vertical alignment. */}
+            <motion.div
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="mb-4 inline-flex items-center gap-2 bg-white/[0.04] backdrop-blur-xl rounded-full px-3 py-1.5 border border-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] self-start"
+            >
+              <motion.span
+                className="w-1.5 h-1.5 rounded-full bg-[#2EC4D5] relative"
+                animate={{
+                  boxShadow: [
+                    "0 0 0 0 rgba(46,196,213,0.6)",
+                    "0 0 0 8px rgba(46,196,213,0)",
+                  ],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeOut",
+                }}
+              />
+              <span className="text-[15px] text-white/80 font-medium inline-flex items-center gap-1.5">
+                <Activity className="w-3.5 h-3.5" strokeWidth={2} />
+                נתונים בזמן אמת
+              </span>
+            </motion.div>
 
-              {periodControl}
-            </div>
+            {/* Period filter — its own block; spacing controlled here so
+                the parent column flows in clean horizontal bands. */}
+            {periodControl && <div className="mb-6">{periodControl}</div>}
 
             <motion.h1
               initial={{ opacity: 0, x: -16 }}

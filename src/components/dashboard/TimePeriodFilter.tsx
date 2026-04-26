@@ -26,6 +26,23 @@ const MONTHS = [
   "דצמבר",
 ];
 
+// Three-letter Hebrew month abbreviations — used by the inline-mode
+// horizontal month scrubber so the whole year fits in one row.
+const MONTH_ABBR = [
+  "ינו",
+  "פבר",
+  "מרץ",
+  "אפר",
+  "מאי",
+  "יונ",
+  "יול",
+  "אוג",
+  "ספט",
+  "אוק",
+  "נוב",
+  "דצמ",
+];
+
 function pad2(value: number): string {
   return value.toString().padStart(2, "0");
 }
@@ -70,6 +87,12 @@ interface TimePeriodFilterProps {
   onChange: (period: TimePeriod) => void;
   variant?: "light" | "dark";
   panelPlacement?: "side-start" | "side-end" | "bottom";
+  /**
+   * `dropdown` (default): renders a button trigger; clicking opens a panel.
+   * `inline`: renders type tabs + the active type's picker always visible —
+   * no click required, currently-selected period stays highlighted.
+   */
+  mode?: "dropdown" | "inline";
 }
 
 export function TimePeriodFilter({
@@ -77,6 +100,7 @@ export function TimePeriodFilter({
   onChange,
   variant = "light",
   panelPlacement = "side-start",
+  mode = "dropdown",
 }: TimePeriodFilterProps) {
   const [showDropdown, setShowDropdown] = useState(false);
   const isDark = variant === "dark";
@@ -144,6 +168,301 @@ export function TimePeriodFilter({
       : panelPlacement === "side-end"
         ? "sm:top-0 sm:mt-0 sm:start-auto sm:end-[calc(100%+12px)] sm:w-[360px]"
         : "sm:top-0 sm:mt-0 sm:end-auto sm:start-[calc(100%+12px)] sm:w-[360px]";
+
+  // Shared panel body — type tabs + active type's picker. Used by both
+  // the dropdown panel (rendered conditionally on click) and the inline
+  // mode (rendered always).
+  const panelBody = (
+    <>
+      <div className="mb-4 flex gap-1 rounded-[12px] bg-[#FDF8F6] p-1">
+        {[
+          { type: "yearly" as const, label: "שנה" },
+          { type: "monthly" as const, label: "חודש" },
+          { type: "range" as const, label: "טווח" },
+        ].map((opt) => (
+          <button
+            key={opt.type}
+            onClick={() => selectType(opt.type)}
+            className={`flex-1 rounded-[10px] px-3 py-2 text-[15px] font-semibold transition-all ${
+              activeType === opt.type
+                ? "bg-white text-[#DC4E59] shadow-sm"
+                : "text-[#4A5568] hover:bg-white/60"
+            }`}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+
+      {activeType === "monthly" && (
+        <div>
+          <p className="mb-2 text-[12px] font-semibold text-[#A0AEC0]">
+            בחר חודש
+          </p>
+          <div className="grid grid-cols-4 gap-2">
+            {MONTHS.map((name, i) => (
+              <button
+                key={i}
+                onClick={() => {
+                  onChange({ type: "monthly", month: i + 1 });
+                  setShowDropdown(false);
+                }}
+                className={`rounded-[12px] px-2 py-3 text-[14px] font-semibold leading-tight transition-all ${
+                  value.type === "monthly" && value.month === i + 1
+                    ? "bg-[#DC4E59] text-white shadow-sm"
+                    : "border border-[#FFF0EA] text-[#4A5568] hover:bg-[#FDF8F6]"
+                }`}
+              >
+                {name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {activeType === "range" && (
+        <div>
+          <p className="mb-2 text-[12px] font-semibold text-[#A0AEC0]">
+            בחר טווח תאריכים
+          </p>
+          <div className="grid grid-cols-1 gap-3">
+            <label className="block">
+              <span className="mb-1 block text-[12px] font-semibold text-[#A0AEC0]">
+                מתאריך
+              </span>
+              <input
+                type="date"
+                value={rangeDraft.fromDate ?? ""}
+                onChange={(e) => applyRange({ fromDate: e.target.value })}
+                className="w-full rounded-[12px] border border-[#FFF0EA] px-3 py-3 text-[14px] font-medium text-[#2D3748] outline-none transition-colors focus:border-[#DC4E59]"
+              />
+            </label>
+            <label className="block">
+              <span className="mb-1 block text-[12px] font-semibold text-[#A0AEC0]">
+                עד תאריך
+              </span>
+              <input
+                type="date"
+                value={rangeDraft.toDate ?? ""}
+                onChange={(e) => applyRange({ toDate: e.target.value })}
+                className="w-full rounded-[12px] border border-[#FFF0EA] px-3 py-3 text-[14px] font-medium text-[#2D3748] outline-none transition-colors focus:border-[#DC4E59]"
+              />
+            </label>
+            <button
+              onClick={commitRange}
+              className="rounded-[12px] bg-[#DC4E59] px-4 py-3 text-[14px] font-semibold text-white shadow-sm transition-colors hover:bg-[#c9444f]"
+            >
+              החל טווח
+            </button>
+          </div>
+        </div>
+      )}
+
+      {activeType === "yearly" && (
+        <div className="rounded-[12px] border border-[#FFF0EA] bg-[#FDF8F6] px-4 py-4 text-center">
+          <p className="text-[15px] font-semibold text-[#2D3748]">
+            תצוגה שנתית
+          </p>
+          <p className="mt-1 text-[13px] text-[#A0AEC0]">
+            הדף מציג ביצועים מצטברים מתחילת השנה
+          </p>
+        </div>
+      )}
+    </>
+  );
+
+  if (mode === "inline") {
+    // Editorial chronograph design — flows on the dark hero surface
+    // without an inner card. Hierarchy comes from typography and a
+    // sliding accent underline (motion's layoutId) that connects the
+    // type tabs and the month scrubber as one continuous mechanism.
+    //   - Cyan underline picks WHICH KIND of period (yearly/monthly/range)
+    //   - Red underline picks WHICH EXACT month
+    // The light variant is supported for non-hero placements but the
+    // surface is designed primarily for the dark hero strip.
+    const eyebrowColor = isDark ? "text-white/40" : "text-[#A0AEC0]";
+    const headingColor = isDark ? "text-white" : "text-[#2D3748]";
+    const dividerColor = isDark ? "border-white/[0.06]" : "border-[#F5E6DE]";
+    const tabIdleColor = isDark
+      ? "text-white/40 hover:text-white/75"
+      : "text-[#A0AEC0] hover:text-[#4A5568]";
+    const tabActiveColor = isDark ? "text-white" : "text-[#2D3748]";
+    const monthIdleColor = isDark
+      ? "text-white/35 hover:text-white/75"
+      : "text-[#A0AEC0] hover:text-[#4A5568]";
+    const monthActiveColor = isDark ? "text-white" : "text-[#2D3748]";
+    const dateBorderIdle = isDark ? "border-white/15" : "border-[#FFE8DE]";
+    const dateInputColor = isDark ? "text-white" : "text-[#2D3748]";
+
+    return (
+      <div dir="rtl" className="space-y-5">
+        {/* Editorial header — small eyebrow over a generous display period.
+            Re-keying the motion.p on label change replays the entry so
+            switching periods feels like a chronograph hand snapping in. */}
+        <div>
+          <p className={`text-[15px] font-semibold ${eyebrowColor}`}>
+            טווח ניתוח
+          </p>
+          <motion.p
+            key={getPeriodLabel(value)}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.28, ease: "easeOut" }}
+            className={`mt-1 text-3xl font-bold tracking-tight tabular-nums leading-tight ${headingColor}`}
+          >
+            {getPeriodLabel(value)}
+          </motion.p>
+        </div>
+
+        {/* Type tabs — text-only, sliding cyan accent underline */}
+        <div
+          className={`flex items-center gap-1 border-t pt-3 ${dividerColor}`}
+        >
+          {[
+            { type: "yearly" as const, label: "שנה" },
+            { type: "monthly" as const, label: "חודש" },
+            { type: "range" as const, label: "טווח" },
+          ].map((opt) => {
+            const isActive = activeType === opt.type;
+            return (
+              <button
+                key={opt.type}
+                onClick={() => selectType(opt.type)}
+                className="relative px-3 py-2"
+              >
+                <span
+                  className={`text-[18px] font-semibold transition-colors ${
+                    isActive ? tabActiveColor : tabIdleColor
+                  }`}
+                >
+                  {opt.label}
+                </span>
+                {isActive && (
+                  <motion.span
+                    layoutId="period-type-underline"
+                    className="absolute inset-x-3 bottom-0 h-[2px] rounded-full bg-[#2EC4D5]"
+                    transition={{
+                      type: "spring",
+                      stiffness: 420,
+                      damping: 32,
+                    }}
+                  />
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Active picker — only monthly + range render a sub-row;
+            yearly is fully expressed by the heading above. */}
+        <AnimatePresence mode="wait" initial={false}>
+          {activeType === "monthly" && (
+            <motion.div
+              key="month-scrubber"
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="flex items-end justify-between gap-2">
+                {MONTH_ABBR.map((abbr, i) => {
+                  const isSelected =
+                    value.type === "monthly" && value.month === i + 1;
+                  return (
+                    <button
+                      key={i}
+                      onClick={() =>
+                        onChange({ type: "monthly", month: i + 1 })
+                      }
+                      className="relative flex-1 py-2"
+                    >
+                      <span
+                        className={`block text-[16px] font-semibold tabular-nums transition-colors ${
+                          isSelected ? monthActiveColor : monthIdleColor
+                        }`}
+                      >
+                        {abbr}
+                      </span>
+                      {isSelected && (
+                        <motion.span
+                          layoutId="period-month-underline"
+                          className="absolute inset-x-1 -bottom-0.5 h-[2px] rounded-full bg-[#DC4E59]"
+                          transition={{
+                            type: "spring",
+                            stiffness: 420,
+                            damping: 32,
+                          }}
+                        />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </motion.div>
+          )}
+
+          {activeType === "range" && (
+            <motion.div
+              key="range-picker"
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.2 }}
+              className="flex items-end gap-4"
+            >
+              <label className="flex-1 block">
+                <span
+                  className={`block text-[15px] font-semibold mb-1 ${eyebrowColor}`}
+                >
+                  מתאריך
+                </span>
+                <input
+                  type="date"
+                  value={rangeDraft.fromDate ?? ""}
+                  onChange={(e) => applyRange({ fromDate: e.target.value })}
+                  style={{ colorScheme: isDark ? "dark" : "light" }}
+                  className={`w-full bg-transparent border-0 border-b ${dateBorderIdle} px-0 py-1.5 text-[16px] font-semibold tabular-nums outline-none transition-colors focus:border-[#2EC4D5] ${dateInputColor}`}
+                />
+              </label>
+              <label className="flex-1 block">
+                <span
+                  className={`block text-[15px] font-semibold mb-1 ${eyebrowColor}`}
+                >
+                  עד
+                </span>
+                <input
+                  type="date"
+                  value={rangeDraft.toDate ?? ""}
+                  onChange={(e) => applyRange({ toDate: e.target.value })}
+                  style={{ colorScheme: isDark ? "dark" : "light" }}
+                  className={`w-full bg-transparent border-0 border-b ${dateBorderIdle} px-0 py-1.5 text-[16px] font-semibold tabular-nums outline-none transition-colors focus:border-[#2EC4D5] ${dateInputColor}`}
+                />
+              </label>
+              <button
+                onClick={commitRange}
+                className="text-[15px] font-bold text-[#2EC4D5] hover:text-[#5DD8E3] py-1.5 transition-colors whitespace-nowrap"
+              >
+                החל ←
+              </button>
+            </motion.div>
+          )}
+
+          {activeType === "yearly" && (
+            <motion.p
+              key="yearly-caption"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className={`text-[15px] ${eyebrowColor}`}
+            >
+              מציג ביצועים מצטברים מתחילת השנה
+            </motion.p>
+          )}
+        </AnimatePresence>
+      </div>
+    );
+  }
 
   return (
     <div className="relative z-30">
@@ -213,104 +532,7 @@ export function TimePeriodFilter({
                 שנה, חודש או טווח תאריכים לעדכון כל המדדים בדף
               </p>
             </div>
-
-            <div className="mb-4 flex gap-1 rounded-[12px] bg-[#FDF8F6] p-1">
-              {[
-                { type: "yearly" as const, label: "שנה" },
-                { type: "monthly" as const, label: "חודש" },
-                { type: "range" as const, label: "טווח" },
-              ].map((opt) => (
-                <button
-                  key={opt.type}
-                  onClick={() => selectType(opt.type)}
-                  className={`flex-1 rounded-[10px] px-3 py-2 text-[15px] font-semibold transition-all ${
-                    activeType === opt.type
-                      ? "bg-white text-[#DC4E59] shadow-sm"
-                      : "text-[#4A5568] hover:bg-white/60"
-                  }`}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-
-            {/* Month picker */}
-            {activeType === "monthly" && (
-              <div>
-                <p className="mb-2 text-[12px] font-semibold text-[#A0AEC0]">
-                  בחר חודש
-                </p>
-                <div className="grid grid-cols-4 gap-2">
-                  {MONTHS.map((name, i) => (
-                    <button
-                      key={i}
-                      onClick={() => {
-                        onChange({ type: "monthly", month: i + 1 });
-                        setShowDropdown(false);
-                      }}
-                      className={`rounded-[12px] px-2 py-3 text-[14px] font-semibold leading-tight transition-all ${
-                        value.type === "monthly" && value.month === i + 1
-                          ? "bg-[#DC4E59] text-white shadow-sm"
-                          : "border border-[#FFF0EA] text-[#4A5568] hover:bg-[#FDF8F6]"
-                      }`}
-                    >
-                      {name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Range picker */}
-            {activeType === "range" && (
-              <div>
-                <p className="mb-2 text-[12px] font-semibold text-[#A0AEC0]">
-                  בחר טווח תאריכים
-                </p>
-                <div className="grid grid-cols-1 gap-3">
-                  <label className="block">
-                    <span className="mb-1 block text-[12px] font-semibold text-[#A0AEC0]">
-                      מתאריך
-                    </span>
-                    <input
-                      type="date"
-                      value={rangeDraft.fromDate ?? ""}
-                      onChange={(e) => applyRange({ fromDate: e.target.value })}
-                      className="w-full rounded-[12px] border border-[#FFF0EA] px-3 py-3 text-[14px] font-medium text-[#2D3748] outline-none transition-colors focus:border-[#DC4E59]"
-                    />
-                  </label>
-                  <label className="block">
-                    <span className="mb-1 block text-[12px] font-semibold text-[#A0AEC0]">
-                      עד תאריך
-                    </span>
-                    <input
-                      type="date"
-                      value={rangeDraft.toDate ?? ""}
-                      onChange={(e) => applyRange({ toDate: e.target.value })}
-                      className="w-full rounded-[12px] border border-[#FFF0EA] px-3 py-3 text-[14px] font-medium text-[#2D3748] outline-none transition-colors focus:border-[#DC4E59]"
-                    />
-                  </label>
-                  <button
-                    onClick={commitRange}
-                    className="rounded-[12px] bg-[#DC4E59] px-4 py-3 text-[14px] font-semibold text-white shadow-sm transition-colors hover:bg-[#c9444f]"
-                  >
-                    החל טווח
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Yearly — just close */}
-            {activeType === "yearly" && (
-              <div className="rounded-[12px] border border-[#FFF0EA] bg-[#FDF8F6] px-4 py-4 text-center">
-                <p className="text-[15px] font-semibold text-[#2D3748]">
-                  תצוגה שנתית
-                </p>
-                <p className="mt-1 text-[13px] text-[#A0AEC0]">
-                  הדף מציג ביצועים מצטברים מתחילת השנה
-                </p>
-              </div>
-            )}
+            {panelBody}
           </motion.div>
         )}
       </AnimatePresence>
