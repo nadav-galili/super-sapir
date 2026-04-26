@@ -8,6 +8,23 @@
 
 ## 2026-04-26
 
+### Promo simulator — two alternate UI/UX variants (Editorial + Terminal)
+
+Following the "design it twice" principle: spawned two radically different visual treatments of the same wizard at sibling routes, sharing all state/validation/step internals via the new `StepContent` extraction. Each treatment changes only the chrome — page background, fonts, stepper geometry, action-bar style — so a category manager can switch designs mid-flow and the URL search-param state persists.
+
+- **Extracted `StepContent.tsx`** — pulls the 9-way step switch (with `BorderBeam` wrapping for steps 4–7, toggleable via `withBeam`) out of the route file. Original route now passes `state/setState/metrics/briefErrorKeys` and renders the same JSX as before. Net: original route shrank ~110 lines.
+- **Variant A — `/category-manager/promo-simulator-editorial`** (`promo-simulator-editorial.tsx` + `StepperEditorial.tsx`). "Museum brochure / Economist longread" aesthetic. Parchment cream `#F4ECD8` background, deep-gold `#B68B2F` + ink `#1F1A14` accents, system Hebrew serif stack (`'David Libre', 'Frank Ruhl Libre', Georgia, ...`) on headings and the action bar, masthead with `Vol. I · גליון מבצעים` rubric. Stepper rendered as a horizontal Table-of-Contents with oversized 44px serif numerals, hairline ink rules, and a gold underline that sweeps in on the active step (no circles, no progress fill). Buttons are rounded-full pill outlines; the primary advance button is ink-on-cream uppercase tracked.
+- **Variant B — `/category-manager/promo-simulator-terminal`** (`promo-simulator-terminal.tsx` + `StepperTerminal.tsx`). "Bloomberg console / brutalist developer tool" aesthetic. Bone `#EFEFE9` canvas with a 16px dotted grid via `radial-gradient`, monospace everywhere (`'Fira Code', SFMono-Regular, ...`), uppercase tracked labels, hot-lime `#B5F23F` active accent. Stepper is a vertical left rail using `[NN] ▸ STEP NAME` bracket notation with a blinking lime cursor on the active row, `$ promo --plan` prompt header. Buttons are `rounded-none` with 2px solid black borders and brutalist `4px 4px 0 #000` shadows; the primary advance button is lime-filled on commit.
+- **Cross-linking**: original route gets a small `עיצובים נוספים:` strip above the wizard with two link buttons (one styled in editorial gold-on-cream, one in brutal black-shadow mono). Each variant has its own header strip linking back to default + sideways to the other variant. All three pass current `search` so wizard state persists across design switches.
+- **Bugfix — variant routes were navigating back to default on every state change.** `usePromoSimulator`'s `setState` and `restart` previously hardcoded `to: "/category-manager/promo-simulator"`, so any URL write (clicking a step, advancing, or even editing a field on a variant) bounced the user back to the default route. Hook now takes an optional `routePath` argument typed as a union of the three simulator paths; each variant route passes its own. Default route omits the arg, falls back to the canonical path. Stepper jumps, prev/next, and restart now stay within the active variant.
+- TanStack routeTree picked up both new routes automatically. Tests: 21 files / 146 tests still green; typecheck clean.
+
+Files:
+
+- new: `src/components/promo-simulator/StepContent.tsx`, `src/components/promo-simulator/StepperEditorial.tsx`, `src/components/promo-simulator/StepperTerminal.tsx`
+- new: `src/routes/category-manager/promo-simulator-editorial.tsx`, `src/routes/category-manager/promo-simulator-terminal.tsx`
+- modified: `src/routes/category-manager/promo-simulator.tsx` (uses `StepContent`, adds alt-designs link strip)
+
 ### Promo simulator — recolored Step 5 uplift chart (orange + blue)
 
 `UpliftChart.tsx` (rendered inside `Step5Forecast`): swapped the two bar fills to the new palette per request — `COLOR_BASE` from teal `#0F766E` → blue `#159fe6` (בסיס bars), `COLOR_PROMO` from brand red `#DC4E59` → warm orange `#f18d62` (מבצע bars). Updated the matching `LegendChip` Tailwind dot classes (`bg-[#159fe6]`, `bg-[#f18d62]`) and softened the Recharts tooltip cursor fill from `rgba(220,78,89,0.04)` to `rgba(241,141,98,0.06)` so the hover tint matches the new promo color. The vertical accent rule on the card's start edge (driven by `COLOR_PROMO`) now reads orange to stay consistent with the bar; the cumulative line stays slate-ink dashed; the card's outer drop-shadow keeps its red tint.

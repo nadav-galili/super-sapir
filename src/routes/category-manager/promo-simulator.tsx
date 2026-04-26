@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import {
   ArrowRight,
@@ -7,47 +7,27 @@ import {
   RotateCcw,
   Home,
   AlertCircle,
+  BookOpen,
+  Terminal,
 } from "lucide-react";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { Stepper } from "@/components/promo-simulator/Stepper";
-import { StepPlaceholder } from "@/components/promo-simulator/StepPlaceholder";
-import { Step1Brief } from "@/components/promo-simulator/Step1Brief";
-import { Step2Goal } from "@/components/promo-simulator/Step2Goal";
-import { Step3PromoType } from "@/components/promo-simulator/Step3PromoType";
-import { Step4Terms } from "@/components/promo-simulator/Step4Terms";
-import { Step5Forecast } from "@/components/promo-simulator/Step5Forecast";
-import { Step6Analysis } from "@/components/promo-simulator/Step6Analysis";
-import { Step7Implementation } from "@/components/promo-simulator/Step7Implementation";
-import { Step8Control } from "@/components/promo-simulator/Step8Control";
-import { Step9Documentation } from "@/components/promo-simulator/Step9Documentation";
+import { StepContent } from "@/components/promo-simulator/StepContent";
 import { SuccessScreen } from "@/components/promo-simulator/SuccessScreen";
 import { LiveKPIPanel } from "@/components/promo-simulator/LiveKPIPanel";
 import { AINarrative } from "@/components/promo-simulator/AINarrative";
-import { BorderBeam } from "@/components/ui/border-beam";
 import { ShimmerButton } from "@/components/ui/shimmer-button";
 import {
   validateSimulatorSearch,
   type BriefSlice,
   type SimulatorSearch,
 } from "@/lib/promo-simulator/state";
-import { STEPS, type StepId } from "@/lib/promo-simulator/taxonomy";
+import { type StepId } from "@/lib/promo-simulator/taxonomy";
 import { usePromoSimulator } from "@/hooks/usePromoSimulator";
 import {
   PromoTaxonomyProvider,
   DEFAULT_PROMO_TAXONOMY,
 } from "@/contexts/PromoTaxonomyContext";
-
-const SLICE_BY_STEP: Record<StepId, number> = {
-  1: 2,
-  2: 3,
-  3: 3,
-  4: 4,
-  5: 5,
-  6: 6,
-  7: 6,
-  8: 7,
-  9: 7,
-};
 
 function PromoSimulatorPage() {
   const search = Route.useSearch();
@@ -102,120 +82,16 @@ function PromoSimulatorPage() {
     jumpToStep(step);
   };
 
-  const stepMeta = STEPS[state.step - 1];
-  const sliceNum = SLICE_BY_STEP[state.step];
   const showLiveKpi = state.step >= 4 && state.step <= 7;
   const showNarrative = state.step >= 2 && state.step <= 5;
-  const showStepBeam = state.step >= 4 && state.step <= 7;
 
-  const rawStepContent =
-    state.step === 1 ? (
-      <Step1Brief
-        brief={{
-          category: state.category,
-          segment: state.segment,
-          product: state.product,
-          salesArena: state.salesArena,
-          retailer: state.retailer,
-          startDate: state.startDate,
-          durationWeeks: state.durationWeeks,
-          categoryManager: state.categoryManager,
-        }}
-        onChange={setState}
-        errorKeys={briefErrorKeys}
-      />
-    ) : state.step === 2 ? (
-      <Step2Goal goal={state.goal} onChange={setState} />
-    ) : state.step === 3 ? (
-      <Step3PromoType
-        goal={state.goal}
-        promoType={state.promoType}
-        onChange={setState}
-      />
-    ) : state.step === 4 ? (
-      <Step4Terms
-        terms={{
-          promoType: state.promoType,
-          conditionText: state.conditionText,
-          benefitText: state.benefitText,
-          discountPct: state.discountPct,
-          unitPrice: state.unitPrice,
-          unitCost: state.unitCost,
-        }}
-        metrics={metrics}
-        onChange={setState}
-      />
-    ) : state.step === 5 ? (
-      <Step5Forecast
-        forecast={{
-          baseUnits: state.baseUnits,
-          unitPrice: state.unitPrice,
-          unitCost: state.unitCost,
-          upliftPct: state.upliftPct,
-          stockUnits: state.stockUnits,
-          discountPct: state.discountPct,
-          durationWeeks: state.durationWeeks,
-        }}
-        metrics={metrics}
-        onChange={setState}
-      />
-    ) : state.step === 6 ? (
-      <Step6Analysis
-        analysisNote={state.analysisNote}
-        metrics={metrics}
-        onChange={setState}
-      />
-    ) : state.step === 7 ? (
-      <Step7Implementation
-        impl={{
-          signage: state.signage,
-          shelf: state.shelf,
-          training: state.training,
-          cashierBrief: state.cashierBrief,
-        }}
-        onChange={setState}
-      />
-    ) : state.step === 8 ? (
-      <Step8Control
-        control={{
-          controlPrice: state.controlPrice,
-          controlStock: state.controlStock,
-          controlDisplay: state.controlDisplay,
-        }}
-        metrics={metrics}
-        readinessCount={
-          [
-            state.signage,
-            state.shelf,
-            state.training,
-            state.cashierBrief,
-          ].filter(Boolean).length
-        }
-        onChange={setState}
-      />
-    ) : state.step === 9 ? (
-      <Step9Documentation state={state} metrics={metrics} onChange={setState} />
-    ) : (
-      <StepPlaceholder
-        stepNumber={stepMeta.id}
-        title={stepMeta.title}
-        sliceNumber={sliceNum}
-      />
-    );
-
-  const stepContent = showStepBeam ? (
-    <div className="relative rounded-[16px]">
-      <BorderBeam
-        size={220}
-        duration={10}
-        borderWidth={1.5}
-        colorFrom="#DC4E59"
-        colorTo="#E8777F"
-      />
-      {rawStepContent}
-    </div>
-  ) : (
-    rawStepContent
+  const stepContent = (
+    <StepContent
+      state={state}
+      setState={setState}
+      metrics={metrics}
+      briefErrorKeys={briefErrorKeys}
+    />
   );
 
   if (state.completed) {
@@ -243,6 +119,7 @@ function PromoSimulatorPage() {
             </aside>
 
             <div className="space-y-4">
+              <AltDesignsStrip search={search} />
               <AnimatePresence mode="wait">
                 <motion.div
                   key={state.step}
@@ -339,6 +216,38 @@ function PromoSimulatorPage() {
         </PageContainer>
       </div>
     </PromoTaxonomyProvider>
+  );
+}
+
+/**
+ * Two alternate visual treatments of the same wizard, exposed as separate
+ * routes. Same state, search-param codec, and validation — only the chrome
+ * (background, font, stepper, action bar) differs. Each link forwards the
+ * current search params so a manager can switch designs mid-flow.
+ */
+function AltDesignsStrip({ search }: { search: SimulatorSearch }) {
+  return (
+    <div className="flex items-center gap-2 flex-wrap">
+      <span className="text-[14px] uppercase tracking-[0.16em] text-[#A0AEC0]">
+        עיצובים נוספים:
+      </span>
+      <Link
+        to="/category-manager/promo-simulator-editorial"
+        search={search}
+        className="inline-flex items-center gap-2 rounded-[10px] border border-[#E7E0D8] bg-white px-3 py-1.5 text-[14px] font-medium text-[#4A5568] transition-colors hover:border-[#B68B2F] hover:text-[#B68B2F]"
+      >
+        <BookOpen className="w-4 h-4" />
+        עיצוב עיתונאי
+      </Link>
+      <Link
+        to="/category-manager/promo-simulator-terminal"
+        search={search}
+        className="inline-flex items-center gap-2 rounded-none border-2 border-[#0A0A0A] bg-white px-3 py-1.5 text-[14px] font-mono text-[#0A0A0A] transition-shadow hover:shadow-[3px_3px_0_#0A0A0A]"
+      >
+        <Terminal className="w-4 h-4" />
+        TERMINAL
+      </Link>
+    </div>
   );
 }
 

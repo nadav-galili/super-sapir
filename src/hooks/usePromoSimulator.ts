@@ -71,7 +71,20 @@ export function canJumpToStep(state: SimulatorState, target: StepId): boolean {
   return target <= earliestGap;
 }
 
-export function usePromoSimulator(search: SimulatorSearch): UsePromoSimulator {
+/**
+ * @param routePath - which simulator route to navigate to on state changes.
+ *   Defaults to the canonical `/category-manager/promo-simulator`. The
+ *   alternate UI variants pass their own path so that mid-flow state
+ *   updates (e.g., clicking a step in the stepper) don't bounce the user
+ *   back to the default route.
+ */
+export function usePromoSimulator(
+  search: SimulatorSearch,
+  routePath:
+    | "/category-manager/promo-simulator"
+    | "/category-manager/promo-simulator-editorial"
+    | "/category-manager/promo-simulator-terminal" = "/category-manager/promo-simulator"
+): UsePromoSimulator {
   const navigate = useNavigate();
 
   const defaults = useMemo(
@@ -100,12 +113,12 @@ export function usePromoSimulator(search: SimulatorSearch): UsePromoSimulator {
       const next = { ...state, ...cascaded };
       const params = encodeState(next, defaults);
       navigate({
-        to: "/category-manager/promo-simulator",
+        to: routePath,
         search: params,
         replace: true,
       });
     },
-    [state, defaults, navigate]
+    [state, defaults, navigate, routePath]
   );
 
   const metrics = useMemo(() => calcMetrics(state), [state]);
@@ -137,11 +150,11 @@ export function usePromoSimulator(search: SimulatorSearch): UsePromoSimulator {
 
   const restart = useCallback(() => {
     navigate({
-      to: "/category-manager/promo-simulator",
+      to: routePath,
       search: {},
       replace: true,
     });
-  }, [navigate]);
+  }, [navigate, routePath]);
 
   const resetStep = useCallback(() => {
     const fresh = createDefaultState({ defaultCategory: defaults.category });
