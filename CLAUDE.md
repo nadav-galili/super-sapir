@@ -166,6 +166,33 @@ Light motion only:
 - No border-radius > `rounded-2xl`
 - No cramped spacing or tiny fonts (< 15px)
 
+## Testing — TDD Required
+
+When creating or modifying tests in this repo, follow red-green-refactor with **vertical (tracer-bullet) slices**:
+
+1. Write ONE test that describes ONE observable behavior through the public interface.
+2. Run it, watch it fail for the right reason.
+3. Write the minimum code to make it pass.
+4. Refactor only while green; run tests after each refactor step.
+5. Repeat for the next behavior — `test → impl → test → impl`. Never bulk-write tests first.
+
+### Good tests vs bad tests
+
+- **Good tests** describe _what_ the system does, not _how_. They go through the public interface, read like specs ("user can advance from step 1 with a valid brief"), and survive internal refactors.
+- **Bad tests** couple to implementation — they mock internal collaborators, assert on data shapes, or verify through side channels. Warning sign: a refactor that didn't change behavior breaks the test.
+
+### Anti-pattern: horizontal slicing
+
+DO NOT write all tests first, then all implementation. Bulk-written tests verify _imagined_ behavior — they fix function signatures and data shapes in place, become insensitive to real change, and pass when behavior breaks. Always one tracer bullet at a time: red → green → next.
+
+### What to test
+
+You can't test everything. For each task, confirm with the user which behaviors matter most. Prioritize critical paths — KPI resolvers (`src/lib/kpi/`), period math (`src/components/dashboard/TimePeriodFilter`), simulator state transitions, search-param validation — over speculative edge cases.
+
+### Test runner
+
+Vitest. Co-locate as `*.test.ts` / `*.test.tsx` next to the file under test, or under `__tests__/`. Run with `bun run test`. The pre-push hook also runs the full suite — a green push is a green branch.
+
 ## Changelog
 
 All changes are tracked in **[changelog.md](./changelog.md)**.

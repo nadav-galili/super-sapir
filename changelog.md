@@ -8,6 +8,10 @@
 
 ## 2026-04-26
 
+### TDD policy added to CLAUDE.md
+
+Added a `## Testing — TDD Required` section to CLAUDE.md spelling out red-green-refactor with vertical/tracer-bullet slices, the good-vs-bad-test distinction, the horizontal-slicing anti-pattern, and which behaviors to prioritize testing in this repo (KPI resolvers, period math, simulator state). Removed the experimental PreToolUse hook in `.claude/settings.json` that previously injected a "TDD GATE" reminder on edits to test files — CLAUDE.md is the source of truth here and is the only thing that crosses into the sandcastle Docker container, where Claude Code runs as a fresh install with no user-scoped skills or plugins. One place to read the rule, works everywhere.
+
 ### Husky hook hardening + ESLint cleanup
 
 Mirrored the husky hook setup from `poker-league-hero` and tightened the lint gates. Pre-commit now runs `bunx lint-staged` (eslint --fix + prettier on staged files); pre-push runs `bun run typecheck && bun run test`.
