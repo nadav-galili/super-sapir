@@ -30,7 +30,7 @@ export function HRView({ report }: HRViewProps) {
       target: hr.authorized,
     },
     {
-      label: "עלות שכר",
+      label: "הוצאות שכר",
       value: +hr.salaryCostPercent.toFixed(2),
       format: "percent",
       trend: 0.9,
@@ -39,7 +39,7 @@ export function HRView({ report }: HRViewProps) {
       domain: "cost",
     },
     {
-      label: "עלות שכר בש״ח",
+      label: "הוצאות שכר בש״ח",
       value: hr.salaryExpense.current,
       format: "currencyShort",
       trend:

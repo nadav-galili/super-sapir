@@ -8,6 +8,20 @@
 
 ## 2026-04-26
 
+### Fix #46: Ratify retail vocabulary in glossary + sweep UI labels + prompt vocab rules
+
+Established canonical Hebrew retail vocabulary across glossary, store-manager UI, and the AI prompt so the dashboard speaks one language end-to-end (`פחת`, `חריגות`, `הוצאות שכר`).
+
+- **Glossary** — added a `## Hebrew vocabulary — canonical retail terms` section to `context.md` with five entries, each pairing the canonical term with the alias it replaces and a short definition: `פחת` (replaces `בזבוז`), `חריגות` (replaces `סטיות`), `למול` (replaces `לעומת`), `הוצאות שכר` (replaces `עלות שכר`), `שיעור הוצאות שכר מהמחזור` (replaces `אחוז עלות שכר`).
+- **UI sweep — store-manager scope only**:
+  - `src/components/store-manager/charts/BranchPerformanceCard.tsx` — `אחוז עלות שכר` → `שיעור הוצאות שכר`
+  - `src/components/store-manager/charts/AlertsTargetsCard.tsx` — `אחוז עלות שכר` → `שיעור הוצאות שכר`
+  - `src/components/store-manager/views/HRView.tsx` — `עלות שכר` → `הוצאות שכר`, `עלות שכר בש״ח` → `הוצאות שכר בש״ח`
+  - `src/routes/store-manager/$branchId.tsx` — `בזבוז בשר` → `פחת בשר`
+- **Test update** — `AlertsTargetsCard.test.tsx` assertion updated from `אחוז עלות שכר` to `שיעור הוצאות שכר`.
+- **AI prompt** — added an `אוצר מילים קנוני` block to `STORE_SYSTEM_PROMPT` instructing the model to prefer `פחת` over `בזבוז`, `חריגות` over `סטיות`, `למול` over `לעומת`, and to frame salary as `הוצאות שכר בשיעור של X% מהמחזור` rather than raw `עלות שכר`.
+- **Out of scope** — vocabulary sweep is intentionally limited to `store-manager/`. Other surfaces (`category-manager/`, `promo-simulator/`) are unchanged and will be swept when they're touched.
+
 ### Fix #45: Add `subActions` field end-to-end (schema → prompt → renderer)
 
 AI recommendations with multiple discrete sub-steps now render as scannable bulleted lists; recommendations without sub-steps render unchanged.

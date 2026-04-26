@@ -61,7 +61,7 @@ export function BranchPerformanceCard({ report }: BranchPerformanceCardProps) {
       sub: `שטח: ${report.info.sellingArea.toLocaleString()} מ"ר`,
     },
     {
-      label: "אחוז עלות שכר",
+      label: "שיעור הוצאות שכר",
       value: `${report.hr.salaryCostPercent}%`,
       change: +(report.hr.salaryTarget - report.hr.salaryCostPercent).toFixed(
         1

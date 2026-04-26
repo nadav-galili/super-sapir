@@ -10,7 +10,7 @@ describe("AlertsTargetsCard", () => {
       createElement(AlertsTargetsCard, { report: mockReport })
     );
     expect(html).toContain("התראות ויעדים");
-    expect(html).toContain("אחוז עלות שכר");
+    expect(html).toContain("שיעור הוצאות שכר");
     expect(html).toContain("מלאי גבוה");
     expect(html).toContain("חותמות אדומות");
     expect(html).toContain("חסרי פעילות");
