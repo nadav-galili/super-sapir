@@ -1,8 +1,10 @@
-import { motion } from "motion/react";
+import { MapContainer, TileLayer, Marker } from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 import { useLightMotion } from "@/hooks/useLightMotion";
 
 // Real lat/lng for the 12 branches in mock-branches.ts + hadera-seed.ts.
-// Hadera is the HQ — marked separately so the network lines fan out from it.
+// Hadera is the HQ — marked separately so the floating KPI badge anchors on it.
 const HADERA = {
   name: "חדרה",
   lat: 32.434,
@@ -30,245 +32,154 @@ const STATUS_COLOR = {
   danger: "#F43F5E",
 };
 
-// Projection: lat 29.4–33.4 → y 20–560, lng 34.25–35.95 → x 20–220.
-const X_MIN = 34.25,
-  X_SCALE = 117.6;
-const Y_MAX = 33.4,
-  Y_SCALE = 135;
-const project = (lat: number, lng: number) => ({
-  x: 20 + (lng - X_MIN) * X_SCALE,
-  y: 20 + (Y_MAX - lat) * Y_SCALE,
-});
-
-// Stylized Israel outline traced from approximate boundary points,
-// projected through the same lat/lng scaling so branches sit inside it.
-const ISRAEL_PATH =
-  "M 208,34 L 173,67 L 120,74 L 114,81 L 91,135 L 79,202 " +
-  "L 49,270 L 26,317 L 49,371 L 91,439 L 91,506 L 99,547 " +
-  "L 108,540 L 126,439 L 138,371 L 161,304 L 167,229 L 173,142 Z";
-
-// Floating KPI badges — desktop only. Anchored to specific branches.
-const FLOATING = [
-  {
-    branch: "חדרה",
+// Floating KPI badges anchored at specific branches. Rendered via L.divIcon
+// so they pan with the map (decorative only — interactions are disabled).
+const FLOATING_BADGES: Record<
+  string,
+  { label: string; kpi: string; delta: string; deltaColor: string }
+> = {
+  חדרה: {
     label: "מטה",
     kpi: "₪847K",
     delta: "+12.3%",
-    side: "right",
+    deltaColor: "#10B981",
   },
-  {
-    branch: "אילת",
+  אילת: {
     label: "סניף הדרום",
     kpi: "94%",
     delta: "יעד",
-    side: "right",
+    deltaColor: "#10B981",
   },
-  {
-    branch: "אשדוד",
+  אשדוד: {
     label: "התראת מלאי",
     kpi: "3 פריטים",
     delta: "דחוף",
-    side: "left",
+    deltaColor: "#F43F5E",
   },
-];
+};
+
+// ─── Leaflet icon factories ─────────────────────────────────────
+
+function dotIcon(color: string, pulse: boolean) {
+  const pulseEl = pulse ? '<span class="retalio-branch-pulse"></span>' : "";
+  return L.divIcon({
+    className: "retalio-branch-marker",
+    html: `<div class="retalio-branch-dot" style="--dot-color: ${color};">${pulseEl}</div>`,
+    iconSize: [16, 16],
+    iconAnchor: [8, 8],
+  });
+}
+
+function hqIcon(color: string, pulse: boolean) {
+  const pulseEl = pulse ? '<span class="retalio-hq-pulse"></span>' : "";
+  return L.divIcon({
+    className: "retalio-branch-marker",
+    html: `<div class="retalio-hq-dot" style="--dot-color: ${color};">${pulseEl}<span class="retalio-hq-inner"></span></div>`,
+    iconSize: [22, 22],
+    iconAnchor: [11, 11],
+  });
+}
+
+function badgeIcon(args: {
+  label: string;
+  kpi: string;
+  delta: string;
+  deltaColor: string;
+  branchName: string;
+}) {
+  const html = `
+    <div class="retalio-kpi-badge">
+      <p class="retalio-kpi-eyebrow">${args.label} · ${args.branchName}</p>
+      <div class="retalio-kpi-row">
+        <span class="retalio-kpi-value" dir="ltr">${args.kpi}</span>
+        <span class="retalio-kpi-delta" style="color: ${args.deltaColor};">${args.delta}</span>
+      </div>
+    </div>
+  `;
+  return L.divIcon({
+    className: "retalio-badge-marker",
+    html,
+    iconSize: [140, 52],
+    iconAnchor: [-12, 26],
+  });
+}
+
+// ─── Component ──────────────────────────────────────────────────
 
 export function BranchNetworkMap() {
   const light = useLightMotion();
-  const hq = project(HADERA.lat, HADERA.lng);
-  const dots = BRANCHES.map((b) => ({ ...b, ...project(b.lat, b.lng) }));
+  const allBranches = [HADERA, ...BRANCHES];
 
   return (
     <div
-      dir="ltr"
-      className="relative w-full max-w-[260px] mx-auto"
-      style={{ aspectRatio: "240 / 600" }}
+      className="relative w-full max-w-[440px] mx-auto rounded-[20px] overflow-hidden border border-warm-border bg-white"
+      style={{
+        aspectRatio: "440 / 620",
+        boxShadow: "0 20px 50px -24px rgba(220, 78, 89, 0.15)",
+      }}
     >
-      <svg
-        viewBox="0 0 240 600"
-        className="absolute inset-0 w-full h-full"
-        fill="none"
-        aria-label="מפת סניפים בישראל"
+      <MapContainer
+        center={[31.4, 34.95]}
+        zoom={7}
+        zoomControl={false}
+        scrollWheelZoom={false}
+        doubleClickZoom={false}
+        dragging={false}
+        touchZoom={false}
+        boxZoom={false}
+        keyboard={false}
+        attributionControl={false}
+        style={{ height: "100%", width: "100%", background: "#FAFAFA" }}
       >
-        <defs>
-          <radialGradient id="map-bg" cx="50%" cy="40%" r="60%">
-            <stop offset="0%" stopColor="#FFE8DE" stopOpacity="0.55" />
-            <stop offset="100%" stopColor="#FDF8F6" stopOpacity="0" />
-          </radialGradient>
-          <linearGradient id="country-fill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#DC4E59" stopOpacity="0.08" />
-            <stop offset="100%" stopColor="#6C5CE7" stopOpacity="0.05" />
-          </linearGradient>
-          <filter id="dot-glow" x="-200%" y="-200%" width="400%" height="400%">
-            <feGaussianBlur stdDeviation="3" />
-          </filter>
-        </defs>
-
-        {/* Soft backdrop glow */}
-        <rect width="240" height="600" fill="url(#map-bg)" />
-
-        {/* Country outline — draws itself on mount */}
-        <motion.path
-          d={ISRAEL_PATH}
-          fill="url(#country-fill)"
-          stroke="#DC4E59"
-          strokeWidth="1.2"
-          strokeLinejoin="round"
-          strokeDasharray="3 4"
-          initial={light ? false : { pathLength: 0, opacity: 0 }}
-          animate={
-            light
-              ? { pathLength: 1, opacity: 1 }
-              : { pathLength: 1, opacity: 1 }
-          }
-          transition={{ duration: light ? 0 : 1.6, ease: "easeOut" }}
+        <TileLayer
+          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+          subdomains={["a", "b", "c", "d"]}
         />
 
-        {/* Network lines from HQ → branches */}
-        {dots.map((b, i) => (
-          <motion.line
-            key={`line-${b.name}`}
-            x1={hq.x}
-            y1={hq.y}
-            x2={b.x}
-            y2={b.y}
-            stroke={STATUS_COLOR[b.status]}
-            strokeWidth="0.7"
-            strokeOpacity="0.45"
-            strokeDasharray="2 3"
-            initial={light ? false : { pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{
-              delay: light ? 0 : 1.6 + i * 0.06,
-              duration: light ? 0 : 0.5,
-              ease: "easeOut",
-            }}
-          />
-        ))}
-
-        {/* HQ marker — Hadera, ringed and labelled */}
-        <g>
-          {!light && (
-            <motion.circle
-              cx={hq.x}
-              cy={hq.y}
-              r="10"
-              fill={STATUS_COLOR.good}
-              opacity="0.25"
-              animate={{ r: [10, 22, 10], opacity: [0.35, 0, 0.35] }}
-              transition={{ duration: 2.4, repeat: Infinity, ease: "easeOut" }}
-            />
-          )}
-          <circle
-            cx={hq.x}
-            cy={hq.y}
-            r="7"
-            fill="#FFFFFF"
-            stroke={STATUS_COLOR.good}
-            strokeWidth="2.5"
-          />
-          <circle cx={hq.x} cy={hq.y} r="3" fill={STATUS_COLOR.good} />
-        </g>
+        {/* HQ marker — Hadera */}
+        <Marker
+          position={[HADERA.lat, HADERA.lng]}
+          icon={hqIcon(STATUS_COLOR.good, !light)}
+          interactive={false}
+        />
 
         {/* Branch dots */}
-        {dots.map((b, i) => (
-          <g key={b.name}>
-            {!light && b.status !== "good" && (
-              <motion.circle
-                cx={b.x}
-                cy={b.y}
-                r="6"
-                fill={STATUS_COLOR[b.status]}
-                opacity="0.3"
-                animate={{ r: [6, 14, 6], opacity: [0.4, 0, 0.4] }}
-                transition={{
-                  duration: b.status === "danger" ? 1.6 : 2.2,
-                  repeat: Infinity,
-                  ease: "easeOut",
-                  delay: i * 0.15,
-                }}
-              />
+        {BRANCHES.map((b) => (
+          <Marker
+            key={b.name}
+            position={[b.lat, b.lng]}
+            icon={dotIcon(
+              STATUS_COLOR[b.status],
+              !light && b.status !== "good"
             )}
-            <motion.circle
-              cx={b.x}
-              cy={b.y}
-              r="4.5"
-              fill="#FFFFFF"
-              stroke={STATUS_COLOR[b.status]}
-              strokeWidth="2"
-              initial={light ? false : { scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{
-                delay: light ? 0 : 2.0 + i * 0.05,
-                type: "spring",
-                stiffness: 200,
-                damping: 14,
-              }}
-              style={{ transformOrigin: `${b.x}px ${b.y}px` }}
-            />
-          </g>
+            interactive={false}
+          />
         ))}
-      </svg>
 
-      {/* Floating KPI badges — desktop only */}
-      {!light &&
-        FLOATING.map((f, i) => {
-          const target =
-            f.branch === "חדרה" ? hq : dots.find((d) => d.name === f.branch);
-          if (!target) return null;
-          const xPct = (target.x / 240) * 100;
-          const yPct = (target.y / 600) * 100;
-          return (
-            <motion.div
-              key={f.branch}
-              initial={{ opacity: 0, scale: 0.7, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{
-                delay: 2.6 + i * 0.25,
-                type: "spring",
-                stiffness: 180,
-                damping: 16,
-              }}
-              className="absolute pointer-events-none"
-              style={{
-                left: `${xPct}%`,
-                top: `${yPct}%`,
-                transform:
-                  f.side === "right"
-                    ? "translate(12px, -50%)"
-                    : "translate(calc(-100% - 12px), -50%)",
-              }}
-            >
-              <div className="bg-white/95 backdrop-blur-sm rounded-[14px] border border-warm-border shadow-[0_8px_24px_-8px_rgba(220,78,89,0.18)] px-3 py-2 min-w-[100px]">
-                <p className="text-[11px] text-[#788390] leading-none mb-1">
-                  {f.label} · {f.branch}
-                </p>
-                <div className="flex items-baseline gap-1.5">
-                  <span
-                    className="text-[15px] font-bold font-mono text-[#2D3748]"
-                    dir="ltr"
-                  >
-                    {f.kpi}
-                  </span>
-                  <span className="text-[10px] font-semibold text-[#10B981]">
-                    {f.delta}
-                  </span>
-                </div>
-              </div>
-            </motion.div>
-          );
-        })}
+        {/* Floating KPI badges — desktop only */}
+        {!light &&
+          allBranches.map((b) => {
+            const badge = FLOATING_BADGES[b.name];
+            if (!badge) return null;
+            return (
+              <Marker
+                key={`badge-${b.name}`}
+                position={[b.lat, b.lng]}
+                icon={badgeIcon({
+                  ...badge,
+                  branchName: b.name,
+                })}
+                interactive={false}
+              />
+            );
+          })}
+      </MapContainer>
 
-      {/* Subtle perpetual scan line — desktop only, signals "live" */}
+      {/* Subtle "live" scan line — desktop only */}
       {!light && (
-        <motion.div
-          className="absolute inset-x-0 h-[2px] pointer-events-none"
-          style={{
-            background:
-              "linear-gradient(90deg, transparent 0%, #DC4E59 50%, transparent 100%)",
-            opacity: 0.35,
-          }}
-          animate={{ top: ["0%", "100%", "0%"] }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 retalio-map-scan"
         />
       )}
     </div>

@@ -200,3 +200,145 @@
     opacity: 0;
   }
 }
+
+/* ─── BranchNetworkMap (Leaflet) — markers, badges, scan ─── */
+
+.retalio-branch-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
+.retalio-branch-dot {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2.5px solid var(--dot-color);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+}
+
+.retalio-branch-pulse,
+.retalio-hq-pulse {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--dot-color);
+  opacity: 0.4;
+  animation: retalioBranchPulse 2.2s ease-out infinite;
+  pointer-events: none;
+}
+
+@keyframes retalioBranchPulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  70% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+.retalio-hq-dot {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid var(--dot-color);
+  box-shadow:
+    0 0 0 3px rgba(255, 255, 255, 0.8),
+    0 4px 10px rgba(220, 78, 89, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.retalio-hq-inner {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--dot-color);
+}
+
+.retalio-badge-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
+.retalio-kpi-badge {
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(8px);
+  border: 1px solid #ffe8de;
+  border-radius: 12px;
+  padding: 6px 10px;
+  min-width: 120px;
+  box-shadow: 0 8px 20px -8px rgba(220, 78, 89, 0.22);
+  direction: rtl;
+}
+
+.retalio-kpi-eyebrow {
+  font-size: 10px;
+  color: #788390;
+  margin: 0 0 2px 0;
+  line-height: 1.2;
+}
+
+.retalio-kpi-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.retalio-kpi-value {
+  font-size: 14px;
+  font-weight: 700;
+  font-family: "Fira Code", monospace;
+  color: #2d3748;
+  line-height: 1;
+}
+
+.retalio-kpi-delta {
+  font-size: 10px;
+  font-weight: 600;
+}
+
+/* Subtle horizontal scan band over the map */
+.retalio-map-scan {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    transparent 48%,
+    rgba(220, 78, 89, 0.18) 50%,
+    transparent 52%,
+    transparent 100%
+  );
+  background-size: 100% 200%;
+  animation: retalioMapScan 7s ease-in-out infinite;
+  mix-blend-mode: multiply;
+}
+
+@keyframes retalioMapScan {
+  0% {
+    background-position: 0% 0%;
+  }
+  50% {
+    background-position: 0% 100%;
+  }
+  100% {
+    background-position: 0% 0%;
+  }
+}
+
+/* Make Leaflet's default container play nice with our card */
+.leaflet-container {
+  font-family: inherit;
+  background: #fafafa;
+}

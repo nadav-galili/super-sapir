@@ -1,30 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Sparkles, ChevronDown } from "lucide-react";
-import { motion, useScroll, useTransform } from "motion/react";
-import { useRef } from "react";
 import { APP_NAME, BRAND_LOGO_SRC } from "@/lib/branding";
 import { BrandLogo } from "@/components/branding/BrandLogo";
-import { BranchNetworkMap } from "@/components/home/BranchNetworkMap";
 import { BentoLiveDashboard } from "@/components/home/BentoLiveDashboard";
+import { CinematicHero } from "@/components/ui/cinematic-landing-hero";
 import { useLightMotion } from "@/hooks/useLightMotion";
-// Imports kept for the commented-out demo CTAs — uncomment together with the
-// JSX blocks in HeroSection and CTASection when meeting the client.
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { Link } from "@tanstack/react-router";
-import { ArrowLeft } from "lucide-react";
-import { MagneticButton } from "@/components/home/MagneticButton";
-/* eslint-enable @typescript-eslint/no-unused-vars */
-
-// ─── Stagger animation variants ─────────────────────────────────
-const containerVariants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.12 } },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
-};
+import { motion } from "motion/react";
 
 // ─── Data ───────────────────────────────────────────────────────
 const stats = [
@@ -47,172 +27,13 @@ const TICKER_EVENTS = [
 // ─── Hero ───────────────────────────────────────────────────────
 
 function HeroSection() {
-  const ref = useRef<HTMLDivElement>(null);
-  const light = useLightMotion();
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start start", "end start"],
-  });
-  const mapY = useTransform(scrollYProgress, [0, 1], [0, light ? 0 : 60]);
-  const textY = useTransform(scrollYProgress, [0, 1], [0, light ? 0 : -20]);
-
   return (
-    <section
-      ref={ref}
-      className="relative min-h-[100dvh] flex items-center overflow-hidden"
-    >
-      {/* Background decorative elements */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div
-          className="absolute -top-32 -left-32 w-96 h-96 rounded-full opacity-[0.07]"
-          style={{
-            background: "radial-gradient(circle, #DC4E59 0%, transparent 70%)",
-          }}
-        />
-        <div
-          className="absolute top-1/3 -right-20 w-72 h-72 rounded-full opacity-[0.05]"
-          style={{
-            background: "radial-gradient(circle, #6C5CE7 0%, transparent 70%)",
-          }}
-        />
-        <div
-          className="absolute bottom-20 left-1/4 w-48 h-48 rounded-full opacity-[0.06]"
-          style={{
-            background: "radial-gradient(circle, #2EC4D5 0%, transparent 70%)",
-          }}
-        />
-      </div>
-
-      <div className="w-full max-w-[1280px] mx-auto grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-12 lg:gap-16 items-center px-4 sm:px-6 py-10 lg:py-16">
-        {/* Text content */}
-        <motion.div
-          style={{ y: textY }}
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="space-y-7 lg:space-y-8"
-        >
-          <motion.div variants={itemVariants}>
-            <div className="flex flex-wrap items-center gap-3">
-              <span
-                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[13px] font-semibold border"
-                style={{
-                  background: "#6C5CE7" + "12",
-                  color: "#6C5CE7",
-                  borderColor: "#6C5CE7" + "30",
-                }}
-              >
-                <Sparkles className="w-3.5 h-3.5" />
-                מונע בינה מלאכותית
-              </span>
-              <div
-                dir="ltr"
-                className="inline-flex shrink-0 items-center self-start h-32 sm:h-40 lg:h-56"
-                aria-label={APP_NAME}
-              >
-                <img
-                  src={BRAND_LOGO_SRC}
-                  alt={APP_NAME}
-                  className="block h-full w-auto max-w-full object-contain"
-                />
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.h1
-            variants={itemVariants}
-            className="text-4xl sm:text-5xl lg:text-6xl xl:text-[68px] font-bold leading-[1.05] tracking-tight"
-            style={{ color: "#2D3748" }}
-          >
-            כל הסניפים שלכם.
-            <br />
-            <span style={{ color: "#DC4E59" }}>במסך אחד.</span>
-            <br />
-            בזמן אמת.
-          </motion.h1>
-
-          <motion.p
-            variants={itemVariants}
-            className="text-[17px] lg:text-[20px] leading-relaxed max-w-xl"
-            style={{ color: "#4A5568" }}
-          >
-            רטליו מאחדת את כל הנתונים של הרשת — מכירות, מלאי, איכות, כח אדם —
-            לכדי לוח בקרה חי שמדבר עם כל מנהל בשפה שלו.
-          </motion.p>
-
-          {/* Demo CTA — hidden for the public landing page. Uncomment for the client meeting. */}
-          {/*
-          <motion.div
-            variants={itemVariants}
-            className="flex flex-wrap gap-4 items-center"
-          >
-            <MagneticButton strength={0.35}>
-              <Link
-                to="/store-manager"
-                search={{ view: "overview" }}
-                className="inline-flex items-center gap-2 px-8 py-4 text-white font-semibold rounded-[14px] text-[17px] transition-shadow active:scale-[0.97]"
-                style={{
-                  background: "linear-gradient(135deg, #DC4E59, #E8777F)",
-                  boxShadow:
-                    "0 14px 30px -10px rgba(220, 78, 89, 0.45), inset 0 1px 0 rgba(255,255,255,0.18)",
-                }}
-              >
-                כניסה לדמו חי
-                <ArrowLeft className="w-4 h-4" />
-              </Link>
-            </MagneticButton>
-          </motion.div>
-          */}
-
-          {/* Stats strip */}
-          <motion.div
-            variants={itemVariants}
-            className="flex flex-wrap gap-x-10 gap-y-4 pt-6 border-t border-warm-border"
-          >
-            {stats.map((stat) => (
-              <div key={stat.label}>
-                <p
-                  className="text-[28px] font-bold font-mono leading-none"
-                  style={{ color: "#DC4E59" }}
-                  dir="ltr"
-                >
-                  {stat.value}
-                </p>
-                <p className="text-[13px] mt-1.5" style={{ color: "#788390" }}>
-                  {stat.label}
-                </p>
-              </div>
-            ))}
-          </motion.div>
-        </motion.div>
-
-        {/* Branch network map (replaces phone mockup) */}
-        <motion.div
-          style={{ y: mapY }}
-          initial={{ opacity: 0, scale: 0.94 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.9, ease: "easeOut", delay: 0.2 }}
-          className="relative"
-        >
-          <BranchNetworkMap />
-        </motion.div>
-      </div>
-
-      {/* Scroll indicator */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.5 }}
-        className="absolute bottom-6 left-1/2 -translate-x-1/2 hidden sm:block"
-      >
-        <motion.div
-          animate={light ? {} : { y: [0, 8, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-        >
-          <ChevronDown className="w-5 h-5 text-[#788390]" />
-        </motion.div>
-      </motion.div>
-    </section>
+    <CinematicHero
+      brandName={APP_NAME}
+      brandLogoSrc={BRAND_LOGO_SRC}
+      brandLogoAlt={APP_NAME}
+      stats={stats}
+    />
   );
 }
 
