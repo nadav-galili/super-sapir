@@ -8,6 +8,14 @@
 
 ## 2026-04-28
 
+### Home page — landing-only mode: dashboard CTAs hidden, editorial closing section
+
+Two demo CTAs in `index.tsx` (hero "כניסה לדמו חי" and bottom "נסו עכשיו", both linking to `/store-manager?view=overview`) are commented out so the public landing doesn't expose the dashboards. Both blocks include a comment explaining that they should be uncommented for the client meeting; their `MagneticButton`/`Link`/`ArrowLeft` references inside JSX block comments keep the imports satisfying TS without removing them.
+
+The dark slate `CTASection` was replaced with an **editorial closing manifesto** (no centered card, no big purple/red button). Layout: animated horizontal eyebrow rule → small `RETALIO` label with thin red rule → split-typography headline ("לא עוד דוחות. / בקרה חיה." — same `text-4xl sm:text-5xl lg:text-6xl xl:text-[68px] font-bold leading-[1.05] tracking-tight` typography as the hero h1 so they feel paired) → manifesto paragraph → newspaper-column ledger (`01/02/03` with `120 / 380+ / AI`) → footer rule with `BUILT FOR RETAIL, IN TEL AVIV` and a real mailto CTA `לקבלת הצעה — nadav@retalio.net` (prefilled Hebrew subject "בקשת הצעה - Retalio" and body). Pulsing red dot beside the email keeps the live-product personality without shouting. Removed the decorative red+violet orbs and the warm-white centered card.
+
+Files modified: `src/routes/index.tsx`.
+
 ### Home page — bento card swap: SalesPulseCard → PromoSimulatorCard
 
 The "live sales pulse" card claimed real-time stats the app doesn't actually have (Retalio shows historical data, not streaming sales). Replaced it with a card that previews the actual flagship feature — the 9-step promo planning wizard. The new card auto-advances through all 9 steps (~1.1s per step), each step pill morphing from a numbered todo → red active with pulsing glow → green done with check, while the progress bar fills underneath. The center panel cross-fades between four representative phase mocks (`bריף` brief with category & description, `plan` with selectable promo-type chips and 30%-הנחה pre-selected, `forecast` with a self-drawing uplift line + confidence band, `deploy` with branch chips springing in). A persistent forecast strip at the bottom shows the canonical wizard outputs: +18.7% uplift / 3.2x ROI / 87% confidence — plus a "פתח סימולטור" CTA hint. On mobile/reduced-motion the card renders in its terminal state (all 9 done, deploy phase visible) without auto-advance.

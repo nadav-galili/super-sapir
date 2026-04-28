@@ -1,13 +1,19 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { Sparkles, ArrowLeft, ChevronDown } from "lucide-react";
+import { createFileRoute } from "@tanstack/react-router";
+import { Sparkles, ChevronDown } from "lucide-react";
 import { motion, useScroll, useTransform } from "motion/react";
 import { useRef } from "react";
 import { APP_NAME, BRAND_LOGO_SRC } from "@/lib/branding";
 import { BrandLogo } from "@/components/branding/BrandLogo";
 import { BranchNetworkMap } from "@/components/home/BranchNetworkMap";
 import { BentoLiveDashboard } from "@/components/home/BentoLiveDashboard";
-import { MagneticButton } from "@/components/home/MagneticButton";
 import { useLightMotion } from "@/hooks/useLightMotion";
+// Imports kept for the commented-out demo CTAs — uncomment together with the
+// JSX blocks in HeroSection and CTASection when meeting the client.
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { Link } from "@tanstack/react-router";
+import { ArrowLeft } from "lucide-react";
+import { MagneticButton } from "@/components/home/MagneticButton";
+/* eslint-enable @typescript-eslint/no-unused-vars */
 
 // ─── Stagger animation variants ─────────────────────────────────
 const containerVariants = {
@@ -134,6 +140,8 @@ function HeroSection() {
             לכדי לוח בקרה חי שמדבר עם כל מנהל בשפה שלו.
           </motion.p>
 
+          {/* Demo CTA — hidden for the public landing page. Uncomment for the client meeting. */}
+          {/*
           <motion.div
             variants={itemVariants}
             className="flex flex-wrap gap-4 items-center"
@@ -154,6 +162,7 @@ function HeroSection() {
               </Link>
             </MagneticButton>
           </motion.div>
+          */}
 
           {/* Stats strip */}
           <motion.div
@@ -266,90 +275,142 @@ function LiveTickerStrip() {
 
 // ─── CTA ────────────────────────────────────────────────────────
 
+const CLOSING_LEDGER = [
+  { id: "01", label: "סניפים בניטור", value: "120" },
+  { id: "02", label: "מדדים בזמן אמת", value: "380+" },
+  { id: "03", label: "תובנות יומיות", value: "AI" },
+];
+
 function CTASection() {
   return (
-    <section className="py-20 lg:py-28 px-4 sm:px-6">
+    <section className="py-20 lg:py-32 px-4 sm:px-6">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.2 }}
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true, amount: 0.3 }}
         transition={{ duration: 0.6 }}
-        className="relative max-w-4xl mx-auto rounded-[28px] overflow-hidden p-10 sm:p-14 grid grid-cols-1 md:grid-cols-[1fr_auto] gap-8 md:gap-10 items-center"
-        style={{
-          background: "linear-gradient(135deg, #FFFFFF 0%, #FFF5F0 100%)",
-          border: "1px solid #FFE8DE",
-          boxShadow: "0 24px 60px -28px rgba(220, 78, 89, 0.18)",
-        }}
+        className="relative max-w-[1100px] mx-auto"
       >
-        {/* Subtle decorative orb — warm tint */}
-        <div
-          className="absolute -top-20 -left-20 w-72 h-72 rounded-full opacity-[0.18] blur-3xl pointer-events-none"
-          style={{ background: "#DC4E59" }}
-        />
-        <div
-          className="absolute -bottom-16 -right-16 w-56 h-56 rounded-full opacity-[0.12] blur-3xl pointer-events-none"
-          style={{ background: "#6C5CE7" }}
+        {/* Eyebrow rule */}
+        <motion.div
+          initial={{ scaleX: 0 }}
+          whileInView={{ scaleX: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.7, ease: "easeOut" }}
+          className="h-px origin-right mb-10"
+          style={{
+            background:
+              "linear-gradient(90deg, transparent 0%, #DC4E59 50%, transparent 100%)",
+          }}
         />
 
-        <div className="relative text-right space-y-4">
-          <span
-            className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[12px] font-semibold border"
-            style={{
-              background: "rgba(220, 78, 89, 0.08)",
-              color: "#DC4E59",
-              borderColor: "rgba(220, 78, 89, 0.20)",
-            }}
-          >
-            <Sparkles className="w-3 h-3" />
-            דמו חי
-          </span>
-          <h2
-            className="text-3xl sm:text-4xl lg:text-[44px] font-bold leading-[1.1] tracking-tight"
-            style={{ color: "#2D3748" }}
-          >
-            הרשת שלכם. <span style={{ color: "#DC4E59" }}>במסך אחד.</span>
-          </h2>
-          <p
-            className="text-[16px] sm:text-[17px] leading-relaxed max-w-md"
-            style={{ color: "#4A5568" }}
-          >
-            דמו אינטראקטיבי מלא של הפלטפורמה.
-          </p>
-          <ul
-            className="flex flex-wrap gap-x-5 gap-y-2 pt-2 text-[13px]"
-            style={{ color: "#4A5568" }}
-          >
-            <li className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]" />
-              12 סניפים
-            </li>
-            <li className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#2EC4D5]" />
-              380+ מדדים
-            </li>
-            <li className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#6C5CE7]" />
-              AI תובנות
-            </li>
-          </ul>
+        <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-10 lg:gap-16 items-end">
+          {/* Editorial split-typography manifesto */}
+          <div className="space-y-6">
+            <div className="flex items-center gap-3" dir="ltr">
+              <span className="w-8 h-px" style={{ background: "#DC4E59" }} />
+              <p
+                className="text-[13px] font-medium tracking-[0.32em]"
+                style={{ color: "#DC4E59" }}
+              >
+                RETALIO
+              </p>
+            </div>
+            <h2
+              className="text-4xl sm:text-5xl lg:text-6xl xl:text-[68px] font-bold leading-[1.05] tracking-tight"
+              style={{ color: "#2D3748" }}
+            >
+              לא עוד דוחות.
+              <br />
+              <span style={{ color: "#DC4E59" }}>בקרה חיה.</span>
+            </h2>
+            <p
+              className="text-[18px] lg:text-[20px] leading-relaxed max-w-xl"
+              style={{ color: "#4A5568" }}
+            >
+              כל מנהל בשפה שלו. כל סניף במקום אחד. כל החלטה מבוססת נתון אחד —
+              עדכני, חי, מדויק.
+            </p>
+          </div>
+
+          {/* Numbered ledger — newspaper-column feel */}
+          <ol className="relative space-y-1 lg:border-s lg:ps-10 lg:border-warm-border">
+            {CLOSING_LEDGER.map((row, i) => (
+              <motion.li
+                key={row.id}
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{
+                  delay: i * 0.08,
+                  type: "spring",
+                  stiffness: 90,
+                  damping: 18,
+                }}
+                className="flex items-baseline gap-4 py-4 border-b border-warm-border last:border-b-0"
+              >
+                <span
+                  className="text-[13px] font-mono font-semibold tabular-nums w-7 shrink-0"
+                  style={{ color: "#DC4E59" }}
+                  dir="ltr"
+                >
+                  {row.id}
+                </span>
+                <span
+                  className="flex-1 text-[15px]"
+                  style={{ color: "#4A5568" }}
+                >
+                  {row.label}
+                </span>
+                <span
+                  className="text-[24px] lg:text-[28px] font-bold font-mono tabular-nums leading-none"
+                  style={{ color: "#2D3748" }}
+                  dir="ltr"
+                >
+                  {row.value}
+                </span>
+              </motion.li>
+            ))}
+          </ol>
         </div>
 
-        <div className="relative flex justify-center md:justify-end">
-          <MagneticButton strength={0.3}>
-            <Link
-              to="/store-manager"
-              search={{ view: "overview" }}
-              className="inline-flex items-center gap-2 px-9 py-4 text-white font-semibold rounded-[14px] text-[17px] transition-shadow active:scale-[0.97] whitespace-nowrap"
-              style={{
-                background: "linear-gradient(135deg, #DC4E59, #E8777F)",
-                boxShadow:
-                  "0 18px 36px -12px rgba(220, 78, 89, 0.5), inset 0 1px 0 rgba(255,255,255,0.22)",
-              }}
-            >
-              נסו עכשיו
-              <ArrowLeft className="w-4 h-4" />
-            </Link>
-          </MagneticButton>
+        {/* Footer rule + email CTA */}
+        <div className="mt-12 lg:mt-16 flex flex-wrap items-center justify-between gap-6 pt-6 border-t border-warm-border">
+          <span
+            className="text-[13px] font-mono uppercase tracking-[0.2em]"
+            style={{ color: "#788390" }}
+            dir="ltr"
+          >
+            built for retail, in tel aviv
+          </span>
+          <a
+            href="mailto:nadav@retalio.net?subject=%D7%91%D7%A7%D7%A9%D7%AA%20%D7%94%D7%A6%D7%A2%D7%94%20-%20Retalio&body=%D7%94%D7%99%D7%99%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A7%D7%91%D7%9C%20%D7%94%D7%A6%D7%A2%D7%94%20%D7%9C%D7%A4%D7%9C%D7%98%D7%A4%D7%95%D7%A8%D7%9E%D7%AA%20Retalio."
+            className="group inline-flex items-center gap-3 text-[15px] font-semibold transition-colors"
+            style={{ color: "#2D3748" }}
+          >
+            <span className="relative flex w-2 h-2">
+              <motion.span
+                className="absolute inset-0 rounded-full"
+                style={{ background: "#DC4E59" }}
+                animate={{ scale: [1, 2.6, 1], opacity: [0.6, 0, 0.6] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              />
+              <span
+                className="relative w-2 h-2 rounded-full"
+                style={{ background: "#DC4E59" }}
+              />
+            </span>
+            <span>
+              לקבלת הצעה —{" "}
+              <span
+                className="underline decoration-[#DC4E59]/40 underline-offset-4 group-hover:decoration-[#DC4E59] transition-colors"
+                style={{ color: "#DC4E59" }}
+                dir="ltr"
+              >
+                nadav@retalio.net
+              </span>
+            </span>
+          </a>
         </div>
       </motion.div>
     </section>
