@@ -61,6 +61,19 @@ export default {
           divider: "#FFF0EA",
           separator: "#F5E6DE",
         },
+        // Logo-derived palette — used on the landing page (`/`) only.
+        // Pulled from the Retalio mark: electric blue + cyan + navy.
+        cool: {
+          blue: "#1F6FEB",
+          blueLight: "#3D8DFE",
+          cyan: "#3CC9DC",
+          ink: "#0F1B33",
+          muted: "#6B7A93",
+          bg: "#F4F8FE",
+          border: "#DCE8F8",
+          divider: "#E5EEFB",
+          separator: "#E1ECFB",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

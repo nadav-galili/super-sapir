@@ -252,8 +252,8 @@
   background: #fff;
   border: 3px solid var(--dot-color);
   box-shadow:
-    0 0 0 3px rgba(255, 255, 255, 0.8),
-    0 4px 10px rgba(220, 78, 89, 0.25);
+    0 0 0 3px rgba(255, 255, 255, 0.85),
+    0 4px 12px rgba(31, 111, 235, 0.32);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -274,17 +274,19 @@
 .retalio-kpi-badge {
   background: rgba(255, 255, 255, 0.96);
   backdrop-filter: blur(8px);
-  border: 1px solid #ffe8de;
+  border: 1px solid #dce8f8;
   border-radius: 12px;
   padding: 6px 10px;
   min-width: 120px;
-  box-shadow: 0 8px 20px -8px rgba(220, 78, 89, 0.22);
+  box-shadow:
+    0 10px 24px -10px rgba(31, 111, 235, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
   direction: rtl;
 }
 
 .retalio-kpi-eyebrow {
   font-size: 10px;
-  color: #788390;
+  color: #6b7a93;
   margin: 0 0 2px 0;
   line-height: 1.2;
 }
@@ -299,7 +301,7 @@
   font-size: 14px;
   font-weight: 700;
   font-family: "Fira Code", monospace;
-  color: #2d3748;
+  color: #0f1b33;
   line-height: 1;
 }
 
@@ -316,7 +318,7 @@
     180deg,
     transparent 0%,
     transparent 48%,
-    rgba(220, 78, 89, 0.18) 50%,
+    rgba(31, 111, 235, 0.2) 50%,
     transparent 52%,
     transparent 100%
   );

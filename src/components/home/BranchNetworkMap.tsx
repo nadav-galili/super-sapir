@@ -112,10 +112,12 @@ export function BranchNetworkMap() {
 
   return (
     <div
-      className="relative w-full max-w-[440px] mx-auto rounded-[20px] overflow-hidden border border-warm-border bg-white"
+      className="relative w-full max-w-[440px] mx-auto rounded-[20px] overflow-hidden border bg-white"
       style={{
         aspectRatio: "440 / 620",
-        boxShadow: "0 20px 50px -24px rgba(220, 78, 89, 0.15)",
+        borderColor: "#DCE8F8",
+        boxShadow:
+          "0 24px 60px -28px rgba(31, 111, 235, 0.30), 0 2px 6px -2px rgba(15, 27, 51, 0.06)",
       }}
     >
       <MapContainer
