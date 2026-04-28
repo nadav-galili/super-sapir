@@ -34,6 +34,12 @@ export interface MiniStatTileProps {
   valueClassName?: string;
   /** Subtitle text class overrides. */
   subtitleClassName?: string;
+  /**
+   * Optional inline color override for the value (e.g. KPI status color).
+   * Overrides the color baked into `valueClassName` without forcing the
+   * caller to redefine size/font classes.
+   */
+  valueColor?: string;
 }
 
 /**
@@ -49,15 +55,20 @@ export function MiniStatTile({
   accessory,
   breakdown,
   className,
-  labelClassName = "text-xs text-[#A0AEC0]",
+  labelClassName = "text-xs text-[#788390]",
   valueClassName = "text-2xl font-bold text-[#2D3748] font-mono tabular-nums",
-  subtitleClassName = "text-[11px] text-[#A0AEC0]",
+  subtitleClassName = "text-[11px] text-[#788390]",
+  valueColor,
 }: MiniStatTileProps) {
   return (
     <div className={cn("rounded-xl bg-[#FDF8F6] p-4 text-center", className)}>
       <p className={cn("mb-1.5", labelClassName)}>{label}</p>
       <div className="flex items-center justify-center gap-1.5">
-        <span className={valueClassName} dir="ltr">
+        <span
+          className={valueClassName}
+          dir="ltr"
+          style={valueColor ? { color: valueColor } : undefined}
+        >
           {value}
         </span>
         {accessory}
@@ -68,7 +79,7 @@ export function MiniStatTile({
           {breakdown.steps?.map((step, i) => (
             <p
               key={i}
-              className="text-[15px] text-[#A0AEC0] font-mono tabular-nums"
+              className="text-[15px] text-[#788390] font-mono tabular-nums"
               dir="ltr"
             >
               {step}

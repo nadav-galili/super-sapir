@@ -187,7 +187,7 @@ function FormatCard({
     >
       <div className="flex items-center justify-between mb-5">
         <h3 className="text-2xl font-bold text-[#2D3748]">{title}</h3>
-        <span className="text-[16px] text-[#A0AEC0] font-medium">
+        <span className="text-[16px] text-[#788390] font-medium">
           {branchCount} סניפים
         </span>
       </div>

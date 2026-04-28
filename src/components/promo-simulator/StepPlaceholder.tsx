@@ -19,7 +19,7 @@ export function StepPlaceholder({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-lg text-[#A0AEC0]">
+        <p className="text-lg text-[#788390]">
           TODO — coming in slice {sliceNumber}
         </p>
       </CardContent>

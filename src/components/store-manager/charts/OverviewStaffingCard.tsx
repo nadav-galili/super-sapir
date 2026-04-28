@@ -42,7 +42,7 @@ export function OverviewStaffingCard({ hr }: OverviewStaffingCardProps) {
               key={item.label}
               className="text-center p-3 rounded-xl bg-[#FDF8F6]"
             >
-              <p className="text-[11px] text-[#A0AEC0] mb-1.5">{item.label}</p>
+              <p className="text-[11px] text-[#788390] mb-1.5">{item.label}</p>
               <p
                 className="text-xl font-bold text-[#2D3748] tabular-nums"
                 dir="ltr"

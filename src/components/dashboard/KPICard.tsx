@@ -77,7 +77,7 @@ export function KPICard({
           {label}
         </p>
         <p
-          className="text-3xl sm:text-4xl font-bold font-mono tabular-nums"
+          className="text-[26px] sm:text-[31px] font-bold font-mono tabular-nums"
           style={{ color: bigNumberColor }}
           dir="ltr"
         >

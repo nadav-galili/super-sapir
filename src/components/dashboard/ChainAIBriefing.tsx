@@ -163,7 +163,7 @@ function SignalSidebar({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.22 }}
-          className="text-[16px] text-[#A0AEC0] leading-snug"
+          className="text-[16px] text-[#788390] leading-snug"
         >
           סקירת מנהל סחר
         </motion.p>
@@ -213,7 +213,7 @@ function SignalSidebar({
               >
                 {isLoading ? "—" : counts[key]}
               </p>
-              <p className="text-[15px] text-[#A0AEC0] mt-1">{label}</p>
+              <p className="text-[15px] text-[#788390] mt-1">{label}</p>
             </motion.div>
           );
         })}

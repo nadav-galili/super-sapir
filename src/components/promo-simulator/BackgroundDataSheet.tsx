@@ -89,7 +89,7 @@ function FeaturedKpi({ kpi }: { kpi: CategoryKpi }) {
         style={{ backgroundColor: color }}
       />
 
-      <div className="flex items-center gap-2 text-[15px] uppercase tracking-[0.14em] text-[#A0AEC0]">
+      <div className="flex items-center gap-2 text-[15px] uppercase tracking-[0.14em] text-[#788390]">
         <BarChart3 className="h-4 w-4" />
         מדד מוביל
       </div>
@@ -110,8 +110,8 @@ function FeaturedKpi({ kpi }: { kpi: CategoryKpi }) {
         </span>
         {kpi.benchmark ? (
           <>
-            <span className="h-1 w-1 rounded-full bg-[#A0AEC0]" aria-hidden />
-            <span className="text-[#A0AEC0]">{kpi.benchmark}</span>
+            <span className="h-1 w-1 rounded-full bg-[#788390]" aria-hidden />
+            <span className="text-[#788390]">{kpi.benchmark}</span>
           </>
         ) : null}
       </div>
@@ -150,7 +150,7 @@ function CompactKpi({ kpi }: { kpi: CategoryKpi }) {
         <span>{kpi.trendDelta}</span>
       </div>
       {kpi.benchmark ? (
-        <div className="mt-1 text-[15px] text-[#A0AEC0]">{kpi.benchmark}</div>
+        <div className="mt-1 text-[15px] text-[#788390]">{kpi.benchmark}</div>
       ) : null}
       <p className="mt-3 text-[16px] leading-snug text-[#4A5568]">
         {kpi.description}
@@ -190,7 +190,7 @@ function PromoRow({ promo }: { promo: HistoricalPromotion }) {
             <span dir="ltr" className="font-mono text-[#4A5568]">
               {promo.startDate} — {endDate}
             </span>
-            <span className="text-[#A0AEC0]">·</span>
+            <span className="text-[#788390]">·</span>
             <span dir="ltr" className="font-mono text-[#4A5568]">
               −{promo.discountPct}%
             </span>
@@ -209,22 +209,22 @@ function PromoRow({ promo }: { promo: HistoricalPromotion }) {
 
       <dl className="mt-6 grid grid-cols-2 divide-x divide-[#E7E0D8] rtl:divide-x-reverse md:grid-cols-4">
         <div className="px-4 first:ps-0">
-          <dt className="text-[15px] uppercase tracking-[0.12em] text-[#A0AEC0]">
+          <dt className="text-[15px] uppercase tracking-[0.12em] text-[#788390]">
             יחידות
           </dt>
           <dd
             dir="ltr"
             className="mt-1 flex items-center gap-1.5 font-mono text-xl font-semibold text-[#2D3748]"
           >
-            <span className="text-[#A0AEC0]">
+            <span className="text-[#788390]">
               {numberFormatter.format(promo.baseUnits)}
             </span>
-            <span className="text-[#A0AEC0]">→</span>
+            <span className="text-[#788390]">→</span>
             <span>{numberFormatter.format(promo.actualUnits)}</span>
           </dd>
         </div>
         <div className="px-4">
-          <dt className="text-[15px] uppercase tracking-[0.12em] text-[#A0AEC0]">
+          <dt className="text-[15px] uppercase tracking-[0.12em] text-[#788390]">
             אפליפט
           </dt>
           <dd
@@ -236,7 +236,7 @@ function PromoRow({ promo }: { promo: HistoricalPromotion }) {
           </dd>
         </div>
         <div className="px-4">
-          <dt className="text-[15px] uppercase tracking-[0.12em] text-[#A0AEC0]">
+          <dt className="text-[15px] uppercase tracking-[0.12em] text-[#788390]">
             פדיון
           </dt>
           <dd
@@ -247,7 +247,7 @@ function PromoRow({ promo }: { promo: HistoricalPromotion }) {
           </dd>
         </div>
         <div className="px-4">
-          <dt className="text-[15px] uppercase tracking-[0.12em] text-[#A0AEC0]">
+          <dt className="text-[15px] uppercase tracking-[0.12em] text-[#788390]">
             ROI
           </dt>
           <dd
@@ -290,7 +290,7 @@ export function BackgroundDataSheet({
       >
         {!hasCategory ? (
           <div className="flex h-full flex-col items-center justify-center gap-3 px-8 text-center">
-            <Database className="h-10 w-10 text-[#A0AEC0]" />
+            <Database className="h-10 w-10 text-[#788390]" />
             <div className="text-2xl font-bold tracking-tight text-[#2D3748]">
               בחר קטגוריה תחילה
             </div>
@@ -342,13 +342,13 @@ export function BackgroundDataSheet({
                 <h3 className="text-3xl font-bold tracking-tight text-[#2D3748]">
                   מדדים מובילים
                 </h3>
-                <p className="mt-1 text-[16px] text-[#A0AEC0]">
+                <p className="mt-1 text-[16px] text-[#788390]">
                   ממוין לפי רלוונטיות — המדד המשפיע ביותר על ביצועי הקטגוריה
                 </p>
               </div>
 
               {kpis.length === 0 ? (
-                <div className="rounded-[16px] border border-dashed border-[#E7E0D8] bg-white/60 px-6 py-14 text-center text-lg text-[#A0AEC0]">
+                <div className="rounded-[16px] border border-dashed border-[#E7E0D8] bg-white/60 px-6 py-14 text-center text-lg text-[#788390]">
                   אין מדדים זמינים.
                 </div>
               ) : (
@@ -371,7 +371,7 @@ export function BackgroundDataSheet({
                 <h3 className="text-3xl font-bold tracking-tight text-[#2D3748]">
                   מבצעים היסטוריים לדוגמה
                 </h3>
-                <p className="mt-1 text-[16px] text-[#A0AEC0]">
+                <p className="mt-1 text-[16px] text-[#788390]">
                   התאמות קרובות לקטגוריה —{" "}
                   <span dir="ltr" className="font-mono">
                     {promos.length}
@@ -381,7 +381,7 @@ export function BackgroundDataSheet({
               </div>
 
               {promos.length === 0 ? (
-                <div className="rounded-[16px] border border-dashed border-[#E7E0D8] bg-white/60 px-6 py-14 text-center text-lg text-[#A0AEC0]">
+                <div className="rounded-[16px] border border-dashed border-[#E7E0D8] bg-white/60 px-6 py-14 text-center text-lg text-[#788390]">
                   אין מבצעים היסטוריים זמינים בקטגוריה זו.
                 </div>
               ) : (

@@ -78,7 +78,7 @@ function RailRow({
           >
             {icon}
           </span>
-          <span className="text-[15px] text-[#A0AEC0] uppercase tracking-[0.06em] font-medium truncate">
+          <span className="text-[15px] text-[#788390] uppercase tracking-[0.06em] font-medium truncate">
             {title}
           </span>
         </div>
@@ -86,7 +86,7 @@ function RailRow({
         <p className="text-[18px] font-semibold text-[#2D3748] truncate leading-tight">
           {productName}
         </p>
-        <p className="text-[15px] text-[#A0AEC0] leading-tight">
+        <p className="text-[15px] text-[#788390] leading-tight">
           {categoryName}
         </p>
       </div>
@@ -95,7 +95,7 @@ function RailRow({
       <div className="shrink-0 text-end">
         {stats.map((s) => (
           <div key={s.label}>
-            <p className="text-[15px] text-[#A0AEC0] leading-none">{s.label}</p>
+            <p className="text-[15px] text-[#788390] leading-none">{s.label}</p>
             <p
               className="text-[17px] font-bold font-mono leading-tight"
               style={{ color: s.color }}
@@ -172,11 +172,11 @@ function SpotlightCard({
             <p className="text-xl font-bold text-[#2D3748] truncate">
               {productName}
             </p>
-            <p className="text-[18px] text-[#A0AEC0] mt-0.5">{categoryName}</p>
+            <p className="text-[18px] text-[#788390] mt-0.5">{categoryName}</p>
             <div className="flex flex-wrap gap-x-4 gap-y-1.5 mt-2.5">
               {stats.map((s) => (
                 <div key={s.label}>
-                  <p className="text-[16px] text-[#A0AEC0]">{s.label}</p>
+                  <p className="text-[16px] text-[#788390]">{s.label}</p>
                   <p
                     className="text-[18px] font-bold font-mono"
                     style={{ color: s.color }}

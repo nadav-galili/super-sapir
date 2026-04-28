@@ -184,9 +184,9 @@ export function SidebarTrigger({
       {...props}
     >
       {state === "collapsed" ? (
-        <PanelRightOpen className="w-3 h-3 text-[#A0AEC0]" />
+        <PanelRightOpen className="w-3 h-3 text-[#788390]" />
       ) : (
-        <PanelRightClose className="w-3 h-3 text-[#A0AEC0]" />
+        <PanelRightClose className="w-3 h-3 text-[#788390]" />
       )}
     </button>
   );
@@ -199,7 +199,7 @@ export function SidebarInset({
   return (
     <main
       className={cn(
-        "relative flex min-h-svh flex-1 flex-col bg-[#FDF8F6] overflow-x-hidden",
+        "relative flex min-h-svh flex-1 flex-col bg-background overflow-x-hidden",
         className
       )}
       {...props}
@@ -274,7 +274,7 @@ export function SidebarGroupLabel({
     <div
       data-sidebar="group-label"
       className={cn(
-        "px-3 pb-2 text-[11px] font-bold text-[#A0AEC0] uppercase tracking-wider truncate transition-[opacity] duration-200",
+        "px-3 pb-2 text-[11px] font-bold text-[#788390] uppercase tracking-wider truncate transition-[opacity] duration-200",
         state === "collapsed" && "opacity-0",
         className
       )}

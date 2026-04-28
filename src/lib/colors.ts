@@ -4,7 +4,7 @@ export const PALETTE = {
   cyan: "#2EC4D5",
   violet: "#6C5CE7",
   amber: "#F6B93B",
-  muted: "#A0AEC0",
+  muted: "#788390",
   heading: "#2D3748",
   body: "#4A5568",
   bg: "#FDF8F6",
@@ -28,7 +28,7 @@ export const CHART_COLORS = [
   "#2EC4D5", // secondary metric
   "#6C5CE7", // tertiary metric
   "#F6B93B", // fourth metric
-  "#A0AEC0", // muted / baseline
+  "#788390", // muted / baseline
 ];
 
 export const GRADIENT_PRESETS = {

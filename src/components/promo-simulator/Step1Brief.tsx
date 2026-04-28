@@ -204,7 +204,7 @@ export function Step1Brief({ brief, onChange, errorKeys }: Step1BriefProps) {
             <div>
               <label className={LABEL} htmlFor="f-product">
                 מוצר{" "}
-                <span className="text-[13px] text-[#A0AEC0] font-normal">
+                <span className="text-[13px] text-[#788390] font-normal">
                   (אופציונלי)
                 </span>
               </label>
@@ -360,7 +360,7 @@ export function Step1Brief({ brief, onChange, errorKeys }: Step1BriefProps) {
                 aria-label="מנהל הקטגוריה מוגדר אוטומטית לפי הקטגוריה הנבחרת"
               >
                 {brief.categoryManager || (
-                  <span className="text-[#A0AEC0]">
+                  <span className="text-[#788390]">
                     ייבחר אוטומטית לפי הקטגוריה
                   </span>
                 )}

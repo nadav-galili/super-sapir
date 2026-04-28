@@ -44,7 +44,7 @@ function HeroStatBlock({ stat, delay }: { stat: QuickStat; delay: number }) {
       {/* Value */}
       <div>
         <p
-          className="text-[15px] font-medium text-[#A0AEC0] uppercase tracking-[0.07em] mb-2"
+          className="text-[15px] font-medium text-[#788390] uppercase tracking-[0.07em] mb-2"
           style={{ letterSpacing: "0.07em" }}
         >
           {stat.label}
@@ -53,7 +53,7 @@ function HeroStatBlock({ stat, delay }: { stat: QuickStat; delay: number }) {
           <span className="text-4xl font-bold font-mono text-[#2D3748] tracking-tight">
             {String(animated)}
           </span>
-          <span className="text-[18px] text-[#A0AEC0] font-normal">
+          <span className="text-[18px] text-[#788390] font-normal">
             {stat.suffix}
           </span>
         </div>
@@ -90,14 +90,14 @@ function SupportingStatBlock({
       </div>
 
       <div className="min-w-0">
-        <p className="text-[15px] text-[#A0AEC0] leading-none mb-1.5">
+        <p className="text-[15px] text-[#788390] leading-none mb-1.5">
           {stat.label}
         </p>
         <div className="flex items-baseline gap-1" dir="ltr">
           <span className="text-2xl font-bold font-mono text-[#2D3748] tracking-tight leading-none">
             {String(animated)}
           </span>
-          <span className="text-[16px] text-[#A0AEC0]">{stat.suffix}</span>
+          <span className="text-[16px] text-[#788390]">{stat.suffix}</span>
         </div>
       </div>
     </motion.div>

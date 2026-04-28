@@ -203,28 +203,28 @@ function CategoryManagerPage() {
               <TabsList className="h-auto gap-6 bg-transparent p-0 rounded-none">
                 <TabsTrigger
                   value="formats"
-                  className="group relative inline-flex items-center gap-2 px-1 pb-3 rounded-none bg-transparent text-[17px] font-medium text-[#A0AEC0] hover:text-[#4A5568] data-[state=active]:bg-transparent data-[state=active]:text-[#2D3748] data-[state=active]:shadow-none transition-colors after:absolute after:inset-x-0 after:-bottom-px after:h-[2px] after:bg-[#DC4E59] after:origin-center after:scale-x-0 data-[state=active]:after:scale-x-100 after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.16,1,0.3,1)]"
+                  className="group relative inline-flex items-center gap-2 px-1 pb-3 rounded-none bg-transparent text-[17px] font-medium text-[#788390] hover:text-[#4A5568] data-[state=active]:bg-transparent data-[state=active]:text-[#2D3748] data-[state=active]:shadow-none transition-colors after:absolute after:inset-x-0 after:-bottom-px after:h-[2px] after:bg-[#DC4E59] after:origin-center after:scale-x-0 data-[state=active]:after:scale-x-100 after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.16,1,0.3,1)]"
                 >
                   <Store className="w-[18px] h-[18px]" strokeWidth={2} />
                   פורמטים
                 </TabsTrigger>
                 <TabsTrigger
                   value="categories"
-                  className="group relative inline-flex items-center gap-2 px-1 pb-3 rounded-none bg-transparent text-[17px] font-medium text-[#A0AEC0] hover:text-[#4A5568] data-[state=active]:bg-transparent data-[state=active]:text-[#2D3748] data-[state=active]:shadow-none transition-colors after:absolute after:inset-x-0 after:-bottom-px after:h-[2px] after:bg-[#DC4E59] after:origin-center after:scale-x-0 data-[state=active]:after:scale-x-100 after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.16,1,0.3,1)]"
+                  className="group relative inline-flex items-center gap-2 px-1 pb-3 rounded-none bg-transparent text-[17px] font-medium text-[#788390] hover:text-[#4A5568] data-[state=active]:bg-transparent data-[state=active]:text-[#2D3748] data-[state=active]:shadow-none transition-colors after:absolute after:inset-x-0 after:-bottom-px after:h-[2px] after:bg-[#DC4E59] after:origin-center after:scale-x-0 data-[state=active]:after:scale-x-100 after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.16,1,0.3,1)]"
                 >
                   <LayoutGrid className="w-[18px] h-[18px]" strokeWidth={2} />
                   ביצועי קטגוריות
                 </TabsTrigger>
                 <TabsTrigger
                   value="suppliers"
-                  className="group relative inline-flex items-center gap-2 px-1 pb-3 rounded-none bg-transparent text-[17px] font-medium text-[#A0AEC0] hover:text-[#4A5568] data-[state=active]:bg-transparent data-[state=active]:text-[#2D3748] data-[state=active]:shadow-none transition-colors after:absolute after:inset-x-0 after:-bottom-px after:h-[2px] after:bg-[#DC4E59] after:origin-center after:scale-x-0 data-[state=active]:after:scale-x-100 after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.16,1,0.3,1)]"
+                  className="group relative inline-flex items-center gap-2 px-1 pb-3 rounded-none bg-transparent text-[17px] font-medium text-[#788390] hover:text-[#4A5568] data-[state=active]:bg-transparent data-[state=active]:text-[#2D3748] data-[state=active]:shadow-none transition-colors after:absolute after:inset-x-0 after:-bottom-px after:h-[2px] after:bg-[#DC4E59] after:origin-center after:scale-x-0 data-[state=active]:after:scale-x-100 after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.16,1,0.3,1)]"
                 >
                   <Truck className="w-[18px] h-[18px]" strokeWidth={2} />
                   ספקים
                 </TabsTrigger>
                 <TabsTrigger
                   value="promotions"
-                  className="group relative inline-flex items-center gap-2 px-1 pb-3 rounded-none bg-transparent text-[17px] font-medium text-[#A0AEC0] hover:text-[#4A5568] data-[state=active]:bg-transparent data-[state=active]:text-[#2D3748] data-[state=active]:shadow-none transition-colors after:absolute after:inset-x-0 after:-bottom-px after:h-[2px] after:bg-[#DC4E59] after:origin-center after:scale-x-0 data-[state=active]:after:scale-x-100 after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.16,1,0.3,1)]"
+                  className="group relative inline-flex items-center gap-2 px-1 pb-3 rounded-none bg-transparent text-[17px] font-medium text-[#788390] hover:text-[#4A5568] data-[state=active]:bg-transparent data-[state=active]:text-[#2D3748] data-[state=active]:shadow-none transition-colors after:absolute after:inset-x-0 after:-bottom-px after:h-[2px] after:bg-[#DC4E59] after:origin-center after:scale-x-0 data-[state=active]:after:scale-x-100 after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.16,1,0.3,1)]"
                 >
                   <Megaphone className="w-[18px] h-[18px]" strokeWidth={2} />
                   מבצעים

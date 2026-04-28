@@ -180,7 +180,7 @@ function PromoSimulatorPage() {
                         type="button"
                         onClick={handleNext}
                         aria-disabled="true"
-                        className="inline-flex items-center gap-2 rounded-[10px] border border-[#E7E0D8] bg-white px-5 py-2.5 text-[16px] font-medium text-[#A0AEC0] cursor-not-allowed opacity-60"
+                        className="inline-flex items-center gap-2 rounded-[10px] border border-[#E7E0D8] bg-white px-5 py-2.5 text-[16px] font-medium text-[#788390] cursor-not-allowed opacity-60"
                       >
                         המשך
                         <ArrowLeft className="w-4 h-4" />

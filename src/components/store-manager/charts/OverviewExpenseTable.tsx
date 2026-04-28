@@ -62,7 +62,7 @@ export function OverviewExpenseTable({ expenses }: OverviewExpenseTableProps) {
                   color:
                     pctChange !== 0
                       ? getCostDeltaColor({ changePercent: pctChange })
-                      : "#A0AEC0",
+                      : "#788390",
                 }}
                 dir="ltr"
               >

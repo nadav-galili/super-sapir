@@ -37,7 +37,7 @@ function KpiCard({
   return (
     <Card className="border-[#E7E0D8] rounded-[16px]">
       <CardContent className="p-5 min-w-0">
-        <p className="text-[15px] font-medium text-[#A0AEC0] uppercase tracking-wide whitespace-nowrap truncate">
+        <p className="text-[15px] font-medium text-[#788390] uppercase tracking-wide whitespace-nowrap truncate">
           {title}
         </p>
         <p

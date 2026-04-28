@@ -87,7 +87,7 @@ export function Step7Implementation({
                     className="mt-0.5 w-6 h-6 shrink-0 rounded-[6px] border-2 flex items-center justify-center transition-colors"
                     style={{
                       background: checked ? "#10B981" : "#FFFFFF",
-                      borderColor: checked ? "#10B981" : "#A0AEC0",
+                      borderColor: checked ? "#10B981" : "#788390",
                     }}
                   >
                     {checked && (

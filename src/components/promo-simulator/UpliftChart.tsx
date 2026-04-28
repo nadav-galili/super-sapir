@@ -56,7 +56,7 @@ export function UpliftChart({ metrics: m, durationWeeks }: UpliftChartProps) {
 
       <header className="mb-5 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 text-[15px] uppercase tracking-[0.14em] text-[#A0AEC0]">
+          <div className="inline-flex items-center gap-2 text-[15px] uppercase tracking-[0.14em] text-[#788390]">
             <TrendingUp className="h-4 w-4" />
             תחזית פדיון
           </div>

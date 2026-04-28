@@ -109,7 +109,7 @@ function SummaryRail({
   return (
     <div className="flex flex-wrap items-baseline gap-x-10 gap-y-4 border-y border-[#E7E0D8] py-5">
       <div>
-        <div className="text-[15px] uppercase tracking-[0.12em] text-[#A0AEC0]">
+        <div className="text-[15px] uppercase tracking-[0.12em] text-[#788390]">
           סה״כ מבצעים
         </div>
         <div
@@ -120,7 +120,7 @@ function SummaryRail({
         </div>
       </div>
       <div>
-        <div className="text-[15px] uppercase tracking-[0.12em] text-[#A0AEC0]">
+        <div className="text-[15px] uppercase tracking-[0.12em] text-[#788390]">
           אפליפט ממוצע
         </div>
         <div
@@ -133,7 +133,7 @@ function SummaryRail({
         </div>
       </div>
       <div>
-        <div className="text-[15px] uppercase tracking-[0.12em] text-[#A0AEC0]">
+        <div className="text-[15px] uppercase tracking-[0.12em] text-[#788390]">
           שיעור הצלחה
         </div>
         <div
@@ -204,12 +204,12 @@ function HistoricalPromoRow({
         {/* Metadata line — inline, no box */}
         <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[16px] text-[#4A5568]">
           <span className="inline-flex items-center gap-1.5">
-            <Calendar className="h-4 w-4 text-[#A0AEC0]" />
+            <Calendar className="h-4 w-4 text-[#788390]" />
             <span dir="ltr" className="font-mono">
               {formatDate(promo.startDate)} — {endDate}
             </span>
           </span>
-          <span className="h-1 w-1 rounded-full bg-[#A0AEC0]" aria-hidden />
+          <span className="h-1 w-1 rounded-full bg-[#788390]" aria-hidden />
           <span>
             משך{" "}
             <span dir="ltr" className="font-mono">
@@ -217,7 +217,7 @@ function HistoricalPromoRow({
             </span>{" "}
             שבועות
           </span>
-          <span className="h-1 w-1 rounded-full bg-[#A0AEC0]" aria-hidden />
+          <span className="h-1 w-1 rounded-full bg-[#788390]" aria-hidden />
           <span>
             הנחה{" "}
             <span dir="ltr" className="font-mono">
@@ -231,7 +231,7 @@ function HistoricalPromoRow({
           className={`mt-5 grid items-end gap-6 ${featured ? "md:grid-cols-[minmax(0,220px)_1fr]" : "md:grid-cols-[minmax(0,180px)_1fr]"}`}
         >
           <div>
-            <div className="text-[15px] uppercase tracking-[0.12em] text-[#A0AEC0]">
+            <div className="text-[15px] uppercase tracking-[0.12em] text-[#788390]">
               אפליפט
             </div>
             <div
@@ -257,22 +257,22 @@ function HistoricalPromoRow({
 
           <dl className="grid grid-cols-3 divide-x divide-[#E7E0D8] rtl:divide-x-reverse">
             <div className="px-4 first:ps-0">
-              <dt className="text-[15px] uppercase tracking-[0.12em] text-[#A0AEC0]">
+              <dt className="text-[15px] uppercase tracking-[0.12em] text-[#788390]">
                 יחידות
               </dt>
               <dd
                 dir="ltr"
                 className="mt-1 flex items-center gap-1.5 font-mono text-xl font-semibold text-[#2D3748]"
               >
-                <span className="text-[#A0AEC0]">
+                <span className="text-[#788390]">
                   {numberFmt.format(promo.baseUnits)}
                 </span>
-                <ArrowLeft className="h-4 w-4 text-[#A0AEC0]" />
+                <ArrowLeft className="h-4 w-4 text-[#788390]" />
                 <span>{numberFmt.format(promo.actualUnits)}</span>
               </dd>
             </div>
             <div className="px-4">
-              <dt className="text-[15px] uppercase tracking-[0.12em] text-[#A0AEC0]">
+              <dt className="text-[15px] uppercase tracking-[0.12em] text-[#788390]">
                 פדיון
               </dt>
               <dd
@@ -283,7 +283,7 @@ function HistoricalPromoRow({
               </dd>
             </div>
             <div className="px-4">
-              <dt className="text-[15px] uppercase tracking-[0.12em] text-[#A0AEC0]">
+              <dt className="text-[15px] uppercase tracking-[0.12em] text-[#788390]">
                 ROI
               </dt>
               <dd
@@ -347,13 +347,13 @@ function BuyAndGetTile({ promo }: { promo: BuyAndGetPromo }) {
           <span className="rounded-[20px] bg-[#FAF8F5] px-3 py-1 font-medium text-[#4A5568]">
             {promo.condition}
           </span>
-          <ArrowLeft className="h-4 w-4 text-[#A0AEC0]" />
+          <ArrowLeft className="h-4 w-4 text-[#788390]" />
           <span className="rounded-[20px] bg-[rgba(46,196,213,0.10)] px-3 py-1 font-semibold text-[#0891B2]">
             {promo.benefit}
           </span>
         </div>
 
-        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-[15px] text-[#A0AEC0]">
+        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-[15px] text-[#788390]">
           <span className="inline-flex items-center gap-1.5">
             <Calendar className="h-4 w-4" />
             <span dir="ltr" className="font-mono">
@@ -364,7 +364,7 @@ function BuyAndGetTile({ promo }: { promo: BuyAndGetPromo }) {
 
         <dl className="mt-5 grid grid-cols-2 divide-x divide-[#E7E0D8] rtl:divide-x-reverse">
           <div className="px-4 first:ps-0">
-            <dt className="text-[15px] uppercase tracking-[0.12em] text-[#A0AEC0]">
+            <dt className="text-[15px] uppercase tracking-[0.12em] text-[#788390]">
               פדיון
             </dt>
             <dd
@@ -375,7 +375,7 @@ function BuyAndGetTile({ promo }: { promo: BuyAndGetPromo }) {
             </dd>
           </div>
           <div className="px-4">
-            <dt className="text-[15px] uppercase tracking-[0.12em] text-[#A0AEC0]">
+            <dt className="text-[15px] uppercase tracking-[0.12em] text-[#788390]">
               יחידות
             </dt>
             <dd
@@ -405,7 +405,7 @@ export function ArchiveSheet({
           className="w-full sm:max-w-[960px] h-screen max-h-screen overflow-y-auto p-0 bg-[#FAF8F5]"
         >
           <div className="flex h-full flex-col items-center justify-center gap-3 px-8 text-center">
-            <Archive className="h-10 w-10 text-[#A0AEC0]" />
+            <Archive className="h-10 w-10 text-[#788390]" />
             <div className="text-2xl font-bold tracking-tight text-[#2D3748]">
               בחר קטגוריה תחילה
             </div>
@@ -498,7 +498,7 @@ export function ArchiveSheet({
                 <h3 className="text-3xl font-bold tracking-tight text-[#2D3748]">
                   מבצעים קודמים
                 </h3>
-                <p className="mt-1 text-[16px] text-[#A0AEC0]">
+                <p className="mt-1 text-[16px] text-[#788390]">
                   ממוין לפי רלוונטיות — התאמות מוצר מופיעות ראשונות
                 </p>
               </div>
@@ -506,7 +506,7 @@ export function ArchiveSheet({
 
             {promotions.length === 0 ? (
               <div className="rounded-[16px] border border-dashed border-[#E7E0D8] bg-white/60 px-6 py-14 text-center">
-                <Archive className="mx-auto h-8 w-8 text-[#A0AEC0]" />
+                <Archive className="mx-auto h-8 w-8 text-[#788390]" />
                 <div className="mt-3 text-lg text-[#4A5568]">
                   אין מבצעים היסטוריים זמינים לקטגוריה זו.
                 </div>
@@ -530,7 +530,7 @@ export function ArchiveSheet({
                 <h3 className="text-3xl font-bold tracking-tight text-[#2D3748]">
                   מבצעי "קנה וקבל" ברשת
                 </h3>
-                <p className="mt-1 text-[16px] text-[#A0AEC0]">
+                <p className="mt-1 text-[16px] text-[#788390]">
                   מעורבים מוצרים מקטגוריה{" "}
                   <span className="text-[#4A5568]">{category}</span>
                 </p>
@@ -544,7 +544,7 @@ export function ArchiveSheet({
             </div>
 
             {buyAndGet.length === 0 ? (
-              <div className="rounded-[16px] border border-dashed border-[#E7E0D8] bg-white/60 px-6 py-14 text-center text-lg text-[#A0AEC0]">
+              <div className="rounded-[16px] border border-dashed border-[#E7E0D8] bg-white/60 px-6 py-14 text-center text-lg text-[#788390]">
                 לא נמצאו מבצעי "קנה וקבל" לקטגוריה זו.
               </div>
             ) : (

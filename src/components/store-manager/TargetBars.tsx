@@ -40,7 +40,7 @@ function TargetBar({
           <span className="text-sm font-semibold text-[#2D3748]">{label}</span>
           {ranking && (
             <span
-              className="text-[10px] px-1.5 py-0.5 rounded-[20px] bg-[#FDF8F6] text-[#A0AEC0] font-medium border border-warm-border"
+              className="text-[10px] px-1.5 py-0.5 rounded-[20px] bg-[#FDF8F6] text-[#788390] font-medium border border-warm-border"
               dir="ltr"
             >
               #{ranking}
@@ -49,7 +49,7 @@ function TargetBar({
         </div>
         <div className="flex items-center gap-3 text-sm">
           <span
-            className="text-[#A0AEC0] tabular-nums font-mono text-xs sm:text-sm"
+            className="text-[#788390] tabular-nums font-mono text-xs sm:text-sm"
             dir="ltr"
           >
             {formatCurrencyShort(actual)} / {formatCurrencyShort(target)}
@@ -112,7 +112,7 @@ export function TargetBars({ sales }: { sales: SalesData }) {
         </CardHeader>
         <CardContent className="space-y-5">
           {/* Legend */}
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[11px] text-[#A0AEC0] pb-2 border-b border-dashed border-warm-separator">
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[11px] text-[#788390] pb-2 border-b border-dashed border-warm-separator">
             <span className="flex items-center gap-1.5">
               <span
                 className="w-3 h-2 rounded-sm"
@@ -135,7 +135,7 @@ export function TargetBars({ sales }: { sales: SalesData }) {
               מתחת ליעד (&lt;85%)
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="text-[10px] px-1.5 py-0.5 rounded-[20px] bg-[#FDF8F6] text-[#A0AEC0] font-medium border border-warm-border">
+              <span className="text-[10px] px-1.5 py-0.5 rounded-[20px] bg-[#FDF8F6] text-[#788390] font-medium border border-warm-border">
                 #N
               </span>
               דירוג ברשת

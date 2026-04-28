@@ -58,7 +58,7 @@ export function QualityGauge({
             >
               {animatedScore}
             </span>
-            <span className="text-xs text-[#A0AEC0]">מתוך {maxScore}</span>
+            <span className="text-xs text-[#788390]">מתוך {maxScore}</span>
           </div>
         </div>
       </CardContent>

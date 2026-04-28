@@ -65,7 +65,7 @@ function MetricCard({
   return (
     <Card className="border-[#E7E0D8] rounded-[16px]">
       <CardContent className="p-5">
-        <p className="text-[15px] font-medium text-[#A0AEC0] uppercase tracking-wide">
+        <p className="text-[15px] font-medium text-[#788390] uppercase tracking-wide">
           {title}
         </p>
         <p

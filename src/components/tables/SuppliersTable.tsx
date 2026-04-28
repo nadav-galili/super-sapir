@@ -47,7 +47,7 @@ function SortableHeader({
         fontSize: 15,
         letterSpacing: "0.08em",
         textTransform: "uppercase",
-        color: active ? "#4A5568" : "#A0AEC0",
+        color: active ? "#4A5568" : "#788390",
       }}
       onClick={() => onSort(column)}
     >
@@ -145,7 +145,7 @@ export function SuppliersTable() {
                   fontSize: 15,
                   letterSpacing: "0.08em",
                   textTransform: "uppercase",
-                  color: "#A0AEC0",
+                  color: "#788390",
                 }}
               >
                 #
@@ -156,7 +156,7 @@ export function SuppliersTable() {
                   fontSize: 15,
                   letterSpacing: "0.08em",
                   textTransform: "uppercase",
-                  color: "#A0AEC0",
+                  color: "#788390",
                 }}
               >
                 ספק
@@ -217,7 +217,7 @@ export function SuppliersTable() {
                 <>
                   <td className="py-3 ps-2 pe-4 text-end">
                     <span
-                      className="font-mono text-[#A0AEC0]"
+                      className="font-mono text-[#788390]"
                       style={{ fontSize: 18 }}
                     >
                       {rank + 1}

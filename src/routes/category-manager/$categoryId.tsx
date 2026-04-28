@@ -363,7 +363,7 @@ function CategoryDrillDown() {
                   />
                   <YAxis
                     tickFormatter={(v: number) => formatCurrencyShort(v * 1000)}
-                    tick={{ fontSize: 16, fill: "#A0AEC0" }}
+                    tick={{ fontSize: 16, fill: "#788390" }}
                     width={50}
                   />
                   <Tooltip
@@ -436,7 +436,7 @@ function CategoryDrillDown() {
                   חריגות סניפים — {categoryName}
                 </CardTitle>
               </div>
-              <span className="text-lg text-[#A0AEC0]">
+              <span className="text-lg text-[#788390]">
                 {alerts.length > 0
                   ? `${alerts.length} חריגות ב-${groupedAlerts.length} סניפים`
                   : "אין חריגות"}
@@ -450,7 +450,7 @@ function CategoryDrillDown() {
                 <p className="text-xl font-semibold text-[#2D3748]">
                   כל הסניפים תקינים
                 </p>
-                <p className="text-lg text-[#A0AEC0] mt-1">
+                <p className="text-lg text-[#788390] mt-1">
                   לא זוהו חריגות בקטגוריה זו
                 </p>
               </div>
@@ -459,13 +459,13 @@ function CategoryDrillDown() {
                 <table className="w-full min-w-[500px] text-lg">
                   <thead>
                     <tr className="border-b border-[#FFF0EA]">
-                      <th className="px-3 py-2 text-right font-medium text-[#A0AEC0]">
+                      <th className="px-3 py-2 text-right font-medium text-[#788390]">
                         סניף
                       </th>
-                      <th className="px-3 py-2 text-right font-medium text-[#A0AEC0]">
+                      <th className="px-3 py-2 text-right font-medium text-[#788390]">
                         חריגות
                       </th>
-                      <th className="px-3 py-2 text-right font-medium text-[#A0AEC0]">
+                      <th className="px-3 py-2 text-right font-medium text-[#788390]">
                         פירוט
                       </th>
                     </tr>

@@ -241,7 +241,7 @@ export function CategoryPerformanceTable({
                 params: { categoryId: row.original.category.id },
               });
             }}
-            className="text-[#A0AEC0] hover:text-[#DC4E59] transition-colors"
+            className="text-[#788390] hover:text-[#DC4E59] transition-colors"
             aria-label="פתח קטגוריה"
           >
             <ExternalLink className="w-4 h-4" />
@@ -296,7 +296,7 @@ export function CategoryPerformanceTable({
                   {hg.headers.map((header) => (
                     <th
                       key={header.id}
-                      className="px-4 py-2.5 text-right text-[15px] uppercase tracking-[0.08em] text-[#A0AEC0] font-medium"
+                      className="px-4 py-2.5 text-right text-[15px] uppercase tracking-[0.08em] text-[#788390] font-medium"
                     >
                       {header.isPlaceholder
                         ? null

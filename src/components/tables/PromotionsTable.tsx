@@ -50,44 +50,44 @@ export function PromotionsTable({
           <tr>
             <th
               scope="col"
-              className="pb-3 ps-2 pe-3 text-start text-[15px] uppercase tracking-[0.08em] text-[#A0AEC0] font-medium whitespace-nowrap"
+              className="pb-3 ps-2 pe-3 text-start text-[15px] uppercase tracking-[0.08em] text-[#788390] font-medium whitespace-nowrap"
             >
               מבצע
             </th>
             <th
               scope="col"
-              className="pb-3 px-3 text-start text-[15px] uppercase tracking-[0.08em] text-[#A0AEC0] font-medium whitespace-nowrap hidden sm:table-cell"
+              className="pb-3 px-3 text-start text-[15px] uppercase tracking-[0.08em] text-[#788390] font-medium whitespace-nowrap hidden sm:table-cell"
             >
               מוצר
             </th>
             <th
               scope="col"
-              className="pb-3 px-3 text-start text-[15px] uppercase tracking-[0.08em] text-[#A0AEC0] font-medium whitespace-nowrap"
+              className="pb-3 px-3 text-start text-[15px] uppercase tracking-[0.08em] text-[#788390] font-medium whitespace-nowrap"
             >
               סוג
             </th>
             <th
               scope="col"
-              className="pb-3 px-3 text-end text-[15px] uppercase tracking-[0.08em] text-[#A0AEC0] font-medium whitespace-nowrap"
+              className="pb-3 px-3 text-end text-[15px] uppercase tracking-[0.08em] text-[#788390] font-medium whitespace-nowrap"
               dir="ltr"
             >
               ₪ מכירות
             </th>
             <th
               scope="col"
-              className="pb-3 px-3 text-end text-[15px] uppercase tracking-[0.08em] text-[#A0AEC0] font-medium whitespace-nowrap"
+              className="pb-3 px-3 text-end text-[15px] uppercase tracking-[0.08em] text-[#788390] font-medium whitespace-nowrap"
             >
               עלייה %
             </th>
             <th
               scope="col"
-              className="pb-3 px-3 text-end text-[15px] uppercase tracking-[0.08em] text-[#A0AEC0] font-medium whitespace-nowrap"
+              className="pb-3 px-3 text-end text-[15px] uppercase tracking-[0.08em] text-[#788390] font-medium whitespace-nowrap"
             >
               ROI
             </th>
             <th
               scope="col"
-              className="pb-3 px-3 text-end text-[15px] uppercase tracking-[0.08em] text-[#A0AEC0] font-medium whitespace-nowrap"
+              className="pb-3 px-3 text-end text-[15px] uppercase tracking-[0.08em] text-[#788390] font-medium whitespace-nowrap"
             >
               ימים
             </th>
@@ -178,7 +178,7 @@ export function PromotionsTable({
                       "font-mono text-[18px]",
                       isPositiveROI
                         ? "font-bold text-[#2D3748]"
-                        : "font-normal text-[#A0AEC0]",
+                        : "font-normal text-[#788390]",
                     ].join(" ")}
                   >
                     {promo.roi.toFixed(1)}x

@@ -40,7 +40,7 @@ export function OverviewView({ report, branchId }: OverviewViewProps) {
       value: s.customers.current,
       format: "number",
       trend: s.customers.change,
-      trendLabel: `סל ממוצע: ₪${s.avgBasket.current.toLocaleString()}`,
+      trendLabel: `דירוג #${s.customers.ranking}`,
       target: s.customers.target,
     },
     {
@@ -60,7 +60,7 @@ export function OverviewView({ report, branchId }: OverviewViewProps) {
   ];
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5" style={{ zoom: 1.25 }}>
       <StoreAIBriefing
         rows={rows}
         isLoading={isLoading}

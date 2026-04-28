@@ -57,7 +57,7 @@ export function Step2Goal({ goal, onChange }: Step2GoalProps) {
                   <span
                     className="w-5 h-5 rounded-full border-2 flex items-center justify-center"
                     style={{
-                      borderColor: isActive ? "#10B981" : "#A0AEC0",
+                      borderColor: isActive ? "#10B981" : "#788390",
                       background: isActive ? "#10B981" : "transparent",
                     }}
                   >

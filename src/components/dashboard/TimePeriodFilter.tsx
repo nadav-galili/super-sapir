@@ -196,7 +196,7 @@ export function TimePeriodFilter({
 
       {activeType === "monthly" && (
         <div>
-          <p className="mb-2 text-[12px] font-semibold text-[#A0AEC0]">
+          <p className="mb-2 text-[12px] font-semibold text-[#788390]">
             בחר חודש
           </p>
           <div className="grid grid-cols-4 gap-2">
@@ -222,12 +222,12 @@ export function TimePeriodFilter({
 
       {activeType === "range" && (
         <div>
-          <p className="mb-2 text-[12px] font-semibold text-[#A0AEC0]">
+          <p className="mb-2 text-[12px] font-semibold text-[#788390]">
             בחר טווח תאריכים
           </p>
           <div className="grid grid-cols-1 gap-3">
             <label className="block">
-              <span className="mb-1 block text-[12px] font-semibold text-[#A0AEC0]">
+              <span className="mb-1 block text-[12px] font-semibold text-[#788390]">
                 מתאריך
               </span>
               <input
@@ -238,7 +238,7 @@ export function TimePeriodFilter({
               />
             </label>
             <label className="block">
-              <span className="mb-1 block text-[12px] font-semibold text-[#A0AEC0]">
+              <span className="mb-1 block text-[12px] font-semibold text-[#788390]">
                 עד תאריך
               </span>
               <input
@@ -263,7 +263,7 @@ export function TimePeriodFilter({
           <p className="text-[15px] font-semibold text-[#2D3748]">
             תצוגה שנתית
           </p>
-          <p className="mt-1 text-[13px] text-[#A0AEC0]">
+          <p className="mt-1 text-[13px] text-[#788390]">
             הדף מציג ביצועים מצטברים מתחילת השנה
           </p>
         </div>
@@ -280,16 +280,16 @@ export function TimePeriodFilter({
     //   - Red underline picks WHICH EXACT month
     // The light variant is supported for non-hero placements but the
     // surface is designed primarily for the dark hero strip.
-    const eyebrowColor = isDark ? "text-white/40" : "text-[#A0AEC0]";
+    const eyebrowColor = isDark ? "text-white/40" : "text-[#788390]";
     const headingColor = isDark ? "text-white" : "text-[#2D3748]";
     const dividerColor = isDark ? "border-white/[0.06]" : "border-[#F5E6DE]";
     const tabIdleColor = isDark
       ? "text-white/40 hover:text-white/75"
-      : "text-[#A0AEC0] hover:text-[#4A5568]";
+      : "text-[#788390] hover:text-[#4A5568]";
     const tabActiveColor = isDark ? "text-white" : "text-[#2D3748]";
     const monthIdleColor = isDark
       ? "text-white/35 hover:text-white/75"
-      : "text-[#A0AEC0] hover:text-[#4A5568]";
+      : "text-[#788390] hover:text-[#4A5568]";
     const monthActiveColor = isDark ? "text-white" : "text-[#2D3748]";
     const dateBorderIdle = isDark ? "border-white/15" : "border-[#FFE8DE]";
     const dateInputColor = isDark ? "text-white" : "text-[#2D3748]";
@@ -489,7 +489,7 @@ export function TimePeriodFilter({
           <div className="min-w-0">
             <p
               className={`text-[11px] font-semibold tracking-[0.12em] ${
-                isDark ? "text-white/45" : "text-[#A0AEC0]"
+                isDark ? "text-white/45" : "text-[#788390]"
               }`}
             >
               טווח ניתוח
@@ -503,7 +503,7 @@ export function TimePeriodFilter({
             </p>
             <p
               className={`truncate text-[12px] ${
-                isDark ? "text-white/55" : "text-[#A0AEC0]"
+                isDark ? "text-white/55" : "text-[#788390]"
               }`}
             >
               {getPeriodDescriptor(value)}
@@ -511,7 +511,7 @@ export function TimePeriodFilter({
           </div>
         </div>
         <ChevronDown
-          className={`w-4 h-4 shrink-0 transition-transform ${isDark ? "text-white/45" : "text-[#A0AEC0]"} ${showDropdown ? "rotate-180" : ""}`}
+          className={`w-4 h-4 shrink-0 transition-transform ${isDark ? "text-white/45" : "text-[#788390]"} ${showDropdown ? "rotate-180" : ""}`}
         />
       </button>
 
@@ -525,7 +525,7 @@ export function TimePeriodFilter({
             className={`absolute top-full mt-3 end-0 z-[80] w-[min(92vw,340px)] rounded-[16px] border border-[#FFE8DE] bg-white p-4 shadow-[0_20px_40px_-18px_rgba(45,55,72,0.24)] ${panelPlacementClass}`}
           >
             <div className="mb-3">
-              <p className="text-[11px] font-semibold tracking-[0.12em] text-[#A0AEC0]">
+              <p className="text-[11px] font-semibold tracking-[0.12em] text-[#788390]">
                 בחירת תקופה
               </p>
               <p className="mt-1 text-[14px] text-[#4A5568]">

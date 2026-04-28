@@ -154,7 +154,7 @@ function SupplierDrillDown() {
                 <Package className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-[13px] font-semibold tracking-[0.12em] text-[#A0AEC0]">
+                <p className="text-[13px] font-semibold tracking-[0.12em] text-[#788390]">
                   SUPPLIER CONTROL
                 </p>
                 <h1 className="text-4xl font-bold text-[#2D3748]">
@@ -206,7 +206,7 @@ function SupplierDrillDown() {
                   />
                   <YAxis
                     tickFormatter={(v: number) => formatCurrencyShort(v * 1000)}
-                    tick={{ fontSize: 16, fill: "#A0AEC0" }}
+                    tick={{ fontSize: 16, fill: "#788390" }}
                     width={50}
                   />
                   <Tooltip
@@ -270,19 +270,19 @@ function SupplierDrillDown() {
               <table className="w-full min-w-[720px] text-lg">
                 <thead>
                   <tr className="border-b border-[#FFF0EA]">
-                    <th className="px-3 py-2 text-right font-medium text-[#A0AEC0]">
+                    <th className="px-3 py-2 text-right font-medium text-[#788390]">
                       קטגוריה
                     </th>
-                    <th className="px-3 py-2 text-right font-medium text-[#A0AEC0]">
+                    <th className="px-3 py-2 text-right font-medium text-[#788390]">
                       מוצרים
                     </th>
-                    <th className="px-3 py-2 text-right font-medium text-[#A0AEC0]">
+                    <th className="px-3 py-2 text-right font-medium text-[#788390]">
                       מכירות
                     </th>
-                    <th className="px-3 py-2 text-right font-medium text-[#A0AEC0]">
+                    <th className="px-3 py-2 text-right font-medium text-[#788390]">
                       עמידה ביעד
                     </th>
-                    <th className="px-3 py-2 text-right font-medium text-[#A0AEC0]">
+                    <th className="px-3 py-2 text-right font-medium text-[#788390]">
                       רווח גולמי
                     </th>
                   </tr>
@@ -309,7 +309,7 @@ function SupplierDrillDown() {
                           >
                             {category.categoryName}
                           </Link>
-                          <p className="mt-1 text-[14px] text-[#A0AEC0]">
+                          <p className="mt-1 text-[14px] text-[#788390]">
                             {category.sharePercent}% מפעילות הספק
                           </p>
                         </td>
@@ -371,7 +371,7 @@ function SupplierDrillDown() {
                 <p className="text-xl font-semibold text-[#2D3748]">
                   הספק עומד במדדי התקופה
                 </p>
-                <p className="mt-1 text-lg text-[#A0AEC0]">
+                <p className="mt-1 text-lg text-[#788390]">
                   אין פערי יעד או רווחיות חריגים.
                 </p>
               </div>

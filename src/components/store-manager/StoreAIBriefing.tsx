@@ -171,7 +171,7 @@ export function StoreAIBriefing({
                               />
                             </span>
                             {row.subActions && row.subActions.length > 0 && (
-                              <ul className="mt-2 space-y-1 ps-5 list-disc text-[16px] text-[#4A5568] leading-relaxed marker:text-[#A0AEC0]">
+                              <ul className="mt-2 space-y-1 ps-5 list-disc text-[16px] text-[#4A5568] leading-relaxed marker:text-[#788390]">
                                 {row.subActions.map((action, j) => (
                                   <li key={j}>
                                     <TypingText

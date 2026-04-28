@@ -221,11 +221,12 @@ export function MonthlyComparisonChart({
                 />
                 <XAxis
                   dataKey="month"
-                  tick={{ fontSize: 16, fill: "#4A5568" }}
+                  tick={{ fontSize: 11, fill: "#4A5568" }}
+                  tickFormatter={(v: string) => v.slice(0, 3)}
                 />
                 <YAxis
                   tickFormatter={(v: number) => `${(v / 1000).toFixed(1)}M`}
-                  tick={{ fontSize: 16, fill: "#A0AEC0" }}
+                  tick={{ fontSize: 16, fill: "#788390" }}
                   domain={[7000, "auto"]}
                   width={50}
                 />

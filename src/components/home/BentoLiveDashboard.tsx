@@ -90,7 +90,7 @@ function PhaseBrief() {
         </span>
       </div>
       <div className="rounded-[10px] bg-[#FDF8F6]/70 border border-warm-border px-3 py-2.5">
-        <p className="text-[12px] text-[#A0AEC0] mb-1">בריף ראשוני</p>
+        <p className="text-[12px] text-[#788390] mb-1">בריף ראשוני</p>
         <p className="text-[13px] leading-snug text-[#4A5568]">
           הקפצת מכירות יוגורט פרימיום בסניפי המרכז לקראת הקיץ.
         </p>
@@ -121,7 +121,7 @@ function PhasePlan() {
             className="px-3 py-1.5 rounded-full text-[12px] font-semibold border"
             style={{
               background: o.active ? "#DC4E59" : "#FFFFFF",
-              color: o.active ? "#FFFFFF" : "#A0AEC0",
+              color: o.active ? "#FFFFFF" : "#788390",
               borderColor: o.active ? "#DC4E59" : "#FFE8DE",
             }}
           >
@@ -160,7 +160,7 @@ function PhaseForecast() {
             y1="48"
             x2="320"
             y2="48"
-            stroke="#A0AEC0"
+            stroke="#788390"
             strokeWidth="1"
             strokeDasharray="3 4"
           />
@@ -271,7 +271,7 @@ const PromoSimulatorCard = memo(function PromoSimulatorCard() {
                         : state === "done"
                           ? "#10B981"
                           : "#FFFFFF",
-                    color: state === "todo" ? "#A0AEC0" : "#FFFFFF",
+                    color: state === "todo" ? "#788390" : "#FFFFFF",
                     borderColor:
                       state === "active"
                         ? "#DC4E59"
@@ -299,7 +299,7 @@ const PromoSimulatorCard = memo(function PromoSimulatorCard() {
                 <span
                   className="text-[10px] font-medium text-center leading-tight max-w-[52px]"
                   style={{
-                    color: state === "todo" ? "#A0AEC0" : "#4A5568",
+                    color: state === "todo" ? "#788390" : "#4A5568",
                   }}
                 >
                   {s.label}
@@ -332,7 +332,7 @@ const PromoSimulatorCard = memo(function PromoSimulatorCard() {
       <div className="flex items-center justify-between gap-3 pt-3 border-t border-warm-border">
         <div className="flex items-center gap-3 lg:gap-5">
           <div>
-            <p className="text-[10px] uppercase tracking-wider text-[#A0AEC0] mb-0.5">
+            <p className="text-[10px] uppercase tracking-wider text-[#788390] mb-0.5">
               uplift חזוי
             </p>
             <p
@@ -344,7 +344,7 @@ const PromoSimulatorCard = memo(function PromoSimulatorCard() {
           </div>
           <div className="w-px h-8 bg-[#FFE8DE]" />
           <div>
-            <p className="text-[10px] uppercase tracking-wider text-[#A0AEC0] mb-0.5">
+            <p className="text-[10px] uppercase tracking-wider text-[#788390] mb-0.5">
               ROI
             </p>
             <p
@@ -356,7 +356,7 @@ const PromoSimulatorCard = memo(function PromoSimulatorCard() {
           </div>
           <div className="w-px h-8 bg-[#FFE8DE]" />
           <div>
-            <p className="text-[10px] uppercase tracking-wider text-[#A0AEC0] mb-0.5">
+            <p className="text-[10px] uppercase tracking-wider text-[#788390] mb-0.5">
               ביטחון
             </p>
             <p
@@ -470,7 +470,7 @@ const AITypewriterCard = memo(function AITypewriterCard() {
         </p>
       </div>
 
-      <div className="flex items-center gap-3 mt-4 text-[12px] text-[#A0AEC0]">
+      <div className="flex items-center gap-3 mt-4 text-[12px] text-[#788390]">
         <span className="flex items-center gap-1">
           <Activity className="w-3.5 h-3.5" />
           {AI_INSIGHTS.length} תובנות חדשות היום
@@ -691,7 +691,7 @@ const AlertsFeedCard = memo(function AlertsFeedCard() {
                 </div>
                 <span
                   className="text-[10px] font-mono"
-                  style={{ color: "#A0AEC0" }}
+                  style={{ color: "#788390" }}
                   dir="ltr"
                 >
                   {idx === 0 ? "now" : `${idx * 3}m`}
@@ -772,7 +772,7 @@ const CategoryLeaderCard = memo(function CategoryLeaderCard() {
               <span
                 className="w-5 text-[13px] font-mono font-bold text-center shrink-0"
                 style={{
-                  color: idx === 0 ? "#DC4E59" : "#A0AEC0",
+                  color: idx === 0 ? "#DC4E59" : "#788390",
                 }}
                 dir="ltr"
               >
@@ -832,7 +832,7 @@ const CategoryLeaderCard = memo(function CategoryLeaderCard() {
       </ol>
 
       <div className="flex items-center justify-between pt-3 mt-3 border-t border-warm-border text-[12px]">
-        <span style={{ color: "#A0AEC0" }}>נע מהשבוע הקודם</span>
+        <span style={{ color: "#788390" }}>נע מהשבוע הקודם</span>
         {!light && (
           <motion.span
             className="flex items-center gap-1 text-[11px] font-mono uppercase tracking-wider text-[#DC4E59]"

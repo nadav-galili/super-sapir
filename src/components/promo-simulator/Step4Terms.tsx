@@ -38,7 +38,7 @@ export function Step4Terms({ terms, metrics: m, onChange }: Step4TermsProps) {
             <label className={LABEL}>סוג מבצע נבחר</label>
             <div className="flex h-10 w-full items-center rounded-[10px] border border-[#E7E0D8] bg-[#FAF8F5] px-3 text-[16px] text-[#2D3748]">
               {terms.promoType || (
-                <span className="text-[#A0AEC0]">טרם נבחר</span>
+                <span className="text-[#788390]">טרם נבחר</span>
               )}
             </div>
           </div>

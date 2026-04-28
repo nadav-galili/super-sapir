@@ -167,7 +167,7 @@ export function AppSidebar() {
 
       <SidebarFooter className="p-3 border-t border-warm-border">
         {expanded && (
-          <p className="text-xs text-[#A0AEC0] text-center">
+          <p className="text-xs text-[#788390] text-center">
             {currentMonthYear()}
           </p>
         )}

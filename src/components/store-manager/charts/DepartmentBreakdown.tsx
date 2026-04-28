@@ -159,7 +159,7 @@ export function DepartmentBreakdown({
                     {dept.yoyChangePercent}%
                   </span>
                   <span
-                    className="text-xs tabular-nums text-[#A0AEC0] w-10 text-left"
+                    className="text-xs tabular-nums text-[#788390] w-10 text-left"
                     dir="ltr"
                   >
                     {dept.sharePercent}%
@@ -168,7 +168,7 @@ export function DepartmentBreakdown({
               );
             })}
           </div>
-          <div className="flex items-center gap-6 mt-5 pt-3 border-t border-warm-divider text-[11px] text-[#A0AEC0]">
+          <div className="flex items-center gap-6 mt-5 pt-3 border-t border-warm-divider text-[11px] text-[#788390]">
             <span className="flex items-center gap-1.5">
               <span className="w-4 h-3 rounded-sm bg-[#1976d2]" />
               חודשי

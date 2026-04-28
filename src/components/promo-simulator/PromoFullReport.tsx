@@ -178,7 +178,7 @@ export function PromoFullReport({ state, metrics: m }: PromoFullReportProps) {
         </Section>
       )}
 
-      <footer className="pt-4 text-[12px] text-[#A0AEC0] text-center">
+      <footer className="pt-4 text-[12px] text-[#788390] text-center">
         Retalio · תיק מבצע הופק אוטומטית מהסימולטור
       </footer>
     </div>

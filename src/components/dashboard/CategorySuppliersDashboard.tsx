@@ -75,7 +75,7 @@ function SupplierKpiCard({
         <div className="flex flex-wrap gap-x-4 gap-y-1">
           {stats.map((s) => (
             <div key={s.label}>
-              <p className="text-[15px] text-[#A0AEC0]">{s.label}</p>
+              <p className="text-[15px] text-[#788390]">{s.label}</p>
               <p
                 className="text-lg font-bold font-mono"
                 style={{ color: s.color }}
@@ -146,7 +146,7 @@ export function CategorySuppliersDashboard({
           <h2 className="text-2xl font-bold text-[#2D3748]">
             ספקים — {categoryName}
           </h2>
-          <p className="text-[20px] text-[#A0AEC0] mt-0.5">
+          <p className="text-[20px] text-[#788390] mt-0.5">
             {suppliers.length} ספקים פעילים בקטגוריה
           </p>
         </div>
@@ -280,7 +280,7 @@ export function CategorySuppliersDashboard({
                     </Bar>
                     <Bar
                       dataKey="target"
-                      fill="#A0AEC0"
+                      fill="#788390"
                       opacity={0.3}
                       radius={[4, 4, 0, 0]}
                       animationDuration={1000}
@@ -311,22 +311,22 @@ export function CategorySuppliersDashboard({
                 <table className="w-full text-lg">
                   <thead>
                     <tr className="border-b border-[#FFF0EA]">
-                      <th className="px-3 py-2 text-right font-medium text-[#A0AEC0]">
+                      <th className="px-3 py-2 text-right font-medium text-[#788390]">
                         ספק
                       </th>
-                      <th className="px-3 py-2 text-right font-medium text-[#A0AEC0]">
+                      <th className="px-3 py-2 text-right font-medium text-[#788390]">
                         מכירות
                       </th>
-                      <th className="px-3 py-2 text-right font-medium text-[#A0AEC0]">
+                      <th className="px-3 py-2 text-right font-medium text-[#788390]">
                         יעד
                       </th>
-                      <th className="px-3 py-2 text-right font-medium text-[#A0AEC0]">
+                      <th className="px-3 py-2 text-right font-medium text-[#788390]">
                         רווח %
                       </th>
-                      <th className="px-3 py-2 text-right font-medium text-[#A0AEC0]">
+                      <th className="px-3 py-2 text-right font-medium text-[#788390]">
                         חוסרים
                       </th>
-                      <th className="px-3 py-2 text-right font-medium text-[#A0AEC0]">
+                      <th className="px-3 py-2 text-right font-medium text-[#788390]">
                         פריטים
                       </th>
                     </tr>

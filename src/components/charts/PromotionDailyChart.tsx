@@ -54,7 +54,7 @@ function ChartTooltip({ active, payload, label }: ChartTooltipProps) {
           marginRight: "-1rem",
         }}
       />
-      <p className="text-[15px] font-medium text-[#A0AEC0] mb-2 tracking-[0.05em]">
+      <p className="text-[15px] font-medium text-[#788390] mb-2 tracking-[0.05em]">
         {label}
       </p>
       <div className="space-y-1.5">
@@ -72,16 +72,16 @@ function ChartTooltip({ active, payload, label }: ChartTooltipProps) {
         </div>
         <div className="flex items-center justify-between gap-4">
           <span className="flex items-center gap-1.5 text-[16px] text-[#4A5568]">
-            <span className="w-2 h-2 rounded-full bg-[#A0AEC0] shrink-0" />
+            <span className="w-2 h-2 rounded-full bg-[#788390] shrink-0" />
             בסיס
           </span>
-          <span className="font-mono text-[18px] text-[#A0AEC0]" dir="ltr">
+          <span className="font-mono text-[18px] text-[#788390]" dir="ltr">
             {formatCurrencyShort(d.baseline)}
           </span>
         </div>
         {d.uplift > 0 && (
           <div className="pt-1.5 mt-1.5 border-t border-[#FFF0EA] flex items-center justify-between gap-4">
-            <span className="text-[15px] text-[#A0AEC0]">עלייה</span>
+            <span className="text-[15px] text-[#788390]">עלייה</span>
             <span
               className="font-mono text-[18px] font-semibold text-[#10B981]"
               dir="ltr"
@@ -159,7 +159,7 @@ export function PromotionDailyChart({ promotion }: PromotionDailyChartProps) {
           />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-[15px] uppercase tracking-[0.08em] text-[#A0AEC0] font-medium leading-none mb-1">
+          <p className="text-[15px] uppercase tracking-[0.08em] text-[#788390] font-medium leading-none mb-1">
             {promotion.promoType}
             <span className="mx-2 text-[#FFE8DE]">·</span>
             <span dir="ltr" className="font-mono">
@@ -169,7 +169,7 @@ export function PromotionDailyChart({ promotion }: PromotionDailyChartProps) {
           <h3 className="text-[20px] font-semibold text-[#2D3748] truncate leading-snug">
             {promotion.name}
           </h3>
-          <p className="text-[16px] text-[#A0AEC0] truncate mt-0.5">
+          <p className="text-[16px] text-[#788390] truncate mt-0.5">
             {promotion.productName}
           </p>
         </div>
@@ -205,7 +205,7 @@ export function PromotionDailyChart({ promotion }: PromotionDailyChartProps) {
                   dataKey="day"
                   tick={{
                     fontSize: 16,
-                    fill: "#A0AEC0",
+                    fill: "#788390",
                     fontFamily: "Rubik, sans-serif",
                   }}
                   tickLine={false}
@@ -215,7 +215,7 @@ export function PromotionDailyChart({ promotion }: PromotionDailyChartProps) {
                   tickFormatter={(v: number) => `${(v / 1000).toFixed(0)}K`}
                   tick={{
                     fontSize: 16,
-                    fill: "#A0AEC0",
+                    fill: "#788390",
                     fontFamily: "Rubik, sans-serif",
                   }}
                   tickLine={false}
@@ -252,7 +252,7 @@ export function PromotionDailyChart({ promotion }: PromotionDailyChartProps) {
                 <Line
                   type="monotone"
                   dataKey="baseline"
-                  stroke="#A0AEC0"
+                  stroke="#788390"
                   strokeDasharray="6 3"
                   strokeWidth={1.5}
                   dot={false}
@@ -308,7 +308,7 @@ export function PromotionDailyChart({ promotion }: PromotionDailyChartProps) {
               y1="1.5"
               x2="20"
               y2="1.5"
-              stroke="#A0AEC0"
+              stroke="#788390"
               strokeWidth="2"
               strokeDasharray="5 2"
             />

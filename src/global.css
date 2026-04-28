@@ -1,6 +1,6 @@
-@import '@fontsource-variable/rubik';
-@import '@fontsource/fira-code/400.css';
-@import '@fontsource/fira-code/700.css';
+@import "@fontsource-variable/rubik";
+@import "@fontsource/fira-code/400.css";
+@import "@fontsource/fira-code/700.css";
 
 @tailwind base;
 @tailwind components;
@@ -8,7 +8,7 @@
 
 @layer base {
   :root {
-    --background: 28 60% 98%;
+    --background: 220 13% 96%;
     --foreground: 213 24% 22%;
     --card: 0 0% 100%;
     --card-foreground: 213 24% 22%;
@@ -62,27 +62,26 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #F5E6DE;
+  background: #f5e6de;
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #A0AEC0;
+  background: #788390;
 }
 
 /* AI shimmer loading effect */
 @keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 .ai-shimmer {
-  background: linear-gradient(
-    90deg,
-    #FDF8F6 25%,
-    #e8e0fa 37%,
-    #FDF8F6 63%
-  );
+  background: linear-gradient(90deg, #fdf8f6 25%, #e8e0fa 37%, #fdf8f6 63%);
   background-size: 200% 100%;
   animation: shimmer 2s ease-in-out infinite;
 }
@@ -90,11 +89,11 @@
 .ai-shimmer-border {
   background: linear-gradient(
     90deg,
-    #FFE8DE 0%,
+    #ffe8de 0%,
     #c4b5fd 25%,
-    #8B7FED 50%,
+    #8b7fed 50%,
     #c4b5fd 75%,
-    #FFE8DE 100%
+    #ffe8de 100%
   );
   background-size: 200% 100%;
   animation: shimmer 2.5s ease-in-out infinite;
@@ -112,18 +111,18 @@
   }
   100% {
     background-image: none;
-    color: #4A5568;
+    color: #4a5568;
   }
 }
 
 .narrative-shimmer-text {
   background-image: linear-gradient(
     90deg,
-    #4A5568 0%,
-    #4A5568 38%,
-    #6C5CE7 50%,
-    #4A5568 62%,
-    #4A5568 100%
+    #4a5568 0%,
+    #4a5568 38%,
+    #6c5ce7 50%,
+    #4a5568 62%,
+    #4a5568 100%
   );
   background-size: 200% 100%;
   -webkit-background-clip: text;
@@ -132,10 +131,18 @@
 }
 
 @keyframes narrative-flash {
-  0%   { opacity: 0; }
-  10%  { opacity: 1; }
-  85%  { opacity: 1; }
-  100% { opacity: 0; }
+  0% {
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 .narrative-flash {
@@ -147,7 +154,7 @@
   .narrative-shimmer-text {
     animation: none;
     background-image: none;
-    color: #4A5568;
+    color: #4a5568;
   }
   .narrative-flash {
     animation: none;
@@ -157,15 +164,20 @@
 
 /* AI streaming cursor */
 @keyframes cursorBlink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
 }
 
 .ai-cursor {
   display: inline-block;
   width: 2px;
   height: 1em;
-  background: #6C5CE7;
+  background: #6c5ce7;
   margin-inline-start: 2px;
   vertical-align: text-bottom;
   animation: cursorBlink 0.8s ease-in-out infinite;
@@ -173,8 +185,18 @@
 
 /* Phone mockup scan line animation */
 @keyframes scanLine {
-  0% { top: 10%; opacity: 0; }
-  10% { opacity: 1; }
-  90% { opacity: 1; }
-  100% { top: 85%; opacity: 0; }
+  0% {
+    top: 10%;
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    top: 85%;
+    opacity: 0;
+  }
 }

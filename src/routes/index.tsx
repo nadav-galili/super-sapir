@@ -153,9 +153,6 @@ function HeroSection() {
                 <ArrowLeft className="w-4 h-4" />
               </Link>
             </MagneticButton>
-            <span className="text-[14px]" style={{ color: "#A0AEC0" }}>
-              ללא הרשמה · 30 שניות
-            </span>
           </motion.div>
 
           {/* Stats strip */}
@@ -172,7 +169,7 @@ function HeroSection() {
                 >
                   {stat.value}
                 </p>
-                <p className="text-[13px] mt-1.5" style={{ color: "#A0AEC0" }}>
+                <p className="text-[13px] mt-1.5" style={{ color: "#788390" }}>
                   {stat.label}
                 </p>
               </div>
@@ -203,7 +200,7 @@ function HeroSection() {
           animate={light ? {} : { y: [0, 8, 0] }}
           transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
         >
-          <ChevronDown className="w-5 h-5 text-[#A0AEC0]" />
+          <ChevronDown className="w-5 h-5 text-[#788390]" />
         </motion.div>
       </motion.div>
     </section>
@@ -255,7 +252,7 @@ function LiveTickerStrip() {
               >
                 <span
                   className="w-1 h-1 rounded-full"
-                  style={{ background: "#A0AEC0" }}
+                  style={{ background: "#788390" }}
                 />
                 {text}
               </span>
@@ -316,7 +313,7 @@ function CTASection() {
             className="text-[16px] sm:text-[17px] leading-relaxed max-w-md"
             style={{ color: "#4A5568" }}
           >
-            דמו אינטראקטיבי מלא, נטען ב-30 שניות. ללא הרשמה.
+            דמו אינטראקטיבי מלא של הפלטפורמה.
           </p>
           <ul
             className="flex flex-wrap gap-x-5 gap-y-2 pt-2 text-[13px]"
@@ -382,7 +379,7 @@ function HomePage() {
           style={{ color: "#4A5568" }}
         >
           <span>Nadav Galili</span>
-          <span style={{ color: "#A0AEC0" }}>·</span>
+          <span style={{ color: "#788390" }}>·</span>
           <a
             href="mailto:nadav@retalio.net"
             className="hover:underline"
@@ -390,7 +387,7 @@ function HomePage() {
           >
             nadav@retalio.net
           </a>
-          <span style={{ color: "#A0AEC0" }}>·</span>
+          <span style={{ color: "#788390" }}>·</span>
           <a
             href="tel:052-4417944"
             dir="ltr"
@@ -400,7 +397,7 @@ function HomePage() {
             052-4417944
           </a>
         </div>
-        <p className="text-[12px]" style={{ color: "#A0AEC0" }}>
+        <p className="text-[12px]" style={{ color: "#788390" }}>
           © {new Date().getFullYear()} Retalio. כל הזכויות שמורות.
         </p>
       </footer>

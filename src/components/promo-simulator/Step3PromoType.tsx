@@ -22,7 +22,7 @@ function Stars({ count }: { count: 1 | 2 | 3 }) {
           key={i}
           className="w-4 h-4"
           fill={i <= count ? "#F6B93B" : "transparent"}
-          stroke={i <= count ? "#F6B93B" : "#A0AEC0"}
+          stroke={i <= count ? "#F6B93B" : "#788390"}
           strokeWidth={1.5}
         />
       ))}

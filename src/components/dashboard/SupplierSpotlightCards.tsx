@@ -22,7 +22,7 @@ function MiniSparkline({ actual, target }: { actual: number; target: number }) {
     <div className="mt-4">
       <div className="flex items-center justify-between mb-1.5">
         <span
-          className="text-[#A0AEC0] uppercase tracking-[0.08em]"
+          className="text-[#788390] uppercase tracking-[0.08em]"
           style={{ fontSize: 15 }}
         >
           עמידה ביעד
@@ -106,7 +106,7 @@ function HeroSupplierCard({
             {icon}
           </span>
           <span
-            className="font-medium text-[#A0AEC0] uppercase tracking-[0.08em]"
+            className="font-medium text-[#788390] uppercase tracking-[0.08em]"
             style={{ fontSize: 15 }}
           >
             {title}
@@ -147,7 +147,7 @@ function HeroSupplierCard({
               >
                 {metricValue}
               </span>
-              <span className="text-[#A0AEC0]" style={{ fontSize: 15 }}>
+              <span className="text-[#788390]" style={{ fontSize: 15 }}>
                 {metricLabel}
               </span>
             </div>
@@ -157,7 +157,7 @@ function HeroSupplierCard({
         {/* Sales sub-stat */}
         <div className="pt-3 border-t border-[#FFF0EA]">
           <div className="flex items-center justify-between">
-            <span className="text-[#A0AEC0]" style={{ fontSize: 16 }}>
+            <span className="text-[#788390]" style={{ fontSize: 16 }}>
               מכירות
             </span>
             <span
@@ -217,7 +217,7 @@ function CapsuleRow({
       {/* Title + supplier name */}
       <div className="flex-1 min-w-0">
         <p
-          className="text-[#A0AEC0] uppercase tracking-[0.08em] leading-none"
+          className="text-[#788390] uppercase tracking-[0.08em] leading-none"
           style={{ fontSize: 15 }}
         >
           {title}
@@ -245,7 +245,7 @@ function CapsuleRow({
         >
           {metricValue}
           <span
-            className="text-[#A0AEC0] font-normal ms-0.5"
+            className="text-[#788390] font-normal ms-0.5"
             style={{ fontSize: 15 }}
           >
             {metricLabel}

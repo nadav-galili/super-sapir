@@ -74,7 +74,7 @@ export function Step8Control({
                     className="w-6 h-6 shrink-0 rounded-[6px] border-2 flex items-center justify-center transition-colors"
                     style={{
                       background: checked ? "#10B981" : "#FFFFFF",
-                      borderColor: checked ? "#10B981" : "#A0AEC0",
+                      borderColor: checked ? "#10B981" : "#788390",
                     }}
                   >
                     {checked && (
@@ -156,7 +156,7 @@ function KpiCard({
   return (
     <Card className="border-[#E7E0D8] rounded-[16px]">
       <CardContent className="p-5">
-        <p className="text-[15px] font-medium text-[#A0AEC0] uppercase tracking-wide">
+        <p className="text-[15px] font-medium text-[#788390] uppercase tracking-wide">
           {title}
         </p>
         <p className="text-3xl font-bold mt-1" style={{ color }} dir="ltr">

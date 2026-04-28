@@ -96,7 +96,7 @@ export function Step9Documentation({
                   {TABLE_HEADERS.map((h) => (
                     <th
                       key={h}
-                      className="text-[15px] font-semibold text-[#A0AEC0] uppercase tracking-wide px-3 py-2 border-b border-[#F1EBE3]"
+                      className="text-[15px] font-semibold text-[#788390] uppercase tracking-wide px-3 py-2 border-b border-[#F1EBE3]"
                     >
                       {h}
                     </th>

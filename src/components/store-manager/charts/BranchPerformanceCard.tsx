@@ -4,9 +4,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { BranchFullReport } from "@/data/hadera-real";
 import { WORKING_DAYS_PER_MONTH } from "@/data/constants";
-import { getGrowthColor } from "@/lib/kpi/resolvers";
-import { formatCurrencyShort } from "@/lib/format";
-import { MiniStatTile, type MiniStatTileBreakdown } from "../MiniStatTile";
+import { getGrowthColor, getQualityColor } from "@/lib/kpi/resolvers";
+import { KPI_STATUS } from "@/lib/colors";
+import { MiniStatTile } from "../MiniStatTile";
 
 const PRODUCTIVITY_BASELINE = 420;
 
@@ -25,19 +25,12 @@ export function BranchPerformanceCard({ report }: BranchPerformanceCardProps) {
     100
   ).toFixed(1);
 
-  const productivityBreakdown: MiniStatTileBreakdown = {
-    steps: [
-      `${report.hr.actual} משרות × ${WORKING_DAYS_PER_MONTH} ימים × 8 שעות = ${totalWorkHours.toLocaleString()} שעות`,
-    ],
-    formula: `${formatCurrencyShort(report.sales.total.current)} ÷ ${totalWorkHours.toLocaleString()} = ₪${productivityPerHour.toLocaleString()}/שעה`,
-  };
-
   const items: {
     label: string;
     value: string;
     change: number | null;
     sub: string;
-    breakdown?: MiniStatTileBreakdown;
+    valueColor?: string;
   }[] = [
     {
       label: "% יישום משימות בEyedo",
@@ -53,6 +46,10 @@ export function BranchPerformanceCard({ report }: BranchPerformanceCardProps) {
                 100
             ),
       sub: "מתוך 100",
+      valueColor: getQualityColor({
+        score: report.operations.qualityScore.current,
+        maxScore: report.operations.qualityScore.target,
+      }),
     },
     {
       label: 'הכנסות למ"ר',
@@ -67,18 +64,27 @@ export function BranchPerformanceCard({ report }: BranchPerformanceCardProps) {
         1
       ),
       sub: `יעד: ${report.hr.salaryTarget}%`,
+      valueColor:
+        report.hr.salaryCostPercent > report.hr.salaryTarget
+          ? KPI_STATUS.bad
+          : KPI_STATUS.good,
     },
     {
       label: "פריון לשעת עבודה",
       value: `₪${productivityPerHour.toLocaleString()}`,
       change: productivityChange,
       sub: `${report.hr.actual} משרות`,
-      breakdown: productivityBreakdown,
+      valueColor:
+        productivityChange >= 5
+          ? KPI_STATUS.good
+          : productivityChange >= -5
+            ? KPI_STATUS.warning
+            : KPI_STATUS.bad,
     },
   ];
 
   return (
-    <Card className="border-warm-border rounded-[16px]">
+    <Card className="border-warm-border rounded-[16px]" style={{ zoom: 1.25 }}>
       <CardHeader className="pb-3">
         <CardTitle className="text-base text-[#2D3748]">ביצועי סניף</CardTitle>
       </CardHeader>
@@ -90,7 +96,7 @@ export function BranchPerformanceCard({ report }: BranchPerformanceCardProps) {
               label={item.label}
               value={item.value}
               subtitle={item.sub}
-              breakdown={item.breakdown}
+              valueColor={item.valueColor}
               accessory={
                 item.change !== null ? (
                   <span

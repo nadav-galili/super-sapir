@@ -13,7 +13,7 @@ interface CategoryDonutProps {
 // Avoids the "rainbow donut" anti-pattern.
 const DONUT_PALETTE = [
   "#DC4E59", // primary — largest slice, accent red
-  "#A0AEC0", // muted grey — second
+  "#788390", // muted grey — second
   "#C4CDD7", // lighter grey — third
   "#D6DDE4", // near-white grey — fourth
   "#E8EDF2", // faintest — "others"
@@ -164,7 +164,7 @@ export function CategoryDonut({ snapshots }: CategoryDonutProps) {
               >
                 {formatCurrencyShort(animatedTotal)}
               </span>
-              <span className="text-[15px] text-[#A0AEC0] leading-none">
+              <span className="text-[15px] text-[#788390] leading-none">
                 סה"כ
               </span>
               <span

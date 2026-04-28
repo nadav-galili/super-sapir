@@ -239,7 +239,7 @@ export function BranchNetworkMap() {
               }}
             >
               <div className="bg-white/95 backdrop-blur-sm rounded-[14px] border border-warm-border shadow-[0_8px_24px_-8px_rgba(220,78,89,0.18)] px-3 py-2 min-w-[100px]">
-                <p className="text-[11px] text-[#A0AEC0] leading-none mb-1">
+                <p className="text-[11px] text-[#788390] leading-none mb-1">
                   {f.label} · {f.branch}
                 </p>
                 <div className="flex items-baseline gap-1.5">

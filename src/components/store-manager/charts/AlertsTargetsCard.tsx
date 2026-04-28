@@ -77,13 +77,13 @@ export function AlertsTargetsCard({ report }: AlertsTargetsCardProps) {
           <CardTitle className="text-base text-[#2D3748]">
             התראות ויעדים
           </CardTitle>
-          <div className="flex items-center gap-4 text-[11px] text-[#A0AEC0]">
+          <div className="flex items-center gap-4 text-[11px] text-[#788390]">
             <span className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-[#2D3748]" />
               ביצוע
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-sm border-2 border-[#A0AEC0] border-dashed" />
+              <span className="w-2.5 h-2.5 rounded-sm border-2 border-[#788390] border-dashed" />
               יעד
             </span>
           </div>
@@ -131,7 +131,7 @@ export function AlertsTargetsCard({ report }: AlertsTargetsCardProps) {
                   style={{ insetInlineStart: `${targetPct}%` }}
                 >
                   <div
-                    className="absolute -top-4 start-1/2 -translate-x-1/2 text-[9px] font-mono text-[#A0AEC0] whitespace-nowrap"
+                    className="absolute -top-4 start-1/2 -translate-x-1/2 text-[9px] font-mono text-[#788390] whitespace-nowrap"
                     dir="ltr"
                   >
                     {kpi.target}

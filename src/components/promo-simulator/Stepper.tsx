@@ -48,7 +48,7 @@ export function Stepper({ current, onJump }: StepperProps) {
                       color:
                         state === "active" || state === "done"
                           ? "#FFFFFF"
-                          : "#A0AEC0",
+                          : "#788390",
                       borderColor:
                         state === "active"
                           ? "#DC4E59"
@@ -98,7 +98,7 @@ export function Stepper({ current, onJump }: StepperProps) {
                         ? "text-[#2D3748]"
                         : state === "done"
                           ? "text-[#4A5568]"
-                          : "text-[#A0AEC0]"
+                          : "text-[#788390]"
                     }`}
                   >
                     {s.title}

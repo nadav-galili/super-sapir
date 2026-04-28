@@ -68,7 +68,7 @@ export function InventoryByDepartmentChart({
             );
           })}
         </div>
-        <div className="flex items-center gap-4 mt-4 pt-3 border-t border-warm-divider text-[11px] text-[#A0AEC0]">
+        <div className="flex items-center gap-4 mt-4 pt-3 border-t border-warm-divider text-[11px] text-[#788390]">
           <span className="flex items-center gap-1.5">
             <span className="w-3 h-2 rounded-sm bg-[#2EC4D5]" />
             תקין (≤{target} ימים)
