@@ -146,7 +146,7 @@ function HeroSection() {
                 <Sparkles className="w-3.5 h-3.5" />
                 מונע בינה מלאכותית
               </span>
-              <BrandLogo size={72} />
+              <BrandLogo size={288} />
             </div>
           </motion.div>
 
@@ -459,11 +459,11 @@ function HomePage() {
           <span>Nadav Galili</span>
           <span style={{ color: "#A0AEC0" }}>|</span>
           <a
-            href="mailto:nadavg@retalio.online"
+            href="mailto:nadav@retalio.net"
             className="hover:underline"
             style={{ color: "#DC4E59" }}
           >
-            nadavg@retalio.online
+            nadav@retalio.net
           </a>
           <span style={{ color: "#A0AEC0" }}>|</span>
           <a

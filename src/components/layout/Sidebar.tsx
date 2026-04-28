@@ -51,7 +51,7 @@ function SidebarLogo() {
   const { state } = useSidebar();
   const expanded = state === "expanded";
 
-  return <BrandLogo size={expanded ? 52 : 44} showName={expanded} />;
+  return <BrandLogo size={expanded ? 104 : 56} showName={expanded} />;
 }
 
 export function AppSidebar() {
@@ -77,7 +77,7 @@ export function AppSidebar() {
         <SidebarTrigger className="absolute -start-3 top-[4.5rem] z-20" />
       )}
 
-      <SidebarHeader className="h-16 justify-center px-4 border-b border-warm-border">
+      <SidebarHeader className="h-32 justify-center px-4 border-b border-warm-border">
         <SidebarLogo />
       </SidebarHeader>
 
