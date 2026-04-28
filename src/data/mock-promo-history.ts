@@ -1,4 +1,4 @@
-// Mock data for the RetailSkillz promo simulator: historical promotions,
+// Mock data for the Retalio promo simulator: historical promotions,
 // category YTD stats, buy-and-get promos, and category-manager KPIs.
 
 export const CATEGORY_MANAGERS: Record<string, string> = {

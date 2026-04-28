@@ -8,6 +8,12 @@
 
 ## 2026-04-28
 
+### Rebrand — "RetailSkillz Analytics" → "Retalio"
+
+New brand name and logo across the app. `src/lib/branding.ts` now exports `APP_NAME = "Retalio"`, plus `APP_TAGLINE` and `BRAND_LOGO_SRC` so all surfaces share the same source of truth. `BrandLogo.tsx` swapped its hand-drawn SVG (cap + shield) for an `<img>` referencing the new `/retalio_logo.webp` asset; component is wrapped in `dir="ltr"` so the wordmark stays correctly oriented inside the RTL app, and the tagline font bumped to 15px to clear the design-system minimum. Updated browser tab title + favicon in `index.html`, the auto-generated promo report footer in `PromoFullReport.tsx`, the marketing email link on the landing page (`nadavg@retailskillz.online` → `nadavg@retalio.online`), the file header comment in `mock-promo-history.ts`, and the project description in `CLAUDE.md` + `context.md`. Typecheck clean.
+
+Files modified: `src/lib/branding.ts`, `src/components/branding/BrandLogo.tsx`, `index.html`, `src/components/promo-simulator/PromoFullReport.tsx`, `src/routes/index.tsx`, `src/data/mock-promo-history.ts`, `CLAUDE.md`, `context.md`.
+
 ### Promo simulator — removed Editorial + Terminal alternate UI variants
 
 User decided to keep just the canonical wizard. Deleted the two sibling routes (`promo-simulator-editorial.tsx`, `promo-simulator-terminal.tsx`) and their dedicated steppers (`StepperEditorial.tsx`, `StepperTerminal.tsx`). Removed the `AltDesignsStrip` from the canonical route so the "עיצובים נוספים" link bar no longer renders. Simplified `usePromoSimulator` to drop the `routePath` union argument — the hook now navigates only to `/category-manager/promo-simulator`. Tanstack regenerated `routeTree.gen.ts` with the alternates removed; typecheck clean.

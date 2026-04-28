@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Is
 
-RetailSkillz Analytics — a B2B SaaS retail management dashboard MVP built for pitching to Super Sapir (Israeli food retailer). Hebrew RTL interface
+Retalio — a B2B SaaS retail management dashboard MVP built for pitching to Super Sapir (Israeli food retailer). Hebrew RTL interface. (Previously branded "RetailSkillz Analytics".)
 
 ## Ubiquitous Language
 

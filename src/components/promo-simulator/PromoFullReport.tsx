@@ -179,7 +179,7 @@ export function PromoFullReport({ state, metrics: m }: PromoFullReportProps) {
       )}
 
       <footer className="pt-4 text-[12px] text-[#A0AEC0] text-center">
-        RetailSkillz Analytics · תיק מבצע הופק אוטומטית מהסימולטור
+        Retalio · תיק מבצע הופק אוטומטית מהסימולטור
       </footer>
     </div>
   );

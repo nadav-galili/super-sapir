@@ -1,6 +1,6 @@
 # Ubiquitous Language
 
-Domain glossary for **RetailSkillz Analytics** — the B2B SaaS dashboard for Super Sapir, an Israeli food retail chain. Every term below should be used consistently in code, UI copy, commits, and conversation. Aliases listed are **not** to be used.
+Domain glossary for **Retalio** (previously "RetailSkillz Analytics") — the B2B SaaS dashboard for Super Sapir, an Israeli food retail chain. Every term below should be used consistently in code, UI copy, commits, and conversation. Aliases listed are **not** to be used.
 
 ---
 

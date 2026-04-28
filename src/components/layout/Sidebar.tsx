@@ -14,7 +14,6 @@ import {
   Users,
   LayoutGrid,
   Bell,
-  Sparkles,
 } from "lucide-react";
 import {
   Sidebar as SidebarRoot,
@@ -34,7 +33,7 @@ import {
 import { BrandLogo } from "@/components/branding/BrandLogo";
 
 const generalNavItems = [
-  { to: "/", label: "סקירה כללית", icon: LayoutDashboard },
+  { to: "/", label: "מסך הבית", icon: LayoutDashboard },
   { to: "/store-manager", label: "מנהל סניף", icon: Store },
   { to: "/division-manager", label: "מנהל אזור", icon: Map },
   { to: "/category-manager", label: "ניהול סחר", icon: PieChart },
@@ -45,16 +44,14 @@ const storeCategories = [
   { view: "inventory", label: "מלאי", icon: Package },
   { view: "hr", label: "כח אדם", icon: Users },
   { view: "departments", label: "מחלקות", icon: LayoutGrid },
-
   { view: "alerts", label: "התראות", icon: Bell },
-  { view: "ai", label: "ניתוח AI", icon: Sparkles },
 ] as const;
 
 function SidebarLogo() {
   const { state } = useSidebar();
   const expanded = state === "expanded";
 
-  return <BrandLogo size={40} showName={expanded} compact />;
+  return <BrandLogo size={expanded ? 52 : 44} showName={expanded} />;
 }
 
 export function AppSidebar() {
