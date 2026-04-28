@@ -2,8 +2,12 @@ import { useMemo } from "react";
 import { motion } from "motion/react";
 import { ShoppingCart, Users, PackageCheck, AlertTriangle } from "lucide-react";
 import { useAnimatedCounter } from "@/hooks/useAnimatedCounter";
-import { usePeriodMultiplier } from "@/contexts/PeriodContext";
+import {
+  usePeriodMultiplier,
+  useSelectedPeriod,
+} from "@/contexts/PeriodContext";
 import { allBranches } from "@/data/mock-branches";
+import { getPeriodJitter } from "@/components/dashboard/TimePeriodFilter";
 
 // ─── Types ────────────────────────────────────────────────────────
 
@@ -104,15 +108,17 @@ function SupportingStatBlock({
 
 export function QuickStatCards() {
   const m = usePeriodMultiplier();
+  const period = useSelectedPeriod();
 
   const stats = useMemo<QuickStat[]>(() => {
+    const basketJitter = getPeriodJitter(period, 1);
     const totalCustomers = Math.round(
       allBranches.reduce((sum, b) => sum + b.metrics.customersPerDay, 0) * m
     );
     const avgBasket = Math.round(
       (allBranches.reduce((sum, b) => sum + b.metrics.avgBasket, 0) /
         allBranches.length) *
-        m
+        basketJitter
     );
     const avgSupply = +(
       allBranches.reduce((sum, b) => sum + b.metrics.supplyRate, 0) /
@@ -152,7 +158,7 @@ export function QuickStatCards() {
         role: "supporting" as const,
       },
     ];
-  }, [m]);
+  }, [m, period]);
 
   const [hero, ...supporting] = stats;
 

@@ -72,6 +72,7 @@ export function canJumpToStep(state: SimulatorState, target: StepId): boolean {
 }
 
 export function usePromoSimulator(search: SimulatorSearch): UsePromoSimulator {
+  const routePath = "/category-manager/promo-simulator" as const;
   const navigate = useNavigate();
 
   const defaults = useMemo(
@@ -100,12 +101,12 @@ export function usePromoSimulator(search: SimulatorSearch): UsePromoSimulator {
       const next = { ...state, ...cascaded };
       const params = encodeState(next, defaults);
       navigate({
-        to: "/category-manager/promo-simulator",
+        to: routePath,
         search: params,
         replace: true,
       });
     },
-    [state, defaults, navigate]
+    [state, defaults, navigate, routePath]
   );
 
   const metrics = useMemo(() => calcMetrics(state), [state]);
@@ -137,11 +138,11 @@ export function usePromoSimulator(search: SimulatorSearch): UsePromoSimulator {
 
   const restart = useCallback(() => {
     navigate({
-      to: "/category-manager/promo-simulator",
+      to: routePath,
       search: {},
       replace: true,
     });
-  }, [navigate]);
+  }, [navigate, routePath]);
 
   const resetStep = useCallback(() => {
     const fresh = createDefaultState({ defaultCategory: defaults.category });

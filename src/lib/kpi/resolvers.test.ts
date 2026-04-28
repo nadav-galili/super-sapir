@@ -8,8 +8,10 @@ import {
   getBasketColor,
   getCostColor,
   getCostDeltaColor,
+  getGaugeRatioColor,
   getGrowthColor,
   getMarginColor,
+  getMonthlySalesColor,
   getProgressColor,
   getPromotionColor,
   getQualityColor,
@@ -200,6 +202,81 @@ describe("getCostDeltaColor", () => {
     expect(getCostDeltaColor({ changePercent: 0 })).toBe(KPI_STATUS.warning);
     expect(getCostDeltaColor({ changePercent: 1 })).toBe(KPI_STATUS.warning);
     expect(getCostDeltaColor({ changePercent: -1 })).toBe(KPI_STATUS.warning);
+  });
+});
+
+describe("getMonthlySalesColor", () => {
+  it("returns bad below 99% of target", () => {
+    expect(getMonthlySalesColor({ actual: 98.99, target: 100 })).toBe(
+      KPI_STATUS.bad
+    );
+    expect(getMonthlySalesColor({ actual: 50, target: 100 })).toBe(
+      KPI_STATUS.bad
+    );
+  });
+
+  it("returns warning between 99% and 101% inclusive", () => {
+    expect(getMonthlySalesColor({ actual: 99, target: 100 })).toBe(
+      KPI_STATUS.warning
+    );
+    expect(getMonthlySalesColor({ actual: 100, target: 100 })).toBe(
+      KPI_STATUS.warning
+    );
+    expect(getMonthlySalesColor({ actual: 101, target: 100 })).toBe(
+      KPI_STATUS.warning
+    );
+  });
+
+  it("returns good above 101% of target", () => {
+    expect(getMonthlySalesColor({ actual: 101.01, target: 100 })).toBe(
+      KPI_STATUS.good
+    );
+    expect(getMonthlySalesColor({ actual: 200, target: 100 })).toBe(
+      KPI_STATUS.good
+    );
+  });
+
+  it("returns muted when target is zero", () => {
+    expect(getMonthlySalesColor({ actual: 100, target: 0 })).toBe(
+      PALETTE.muted
+    );
+  });
+});
+
+describe("getGaugeRatioColor", () => {
+  it("returns good when ratio ≥ 100%", () => {
+    expect(getGaugeRatioColor({ actual: 100, target: 100 })).toBe(
+      KPI_STATUS.good
+    );
+    expect(getGaugeRatioColor({ actual: 110, target: 100 })).toBe(
+      KPI_STATUS.good
+    );
+  });
+
+  it("returns warning when 95% ≤ ratio < 100%", () => {
+    expect(getGaugeRatioColor({ actual: 95, target: 100 })).toBe(
+      KPI_STATUS.warning
+    );
+    expect(getGaugeRatioColor({ actual: 99, target: 100 })).toBe(
+      KPI_STATUS.warning
+    );
+    expect(getGaugeRatioColor({ actual: 99.99, target: 100 })).toBe(
+      KPI_STATUS.warning
+    );
+  });
+
+  it("returns bad when ratio < 95%", () => {
+    expect(getGaugeRatioColor({ actual: 94.99, target: 100 })).toBe(
+      KPI_STATUS.bad
+    );
+    expect(getGaugeRatioColor({ actual: 70, target: 100 })).toBe(
+      KPI_STATUS.bad
+    );
+    expect(getGaugeRatioColor({ actual: 0, target: 100 })).toBe(KPI_STATUS.bad);
+  });
+
+  it("returns muted when target is zero", () => {
+    expect(getGaugeRatioColor({ actual: 50, target: 0 })).toBe(PALETTE.muted);
   });
 });
 

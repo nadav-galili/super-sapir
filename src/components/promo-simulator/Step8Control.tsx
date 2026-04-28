@@ -4,7 +4,7 @@ import { getProgressColor, getStatusColor } from "@/lib/kpi/resolvers";
 import { statusLabel, type PromoMetrics } from "@/lib/promo-simulator/calc";
 import type { ControlSlice, SliceSetter } from "@/lib/promo-simulator/state";
 
-interface Step7ControlProps {
+interface Step8ControlProps {
   control: ControlSlice;
   metrics: PromoMetrics;
   readinessCount: number;
@@ -20,12 +20,12 @@ const CHECKS: {
   { field: "controlDisplay", label: "יש נראות מספקת" },
 ];
 
-export function Step7Control({
+export function Step8Control({
   control,
   metrics: m,
   readinessCount,
   onChange,
-}: Step7ControlProps) {
+}: Step8ControlProps) {
   const statusColor = getStatusColor({
     status:
       m.status === "worthIt"
@@ -46,7 +46,7 @@ export function Step7Control({
 
   return (
     <div className="space-y-4">
-      <Card className="border-[#FFE8DE] rounded-[16px]">
+      <Card className="border-[#E7E0D8] rounded-[16px]">
         <CardHeader>
           <CardTitle className="text-2xl text-[#2D3748]">בקרה</CardTitle>
           <p className="text-lg text-[#4A5568]">
@@ -67,7 +67,7 @@ export function Step7Control({
                     background: checked
                       ? "rgba(16, 185, 129, 0.06)"
                       : "#FFFFFF",
-                    borderColor: checked ? "#10B981" : "#FFE8DE",
+                    borderColor: checked ? "#10B981" : "#E7E0D8",
                   }}
                 >
                   <span
@@ -154,7 +154,7 @@ function KpiCard({
   color: string;
 }) {
   return (
-    <Card className="border-[#FFE8DE] rounded-[16px]">
+    <Card className="border-[#E7E0D8] rounded-[16px]">
       <CardContent className="p-5">
         <p className="text-[15px] font-medium text-[#A0AEC0] uppercase tracking-wide">
           {title}

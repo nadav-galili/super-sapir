@@ -1,6 +1,6 @@
 # Ubiquitous Language
 
-Domain glossary for **RetailSkillz Analytics** — the B2B SaaS dashboard for Super Sapir, an Israeli food retail chain. Every term below should be used consistently in code, UI copy, commits, and conversation. Aliases listed are **not** to be used.
+Domain glossary for **Retalio** (previously "RetailSkillz Analytics") — the B2B SaaS dashboard for Super Sapir, an Israeli food retail chain. Every term below should be used consistently in code, UI copy, commits, and conversation. Aliases listed are **not** to be used.
 
 ---
 
@@ -80,6 +80,20 @@ Domain glossary for **RetailSkillz Analytics** — the B2B SaaS dashboard for Su
 | **Customer Complaints**     | Count of recorded complaints for the period, tracked against a target.                        | Tickets, issues          |
 | **Focus Reports**           | Scheduled operational inspection reports required per period.                                 | Audits, checks           |
 | **Shopper Usage**           | Percent of orders picked via the Shopper system (compared between Super Sapir and Shufersal). | Picker rate              |
+
+---
+
+## Hebrew vocabulary — canonical retail terms
+
+These are the canonical Hebrew terms used across UI labels, AI prompts, and copy. The aliases below are **not** to be used.
+
+| Canonical (HE)               | Replaces (HE alias) | Definition                                                                                                                                                                                                        |
+| ---------------------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **פחת**                      | בזבוז               | Retail loss / shrinkage — the canonical term for inventory written off (waste, theft, spoilage). Use in all retail-loss contexts (e.g. `פחת בשר`, `פחת %`).                                                       |
+| **חריגות**                   | סטיות               | Deviation from a KPI target or expected value. Use when describing departments / categories / suppliers that fall outside the expected band.                                                                      |
+| **למול**                     | לעומת               | Canonical preposition for comparisons (`חריגות למול היעד`, `שיעור הוצאות שכר למול המחזור`). Hebraic / formal register; preferred over the more colloquial `לעומת`.                                                |
+| **הוצאות שכר**               | עלות שכר            | Canonical noun for salary expenditure. Use as the static label on cards and tables (`הוצאות שכר`, `הוצאות שכר בש״ח`).                                                                                             |
+| **שיעור הוצאות שכר מהמחזור** | אחוז עלות שכר       | The ratio metric — salary as a percent of branch revenue. Use when the percent value is rendered with context (e.g. AI copy: `הוצאות שכר בשיעור של 8.4% מהמחזור`). The card-tile shorthand is `שיעור הוצאות שכר`. |
 
 ---
 

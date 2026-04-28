@@ -53,12 +53,20 @@ describe("buildCategoryInsight", () => {
 
 describe("buildChainInsight", () => {
   it("has the chain cache key", () => {
-    const build = buildChainInsight();
-    expect(build.cacheKey).toBe("chain:trade-manager");
+    const build = buildChainInsight({
+      periodKey: "yearly-0-0",
+      periodLabel: "שנה מצטברת",
+      multiplier: 1,
+    });
+    expect(build.cacheKey).toBe("chain:trade-manager:yearly-0-0");
   });
 
   it("payload has chain-level summary fields", () => {
-    const build = buildChainInsight();
+    const build = buildChainInsight({
+      periodKey: "yearly-0-0",
+      periodLabel: "שנה מצטברת",
+      multiplier: 1,
+    });
     expect(build.payload.chainSummary.branchCount).toBeGreaterThan(0);
     expect(Array.isArray(build.payload.categories)).toBe(true);
     expect(Array.isArray(build.payload.promotions)).toBe(true);

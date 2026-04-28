@@ -6,6 +6,221 @@
 
 ---
 
+## 2026-04-28
+
+### Rebrand — "RetailSkillz Analytics" → "Retalio"
+
+New brand name and logo across the app. `src/lib/branding.ts` now exports `APP_NAME = "Retalio"`, plus `APP_TAGLINE` and `BRAND_LOGO_SRC` so all surfaces share the same source of truth. `BrandLogo.tsx` swapped its hand-drawn SVG (cap + shield) for an `<img>` referencing the new `/retalio_logo.webp` asset; component is wrapped in `dir="ltr"` so the wordmark stays correctly oriented inside the RTL app, and the tagline font bumped to 15px to clear the design-system minimum. Updated browser tab title + favicon in `index.html`, the auto-generated promo report footer in `PromoFullReport.tsx`, the marketing email link on the landing page (`nadavg@retailskillz.online` → `nadavg@retalio.online`), the file header comment in `mock-promo-history.ts`, and the project description in `CLAUDE.md` + `context.md`. Typecheck clean.
+
+Files modified: `src/lib/branding.ts`, `src/components/branding/BrandLogo.tsx`, `index.html`, `src/components/promo-simulator/PromoFullReport.tsx`, `src/routes/index.tsx`, `src/data/mock-promo-history.ts`, `CLAUDE.md`, `context.md`.
+
+### Promo simulator — removed Editorial + Terminal alternate UI variants
+
+User decided to keep just the canonical wizard. Deleted the two sibling routes (`promo-simulator-editorial.tsx`, `promo-simulator-terminal.tsx`) and their dedicated steppers (`StepperEditorial.tsx`, `StepperTerminal.tsx`). Removed the `AltDesignsStrip` from the canonical route so the "עיצובים נוספים" link bar no longer renders. Simplified `usePromoSimulator` to drop the `routePath` union argument — the hook now navigates only to `/category-manager/promo-simulator`. Tanstack regenerated `routeTree.gen.ts` with the alternates removed; typecheck clean.
+
+Files removed: `src/routes/category-manager/promo-simulator-editorial.tsx`, `src/routes/category-manager/promo-simulator-terminal.tsx`, `src/components/promo-simulator/StepperEditorial.tsx`, `src/components/promo-simulator/StepperTerminal.tsx`.
+Files modified: `src/routes/category-manager/promo-simulator.tsx`, `src/hooks/usePromoSimulator.ts`, `src/routeTree.gen.ts`.
+
+---
+
+## 2026-04-26
+
+### Promo simulator — two alternate UI/UX variants (Editorial + Terminal)
+
+Following the "design it twice" principle: spawned two radically different visual treatments of the same wizard at sibling routes, sharing all state/validation/step internals via the new `StepContent` extraction. Each treatment changes only the chrome — page background, fonts, stepper geometry, action-bar style — so a category manager can switch designs mid-flow and the URL search-param state persists.
+
+- **Extracted `StepContent.tsx`** — pulls the 9-way step switch (with `BorderBeam` wrapping for steps 4–7, toggleable via `withBeam`) out of the route file. Original route now passes `state/setState/metrics/briefErrorKeys` and renders the same JSX as before. Net: original route shrank ~110 lines.
+- **Variant A — `/category-manager/promo-simulator-editorial`** (`promo-simulator-editorial.tsx` + `StepperEditorial.tsx`). "Museum brochure / Economist longread" aesthetic. Parchment cream `#F4ECD8` background, deep-gold `#B68B2F` + ink `#1F1A14` accents, system Hebrew serif stack (`'David Libre', 'Frank Ruhl Libre', Georgia, ...`) on headings and the action bar, masthead with `Vol. I · גליון מבצעים` rubric. Stepper rendered as a horizontal Table-of-Contents with oversized 44px serif numerals, hairline ink rules, and a gold underline that sweeps in on the active step (no circles, no progress fill). Buttons are rounded-full pill outlines; the primary advance button is ink-on-cream uppercase tracked.
+- **Variant B — `/category-manager/promo-simulator-terminal`** (`promo-simulator-terminal.tsx` + `StepperTerminal.tsx`). "Bloomberg console / brutalist developer tool" aesthetic. Bone `#EFEFE9` canvas with a 16px dotted grid via `radial-gradient`, monospace everywhere (`'Fira Code', SFMono-Regular, ...`), uppercase tracked labels, hot-lime `#B5F23F` active accent. Stepper is a vertical left rail using `[NN] ▸ STEP NAME` bracket notation with a blinking lime cursor on the active row, `$ promo --plan` prompt header. Buttons are `rounded-none` with 2px solid black borders and brutalist `4px 4px 0 #000` shadows; the primary advance button is lime-filled on commit.
+- **Cross-linking**: original route gets a small `עיצובים נוספים:` strip above the wizard with two link buttons (one styled in editorial gold-on-cream, one in brutal black-shadow mono). Each variant has its own header strip linking back to default + sideways to the other variant. All three pass current `search` so wizard state persists across design switches.
+- **Bugfix — variant routes were navigating back to default on every state change.** `usePromoSimulator`'s `setState` and `restart` previously hardcoded `to: "/category-manager/promo-simulator"`, so any URL write (clicking a step, advancing, or even editing a field on a variant) bounced the user back to the default route. Hook now takes an optional `routePath` argument typed as a union of the three simulator paths; each variant route passes its own. Default route omits the arg, falls back to the canonical path. Stepper jumps, prev/next, and restart now stay within the active variant.
+- TanStack routeTree picked up both new routes automatically. Tests: 21 files / 146 tests still green; typecheck clean.
+
+Files:
+
+- new: `src/components/promo-simulator/StepContent.tsx`, `src/components/promo-simulator/StepperEditorial.tsx`, `src/components/promo-simulator/StepperTerminal.tsx`
+- new: `src/routes/category-manager/promo-simulator-editorial.tsx`, `src/routes/category-manager/promo-simulator-terminal.tsx`
+- modified: `src/routes/category-manager/promo-simulator.tsx` (uses `StepContent`, adds alt-designs link strip)
+
+### Promo simulator — recolored Step 5 uplift chart (orange + blue)
+
+`UpliftChart.tsx` (rendered inside `Step5Forecast`): swapped the two bar fills to the new palette per request — `COLOR_BASE` from teal `#0F766E` → blue `#159fe6` (בסיס bars), `COLOR_PROMO` from brand red `#DC4E59` → warm orange `#f18d62` (מבצע bars). Updated the matching `LegendChip` Tailwind dot classes (`bg-[#159fe6]`, `bg-[#f18d62]`) and softened the Recharts tooltip cursor fill from `rgba(220,78,89,0.04)` to `rgba(241,141,98,0.06)` so the hover tint matches the new promo color. The vertical accent rule on the card's start edge (driven by `COLOR_PROMO`) now reads orange to stay consistent with the bar; the cumulative line stays slate-ink dashed; the card's outer drop-shadow keeps its red tint.
+
+### Promo simulator — editable end-date + vertical stepper
+
+Step 1 (בריף) and the wizard chrome on `/category-manager/promo-simulator` got two ergonomic fixes.
+
+- **End date is now a date picker, not a derived readonly field.** `Step1Brief.tsx` swapped the `READONLY_CLS` div for a `<input type="date">` bound to the existing computed end date (`startDate + durationWeeks*7`). On change, we re-compute `durationWeeks = (endDate − startDate) / 7` (fractional weeks allowed) and write that back through the slice setter, so downstream consumers (`Step5Forecast`, `UpliftChart`, `PromoFullReport`, URL codec) keep working unchanged. Input gets `min={startDate}` to block earlier picks. The `משך מבצע` Select is left in source as a JSX comment per the user's request — easy to re-enable later. Removed the now-unused `durationWeeksOptions` destructure.
+- **Stepper is now a vertical sticky column on the right-of-content.** `Stepper.tsx` rewritten from horizontal sticky-top to a vertical `<ol>` inside a bordered card: vertical track line + animated gradient fill, 48px circles with the same active/done/todo color states, label sits next to each circle (RTL: circle right, label left). Route layout `routes/category-manager/promo-simulator.tsx` wraps the stepper + content in a `lg:grid-cols-[260px,1fr]` grid; the stepper aside is `lg:sticky lg:top-4` so it tracks scroll. The Live KPI panel (steps 4–7) was bumped from `lg:` to `xl:` breakpoint so it doesn't crush against the stepper at mid widths.
+- Tests: 21 files / 146 tests still green; typecheck clean.
+
+Files: `src/components/promo-simulator/Step1Brief.tsx`, `src/components/promo-simulator/Stepper.tsx`, `src/routes/category-manager/promo-simulator.tsx`.
+
+### Promo video — added simulator showcase scene
+
+Extended `promo-video/` Remotion composition `CategoryManagerPromo` to include a new 8s scene showcasing `/category-manager/promo-simulator?categoryManager=אבי+לוי`. Captured 4 fresh full-page screenshots via Playwright (against `netlify dev` on :8888), driving simulator state via URL params: brief intake (step 1), live KPI + forecast chart + AI advisor (step 5), analysis verdict (step 6), and the "תיק מבצע מוכן" success screen. New scene cross-fades through the four steps inside a browser-chrome mock with a Ken-Burns zoom, animated step-dots progress indicator, and a numbered Hebrew caption per step ("בריף — מי, מה, מתי", "תחזית חיה — KPIs ויועץ AI", "תחזית והערכה — כדאיות במבט", "תיק מבצע מוכן — שיתוף וארכיון"). Wired between `FeaturesScene` and `MobileShowcaseScene` with fade-in / slide-from-left transitions; bumped composition `durationInFrames` 900 → 1170 (39s @ 30fps). Re-rendered to `out/promo.mp4` (11.8 MB).
+
+- New: `promo-video/src/scenes/SimulatorShowcaseScene.tsx`
+- Updated: `promo-video/src/CategoryManagerPromo.tsx`, `promo-video/src/Root.tsx`
+- New assets: `promo-video/public/screenshots/sim-step1-brief.png`, `sim-step5-forecast.png`, `sim-step6-analysis.png`, `sim-success.png`
+
+### Monthly chart polish + division-manager consistency + map hover
+
+Follow-up tweaks after issues #42–#46 landed: finished the monthly chart visuals that issue #43 left rough, fixed a domain inconsistency in the division-manager data, and added branch-name hover labels to the map.
+
+- **`MonthlyComparisonChart` — custom tooltip, status dots, brighter bars.** The Recharts default tooltip was leaking Scatter X/Y entries into the popup (showing `NaNK₪` and a series mislabeled `2024`). Replaced it with a `MonthlyTooltip` component that reads everything from `payload[0].payload`, so the tooltip now shows month + year, current sales, last-year sales, target, and a verdict line in the status color (`מעל היעד +X%`, `על היעד ±X%`, or `מתחת ליעד -X%`). Bumped bar fill opacity from `33` (20%) to `80` (50%) so traffic-light differentiation reads at a glance, and added a 6px status dot on top of each bar via a hidden `<Scatter dataKey="current">` for an unmistakable verdict cue. Cursor hover-rectangle disabled.
+- **`hadera-real.ts` — softened December target so the chart shows variation.** With the original `total.target = 9_920_000` the chart's growth multiplier was 1.060 (6%) — every Hadera month fell below 99% of that derived target, so all 11 visible bars rendered red. Lowered `total.target` to `9_300_000` (a defensive ~0.6% decline target) and updated `total.vsTarget` from `-0.2` to `+6.5` so the "מכירות סניף" KPI card stays consistent. Mirrored both fields on `network`. The chart now shows a realistic mix: 🟢 March, October · 🟡 June, July, September, November · 🔴 January, February, April, May, August.
+- **`generators.ts` — `yoyGrowth` derived from `qualityScore`.** Before: `yoyGrowth` was an independent random draw, so a generated branch could land at quality 42 + growth +8% (domain-nonsense — bad service shouldn't grow). Now: `qualityBase = ((qualityScore - 40) / 55) × 14 - 6` mapped linearly into [-6%, +8%], plus ±3% noise from the existing seed. Low-quality branches genuinely decline, high-quality ones genuinely grow, and two same-quality branches still differ. The other independent draws (`complaints`, `customersPerDay`) are flagged as future correlation candidates but unchanged for now.
+- **`BranchMarker.tsx` — branch name on map hover.** Added a `<Tooltip>` from `react-leaflet` (separate from the existing click-Popup) that shows the branch name in a small label above the dot on mouseover. Click still opens the full popup with sales / quality / growth — both behaviors coexist.
+- **Removed `public/mockup-screen.png`** — unused asset.
+
+### Fix #46: Ratify retail vocabulary in glossary + sweep UI labels + prompt vocab rules
+
+Established canonical Hebrew retail vocabulary across glossary, store-manager UI, and the AI prompt so the dashboard speaks one language end-to-end (`פחת`, `חריגות`, `הוצאות שכר`).
+
+- **Glossary** — added a `## Hebrew vocabulary — canonical retail terms` section to `context.md` with five entries, each pairing the canonical term with the alias it replaces and a short definition: `פחת` (replaces `בזבוז`), `חריגות` (replaces `סטיות`), `למול` (replaces `לעומת`), `הוצאות שכר` (replaces `עלות שכר`), `שיעור הוצאות שכר מהמחזור` (replaces `אחוז עלות שכר`).
+- **UI sweep — store-manager scope only**:
+  - `src/components/store-manager/charts/BranchPerformanceCard.tsx` — `אחוז עלות שכר` → `שיעור הוצאות שכר`
+  - `src/components/store-manager/charts/AlertsTargetsCard.tsx` — `אחוז עלות שכר` → `שיעור הוצאות שכר`
+  - `src/components/store-manager/views/HRView.tsx` — `עלות שכר` → `הוצאות שכר`, `עלות שכר בש״ח` → `הוצאות שכר בש״ח`
+  - `src/routes/store-manager/$branchId.tsx` — `בזבוז בשר` → `פחת בשר`
+- **Test update** — `AlertsTargetsCard.test.tsx` assertion updated from `אחוז עלות שכר` to `שיעור הוצאות שכר`.
+- **AI prompt** — added an `אוצר מילים קנוני` block to `STORE_SYSTEM_PROMPT` instructing the model to prefer `פחת` over `בזבוז`, `חריגות` over `סטיות`, `למול` over `לעומת`, and to frame salary as `הוצאות שכר בשיעור של X% מהמחזור` rather than raw `עלות שכר`.
+- **Out of scope** — vocabulary sweep is intentionally limited to `store-manager/`. Other surfaces (`category-manager/`, `promo-simulator/`) are unchanged and will be swept when they're touched.
+
+### Fix #45: Add `subActions` field end-to-end (schema → prompt → renderer)
+
+AI recommendations with multiple discrete sub-steps now render as scannable bulleted lists; recommendations without sub-steps render unchanged.
+
+- **Schema** — added optional `subActions?: string[]` to `InsightRow` in `src/lib/ai/types.ts`. The Netlify function's `formatSSEItem` already spreads unknown fields, so the type addition makes it explicit without changing the transport.
+- **Prompt** — added a `תתי-פעולות (subActions)` section to `STORE_SYSTEM_PROMPT`: when a recommendation has multiple discrete sub-steps populate the array (2–4 items recommended); when it's a single action, omit the field entirely (no empty arrays). Includes a worked example shaped like `{"recommendation":"להעמיק פעילות תחרותית במחלקת חלב","subActions":["פרסום בסביבת החנות","העמקת הנחות במוצרי משיכה","מבצעי סל"]}`.
+- **Renderer** — `StoreAIBriefing.tsx` renders `subActions` as a `<ul>` with `list-disc` bullets under the recommendation text. Typography matches the design system: 16px, body color `#4A5568`, muted bullet markers, `ps-5` indent (RTL logical), `mt-2 space-y-1` spacing. When `subActions` is absent or empty, no extra markup is emitted — zero layout shift for existing recommendations. Sub-actions also stream via the existing `TypingText` so they animate in like the parent text.
+
+### Fix #44: Generic `MiniStatTile` `breakdown` prop wired for פריון לשעת עבודה
+
+The productivity tile in `BranchPerformanceCard` now exposes its full calculation always-visible — no hover, no click. Built as a generic mechanism so any future computed KPI can opt in.
+
+- **`MiniStatTile`** gained an optional `breakdown?: { formula: string; steps?: string[] }` prop. When present, `steps` render as small mono-font lines beneath the value (15px, muted `#A0AEC0`) and `formula` as the final mono-font line (15px, body `#4A5568`). When absent, the tile renders identically — no extra markup, no layout shift. Exported `MiniStatTileBreakdown` type for consumers.
+- **`BranchPerformanceCard`** wires `breakdown` only for the productivity tile, with `steps: ["{N} משרות × 22 ימים × 8 שעות = {totalHours} שעות"]` and `formula: "{totalSales} ÷ {totalHours} = ₪{productivity}/שעה"`. Other tiles (`% יישום משימות בEyedo`, `הכנסות למ"ר`, `אחוז עלות שכר`) are unchanged. Numbers formatted via `formatCurrencyShort` and `toLocaleString`.
+
+### Fix #43: Monthly chart traffic-light bars + per-month target markers
+
+The store-overview monthly sales chart now visually communicates target performance per month.
+
+- **New pure module** `src/lib/monthly-targets.ts` — `deriveMonthlyTargets(months, annualTarget, annualLastYear)` annotates each `MonthlyDetail` row with a derived `target`, `vsTargetPercent`, and tri-state `status`. Per-month target = `lastYearSales × (annualTarget / annualLastYear)`, which preserves seasonality and sums to the annual target by construction. Degenerate inputs (zero target or zero lastYear) yield neutral rows.
+- **New resolver** `getMonthlySalesColor({ actual, target })` in `src/lib/kpi/resolvers.ts` — three-band traffic light (`<99%` red, `99–101%` yellow, `>101%` green). Tighter than the generic `getSalesColor` because each month is a small slice of the annual goal.
+- **`MonthlyComparisonChart`** now takes `annualTarget` and `annualLastYear` props, uses the derivation module to compute per-month targets/statuses, and colors each `<Bar>` via `<Cell>` based on the resolver. A small horizontal `<Scatter>` marker renders the target Y-value on each column. Existing last-year dashed line is unchanged. Axis/tooltip/legend font sizes bumped to the dashboard scale (16/18px) per CLAUDE.md.
+- **`OverviewView`** wires `s.total.target` and `s.total.lastYear` through to the chart.
+- **Tests** — TDD vertical slices: 7 tests for the derivation module (multiplier math, vs-target ratio, threshold boundaries 98.99/99/100/101/101.01, zero-target / zero-lastYear fallbacks, sum invariant within rounding tolerance) + 4 tests for the new resolver. Existing chart smoke test updated to pass the new required props. 142 tests passing.
+
+### Fix #42: Lock four canonical subjects + force specificity in store AI prompt
+
+Rewrote `STORE_SYSTEM_PROMPT` in `src/lib/ai/builders.ts` to mirror the strict-subjects pattern from `CHAIN_SYSTEM_PROMPT`. Every refresh of the store-overview AI insight now returns exactly four insights with locked verbatim subject names in fixed display order:
+`עמידה ביעדי מכירות` → `ניהול מלאי` → `עלויות כוח אדם` → `איכות ותפעול`.
+
+- Added a hard specificity rule forbidding generic phrasing (`נתח את מיקס המוצרים`, `בחן את הסניף`, `שפר את הביצועים`, `הסתכל על הנתונים`) — every recommendation must cite a named entity (department, category, supplier, month) drawn from the payload, or at minimum a concrete number.
+- Added per-subject "what to cite" guidance: `עמידה ביעדי מכירות` → departments above/below target from `deptsByShare`/`anomalies`; `ניהול מלאי` → departments where stockout/פחת is concentrated; `עלויות כוח אדם` → store-level (turnover %, staffing gap), no department citation expected; `איכות ותפעול` → specific compliance items (`redAlerts`, `customerComplaints`, `missingActivities`, `returns`).
+- No code paths or schemas changed; pure prompt-text edit. Tests + typecheck + build green.
+
+### TDD policy added to CLAUDE.md
+
+Added a `## Testing — TDD Required` section to CLAUDE.md spelling out red-green-refactor with vertical/tracer-bullet slices, the good-vs-bad-test distinction, the horizontal-slicing anti-pattern, and which behaviors to prioritize testing in this repo (KPI resolvers, period math, simulator state). Removed the experimental PreToolUse hook in `.claude/settings.json` that previously injected a "TDD GATE" reminder on edits to test files — CLAUDE.md is the source of truth here and is the only thing that crosses into the sandcastle Docker container, where Claude Code runs as a fresh install with no user-scoped skills or plugins. One place to read the rule, works everywhere.
+
+### Husky hook hardening + ESLint cleanup
+
+Mirrored the husky hook setup from `poker-league-hero` and tightened the lint gates. Pre-commit now runs `bunx lint-staged` (eslint --fix + prettier on staged files); pre-push runs `bun run typecheck && bun run test`.
+
+- **`.husky/pre-commit`** simplified from `lint-staged + typecheck + test` to just `bunx lint-staged` (heavy checks moved to pre-push for faster commits).
+- **`.husky/pre-push`** added with `bun run typecheck && bun run test`.
+- **`.lintstagedrc`** now lints TS/TSX with `eslint --fix` in addition to prettier formatting.
+- **`eslint.config.js`** — ignored `promo-video/**` (separate sub-project) and `src/routeTree.gen.ts`; configured `@typescript-eslint/no-unused-vars` to respect `_`-prefix convention; enabled `allowConstantExport` for `react-refresh/only-export-components` (cva variants); disabled the rule entirely for `src/routes/**` (TanStack Router file-based pattern).
+- **`src/hooks/use-mobile.tsx`** — refactored from `useEffect`/`setState` to `useSyncExternalStore` (correct subscription model for `matchMedia`).
+- **`src/components/dashboard/TimePeriodFilter.tsx`** — replaced effect-syncs-prop pattern with React's "store previous value during render" pattern. No more cascading renders.
+- **`src/routes/category-manager/promo-simulator.tsx`** — same store-during-render refactor for the per-step `attempted` reset; dropped `useEffect`/`useRef` imports.
+- Removed dead imports: `CategorySupplier` (CategorySuppliersDashboard), `AlertTriangle` (`$categoryId`), `getPeriodLabel` (category-manager index).
+- Final lint state: 0 errors, 13 benign warnings (TanStack Table react-compiler hints + cva variant exports in shadcn ui files).
+
+---
+
+## 2026-04-23
+
+### Promo Simulator — step reorder (Analysis → step 6) + "תחזית והערכה"
+
+- **Reordered the 9-step wizard** so the Analysis step runs immediately after Forecast (step 5) instead of after Control. New order: 1 בריף → 2 מטרה → 3 סוג מבצע → 4 התניה והטבה → 5 יעדים/תחזית → **6 תחזית והערכה** → 7 יישום בשטח → 8 בקרה → 9 תיעוד. The quantitative arc (forecast → assess) now sits together before the operational checklist.
+- **Step renamed** from "ניתוח והערכה" to "תחזית והערכה" — in the `STEPS` taxonomy array and in the inline section header inside the component.
+- **Files renamed via `git mv`** (history preserved): `Step8Analysis.tsx → Step6Analysis.tsx`, `Step6Implementation.tsx → Step7Implementation.tsx`, `Step7Control.tsx → Step8Control.tsx`. Inner `function`/`interface`/`Props` identifiers renamed to match. Route imports + the `state.step === N` render switch rewired.
+- `showLiveKpi` / `showNarrative` / `showStepBeam` ranges (4–7, 2–5, 4–7) unchanged — they still select the quantitative phases; with the reorder, Analysis (6) is now covered by the live-KPI panel and border beam (the most data-relevant context for it), while Control (8) is a pure readiness checklist without beam/KPI.
+
+### Promo Simulator — page palette preview (less-pink warm neutral)
+
+Targeted preview applied **only to the promo-simulator scope** (20 files in `src/components/promo-simulator/` + the route file). The rest of the app still uses the original warm palette so they can be A/B compared.
+
+- Page bg `#FDF8F6` → `#FAF8F5` (warm off-white, no peach undertone)
+- Borders `#FFE8DE` → `#E7E0D8` (warm beige, no salmon)
+- Light fills `#FFF0EA` → `#F1EBE3` (warm cream)
+- Section separators `#F5E6DE` → `#E7E0D8` (unified with borders)
+- Card shadows `rgba(220, 78, 89, …)` → `rgba(30, 41, 59, …)` so the drop no longer bleeds the accent red into the surface
+- Brand accent `#DC4E59` kept — still the single signal color. No CLAUDE.md palette change yet; that's a separate decision if the preview lands.
+
+### Promo Simulator — UpliftChart color refactor (design-taste-frontend)
+
+Rebuilt the Phase 5 forecast chart per the design skill (LILA ban, desaturated accents, no pale bars).
+
+- **Dropped violet `#6C5CE7`** from cumulative line + dots (design-taste skill's explicit LILA ban).
+- **Base bars** now `#0F766E` (deep desaturated teal) — complementary to the brand red, crisp and visible. No pale greys, no pink.
+- **Promo bars** kept `#DC4E59` (brand accent).
+- **Cumulative line** `#1E293B` (slate ink) with `strokeDasharray="6 4"`, dots `r=3.5` matching. Activates to `r=5` on hover.
+- **Grid** softened to `rgba(30, 41, 59, 0.07)`, axes `#64748B`.
+- Tooltip tightened: monospace font stack, slate drop-shadow, rounded-[12px], Hebrew direction, he-IL currency format.
+- Default Recharts legend suppressed in favour of three **custom chip-style legend entries** in the card header (matches the simulator's chip vocabulary).
+- Structural reshape: card uses a 3px accent rule on the RTL-start edge, bold `tracking-tight` title with uppercase caps-label above, diffusion shadow tinted to slate.
+
+### Promo Simulator — terminology & copy fixes
+
+- Renamed the "מבצע צלב-קטגוריה" promo type to "מבצע חוצה קטגוריות" — the "צלב" root literally means "cross" (as in the Christian cross) and was culturally awkward. Affected: `taxonomy.ts` (promo list + copy key), and the same terminology in `narrative.ts`. "שיעור ההצלבה" in the narrative body was replaced with the cleaner "שיעור הצירוף לסל".
+- Shortened the `AINarrative` section title from "ניתוח AI — פרשנות יועץ" to "יועץ אישי" (a more direct label that reflects how the block reads across steps 2–5).
+
+### Promo Simulator — remove "מותג פרטי" KPI (chain has no private label)
+
+- Dropped the 5 `private-label` ("מותג פרטי") entries from `getCategoryKpis` in `src/data/mock-promo-history.ts` — affected categories: מכולת, נון-פוד, לחם ומאפים, תינוקות, אורגני ובריאות. Those categories now surface 5 KPIs each; the rest still carry 6. `BackgroundDataSheet`'s hero + compact-grid layout adapts automatically to the new count.
+
+### Promo Simulator Step 1 — premium sheet refactor + read-only category manager
+
+Applied the `design-taste-frontend` skill (DESIGN_VARIANCE=8, MOTION_INTENSITY=6, VISUAL_DENSITY=4) to both Step 1 side sheets, and converted the category-manager field from an editable input to a read-only display.
+
+- **ArchiveSheet — full visual rebuild.** Replaced uniform-card layout with asymmetric bento: accent pill tag + big display title (`text-5xl tracking-tight leading-[1.05]`) on one side, meta chip on the other. Added an inline summary rail (`border-y`, no boxes) showing total / avg uplift / success rate in monospace tracking-tight. Historical promo rows now have a 3px vertical outcome-accent bar on the RTL-start edge (no full card tint), split into asymmetric stats: a huge monospace uplift number on one side, a `divide-x rtl:divide-x-reverse` 3-up stats row on the other (יחידות / פדיון / ROI — all `font-mono`). Metadata line is inline dots-separated (no stat boxes). Learnings moved from a grey box to a `border-s-2 border-[#DC4E59]/30` quoted blockquote with a `Quote` icon. Featured (first) promo gets a larger treatment (bigger display + bigger uplift). Buy-and-get tiles use a 2px top gradient stripe + inline condition→benefit pills. All cards have diffusion shadows (`shadow-[0_20px_40px_-24px_rgba(220,78,89,0.18)]`), spring hover lift (`whileHover={{ y: -2 }}`, stiffness 200 damping 22), and Framer Motion staggered entrance (stiffness 120 damping 22, 60ms stagger).
+- **BackgroundDataSheet — asymmetric bento KPIs.** Same header treatment (accent pill + display title). Replaced the flat 3-column KPI grid with a bento: one Featured KPI with a hero treatment (`text-6xl font-mono`, "מדד מוביל" label, wider layout) + the remaining 5 KPIs in a responsive 2/3-col compact grid. All KPIs have a short vertical accent rule on the start edge in traffic-light color. Historical promos use the same `divide-x` 4-up stats row pattern as ArchiveSheet for consistency. Same staggered Motion orchestration.
+- **Typography consistency**: monospace on every number, `tracking-tight` on displays, `uppercase tracking-[0.12em]` on stat labels (label/caps style), `leading-relaxed` on body, `max-w-[54ch]` on paragraphs.
+- **Anti-AI-tells applied**: no 3-equal-card feature row (replaced with bento), no centered hero, no gradient text on headers, no neon glow (diffusion shadows only, tinted to accent).
+- **Scroll + overflow**: both sheets use `h-screen max-h-screen overflow-y-auto p-0` with inner `px-8 pb-20 pt-10 md:px-12` so content breathes and the bottom never clips.
+- **Category manager field is now read-only.** Removed the text input in favor of a readonly display (`READONLY_CLS`) — the manager is determined by the chosen category via `CATEGORY_MANAGERS` and should not be hand-edited. Shows a muted placeholder "ייבחר אוטומטית לפי הקטגוריה" until a category is picked.
+- **Files:** `src/components/promo-simulator/ArchiveSheet.tsx`, `src/components/promo-simulator/BackgroundDataSheet.tsx`, `src/components/promo-simulator/Step1Brief.tsx`.
+
+### Promo Simulator Step 1 — archive narrowed to promotions, data sheet scroll fix
+
+Follow-up fixes to the Phase 1 rollout.
+
+- **ArchiveSheet is now promotion-only.** Removed the 4-card YTD strip (YTD sales, YTD growth, chain growth, vs-chain) and the 12-month grouped bar chart (sales/target/last year) — those belonged to the category dashboard, not to an archive of past promotions. Dropped the now-unused Recharts imports and the `getCategoryYtdStats` call. The sheet now shows only: header + "מבצעים קודמים" list + "מבצעי קנה וקבל ברשת בקטגוריה" grid. Header title changed to "ארכיון מבצעים — {category}" and subtitle focuses on learnings from prior promos.
+- **BackgroundDataSheet overflow fix.** The sheet was cut off at the bottom with no scroll reachable. Added `h-screen max-h-screen` to explicitly bind the sheet height to the viewport so `overflow-y-auto` has a concrete constraint to scroll against, plus `pb-16` so the last card isn't flush against the bottom edge. Same classes applied to ArchiveSheet for consistency.
+- **Files:** `src/components/promo-simulator/ArchiveSheet.tsx`, `src/components/promo-simulator/BackgroundDataSheet.tsx`.
+
+### Promo Simulator Step 1 — category manager, end date, archive/data sheets, format field
+
+Phase 1 overhaul driven by a team of parallel agents (mock data + two sheet components). All 131 tests pass; typecheck clean.
+
+- **Field rename: `salesOwner` → `categoryManager`.** Renamed across `BriefSlice`, `SimulatorState`, `SimulatorSearch`, URL codec (`decodeState`/`encodeState`/`validateSimulatorSearch`), validation, route, `PromoFullReport`, and test fixture. Label changed from "אחראי מכירות" to "מנהל קטגוריה". The field auto-populates based on the chosen category via `CATEGORY_MANAGERS` (hardcoded Hebrew names for all 14 categories). Still editable — the user can override.
+- **End date field.** Added a read-only "תאריך סיום" display next to "תאריך התחלה". Dynamically computed as `startDate + durationWeeks * 7` via a local `computeEndDate` helper. Renders `dir="ltr"` in the warm readonly style.
+- **Product no longer required.** Removed `product` from `missingFieldsForStep(1)`. Product select placeholder now reads "בחר מוצר — או השאר ריק לכל הסגמנט" and the label is suffixed with "(אופציונלי)". A manager can run a promo for a whole segment.
+- **Format (פורמט) replaces Arena (זירה).** `SALES_ARENAS` updated from `["מאורגן", "פרטי", "On The Go"]` to `["שכונתי", "גדול", "כלל הרשת"]`. Label "זירה" → "פורמט" in Step1Brief, validation missing-fields, `Step9Documentation` table header, and `PromoFullReport` row. Test fixture updated.
+- **Removed "מאגר ידע" card.** Info cards grid is now 2 columns. `BookOpen` import removed.
+- **Archive & Data cards are clickable.** Both `ClickableInfoCard`s open full-width side sheets. Disabled (with explanatory copy) until a category is selected.
+- **New `ArchiveSheet` component** (`src/components/promo-simulator/ArchiveSheet.tsx`). For the chosen category/product: 4 YTD KPI strip (YTD sales, YTD growth, chain YTD growth, vs-chain diff) colored via `getGrowthColor`; 12-month grouped Recharts bar chart (sales / target / last year) wrapped in `dir="ltr"`; historical promo cards (product-match first, then category) with type chip, date range, uplift colored via `getUpliftColor`, revenue/ROI/outcome badge, learnings text; buy-and-get section listing chain "קנה X קבל Y" promos involving the category.
+- **New `BackgroundDataSheet` component** (`src/components/promo-simulator/BackgroundDataSheet.tsx`). For the chosen category: 6 KPIs in a responsive 1/2/3-col grid, each with label / value (status-colored) / trend arrow / delta / optional benchmark / description. Plus the first 2 historical promos with full stats strip (base→actual, uplift, revenue, ROI) and outcome badge + learnings.
+- **New mock data module** (`src/data/mock-promo-history.ts`). 46 historical promotions across all 14 categories (mix of product-level and category-wide, varied outcomes), `CATEGORY_MANAGERS` map, `ytdStatsList` with realistic 12-month seasonality benchmarked against a 6.4% chain YTD growth, 32 buy-and-get promos, and `getCategoryKpis` returning 6 curated KPIs per category (fresh categories lean on waste/turnover; grocery on promo share/price index; etc.). Pure data file, no side effects.
+- **Files:** `src/data/mock-promo-history.ts` (new), `src/components/promo-simulator/ArchiveSheet.tsx` (new), `src/components/promo-simulator/BackgroundDataSheet.tsx` (new), `src/components/promo-simulator/Step1Brief.tsx`, `src/lib/promo-simulator/state.ts`, `src/lib/promo-simulator/taxonomy.ts`, `src/lib/promo-simulator/validation.ts`, `src/components/promo-simulator/PromoFullReport.tsx`, `src/components/promo-simulator/Step9Documentation.tsx`, `src/routes/category-manager/promo-simulator.tsx`, `src/hooks/usePromoSimulator.test.ts`.
+
+---
+
 ## 2026-04-19
 
 ### Promo Simulator — cascading Category/Segment/Product + per-step validation

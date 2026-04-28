@@ -5,6 +5,13 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
+export interface MiniStatTileBreakdown {
+  /** Final formula line (e.g. "₪10M ÷ 8K שעות = ₪1,250/שעה"). */
+  formula: string;
+  /** Optional intermediate steps rendered above the formula. */
+  steps?: string[];
+}
+
 export interface MiniStatTileProps {
   label: string;
   value: ReactNode;
@@ -12,6 +19,13 @@ export interface MiniStatTileProps {
   subtitle?: ReactNode;
   /** Optional trailing indicator rendered beside the value (e.g. trend %). */
   accessory?: ReactNode;
+  /**
+   * Optional always-visible breakdown of how the value is computed —
+   * `steps` render as small lines beneath the value, `formula` as the
+   * final line. Generic; any tile can opt in. When absent, the tile
+   * renders identically to its default behavior.
+   */
+  breakdown?: MiniStatTileBreakdown;
   /** Root container class overrides (bg, padding, border, etc). */
   className?: string;
   /** Label text class overrides. */
@@ -33,6 +47,7 @@ export function MiniStatTile({
   value,
   subtitle,
   accessory,
+  breakdown,
   className,
   labelClassName = "text-xs text-[#A0AEC0]",
   valueClassName = "text-2xl font-bold text-[#2D3748] font-mono tabular-nums",
@@ -48,6 +63,25 @@ export function MiniStatTile({
         {accessory}
       </div>
       {subtitle && <p className={cn("mt-1", subtitleClassName)}>{subtitle}</p>}
+      {breakdown && (
+        <div className="mt-2 space-y-0.5">
+          {breakdown.steps?.map((step, i) => (
+            <p
+              key={i}
+              className="text-[15px] text-[#A0AEC0] font-mono tabular-nums"
+              dir="ltr"
+            >
+              {step}
+            </p>
+          ))}
+          <p
+            className="text-[15px] text-[#4A5568] font-mono tabular-nums"
+            dir="ltr"
+          >
+            {breakdown.formula}
+          </p>
+        </div>
+      )}
     </div>
   );
 }

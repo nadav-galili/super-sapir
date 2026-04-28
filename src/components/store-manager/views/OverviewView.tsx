@@ -72,7 +72,11 @@ export function OverviewView({ report, branchId }: OverviewViewProps) {
       <KPIGrid items={kpis} columns={4} />
 
       <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-5">
-        <MonthlyComparisonChart data={report.monthly} />
+        <MonthlyComparisonChart
+          data={report.monthly}
+          annualTarget={s.total.target}
+          annualLastYear={s.total.lastYear}
+        />
         <BranchPerformanceCard report={report} />
       </div>
 

@@ -11,7 +11,7 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
-import { AlertTriangle, CheckCircle2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { KPIGrid } from "@/components/dashboard/KPIGrid";

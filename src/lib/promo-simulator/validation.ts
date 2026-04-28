@@ -38,15 +38,14 @@ export function missingFieldsForStep(
       missing.push({ key: "category", label: "קטגוריה" });
     if (isBlank(state.segment))
       missing.push({ key: "segment", label: "סגמנט" });
-    if (isBlank(state.product)) missing.push({ key: "product", label: "מוצר" });
     if (isBlank(state.salesArena))
-      missing.push({ key: "salesArena", label: "זירה" });
+      missing.push({ key: "salesArena", label: "פורמט" });
     if (isBlank(state.startDate))
       missing.push({ key: "startDate", label: "תאריך התחלה" });
     if (isNonPositive(state.durationWeeks))
       missing.push({ key: "durationWeeks", label: "משך מבצע" });
-    if (isBlank(state.salesOwner))
-      missing.push({ key: "salesOwner", label: "אחראי מכירות" });
+    if (isBlank(state.categoryManager))
+      missing.push({ key: "categoryManager", label: "מנהל קטגוריה" });
     return missing;
   }
 

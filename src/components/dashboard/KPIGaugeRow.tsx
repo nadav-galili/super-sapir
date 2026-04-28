@@ -3,12 +3,7 @@ import { Target } from "lucide-react";
 import { useAnimatedCounter } from "@/hooks/useAnimatedCounter";
 import { formatCurrencyShort } from "@/lib/format";
 import { KPI_STATUS } from "@/lib/colors";
-import {
-  getSalesColor,
-  getMarginColor,
-  getSupplyColor,
-  getQualityColor,
-} from "@/lib/kpi/resolvers";
+import { getGaugeRatioColor } from "@/lib/kpi/resolvers";
 
 // ─── Public types (API unchanged) ────────────────────────────────
 
@@ -16,30 +11,24 @@ interface GaugeKPI {
   label: string;
   value: number;
   target: number;
-  format: "currency" | "percent";
+  format: "currency" | "percent" | "number";
 }
 
 interface KPIGaugeRowProps {
   items: GaugeKPI[];
+  variant?: "standalone" | "heroInline";
 }
 
-// ─── Per-label resolver map ───────────────────────────────────────
-// Selects the semantically correct color resolver for each KPI so we
-// never hardcode thresholds or pass direction flags at the call site.
+// All gauges in this row are read the same way — by the visible
+// "% of target" arc on the gauge itself. Color comes from
+// `getGaugeRatioColor` so every meter answers the same question:
+// did we hit our target? Domain-specific resolvers (margin %, supply
+// rate, quality score) still live in `lib/kpi/resolvers` and remain
+// the right pick when a metric is rendered standalone, but for this
+// hero strip the unified band wins on legibility.
 
 function resolveKpiColor(item: GaugeKPI): string {
-  const { label, value, target } = item;
-  if (label === "רווח גולמי") {
-    return getMarginColor({ marginPercent: value });
-  }
-  if (label === "זמינות מדף") {
-    return getSupplyColor({ ratePercent: value });
-  }
-  if (label === "ציון איכות") {
-    return getQualityColor({ score: value, maxScore: target });
-  }
-  // סל ממוצע ללקוח + מכירות מבצעים → sales/target ratio resolver
-  return getSalesColor({ actual: value, target });
+  return getGaugeRatioColor({ actual: item.value, target: item.target });
 }
 
 // ─── Gauge SVG ────────────────────────────────────────────────────
@@ -139,18 +128,33 @@ interface GaugeCellProps {
   index: number;
   /** primary = larger, supporting = smaller */
   size: "primary" | "supporting";
+  compact?: boolean;
 }
 
-function GaugeCell({ item, index, size }: GaugeCellProps) {
-  const gaugeSize = size === "primary" ? 108 : 80;
-  const strokeWidth = size === "primary" ? 9 : 7;
+function GaugeCell({ item, index, size, compact = false }: GaugeCellProps) {
+  const gaugeSize = compact
+    ? size === "primary"
+      ? 76
+      : 64
+    : size === "primary"
+      ? 108
+      : 80;
+  const strokeWidth = compact
+    ? size === "primary"
+      ? 7
+      : 6
+    : size === "primary"
+      ? 9
+      : 7;
   const color = resolveKpiColor(item);
   const animated = useAnimatedCounter(item.value, 1400, 100 + index * 90);
 
   const formattedValue =
     item.format === "currency"
       ? formatCurrencyShort(animated)
-      : `${typeof animated === "number" ? animated.toFixed(item.value % 1 !== 0 ? 1 : 0) : animated}%`;
+      : item.format === "number"
+        ? Math.round(animated).toLocaleString("he-IL")
+        : `${typeof animated === "number" ? animated.toFixed(item.value % 1 !== 0 ? 1 : 0) : animated}%`;
 
   return (
     <motion.div
@@ -162,7 +166,11 @@ function GaugeCell({ item, index, size }: GaugeCellProps) {
         stiffness: 100,
         damping: 20,
       }}
-      className="flex flex-col items-center gap-3"
+      className={
+        compact
+          ? "flex flex-col items-center gap-2"
+          : "flex flex-col items-center gap-3"
+      }
     >
       <DarkGauge
         actual={item.value}
@@ -178,7 +186,13 @@ function GaugeCell({ item, index, size }: GaugeCellProps) {
           className="font-bold font-mono tabular-nums leading-none"
           style={{
             color,
-            fontSize: size === "primary" ? 22 : 18,
+            fontSize: compact
+              ? size === "primary"
+                ? 17
+                : 15
+              : size === "primary"
+                ? 22
+                : 18,
           }}
           dir="ltr"
         >
@@ -186,7 +200,7 @@ function GaugeCell({ item, index, size }: GaugeCellProps) {
         </p>
         <p
           className="text-white/50 leading-tight"
-          style={{ fontSize: size === "primary" ? 16 : 15 }}
+          style={{ fontSize: compact ? 12 : size === "primary" ? 16 : 15 }}
         >
           {item.label}
         </p>
@@ -197,34 +211,52 @@ function GaugeCell({ item, index, size }: GaugeCellProps) {
 
 // ─── Main export (API unchanged) ─────────────────────────────────
 
-export function KPIGaugeRow({ items }: KPIGaugeRowProps) {
+export function KPIGaugeRow({
+  items,
+  variant = "standalone",
+}: KPIGaugeRowProps) {
+  const isHeroInline = variant === "heroInline";
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.14, type: "spring", stiffness: 100, damping: 20 }}
-      className="rounded-[16px] overflow-hidden border border-white/5"
+      className={
+        isHeroInline
+          ? "rounded-[14px] overflow-hidden border border-white/10 backdrop-blur-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
+          : "rounded-[16px] overflow-hidden border border-white/5"
+      }
       style={{
-        background:
-          "linear-gradient(160deg, #1a1a2e 0%, #16213e 55%, #1a1a2e 100%)",
+        background: isHeroInline
+          ? "linear-gradient(160deg, rgba(255,255,255,0.055) 0%, rgba(255,255,255,0.025) 100%)"
+          : "linear-gradient(160deg, #1a1a2e 0%, #16213e 55%, #1a1a2e 100%)",
       }}
     >
       {/* Internal header — absorbs the removed route-level paragraph */}
-      <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-white/[0.06]">
+      <div
+        className={`${isHeroInline ? "px-4 pt-3 pb-2" : "px-6 pt-5 pb-4"} flex items-center justify-between border-b border-white/[0.06]`}
+      >
         <div className="flex items-center gap-2.5">
           <div
-            className="w-8 h-8 rounded-[8px] flex items-center justify-center"
+            className={`${isHeroInline ? "w-7 h-7" : "w-8 h-8"} rounded-[8px] flex items-center justify-center`}
             style={{ background: "rgba(220,78,89,0.18)" }}
           >
-            <Target className="w-4 h-4 text-[#DC4E59]" />
+            <Target
+              className={`${isHeroInline ? "w-3.5 h-3.5" : "w-4 h-4"} text-[#DC4E59]`}
+            />
           </div>
-          <span className="text-[18px] font-semibold text-white/80 leading-none">
+          <span
+            className={`${isHeroInline ? "text-[14px]" : "text-[18px]"} font-semibold text-white/80 leading-none`}
+          >
             כל המדדים מוצגים ביחס ליעד
           </span>
         </div>
 
         {/* Traffic-light legend — compact, right-aligned */}
-        <div className="hidden sm:flex items-center gap-4 text-[15px] text-white/40">
+        <div
+          className={`${isHeroInline ? "hidden xl:flex text-[12px] gap-3" : "hidden sm:flex text-[15px] gap-4"} items-center text-white/40`}
+        >
           <span className="flex items-center gap-1.5">
             <motion.span
               className="w-2 h-2 rounded-full shrink-0"
@@ -236,21 +268,21 @@ export function KPIGaugeRow({ items }: KPIGaugeRowProps) {
                 ease: "easeInOut",
               }}
             />
-            95%+
+            100%+
           </span>
           <span className="flex items-center gap-1.5">
             <span
               className="w-2 h-2 rounded-full shrink-0"
               style={{ backgroundColor: KPI_STATUS.warning }}
             />
-            85–95%
+            95–99%
           </span>
           <span className="flex items-center gap-1.5">
             <span
               className="w-2 h-2 rounded-full shrink-0"
               style={{ backgroundColor: KPI_STATUS.bad }}
             />
-            &lt;85%
+            &lt;95%
           </span>
         </div>
       </div>
@@ -261,18 +293,21 @@ export function KPIGaugeRow({ items }: KPIGaugeRowProps) {
           - Dividers between items via divide-x.
           - Horizontal scroll on small viewports. */}
       <div
-        className="flex items-end divide-x divide-white/[0.07] overflow-x-auto py-6 px-2"
+        className={`${isHeroInline ? "py-3" : "py-6"} flex items-end divide-x divide-white/[0.07] overflow-x-auto px-2`}
         style={{ scrollbarWidth: "none" }}
       >
         {items.map((item, i) => (
           <div
             key={item.label}
-            className="flex-1 min-w-[110px] flex justify-center px-2"
+            className={`${isHeroInline ? "min-w-[92px]" : "min-w-[110px]"} flex-1 flex justify-center px-2`}
           >
             <GaugeCell
               item={item}
               index={i}
-              size={i === 0 ? "primary" : "supporting"}
+              size={
+                isHeroInline ? "supporting" : i === 0 ? "primary" : "supporting"
+              }
+              compact={isHeroInline}
             />
           </div>
         ))}

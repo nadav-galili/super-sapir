@@ -21,7 +21,7 @@ interface KpiRow {
 export function AlertsTargetsCard({ report }: AlertsTargetsCardProps) {
   const kpis: KpiRow[] = [
     {
-      label: "אחוז עלות שכר",
+      label: "שיעור הוצאות שכר",
       actual: report.hr.salaryCostPercent,
       target: report.hr.salaryTarget,
       domain: "cost",

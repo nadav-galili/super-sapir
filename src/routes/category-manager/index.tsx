@@ -4,13 +4,16 @@ import { Megaphone, LayoutGrid, Truck, Store, Sparkles } from "lucide-react";
 import {
   TimePeriodFilter,
   getPeriodMultiplier,
-  getPeriodJitter,
+  getPeriodTargetMultiplier,
+  getPeriodKpiFactor,
   type TimePeriod,
 } from "@/components/dashboard/TimePeriodFilter";
-import { PeriodMultiplierProvider } from "@/contexts/PeriodContext";
+import {
+  PeriodMultiplierProvider,
+  SelectedPeriodProvider,
+} from "@/contexts/PeriodContext";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { HeroBanner } from "@/components/dashboard/HeroBanner";
-import { QuickStatCards } from "@/components/dashboard/QuickStatCards";
 import { KPIGaugeRow } from "@/components/dashboard/KPIGaugeRow";
 import { CategorySpotlight } from "@/components/dashboard/CategorySpotlight";
 import { CategoryDonut } from "@/components/dashboard/CategoryDonut";
@@ -34,6 +37,7 @@ function CategoryManagerPage() {
   const [selectedPromoId, setSelectedPromoId] = useState(rawPromotions[0]?.id);
   const [period, setPeriod] = useState<TimePeriod>({ type: "yearly" });
   const multiplier = getPeriodMultiplier(period);
+  const targetMultiplier = getPeriodTargetMultiplier(period);
 
   const promotions = useMemo(() => {
     if (multiplier === 1) return rawPromotions;
@@ -70,12 +74,13 @@ function CategoryManagerPage() {
     const target =
       allBranches.reduce((sum, b) => {
         return sum + b.departments.reduce((ds, d) => ds + d.targetSales, 0);
-      }, 0) * m;
+      }, 0) * targetMultiplier;
 
-    const j0 = getPeriodJitter(period, 0);
-    const j2 = getPeriodJitter(period, 2);
-    const j3 = getPeriodJitter(period, 3);
-    const j4 = getPeriodJitter(period, 4);
+    const j0 = getPeriodKpiFactor(period, 0);
+    const j1 = getPeriodKpiFactor(period, 1);
+    const j2 = getPeriodKpiFactor(period, 2);
+    const j3 = getPeriodKpiFactor(period, 3);
+    const j4 = getPeriodKpiFactor(period, 4);
 
     const avgGrossMargin =
       (allBranches.reduce((sum, b) => {
@@ -92,15 +97,18 @@ function CategoryManagerPage() {
     const avgBasket =
       (allBranches.reduce((sum, b) => sum + b.metrics.avgBasket, 0) /
         allBranches.length) *
-      m;
+      j1;
     const avgSupplyRate =
       (allBranches.reduce((sum, b) => sum + b.metrics.supplyRate, 0) /
         allBranches.length) *
       j2;
-    const avgQuality =
-      (allBranches.reduce((sum, b) => sum + b.metrics.qualityScore, 0) /
-        allBranches.length) *
+    const totalCustomers =
+      allBranches.reduce((sum, b) => sum + b.metrics.customersPerDay, 0) *
+      m *
       j3;
+    const targetCustomers =
+      allBranches.reduce((sum, b) => sum + b.metrics.customersPerDay, 0) *
+      targetMultiplier;
 
     const totalPromoSales =
       allBranches.reduce((sum, b) => {
@@ -138,10 +146,10 @@ function CategoryManagerPage() {
           format: "percent" as const,
         },
         {
-          label: "ציון איכות",
-          value: +avgQuality.toFixed(0),
-          target: 100,
-          format: "percent" as const,
+          label: "לקוחות",
+          value: Math.round(totalCustomers),
+          target: Math.max(1, Math.round(targetCustomers)),
+          format: "number" as const,
         },
         {
           label: "מכירות מבצעים",
@@ -151,116 +159,127 @@ function CategoryManagerPage() {
         },
       ],
     };
-  }, [multiplier, period]);
+  }, [multiplier, period, targetMultiplier]);
 
   return (
-    <PeriodMultiplierProvider value={multiplier}>
-      <PageContainer>
-        <HeroBanner
-          totalSales={totalSales}
-          targetSales={totalTargetSales}
-          branchCount={allBranches.length}
-          categoryCount={categorySnapshots.length}
-          backgroundImage="/hero/category-manager.png"
-          cta={
-            <Link
-              to="/category-manager/promo-simulator"
-              className="inline-flex items-center gap-2 rounded-[10px] px-6 py-3 text-lg font-semibold text-white shadow-lg transition-transform hover:-translate-y-0.5"
-              style={{
-                background: "linear-gradient(135deg, #DC4E59, #E8777F)",
-                boxShadow: "0 10px 25px rgba(220, 78, 89, 0.35)",
-              }}
-            >
-              <Sparkles className="w-5 h-5" />
-              סימולטור מבצע חדש
-            </Link>
-          }
-        />
-
-        <ChainAIBriefing />
-
-        <QuickStatCards />
-
-        <KPIGaugeRow items={gaugeKpis} />
-
-        <Tabs defaultValue="formats" dir="rtl">
-          <div className="flex items-center justify-between gap-4 flex-wrap border-b border-[#FFE8DE]">
-            <TabsList className="h-auto gap-6 bg-transparent p-0 rounded-none">
-              <TabsTrigger
-                value="formats"
-                className="group relative inline-flex items-center gap-2 px-1 pb-3 rounded-none bg-transparent text-[17px] font-medium text-[#A0AEC0] hover:text-[#4A5568] data-[state=active]:bg-transparent data-[state=active]:text-[#2D3748] data-[state=active]:shadow-none transition-colors after:absolute after:inset-x-0 after:-bottom-px after:h-[2px] after:bg-[#DC4E59] after:origin-center after:scale-x-0 data-[state=active]:after:scale-x-100 after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.16,1,0.3,1)]"
-              >
-                <Store className="w-[18px] h-[18px]" strokeWidth={2} />
-                פורמטים
-              </TabsTrigger>
-              <TabsTrigger
-                value="categories"
-                className="group relative inline-flex items-center gap-2 px-1 pb-3 rounded-none bg-transparent text-[17px] font-medium text-[#A0AEC0] hover:text-[#4A5568] data-[state=active]:bg-transparent data-[state=active]:text-[#2D3748] data-[state=active]:shadow-none transition-colors after:absolute after:inset-x-0 after:-bottom-px after:h-[2px] after:bg-[#DC4E59] after:origin-center after:scale-x-0 data-[state=active]:after:scale-x-100 after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.16,1,0.3,1)]"
-              >
-                <LayoutGrid className="w-[18px] h-[18px]" strokeWidth={2} />
-                ביצועי קטגוריות
-              </TabsTrigger>
-              <TabsTrigger
-                value="suppliers"
-                className="group relative inline-flex items-center gap-2 px-1 pb-3 rounded-none bg-transparent text-[17px] font-medium text-[#A0AEC0] hover:text-[#4A5568] data-[state=active]:bg-transparent data-[state=active]:text-[#2D3748] data-[state=active]:shadow-none transition-colors after:absolute after:inset-x-0 after:-bottom-px after:h-[2px] after:bg-[#DC4E59] after:origin-center after:scale-x-0 data-[state=active]:after:scale-x-100 after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.16,1,0.3,1)]"
-              >
-                <Truck className="w-[18px] h-[18px]" strokeWidth={2} />
-                ספקים
-              </TabsTrigger>
-              <TabsTrigger
-                value="promotions"
-                className="group relative inline-flex items-center gap-2 px-1 pb-3 rounded-none bg-transparent text-[17px] font-medium text-[#A0AEC0] hover:text-[#4A5568] data-[state=active]:bg-transparent data-[state=active]:text-[#2D3748] data-[state=active]:shadow-none transition-colors after:absolute after:inset-x-0 after:-bottom-px after:h-[2px] after:bg-[#DC4E59] after:origin-center after:scale-x-0 data-[state=active]:after:scale-x-100 after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.16,1,0.3,1)]"
-              >
-                <Megaphone className="w-[18px] h-[18px]" strokeWidth={2} />
-                מבצעים
-              </TabsTrigger>
-            </TabsList>
-            <TimePeriodFilter value={period} onChange={setPeriod} />
-          </div>
-
-          <TabsContent value="formats" className="mt-4">
-            <FormatsOverview period={period} />
-          </TabsContent>
-
-          <TabsContent value="categories" className="mt-4 space-y-4">
-            <SectionHeader
-              title="קטגוריות מובילות"
-              subtitle="4 הקטגוריות המובילות במכירות"
-              icon={LayoutGrid}
-              accentColor="#6C5CE7"
-            />
-            <CategorySpotlight snapshots={categorySnapshots} />
-            <div className="grid grid-cols-1 lg:grid-cols-[1fr,340px] gap-4 items-start">
-              <CategoryPerformanceTable snapshots={categorySnapshots} />
-              <div className="flex flex-col gap-4">
-                <CategoryDonut snapshots={categorySnapshots} />
-                <HeroItemCards vertical />
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="suppliers" className="mt-4 space-y-4">
-            <h2 className="text-2xl font-bold text-[#2D3748]">ביצועי ספקים</h2>
-            <div className="grid grid-cols-1 lg:grid-cols-[1fr,340px] gap-4 items-start">
-              <SuppliersTable />
-              <SupplierSpotlightCards />
-            </div>
-          </TabsContent>
-
-          <TabsContent value="promotions" className="mt-4 space-y-4">
-            <h2 className="text-2xl font-bold text-[#2D3748]">ניתוח מבצעים</h2>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <PromotionDailyChart promotion={selectedPromo} />
-              <PromotionsTable
-                promotions={promotions}
-                selectedId={selectedPromo.id}
-                onSelect={(p) => setSelectedPromoId(p.id)}
+    <SelectedPeriodProvider value={period}>
+      <PeriodMultiplierProvider value={multiplier}>
+        <PageContainer>
+          <HeroBanner
+            totalSales={totalSales}
+            targetSales={totalTargetSales}
+            branchCount={allBranches.length}
+            categoryCount={categorySnapshots.length}
+            middleContent={
+              <KPIGaugeRow items={gaugeKpis} variant="heroInline" />
+            }
+            periodControl={
+              <TimePeriodFilter
+                value={period}
+                onChange={setPeriod}
+                variant="dark"
+                mode="inline"
               />
+            }
+            cta={
+              <Link
+                to="/category-manager/promo-simulator"
+                className="inline-flex items-center gap-2 rounded-[10px] px-6 py-3 text-lg font-semibold text-white shadow-lg transition-transform hover:-translate-y-0.5"
+                style={{
+                  background: "linear-gradient(135deg, #DC4E59, #E8777F)",
+                  boxShadow: "0 10px 25px rgba(220, 78, 89, 0.35)",
+                }}
+              >
+                <Sparkles className="w-5 h-5" />
+                סימולטור מבצע חדש
+              </Link>
+            }
+          />
+
+          <ChainAIBriefing />
+
+          <Tabs defaultValue="formats" dir="rtl">
+            <div className="flex items-center justify-between gap-4 flex-wrap border-b border-[#FFE8DE]">
+              <TabsList className="h-auto gap-6 bg-transparent p-0 rounded-none">
+                <TabsTrigger
+                  value="formats"
+                  className="group relative inline-flex items-center gap-2 px-1 pb-3 rounded-none bg-transparent text-[17px] font-medium text-[#A0AEC0] hover:text-[#4A5568] data-[state=active]:bg-transparent data-[state=active]:text-[#2D3748] data-[state=active]:shadow-none transition-colors after:absolute after:inset-x-0 after:-bottom-px after:h-[2px] after:bg-[#DC4E59] after:origin-center after:scale-x-0 data-[state=active]:after:scale-x-100 after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.16,1,0.3,1)]"
+                >
+                  <Store className="w-[18px] h-[18px]" strokeWidth={2} />
+                  פורמטים
+                </TabsTrigger>
+                <TabsTrigger
+                  value="categories"
+                  className="group relative inline-flex items-center gap-2 px-1 pb-3 rounded-none bg-transparent text-[17px] font-medium text-[#A0AEC0] hover:text-[#4A5568] data-[state=active]:bg-transparent data-[state=active]:text-[#2D3748] data-[state=active]:shadow-none transition-colors after:absolute after:inset-x-0 after:-bottom-px after:h-[2px] after:bg-[#DC4E59] after:origin-center after:scale-x-0 data-[state=active]:after:scale-x-100 after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.16,1,0.3,1)]"
+                >
+                  <LayoutGrid className="w-[18px] h-[18px]" strokeWidth={2} />
+                  ביצועי קטגוריות
+                </TabsTrigger>
+                <TabsTrigger
+                  value="suppliers"
+                  className="group relative inline-flex items-center gap-2 px-1 pb-3 rounded-none bg-transparent text-[17px] font-medium text-[#A0AEC0] hover:text-[#4A5568] data-[state=active]:bg-transparent data-[state=active]:text-[#2D3748] data-[state=active]:shadow-none transition-colors after:absolute after:inset-x-0 after:-bottom-px after:h-[2px] after:bg-[#DC4E59] after:origin-center after:scale-x-0 data-[state=active]:after:scale-x-100 after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.16,1,0.3,1)]"
+                >
+                  <Truck className="w-[18px] h-[18px]" strokeWidth={2} />
+                  ספקים
+                </TabsTrigger>
+                <TabsTrigger
+                  value="promotions"
+                  className="group relative inline-flex items-center gap-2 px-1 pb-3 rounded-none bg-transparent text-[17px] font-medium text-[#A0AEC0] hover:text-[#4A5568] data-[state=active]:bg-transparent data-[state=active]:text-[#2D3748] data-[state=active]:shadow-none transition-colors after:absolute after:inset-x-0 after:-bottom-px after:h-[2px] after:bg-[#DC4E59] after:origin-center after:scale-x-0 data-[state=active]:after:scale-x-100 after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.16,1,0.3,1)]"
+                >
+                  <Megaphone className="w-[18px] h-[18px]" strokeWidth={2} />
+                  מבצעים
+                </TabsTrigger>
+              </TabsList>
             </div>
-          </TabsContent>
-        </Tabs>
-      </PageContainer>
-    </PeriodMultiplierProvider>
+
+            <TabsContent value="formats" className="mt-4">
+              <FormatsOverview period={period} />
+            </TabsContent>
+
+            <TabsContent value="categories" className="mt-4 space-y-4">
+              <SectionHeader
+                title="קטגוריות מובילות"
+                subtitle="4 הקטגוריות המובילות במכירות"
+                icon={LayoutGrid}
+                accentColor="#6C5CE7"
+              />
+              <CategorySpotlight snapshots={categorySnapshots} />
+              <div className="grid grid-cols-1 lg:grid-cols-[1fr,340px] gap-4 items-start">
+                <CategoryPerformanceTable snapshots={categorySnapshots} />
+                <div className="flex flex-col gap-4">
+                  <CategoryDonut snapshots={categorySnapshots} />
+                  <HeroItemCards vertical />
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="suppliers" className="mt-4 space-y-4">
+              <h2 className="text-2xl font-bold text-[#2D3748]">
+                ביצועי ספקים
+              </h2>
+              <div className="grid grid-cols-1 lg:grid-cols-[1fr,340px] gap-4 items-start">
+                <SuppliersTable />
+                <SupplierSpotlightCards />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="promotions" className="mt-4 space-y-4">
+              <h2 className="text-2xl font-bold text-[#2D3748]">
+                ניתוח מבצעים
+              </h2>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <PromotionDailyChart promotion={selectedPromo} />
+                <PromotionsTable
+                  promotions={promotions}
+                  selectedId={selectedPromo.id}
+                  onSelect={(p) => setSelectedPromoId(p.id)}
+                />
+              </div>
+            </TabsContent>
+          </Tabs>
+        </PageContainer>
+      </PeriodMultiplierProvider>
+    </SelectedPeriodProvider>
   );
 }
 

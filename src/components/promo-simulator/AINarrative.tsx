@@ -1,16 +1,16 @@
-import { motion } from 'motion/react'
-import { Sparkles } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { TypingText } from '@/components/ui/typing-text'
+import { motion } from "motion/react";
+import { Sparkles } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { TypingText } from "@/components/ui/typing-text";
 
 interface AINarrativeProps {
-  paragraphs: string[]
+  paragraphs: string[];
 }
 
 export function AINarrative({ paragraphs }: AINarrativeProps) {
-  const joined = paragraphs.join('\n')
+  const joined = paragraphs.join("\n");
 
-  if (paragraphs.length === 0) return null
+  if (paragraphs.length === 0) return null;
 
   return (
     <motion.div
@@ -18,11 +18,11 @@ export function AINarrative({ paragraphs }: AINarrativeProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35 }}
     >
-      <Card className="border-[#FFE8DE] rounded-[16px] overflow-hidden">
+      <Card className="border-[#E7E0D8] rounded-[16px] overflow-hidden">
         <div
           className="h-1 w-full"
           style={{
-            background: 'linear-gradient(90deg, #6C5CE7, #8B7FED, #DC4E59)',
+            background: "linear-gradient(90deg, #6C5CE7, #8B7FED, #DC4E59)",
           }}
         />
         <CardHeader className="pb-2">
@@ -30,17 +30,17 @@ export function AINarrative({ paragraphs }: AINarrativeProps) {
             <div
               className="w-7 h-7 rounded-[10px] flex items-center justify-center"
               style={{
-                background: 'linear-gradient(135deg, #6C5CE7, #8B7FED)',
+                background: "linear-gradient(135deg, #6C5CE7, #8B7FED)",
               }}
             >
               <Sparkles className="w-4 h-4 text-white" />
             </div>
-            ניתוח AI — פרשנות יועץ
+            יועץ אישי
             <span
               className="text-[15px] font-medium px-2 py-0.5 rounded-full"
               style={{
-                background: 'linear-gradient(135deg, #6C5CE7, #8B7FED)',
-                color: 'white',
+                background: "linear-gradient(135deg, #6C5CE7, #8B7FED)",
+                color: "white",
               }}
             >
               AI
@@ -70,5 +70,5 @@ export function AINarrative({ paragraphs }: AINarrativeProps) {
         </CardContent>
       </Card>
     </motion.div>
-  )
+  );
 }

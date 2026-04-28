@@ -268,7 +268,13 @@ export function inflateBranchReport(branch: Branch): BranchFullReport {
       month: t.month,
       monthNum: t.monthNum,
       currentSales: t.totalSales,
-      lastYearSales: Math.round(t.totalSales * 0.97),
+      // Per-month last-year factor centered around the boundary that
+      // makes the traffic-light bands hit (multiplier × factor ≈ 1.0).
+      // Range spans red (<99%), yellow (99–101%), and green (>101%) so
+      // every synthetic branch shows a realistic mix on the chart.
+      lastYearSales: Math.round(
+        t.totalSales * seededFloat(seed + t.monthNum, 45, 0.85, 1.0)
+      ),
       yoyChange: seededFloat(seed + t.monthNum, 35, -4, 8),
       businessDaysImpact: seededFloat(seed + t.monthNum, 36, -3, 3),
       salaryCostPercent: seededFloat(seed + t.monthNum, 37, 7, 9.5),

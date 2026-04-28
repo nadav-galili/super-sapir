@@ -17,6 +17,7 @@ import { Route as StoreManagerBranchIdRouteImport } from './routes/store-manager
 import { Route as DivisionManagerRegionIdRouteImport } from './routes/division-manager/$regionId'
 import { Route as CategoryManagerPromoSimulatorRouteImport } from './routes/category-manager/promo-simulator'
 import { Route as CategoryManagerCategoryIdRouteImport } from './routes/category-manager/$categoryId'
+import { Route as CategoryManagerSuppliersSupplierIdRouteImport } from './routes/category-manager/suppliers/$supplierId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -60,6 +61,12 @@ const CategoryManagerCategoryIdRoute =
     path: '/category-manager/$categoryId',
     getParentRoute: () => rootRouteImport,
   } as any)
+const CategoryManagerSuppliersSupplierIdRoute =
+  CategoryManagerSuppliersSupplierIdRouteImport.update({
+    id: '/category-manager/suppliers/$supplierId',
+    path: '/category-manager/suppliers/$supplierId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -70,6 +77,7 @@ export interface FileRoutesByFullPath {
   '/category-manager/': typeof CategoryManagerIndexRoute
   '/division-manager/': typeof DivisionManagerIndexRoute
   '/store-manager/': typeof StoreManagerIndexRoute
+  '/category-manager/suppliers/$supplierId': typeof CategoryManagerSuppliersSupplierIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -80,6 +88,7 @@ export interface FileRoutesByTo {
   '/category-manager': typeof CategoryManagerIndexRoute
   '/division-manager': typeof DivisionManagerIndexRoute
   '/store-manager': typeof StoreManagerIndexRoute
+  '/category-manager/suppliers/$supplierId': typeof CategoryManagerSuppliersSupplierIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -91,6 +100,7 @@ export interface FileRoutesById {
   '/category-manager/': typeof CategoryManagerIndexRoute
   '/division-manager/': typeof DivisionManagerIndexRoute
   '/store-manager/': typeof StoreManagerIndexRoute
+  '/category-manager/suppliers/$supplierId': typeof CategoryManagerSuppliersSupplierIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -103,6 +113,7 @@ export interface FileRouteTypes {
     | '/category-manager/'
     | '/division-manager/'
     | '/store-manager/'
+    | '/category-manager/suppliers/$supplierId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -113,6 +124,7 @@ export interface FileRouteTypes {
     | '/category-manager'
     | '/division-manager'
     | '/store-manager'
+    | '/category-manager/suppliers/$supplierId'
   id:
     | '__root__'
     | '/'
@@ -123,6 +135,7 @@ export interface FileRouteTypes {
     | '/category-manager/'
     | '/division-manager/'
     | '/store-manager/'
+    | '/category-manager/suppliers/$supplierId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -134,6 +147,7 @@ export interface RootRouteChildren {
   CategoryManagerIndexRoute: typeof CategoryManagerIndexRoute
   DivisionManagerIndexRoute: typeof DivisionManagerIndexRoute
   StoreManagerIndexRoute: typeof StoreManagerIndexRoute
+  CategoryManagerSuppliersSupplierIdRoute: typeof CategoryManagerSuppliersSupplierIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -194,6 +208,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CategoryManagerCategoryIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/category-manager/suppliers/$supplierId': {
+      id: '/category-manager/suppliers/$supplierId'
+      path: '/category-manager/suppliers/$supplierId'
+      fullPath: '/category-manager/suppliers/$supplierId'
+      preLoaderRoute: typeof CategoryManagerSuppliersSupplierIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -206,6 +227,8 @@ const rootRouteChildren: RootRouteChildren = {
   CategoryManagerIndexRoute: CategoryManagerIndexRoute,
   DivisionManagerIndexRoute: DivisionManagerIndexRoute,
   StoreManagerIndexRoute: StoreManagerIndexRoute,
+  CategoryManagerSuppliersSupplierIdRoute:
+    CategoryManagerSuppliersSupplierIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

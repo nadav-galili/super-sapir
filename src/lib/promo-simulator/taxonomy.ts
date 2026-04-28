@@ -26,7 +26,7 @@ export const GOAL_DESCRIPTIONS: Record<Goal, string> = {
   "סטוק / מלאי":
     "פינוי מלאי איטי באמצעות הוזלה ישירה. חשוב לוודא כיסוי מלאי מספק וגידול ריאלי בצריכה.",
   "אחר / חוצה קטגוריות":
-    "מבצעי צלב-קטגוריה, חבילות עונתיות, נושאי אירועים. שימושי לאירועי שיא ולשיתופי פעולה.",
+    "מבצעים חוצי קטגוריות, חבילות עונתיות, נושאי אירועים. שימושי לאירועי שיא ולשיתופי פעולה.",
 };
 
 export interface PromoTypeInfo {
@@ -132,7 +132,7 @@ export const purposeMap: Record<Goal, PromoTypeInfo[]> = {
   ],
   "אחר / חוצה קטגוריות": [
     {
-      name: "מבצע צלב-קטגוריה",
+      name: "מבצע חוצה קטגוריות",
       stars: 3,
       reason: "משלב שתי קטגוריות — אטרקציה לשתי מחלקות.",
       score: 85,
@@ -238,7 +238,7 @@ export const promoDetails: Record<string, PromoDetails> = {
     benefitLabel: "הטבה",
     benefitPlaceholder: "למשל: 40% הנחה",
   },
-  "מבצע צלב-קטגוריה": {
+  "מבצע חוצה קטגוריות": {
     conditionLabel: "התניה",
     conditionPlaceholder: "למשל: בקניית מוצר מקטגוריה X",
     benefitLabel: "הטבה",
@@ -259,7 +259,7 @@ export const promoDetails: Record<string, PromoDetails> = {
 };
 
 // Hardcoded dropdown options
-export const SALES_ARENAS = ["מאורגן", "פרטי", "On The Go"] as const;
+export const SALES_ARENAS = ["שכונתי", "גדול", "כלל הרשת"] as const;
 export type SalesArena = (typeof SALES_ARENAS)[number];
 
 // Segment values are department-scoped and sourced from
@@ -282,9 +282,9 @@ export const STEPS = [
   { id: 3, title: "סוג מבצע" },
   { id: 4, title: "התניה והטבה" },
   { id: 5, title: "יעדים / תחזית" },
-  { id: 6, title: "יישום בשטח" },
-  { id: 7, title: "בקרה" },
-  { id: 8, title: "ניתוח והערכה" },
+  { id: 6, title: "תחזית והערכה" },
+  { id: 7, title: "יישום בשטח" },
+  { id: 8, title: "בקרה" },
   { id: 9, title: "תיעוד" },
 ] as const;
 

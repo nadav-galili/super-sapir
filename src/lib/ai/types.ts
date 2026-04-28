@@ -6,6 +6,18 @@ export interface InsightRow {
   subject: string;
   recommendation: string;
   status: "red" | "yellow" | "green";
+  entity?: {
+    type: "supplier" | "category" | "promotion";
+    name: string;
+    href: string;
+  };
+  /**
+   * Optional discrete sub-steps for a recommendation. When present and
+   * non-empty, the renderer shows them as a bulleted list under the
+   * recommendation text. When absent, the recommendation renders as a
+   * single line. Allowed on any subject.
+   */
+  subActions?: string[];
 }
 
 /** Output shape stored in cache. One row per insight. */

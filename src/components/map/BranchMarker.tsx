@@ -1,4 +1,4 @@
-import { Marker, Popup } from "react-leaflet";
+import { Marker, Popup, Tooltip } from "react-leaflet";
 import L from "leaflet";
 import { getQualityColor } from "@/lib/kpi/resolvers";
 import { formatCurrencyShort } from "@/lib/format";
@@ -38,6 +38,11 @@ export function BranchMarker({ branch, onClick }: BranchMarkerProps) {
       icon={icon}
       eventHandlers={{ click: () => onClick?.() }}
     >
+      <Tooltip direction="top" offset={[0, -10]} opacity={1}>
+        <span dir="rtl" className="font-semibold text-sm">
+          {branch.name}
+        </span>
+      </Tooltip>
       <Popup>
         <div dir="rtl" className="text-sm min-w-[180px]">
           <p className="font-bold text-base mb-1">

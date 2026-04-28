@@ -1,36 +1,34 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { statusLabel, type PromoMetrics } from '@/lib/promo-simulator/calc'
-import { formatCurrency } from '@/lib/format'
-import type { SimulatorState } from '@/lib/promo-simulator/state'
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { statusLabel, type PromoMetrics } from "@/lib/promo-simulator/calc";
+import { formatCurrency } from "@/lib/format";
+import type { SimulatorState } from "@/lib/promo-simulator/state";
 
 interface PromoSummaryCardProps {
-  state: SimulatorState
-  metrics: PromoMetrics
+  state: SimulatorState;
+  metrics: PromoMetrics;
 }
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between gap-3 py-2 border-b border-[#FFF0EA] last:border-b-0">
+    <div className="flex items-center justify-between gap-3 py-2 border-b border-[#F1EBE3] last:border-b-0">
       <span className="text-[16px] text-[#4A5568]">{label}</span>
       <span className="text-[16px] font-semibold text-[#2D3748] text-left">
-        {value || '—'}
+        {value || "—"}
       </span>
     </div>
-  )
+  );
 }
 
 export function PromoSummaryCard({ state, metrics: m }: PromoSummaryCardProps) {
   const conditionBenefit = [state.conditionText, state.benefitText]
     .filter(Boolean)
-    .join(' → ')
+    .join(" → ");
 
   return (
-    <Card className="border-[#FFE8DE] rounded-[16px]">
+    <Card className="border-[#E7E0D8] rounded-[16px]">
       <CardHeader>
         <CardTitle className="text-xl text-[#2D3748]">תקציר תיק מבצע</CardTitle>
-        <p className="text-[16px] text-[#4A5568]">
-          סיכום הבחירות בכל השלבים
-        </p>
+        <p className="text-[16px] text-[#4A5568]">סיכום הבחירות בכל השלבים</p>
       </CardHeader>
       <CardContent>
         <div className="space-y-0">
@@ -45,5 +43,5 @@ export function PromoSummaryCard({ state, metrics: m }: PromoSummaryCardProps) {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

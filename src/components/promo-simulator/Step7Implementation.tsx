@@ -1,63 +1,66 @@
-import { Check, Monitor, Box, Users } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import type { ImplementationSlice, SliceSetter } from '@/lib/promo-simulator/state'
+import { Check, Monitor, Box, Users } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type {
+  ImplementationSlice,
+  SliceSetter,
+} from "@/lib/promo-simulator/state";
 
-interface Step6ImplementationProps {
-  impl: ImplementationSlice
-  onChange: SliceSetter<ImplementationSlice>
+interface Step7ImplementationProps {
+  impl: ImplementationSlice;
+  onChange: SliceSetter<ImplementationSlice>;
 }
 
 const CHECKS: {
-  field: 'signage' | 'shelf' | 'training' | 'cashierBrief'
-  label: string
-  desc: string
+  field: "signage" | "shelf" | "training" | "cashierBrief";
+  label: string;
+  desc: string;
 }[] = [
   {
-    field: 'signage',
-    label: 'שילוט מוכן',
-    desc: 'שלטי מדף, מחיר, מדבקות ו-POS הופקו ומוכנים לפריסה.',
+    field: "signage",
+    label: "שילוט מוכן",
+    desc: "שלטי מדף, מחיר, מדבקות ו-POS הופקו ומוכנים לפריסה.",
   },
   {
-    field: 'shelf',
-    label: 'מיקום מדף / במה',
-    desc: 'נקבעה במה באיזור בעל תנועה או מיקום עיני קהל במדף.',
+    field: "shelf",
+    label: "מיקום מדף / במה",
+    desc: "נקבעה במה באיזור בעל תנועה או מיקום עיני קהל במדף.",
   },
   {
-    field: 'training',
-    label: 'הדרכת עובדים',
-    desc: 'המוכרים מבינים את המבצע ויודעים לענות ללקוחות.',
+    field: "training",
+    label: "הדרכת עובדים",
+    desc: "המוכרים מבינים את המבצע ויודעים לענות ללקוחות.",
   },
   {
-    field: 'cashierBrief',
-    label: 'תדריך קופאים',
-    desc: 'הקופאים יודעים לבדוק עדכון מחיר בקופה ולתת מענה בזמן אמת.',
+    field: "cashierBrief",
+    label: "תדריך קופאים",
+    desc: "הקופאים יודעים לבדוק עדכון מחיר בקופה ולתת מענה בזמן אמת.",
   },
-]
+];
 
 const TIPS: { icon: typeof Monitor; title: string; body: string }[] = [
   {
     icon: Monitor,
-    title: 'POS / במות',
-    body: 'מבצע טוב מתחיל מנוכחות פיזית. במה בקדמת החנות + שילוט גדול = טריגר קל לקליטה.',
+    title: "POS / במות",
+    body: "מבצע טוב מתחיל מנוכחות פיזית. במה בקדמת החנות + שילוט גדול = טריגר קל לקליטה.",
   },
   {
     icon: Box,
-    title: 'מלאי',
-    body: 'ודא שהמלאי בחזית המדף והאחורי מותאם לכמות הצפויה כדי למנוע חוסר בשיא המבצע.',
+    title: "מלאי",
+    body: "ודא שהמלאי בחזית המדף והאחורי מותאם לכמות הצפויה כדי למנוע חוסר בשיא המבצע.",
   },
   {
     icon: Users,
-    title: 'תדריך קצר',
-    body: 'תדריך של 10 דקות לכל המשמרת בעובדי הרצפה והקופאים מעלה את אפקטיביות המבצע.',
+    title: "תדריך קצר",
+    body: "תדריך של 10 דקות לכל המשמרת בעובדי הרצפה והקופאים מעלה את אפקטיביות המבצע.",
   },
-]
+];
 
-export function Step6Implementation({
+export function Step7Implementation({
   impl,
   onChange,
-}: Step6ImplementationProps) {
+}: Step7ImplementationProps) {
   return (
-    <Card className="border-[#FFE8DE] rounded-[16px]">
+    <Card className="border-[#E7E0D8] rounded-[16px]">
       <CardHeader>
         <CardTitle className="text-2xl text-[#2D3748]">יישום בשטח</CardTitle>
         <p className="text-lg text-[#4A5568]">
@@ -67,7 +70,7 @@ export function Step6Implementation({
       <CardContent className="space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {CHECKS.map((c) => {
-            const checked = Boolean(impl[c.field])
+            const checked = Boolean(impl[c.field]);
             return (
               <button
                 type="button"
@@ -75,16 +78,16 @@ export function Step6Implementation({
                 onClick={() => onChange({ [c.field]: !checked })}
                 className="text-right rounded-[16px] border-2 p-4 transition-all hover:-translate-y-0.5"
                 style={{
-                  background: checked ? 'rgba(16, 185, 129, 0.06)' : '#FFFFFF',
-                  borderColor: checked ? '#10B981' : '#FFE8DE',
+                  background: checked ? "rgba(16, 185, 129, 0.06)" : "#FFFFFF",
+                  borderColor: checked ? "#10B981" : "#E7E0D8",
                 }}
               >
                 <div className="flex items-start gap-3">
                   <span
                     className="mt-0.5 w-6 h-6 shrink-0 rounded-[6px] border-2 flex items-center justify-center transition-colors"
                     style={{
-                      background: checked ? '#10B981' : '#FFFFFF',
-                      borderColor: checked ? '#10B981' : '#A0AEC0',
+                      background: checked ? "#10B981" : "#FFFFFF",
+                      borderColor: checked ? "#10B981" : "#A0AEC0",
                     }}
                   >
                     {checked && (
@@ -101,7 +104,7 @@ export function Step6Implementation({
                   </div>
                 </div>
               </button>
-            )
+            );
           })}
         </div>
 
@@ -109,13 +112,13 @@ export function Step6Implementation({
           {TIPS.map((t) => (
             <div
               key={t.title}
-              className="rounded-[16px] border border-[#FFE8DE] bg-white p-5"
+              className="rounded-[16px] border border-[#E7E0D8] bg-white p-5"
             >
               <div className="flex items-center gap-2 mb-2">
                 <span
                   className="w-8 h-8 rounded-[10px] flex items-center justify-center"
                   style={{
-                    background: 'linear-gradient(135deg, #2EC4D5, #5DD8E3)',
+                    background: "linear-gradient(135deg, #2EC4D5, #5DD8E3)",
                   }}
                 >
                   <t.icon className="w-4 h-4 text-white" />
@@ -132,5 +135,5 @@ export function Step6Implementation({
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
