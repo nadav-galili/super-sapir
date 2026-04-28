@@ -13,7 +13,7 @@ import {
 import { motion, useScroll, useTransform } from "motion/react";
 import { useRef } from "react";
 import { PhoneMockup } from "@/components/home/PhoneMockup";
-import { APP_NAME } from "@/lib/branding";
+import { APP_NAME, BRAND_LOGO_SRC } from "@/lib/branding";
 import { BrandLogo } from "@/components/branding/BrandLogo";
 
 // ─── Stagger animation variants ─────────────────────────────────
@@ -146,7 +146,17 @@ function HeroSection() {
                 <Sparkles className="w-3.5 h-3.5" />
                 מונע בינה מלאכותית
               </span>
-              <BrandLogo size={288} />
+              <div
+                dir="ltr"
+                className="inline-flex shrink-0 items-center self-start h-32 sm:h-48 lg:h-72"
+                aria-label={APP_NAME}
+              >
+                <img
+                  src={BRAND_LOGO_SRC}
+                  alt={APP_NAME}
+                  className="block h-full w-auto max-w-full object-contain"
+                />
+              </div>
             </div>
           </motion.div>
 

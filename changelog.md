@@ -8,6 +8,18 @@
 
 ## 2026-04-28
 
+### Home page — fix hero logo overflow on mobile
+
+The hero rendered `<BrandLogo size={288} />` next to the AI badge. Logo image is 1536×1024 (1.5:1), so at 288px height it computes to 432px wide, overflowing the 375px viewport. Because the row is in an RTL flex container, items anchor to the right (start) — so the overflow spilled to the **left**, making the logo appear pushed off-screen on phones. Replaced the fixed `BrandLogo` with an inline `<img>` wrapped in a `dir="ltr"` container using responsive Tailwind heights (`h-32 sm:h-48 lg:h-72`) — 128px on mobile, 192px on tablet, 288px on desktop. Verified at 375px (logo 192×128, fits) and 1280px (logo 432×288, full prominence). `BrandLogo` component itself is unchanged (still used in the footer).
+
+Files modified: `src/routes/index.tsx`.
+
+### Tooling — saved Vite dev server config to `.claude/launch.json`
+
+Added a launch.json describing the project's only dev server (`bun run dev` on port 5173) so Claude Code can start the preview consistently.
+
+Files added: `.claude/launch.json`.
+
 ### Rebrand — "RetailSkillz Analytics" → "Retalio"
 
 New brand name and logo across the app. `src/lib/branding.ts` now exports `APP_NAME = "Retalio"`, plus `APP_TAGLINE` and `BRAND_LOGO_SRC` so all surfaces share the same source of truth. `BrandLogo.tsx` swapped its hand-drawn SVG (cap + shield) for an `<img>` referencing the new `/retalio_logo.webp` asset; component is wrapped in `dir="ltr"` so the wordmark stays correctly oriented inside the RTL app, and the tagline font bumped to 15px to clear the design-system minimum. Updated browser tab title + favicon in `index.html`, the auto-generated promo report footer in `PromoFullReport.tsx`, the marketing email link on the landing page (`nadavg@retailskillz.online` → `nadavg@retalio.online`), the file header comment in `mock-promo-history.ts`, and the project description in `CLAUDE.md` + `context.md`. Typecheck clean.
