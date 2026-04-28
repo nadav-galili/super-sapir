@@ -6,6 +6,17 @@
 
 ---
 
+## 2026-04-28
+
+### Promo simulator — removed Editorial + Terminal alternate UI variants
+
+User decided to keep just the canonical wizard. Deleted the two sibling routes (`promo-simulator-editorial.tsx`, `promo-simulator-terminal.tsx`) and their dedicated steppers (`StepperEditorial.tsx`, `StepperTerminal.tsx`). Removed the `AltDesignsStrip` from the canonical route so the "עיצובים נוספים" link bar no longer renders. Simplified `usePromoSimulator` to drop the `routePath` union argument — the hook now navigates only to `/category-manager/promo-simulator`. Tanstack regenerated `routeTree.gen.ts` with the alternates removed; typecheck clean.
+
+Files removed: `src/routes/category-manager/promo-simulator-editorial.tsx`, `src/routes/category-manager/promo-simulator-terminal.tsx`, `src/components/promo-simulator/StepperEditorial.tsx`, `src/components/promo-simulator/StepperTerminal.tsx`.
+Files modified: `src/routes/category-manager/promo-simulator.tsx`, `src/hooks/usePromoSimulator.ts`, `src/routeTree.gen.ts`.
+
+---
+
 ## 2026-04-26
 
 ### Promo simulator — two alternate UI/UX variants (Editorial + Terminal)

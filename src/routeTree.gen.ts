@@ -15,8 +15,6 @@ import { Route as DivisionManagerIndexRouteImport } from "./routes/division-mana
 import { Route as CategoryManagerIndexRouteImport } from "./routes/category-manager/index";
 import { Route as StoreManagerBranchIdRouteImport } from "./routes/store-manager/$branchId";
 import { Route as DivisionManagerRegionIdRouteImport } from "./routes/division-manager/$regionId";
-import { Route as CategoryManagerPromoSimulatorTerminalRouteImport } from "./routes/category-manager/promo-simulator-terminal";
-import { Route as CategoryManagerPromoSimulatorEditorialRouteImport } from "./routes/category-manager/promo-simulator-editorial";
 import { Route as CategoryManagerPromoSimulatorRouteImport } from "./routes/category-manager/promo-simulator";
 import { Route as CategoryManagerCategoryIdRouteImport } from "./routes/category-manager/$categoryId";
 import { Route as CategoryManagerSuppliersSupplierIdRouteImport } from "./routes/category-manager/suppliers/$supplierId";
@@ -51,18 +49,6 @@ const DivisionManagerRegionIdRoute = DivisionManagerRegionIdRouteImport.update({
   path: "/division-manager/$regionId",
   getParentRoute: () => rootRouteImport,
 } as any);
-const CategoryManagerPromoSimulatorTerminalRoute =
-  CategoryManagerPromoSimulatorTerminalRouteImport.update({
-    id: "/category-manager/promo-simulator-terminal",
-    path: "/category-manager/promo-simulator-terminal",
-    getParentRoute: () => rootRouteImport,
-  } as any);
-const CategoryManagerPromoSimulatorEditorialRoute =
-  CategoryManagerPromoSimulatorEditorialRouteImport.update({
-    id: "/category-manager/promo-simulator-editorial",
-    path: "/category-manager/promo-simulator-editorial",
-    getParentRoute: () => rootRouteImport,
-  } as any);
 const CategoryManagerPromoSimulatorRoute =
   CategoryManagerPromoSimulatorRouteImport.update({
     id: "/category-manager/promo-simulator",
@@ -86,8 +72,6 @@ export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
   "/category-manager/$categoryId": typeof CategoryManagerCategoryIdRoute;
   "/category-manager/promo-simulator": typeof CategoryManagerPromoSimulatorRoute;
-  "/category-manager/promo-simulator-editorial": typeof CategoryManagerPromoSimulatorEditorialRoute;
-  "/category-manager/promo-simulator-terminal": typeof CategoryManagerPromoSimulatorTerminalRoute;
   "/division-manager/$regionId": typeof DivisionManagerRegionIdRoute;
   "/store-manager/$branchId": typeof StoreManagerBranchIdRoute;
   "/category-manager/": typeof CategoryManagerIndexRoute;
@@ -99,8 +83,6 @@ export interface FileRoutesByTo {
   "/": typeof IndexRoute;
   "/category-manager/$categoryId": typeof CategoryManagerCategoryIdRoute;
   "/category-manager/promo-simulator": typeof CategoryManagerPromoSimulatorRoute;
-  "/category-manager/promo-simulator-editorial": typeof CategoryManagerPromoSimulatorEditorialRoute;
-  "/category-manager/promo-simulator-terminal": typeof CategoryManagerPromoSimulatorTerminalRoute;
   "/division-manager/$regionId": typeof DivisionManagerRegionIdRoute;
   "/store-manager/$branchId": typeof StoreManagerBranchIdRoute;
   "/category-manager": typeof CategoryManagerIndexRoute;
@@ -113,8 +95,6 @@ export interface FileRoutesById {
   "/": typeof IndexRoute;
   "/category-manager/$categoryId": typeof CategoryManagerCategoryIdRoute;
   "/category-manager/promo-simulator": typeof CategoryManagerPromoSimulatorRoute;
-  "/category-manager/promo-simulator-editorial": typeof CategoryManagerPromoSimulatorEditorialRoute;
-  "/category-manager/promo-simulator-terminal": typeof CategoryManagerPromoSimulatorTerminalRoute;
   "/division-manager/$regionId": typeof DivisionManagerRegionIdRoute;
   "/store-manager/$branchId": typeof StoreManagerBranchIdRoute;
   "/category-manager/": typeof CategoryManagerIndexRoute;
@@ -128,8 +108,6 @@ export interface FileRouteTypes {
     | "/"
     | "/category-manager/$categoryId"
     | "/category-manager/promo-simulator"
-    | "/category-manager/promo-simulator-editorial"
-    | "/category-manager/promo-simulator-terminal"
     | "/division-manager/$regionId"
     | "/store-manager/$branchId"
     | "/category-manager/"
@@ -141,8 +119,6 @@ export interface FileRouteTypes {
     | "/"
     | "/category-manager/$categoryId"
     | "/category-manager/promo-simulator"
-    | "/category-manager/promo-simulator-editorial"
-    | "/category-manager/promo-simulator-terminal"
     | "/division-manager/$regionId"
     | "/store-manager/$branchId"
     | "/category-manager"
@@ -154,8 +130,6 @@ export interface FileRouteTypes {
     | "/"
     | "/category-manager/$categoryId"
     | "/category-manager/promo-simulator"
-    | "/category-manager/promo-simulator-editorial"
-    | "/category-manager/promo-simulator-terminal"
     | "/division-manager/$regionId"
     | "/store-manager/$branchId"
     | "/category-manager/"
@@ -168,8 +142,6 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute;
   CategoryManagerCategoryIdRoute: typeof CategoryManagerCategoryIdRoute;
   CategoryManagerPromoSimulatorRoute: typeof CategoryManagerPromoSimulatorRoute;
-  CategoryManagerPromoSimulatorEditorialRoute: typeof CategoryManagerPromoSimulatorEditorialRoute;
-  CategoryManagerPromoSimulatorTerminalRoute: typeof CategoryManagerPromoSimulatorTerminalRoute;
   DivisionManagerRegionIdRoute: typeof DivisionManagerRegionIdRoute;
   StoreManagerBranchIdRoute: typeof StoreManagerBranchIdRoute;
   CategoryManagerIndexRoute: typeof CategoryManagerIndexRoute;
@@ -222,20 +194,6 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof DivisionManagerRegionIdRouteImport;
       parentRoute: typeof rootRouteImport;
     };
-    "/category-manager/promo-simulator-terminal": {
-      id: "/category-manager/promo-simulator-terminal";
-      path: "/category-manager/promo-simulator-terminal";
-      fullPath: "/category-manager/promo-simulator-terminal";
-      preLoaderRoute: typeof CategoryManagerPromoSimulatorTerminalRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/category-manager/promo-simulator-editorial": {
-      id: "/category-manager/promo-simulator-editorial";
-      path: "/category-manager/promo-simulator-editorial";
-      fullPath: "/category-manager/promo-simulator-editorial";
-      preLoaderRoute: typeof CategoryManagerPromoSimulatorEditorialRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
     "/category-manager/promo-simulator": {
       id: "/category-manager/promo-simulator";
       path: "/category-manager/promo-simulator";
@@ -264,10 +222,6 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CategoryManagerCategoryIdRoute: CategoryManagerCategoryIdRoute,
   CategoryManagerPromoSimulatorRoute: CategoryManagerPromoSimulatorRoute,
-  CategoryManagerPromoSimulatorEditorialRoute:
-    CategoryManagerPromoSimulatorEditorialRoute,
-  CategoryManagerPromoSimulatorTerminalRoute:
-    CategoryManagerPromoSimulatorTerminalRoute,
   DivisionManagerRegionIdRoute: DivisionManagerRegionIdRoute,
   StoreManagerBranchIdRoute: StoreManagerBranchIdRoute,
   CategoryManagerIndexRoute: CategoryManagerIndexRoute,

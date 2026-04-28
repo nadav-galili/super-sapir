@@ -71,20 +71,8 @@ export function canJumpToStep(state: SimulatorState, target: StepId): boolean {
   return target <= earliestGap;
 }
 
-/**
- * @param routePath - which simulator route to navigate to on state changes.
- *   Defaults to the canonical `/category-manager/promo-simulator`. The
- *   alternate UI variants pass their own path so that mid-flow state
- *   updates (e.g., clicking a step in the stepper) don't bounce the user
- *   back to the default route.
- */
-export function usePromoSimulator(
-  search: SimulatorSearch,
-  routePath:
-    | "/category-manager/promo-simulator"
-    | "/category-manager/promo-simulator-editorial"
-    | "/category-manager/promo-simulator-terminal" = "/category-manager/promo-simulator"
-): UsePromoSimulator {
+export function usePromoSimulator(search: SimulatorSearch): UsePromoSimulator {
+  const routePath = "/category-manager/promo-simulator" as const;
   const navigate = useNavigate();
 
   const defaults = useMemo(

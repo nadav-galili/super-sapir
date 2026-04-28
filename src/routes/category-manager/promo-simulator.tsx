@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import {
   ArrowRight,
@@ -7,8 +7,6 @@ import {
   RotateCcw,
   Home,
   AlertCircle,
-  BookOpen,
-  Terminal,
 } from "lucide-react";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { Stepper } from "@/components/promo-simulator/Stepper";
@@ -119,7 +117,6 @@ function PromoSimulatorPage() {
             </aside>
 
             <div className="space-y-4">
-              <AltDesignsStrip search={search} />
               <AnimatePresence mode="wait">
                 <motion.div
                   key={state.step}
@@ -216,38 +213,6 @@ function PromoSimulatorPage() {
         </PageContainer>
       </div>
     </PromoTaxonomyProvider>
-  );
-}
-
-/**
- * Two alternate visual treatments of the same wizard, exposed as separate
- * routes. Same state, search-param codec, and validation — only the chrome
- * (background, font, stepper, action bar) differs. Each link forwards the
- * current search params so a manager can switch designs mid-flow.
- */
-function AltDesignsStrip({ search }: { search: SimulatorSearch }) {
-  return (
-    <div className="flex items-center gap-2 flex-wrap">
-      <span className="text-[14px] uppercase tracking-[0.16em] text-[#A0AEC0]">
-        עיצובים נוספים:
-      </span>
-      <Link
-        to="/category-manager/promo-simulator-editorial"
-        search={search}
-        className="inline-flex items-center gap-2 rounded-[10px] border border-[#E7E0D8] bg-white px-3 py-1.5 text-[14px] font-medium text-[#4A5568] transition-colors hover:border-[#B68B2F] hover:text-[#B68B2F]"
-      >
-        <BookOpen className="w-4 h-4" />
-        עיצוב עיתונאי
-      </Link>
-      <Link
-        to="/category-manager/promo-simulator-terminal"
-        search={search}
-        className="inline-flex items-center gap-2 rounded-none border-2 border-[#0A0A0A] bg-white px-3 py-1.5 text-[14px] font-mono text-[#0A0A0A] transition-shadow hover:shadow-[3px_3px_0_#0A0A0A]"
-      >
-        <Terminal className="w-4 h-4" />
-        TERMINAL
-      </Link>
-    </div>
   );
 }
 
