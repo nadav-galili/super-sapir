@@ -22,7 +22,10 @@
       "Bash(git commit -m ' *)",
       "Bash(gh api *)",
       "Bash(bun x *)",
-      "mcp__plugin_compound-engineering_pw__browser_wait_for"
+      "mcp__plugin_compound-engineering_pw__browser_wait_for",
+      "Bash(git push *)",
+      "Bash(git stash *)",
+      "Bash(xargs -I {} basename {})"
     ]
   }
 }

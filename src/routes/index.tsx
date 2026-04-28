@@ -1,20 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import {
-  BarChart3,
-  ShieldCheck,
-  Users,
-  MapPin,
-  Bell,
-  Cpu,
-  Sparkles,
-  ArrowLeft,
-  ChevronDown,
-} from "lucide-react";
+import { Sparkles, ArrowLeft, ChevronDown } from "lucide-react";
 import { motion, useScroll, useTransform } from "motion/react";
 import { useRef } from "react";
-import { PhoneMockup } from "@/components/home/PhoneMockup";
 import { APP_NAME, BRAND_LOGO_SRC } from "@/lib/branding";
 import { BrandLogo } from "@/components/branding/BrandLogo";
+import { BranchNetworkMap } from "@/components/home/BranchNetworkMap";
+import { BentoLiveDashboard } from "@/components/home/BentoLiveDashboard";
+import { MagneticButton } from "@/components/home/MagneticButton";
+import { useLightMotion } from "@/hooks/useLightMotion";
 
 // ─── Stagger animation variants ─────────────────────────────────
 const containerVariants = {
@@ -29,78 +22,38 @@ const itemVariants = {
 
 // ─── Data ───────────────────────────────────────────────────────
 const stats = [
+  { value: "12", label: "סניפים בניטור" },
   { value: "380+", label: "מדדים בזמן אמת" },
-  { value: "AI", label: "ניתוח חכם" },
   { value: "24/7", label: "ניטור רציף" },
 ];
 
-const features = [
-  {
-    icon: BarChart3,
-    title: "ניתוח מכירות",
-    description: "מעקב מכירות בזמן אמת עם השוואות בין סניפים ומגמות צמיחה",
-    color: "#DC4E59",
-    span: "lg:col-span-2",
-  },
-  {
-    icon: Sparkles,
-    title: "AI תובנות",
-    description: "ניתוח אוטומטי עם בינה מלאכותית — תדריך בוקר והמלצות פעולה",
-    color: "#6C5CE7",
-    span: "",
-  },
-  {
-    icon: Users,
-    title: "ניהול כח אדם",
-    description: "תמונת מצב תקינה, תחלופה ועמידה ביעדי שעות",
-    color: "#2EC4D5",
-    span: "",
-  },
-  {
-    icon: ShieldCheck,
-    title: "בקרת איכות ומלאי",
-    description: "ניטור ציוני איכות, ימי מלאי וזיהוי חריגות אוטומטי",
-    color: "#F6B93B",
-    span: "lg:col-span-2",
-  },
-  {
-    icon: MapPin,
-    title: "מפת סניפים",
-    description: "מפה אינטראקטיבית עם סטטוס ביצועים ודירוג אזורי",
-    color: "#DC4E59",
-    span: "",
-  },
-  {
-    icon: Bell,
-    title: "התראות חכמות",
-    description: "התראות על חריגות, יעדים ואירועים חריגים בזמן אמת",
-    color: "#2EC4D5",
-    span: "",
-  },
-  {
-    icon: Cpu,
-    title: "דוחות מותאמים",
-    description: "דוחות מפורטים לפי תפקיד עם סינון, ייצוא והשוואה",
-    color: "#6C5CE7",
-    span: "lg:col-span-2",
-  },
+const TICKER_EVENTS = [
+  "סניף תל אביב · מכירות +12.3%",
+  "אשדוד · התראת מלאי קוטג'",
+  "AI · 47 תובנות חדשות היום",
+  "חדרה · יעד שבועי הושג",
+  "ראשון לציון · תור בקופה > 6 דק׳",
+  "טבריה · ציון איכות 94/100",
+  "באר שבע · משלוח התקבל",
+  "כל הצפון · מכירות גבינות בעלייה",
 ];
 
-// ─── Components ─────────────────────────────────────────────────
+// ─── Hero ───────────────────────────────────────────────────────
 
 function HeroSection() {
   const ref = useRef<HTMLDivElement>(null);
+  const light = useLightMotion();
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"],
   });
-  const phoneY = useTransform(scrollYProgress, [0, 1], [0, 80]);
-  const textY = useTransform(scrollYProgress, [0, 1], [0, -30]);
+  const mapY = useTransform(scrollYProgress, [0, 1], [0, light ? 0 : 60]);
+  const textY = useTransform(scrollYProgress, [0, 1], [0, light ? 0 : -20]);
 
   return (
     <section
       ref={ref}
-      className="relative min-h-[85vh] flex items-center overflow-hidden"
+      className="relative min-h-[100dvh] flex items-center overflow-hidden"
     >
       {/* Background decorative elements */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -124,19 +77,19 @@ function HeroSection() {
         />
       </div>
 
-      <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center px-4 sm:px-6 py-10">
-        {/* Text content with parallax */}
+      <div className="w-full max-w-[1280px] mx-auto grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-12 lg:gap-16 items-center px-4 sm:px-6 py-10 lg:py-16">
+        {/* Text content */}
         <motion.div
           style={{ y: textY }}
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="space-y-8"
+          className="space-y-7 lg:space-y-8"
         >
           <motion.div variants={itemVariants}>
             <div className="flex flex-wrap items-center gap-3">
               <span
-                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold border"
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[13px] font-semibold border"
                 style={{
                   background: "#6C5CE7" + "12",
                   color: "#6C5CE7",
@@ -148,7 +101,7 @@ function HeroSection() {
               </span>
               <div
                 dir="ltr"
-                className="inline-flex shrink-0 items-center self-start h-32 sm:h-48 lg:h-72"
+                className="inline-flex shrink-0 items-center self-start h-32 sm:h-40 lg:h-56"
                 aria-label={APP_NAME}
               >
                 <img
@@ -162,52 +115,64 @@ function HeroSection() {
 
           <motion.h1
             variants={itemVariants}
-            className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight"
+            className="text-4xl sm:text-5xl lg:text-6xl xl:text-[68px] font-bold leading-[1.05] tracking-tight"
             style={{ color: "#2D3748" }}
           >
-            ניהול חכם
+            כל הסניפים שלכם.
             <br />
-            <span style={{ color: "#DC4E59" }}>לרשתות קמעונאיות</span>
+            <span style={{ color: "#DC4E59" }}>במסך אחד.</span>
+            <br />
+            בזמן אמת.
           </motion.h1>
 
           <motion.p
             variants={itemVariants}
-            className="text-lg lg:text-xl leading-relaxed max-w-lg"
+            className="text-[17px] lg:text-[20px] leading-relaxed max-w-xl"
             style={{ color: "#4A5568" }}
           >
-            פלטפורמת ניתוח וניהול שמרכזת את כל הנתונים של הרשת במקום אחד ומספקת
-            תובנות ממוקדות לכל דרג ניהולי.
+            רטליו מאחדת את כל הנתונים של הרשת — מכירות, מלאי, איכות, כח אדם —
+            לכדי לוח בקרה חי שמדבר עם כל מנהל בשפה שלו.
           </motion.p>
 
-          <motion.div variants={itemVariants} className="flex flex-wrap gap-4">
-            <Link
-              to="/store-manager"
-              search={{ view: "overview" }}
-              className="inline-flex items-center gap-2 px-8 py-3.5 text-white font-semibold rounded-[12px] text-base transition-all hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]"
-              style={{
-                background: "linear-gradient(135deg, #DC4E59, #E8777F)",
-              }}
-            >
-              כניסה לדמו
-              <ArrowLeft className="w-4 h-4" />
-            </Link>
+          <motion.div
+            variants={itemVariants}
+            className="flex flex-wrap gap-4 items-center"
+          >
+            <MagneticButton strength={0.35}>
+              <Link
+                to="/store-manager"
+                search={{ view: "overview" }}
+                className="inline-flex items-center gap-2 px-8 py-4 text-white font-semibold rounded-[14px] text-[17px] transition-shadow active:scale-[0.97]"
+                style={{
+                  background: "linear-gradient(135deg, #DC4E59, #E8777F)",
+                  boxShadow:
+                    "0 14px 30px -10px rgba(220, 78, 89, 0.45), inset 0 1px 0 rgba(255,255,255,0.18)",
+                }}
+              >
+                כניסה לדמו חי
+                <ArrowLeft className="w-4 h-4" />
+              </Link>
+            </MagneticButton>
+            <span className="text-[14px]" style={{ color: "#A0AEC0" }}>
+              ללא הרשמה · 30 שניות
+            </span>
           </motion.div>
 
           {/* Stats strip */}
           <motion.div
             variants={itemVariants}
-            className="flex flex-wrap gap-8 pt-4"
+            className="flex flex-wrap gap-x-10 gap-y-4 pt-6 border-t border-warm-border"
           >
             {stats.map((stat) => (
-              <div key={stat.label} className="text-center">
+              <div key={stat.label}>
                 <p
-                  className="text-2xl font-bold font-mono"
+                  className="text-[28px] font-bold font-mono leading-none"
                   style={{ color: "#DC4E59" }}
                   dir="ltr"
                 >
                   {stat.value}
                 </p>
-                <p className="text-xs mt-0.5" style={{ color: "#A0AEC0" }}>
+                <p className="text-[13px] mt-1.5" style={{ color: "#A0AEC0" }}>
                   {stat.label}
                 </p>
               </div>
@@ -215,69 +180,15 @@ function HeroSection() {
           </motion.div>
         </motion.div>
 
-        {/* Phone mockup with parallax + floating cards */}
+        {/* Branch network map (replaces phone mockup) */}
         <motion.div
-          style={{ y: phoneY }}
-          initial={{ opacity: 0, scale: 0.88, rotate: -2 }}
-          animate={{ opacity: 1, scale: 1, rotate: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut", delay: 0.3 }}
-          className="relative flex justify-center max-w-[280px] mx-auto"
+          style={{ y: mapY }}
+          initial={{ opacity: 0, scale: 0.94 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.9, ease: "easeOut", delay: 0.2 }}
+          className="relative"
         >
-          <PhoneMockup />
-
-          {/* Floating metric cards */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.8, duration: 0.5 }}
-            className="absolute top-16 -left-24 bg-white/90 backdrop-blur-md rounded-[14px] border border-warm-border px-4 py-3 shadow-lg hidden sm:block"
-          >
-            <p className="text-[10px] text-[#A0AEC0]">מכירות היום</p>
-            <p className="text-lg font-bold font-mono text-[#2D3748]" dir="ltr">
-              ₪847K
-            </p>
-            <span
-              className="text-[10px] font-semibold text-[#2EC4D5]"
-              dir="ltr"
-            >
-              ▲ 12.3%
-            </span>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 1, duration: 0.5 }}
-            className="absolute bottom-32 -right-24 bg-white/90 backdrop-blur-md rounded-[14px] border border-warm-border px-4 py-3 shadow-lg hidden sm:block"
-          >
-            <p className="text-[10px] text-[#A0AEC0]">ציון איכות</p>
-            <p className="text-lg font-bold font-mono text-[#6C5CE7]" dir="ltr">
-              92
-            </p>
-            <span
-              className="text-[10px] font-semibold text-[#2EC4D5]"
-              dir="ltr"
-            >
-              ▲ 8pts
-            </span>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.2, duration: 0.5 }}
-            className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-md rounded-[14px] border border-warm-border px-4 py-2 shadow-lg flex items-center gap-2"
-          >
-            <div
-              className="w-5 h-5 rounded-full flex items-center justify-center"
-              style={{ background: "#6C5CE7" + "20" }}
-            >
-              <Sparkles className="w-3 h-3 text-[#6C5CE7]" />
-            </div>
-            <p className="text-[10px] text-[#4A5568] font-medium">
-              AI זיהה 3 חריגות
-            </p>
-          </motion.div>
+          <BranchNetworkMap />
         </motion.div>
       </div>
 
@@ -286,10 +197,10 @@ function HeroSection() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.5 }}
-        className="absolute bottom-6 left-1/2 -translate-x-1/2"
+        className="absolute bottom-6 left-1/2 -translate-x-1/2 hidden sm:block"
       >
         <motion.div
-          animate={{ y: [0, 8, 0] }}
+          animate={light ? {} : { y: [0, 8, 0] }}
           transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
         >
           <ChevronDown className="w-5 h-5 text-[#A0AEC0]" />
@@ -299,114 +210,149 @@ function HeroSection() {
   );
 }
 
-function FeaturesSection() {
+// ─── Live ticker strip (replaces feature-name marquee) ────────────
+
+function LiveTickerStrip() {
+  const light = useLightMotion();
+  const items = [...TICKER_EVENTS, ...TICKER_EVENTS];
+  return (
+    <div
+      className="py-4 border-y overflow-hidden"
+      style={{
+        borderColor: "#FFE8DE",
+        background:
+          "linear-gradient(90deg, #FDF8F6 0%, #FFFFFF 50%, #FDF8F6 100%)",
+      }}
+    >
+      <div className="flex items-center gap-3 px-4">
+        <span className="flex items-center gap-2 shrink-0">
+          <span className="relative flex w-2 h-2">
+            {!light && (
+              <motion.span
+                className="absolute inset-0 rounded-full bg-[#DC4E59]"
+                animate={{ scale: [1, 2.5, 1], opacity: [0.6, 0, 0.6] }}
+                transition={{ duration: 1.6, repeat: Infinity }}
+              />
+            )}
+            <span className="relative w-2 h-2 rounded-full bg-[#DC4E59]" />
+          </span>
+          <span className="text-[12px] font-bold tracking-[0.18em] text-[#DC4E59] uppercase">
+            live
+          </span>
+        </span>
+        <span className="w-px h-4 bg-[#FFE8DE] shrink-0" />
+        <div className="overflow-hidden flex-1">
+          <motion.div
+            animate={light ? {} : { x: ["0%", "-50%"] }}
+            transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
+            className="flex gap-10 whitespace-nowrap"
+          >
+            {items.map((text, i) => (
+              <span
+                key={i}
+                className="text-[14px] font-medium flex items-center gap-3"
+                style={{ color: "#4A5568" }}
+              >
+                <span
+                  className="w-1 h-1 rounded-full"
+                  style={{ background: "#A0AEC0" }}
+                />
+                {text}
+              </span>
+            ))}
+          </motion.div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── CTA ────────────────────────────────────────────────────────
+
+function CTASection() {
   return (
     <section className="py-20 lg:py-28 px-4 sm:px-6">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 0.5 }}
-        className="text-center mb-16"
-      >
-        <h2
-          className="text-3xl lg:text-4xl font-bold mb-4"
-          style={{ color: "#2D3748" }}
-        >
-          הכל במקום אחד
-        </h2>
-        <p className="text-lg max-w-md mx-auto" style={{ color: "#A0AEC0" }}>
-          כל הכלים שמנהל רשת צריך — בממשק אחד פשוט
-        </p>
-      </motion.div>
-
-      {/* Bento grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 max-w-5xl mx-auto">
-        {features.map((feature, i) => (
-          <motion.div
-            key={feature.title}
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.1 }}
-            transition={{ duration: 0.45, delay: i * 0.07 }}
-            whileHover={{ y: -4, transition: { duration: 0.2 } }}
-            className={`group relative bg-white rounded-[20px] border border-warm-border p-7 cursor-default overflow-hidden ${feature.span}`}
-          >
-            {/* Hover glow */}
-            <div
-              className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-              style={{
-                background: `radial-gradient(circle at 30% 30%, ${feature.color}08 0%, transparent 60%)`,
-              }}
-            />
-
-            <div className="relative space-y-3">
-              <div
-                className="w-10 h-10 rounded-[12px] flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
-                style={{ background: feature.color + "12" }}
-              >
-                <feature.icon
-                  className="w-5 h-5"
-                  style={{ color: feature.color }}
-                />
-              </div>
-              <h3 className="text-base font-bold" style={{ color: "#2D3748" }}>
-                {feature.title}
-              </h3>
-              <p
-                className="text-sm leading-relaxed"
-                style={{ color: "#4A5568" }}
-              >
-                {feature.description}
-              </p>
-            </div>
-          </motion.div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function CTASection() {
-  return (
-    <section className="py-20 px-4 sm:px-6">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.96 }}
-        whileInView={{ opacity: 1, scale: 1 }}
-        viewport={{ once: true, amount: 0.2 }}
         transition={{ duration: 0.6 }}
-        className="relative max-w-3xl mx-auto rounded-[24px] overflow-hidden p-10 sm:p-14 text-center"
+        className="relative max-w-4xl mx-auto rounded-[28px] overflow-hidden p-10 sm:p-14 grid grid-cols-1 md:grid-cols-[1fr_auto] gap-8 md:gap-10 items-center"
         style={{
-          background: "linear-gradient(135deg, #2D3748 0%, #1a202c 100%)",
+          background: "linear-gradient(135deg, #FFFFFF 0%, #FFF5F0 100%)",
+          border: "1px solid #FFE8DE",
+          boxShadow: "0 24px 60px -28px rgba(220, 78, 89, 0.18)",
         }}
       >
-        {/* Decorative gradient orbs */}
+        {/* Subtle decorative orb — warm tint */}
         <div
-          className="absolute top-0 right-0 w-60 h-60 rounded-full opacity-20 blur-3xl"
+          className="absolute -top-20 -left-20 w-72 h-72 rounded-full opacity-[0.18] blur-3xl pointer-events-none"
           style={{ background: "#DC4E59" }}
         />
         <div
-          className="absolute bottom-0 left-0 w-48 h-48 rounded-full opacity-15 blur-3xl"
+          className="absolute -bottom-16 -right-16 w-56 h-56 rounded-full opacity-[0.12] blur-3xl pointer-events-none"
           style={{ background: "#6C5CE7" }}
         />
 
-        <div className="relative space-y-6">
-          <h2 className="text-2xl sm:text-3xl font-bold text-white leading-tight">
-            מוכנים לשדרג את ניהול הרשת?
-          </h2>
-          <p className="text-base text-white/60 max-w-md mx-auto">
-            התחילו עם הדמו האינטראקטיבי וראו איך {APP_NAME} יכול לחסוך לכם זמן
-            ולהגדיל רווחים.
-          </p>
-          <Link
-            to="/store-manager"
-            search={{ view: "overview" }}
-            className="inline-flex items-center gap-2 px-8 py-3.5 text-white font-semibold rounded-[12px] text-base transition-all hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]"
-            style={{ background: "linear-gradient(135deg, #DC4E59, #E8777F)" }}
+        <div className="relative text-right space-y-4">
+          <span
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[12px] font-semibold border"
+            style={{
+              background: "rgba(220, 78, 89, 0.08)",
+              color: "#DC4E59",
+              borderColor: "rgba(220, 78, 89, 0.20)",
+            }}
           >
-            נסו עכשיו בחינם
-            <ArrowLeft className="w-4 h-4" />
-          </Link>
+            <Sparkles className="w-3 h-3" />
+            דמו חי
+          </span>
+          <h2
+            className="text-3xl sm:text-4xl lg:text-[44px] font-bold leading-[1.1] tracking-tight"
+            style={{ color: "#2D3748" }}
+          >
+            הרשת שלכם. <span style={{ color: "#DC4E59" }}>במסך אחד.</span>
+          </h2>
+          <p
+            className="text-[16px] sm:text-[17px] leading-relaxed max-w-md"
+            style={{ color: "#4A5568" }}
+          >
+            דמו אינטראקטיבי מלא, נטען ב-30 שניות. ללא הרשמה.
+          </p>
+          <ul
+            className="flex flex-wrap gap-x-5 gap-y-2 pt-2 text-[13px]"
+            style={{ color: "#4A5568" }}
+          >
+            <li className="flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]" />
+              12 סניפים
+            </li>
+            <li className="flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#2EC4D5]" />
+              380+ מדדים
+            </li>
+            <li className="flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#6C5CE7]" />
+              AI תובנות
+            </li>
+          </ul>
+        </div>
+
+        <div className="relative flex justify-center md:justify-end">
+          <MagneticButton strength={0.3}>
+            <Link
+              to="/store-manager"
+              search={{ view: "overview" }}
+              className="inline-flex items-center gap-2 px-9 py-4 text-white font-semibold rounded-[14px] text-[17px] transition-shadow active:scale-[0.97] whitespace-nowrap"
+              style={{
+                background: "linear-gradient(135deg, #DC4E59, #E8777F)",
+                boxShadow:
+                  "0 18px 36px -12px rgba(220, 78, 89, 0.5), inset 0 1px 0 rgba(255,255,255,0.22)",
+              }}
+            >
+              נסו עכשיו
+              <ArrowLeft className="w-4 h-4" />
+            </Link>
+          </MagneticButton>
         </div>
       </motion.div>
     </section>
@@ -414,44 +360,13 @@ function CTASection() {
 }
 
 // ─── Page ────────────────────────────────────────────────────────
+
 function HomePage() {
   return (
     <div className="overflow-x-hidden">
       <HeroSection />
-
-      {/* Marquee strip */}
-      <div className="py-5 border-y border-warm-border overflow-hidden">
-        <motion.div
-          animate={{ x: ["0%", "-50%"] }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="flex gap-12 whitespace-nowrap"
-        >
-          {[...Array(2)].map((_, setIdx) => (
-            <div key={setIdx} className="flex gap-12 items-center">
-              {[
-                "ניתוח מכירות",
-                "בקרת איכות",
-                "כח אדם",
-                "ניהול מלאי",
-                "AI תובנות",
-                "מפת סניפים",
-                "דוחות",
-                "התראות",
-              ].map((text) => (
-                <span
-                  key={`${setIdx}-${text}`}
-                  className="text-sm font-medium"
-                  style={{ color: "#A0AEC0" }}
-                >
-                  {text} <span className="mx-4 text-[#FFE8DE]">●</span>
-                </span>
-              ))}
-            </div>
-          ))}
-        </motion.div>
-      </div>
-
-      <FeaturesSection />
+      <LiveTickerStrip />
+      <BentoLiveDashboard />
       <CTASection />
 
       {/* Footer */}
@@ -463,11 +378,11 @@ function HomePage() {
           <BrandLogo size={64} />
         </div>
         <div
-          className="flex items-center justify-center gap-4 text-sm"
+          className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[14px]"
           style={{ color: "#4A5568" }}
         >
           <span>Nadav Galili</span>
-          <span style={{ color: "#A0AEC0" }}>|</span>
+          <span style={{ color: "#A0AEC0" }}>·</span>
           <a
             href="mailto:nadav@retalio.net"
             className="hover:underline"
@@ -475,7 +390,7 @@ function HomePage() {
           >
             nadav@retalio.net
           </a>
-          <span style={{ color: "#A0AEC0" }}>|</span>
+          <span style={{ color: "#A0AEC0" }}>·</span>
           <a
             href="tel:052-4417944"
             dir="ltr"
@@ -485,8 +400,8 @@ function HomePage() {
             052-4417944
           </a>
         </div>
-        <p className="text-xs" style={{ color: "#A0AEC0" }}>
-          © {new Date().getFullYear()} Nadav Galili. כל הזכויות שמורות.
+        <p className="text-[12px]" style={{ color: "#A0AEC0" }}>
+          © {new Date().getFullYear()} Retalio. כל הזכויות שמורות.
         </p>
       </footer>
     </div>
