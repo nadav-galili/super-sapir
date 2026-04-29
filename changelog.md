@@ -8,6 +8,12 @@
 
 ## 2026-04-29
 
+### Store-manager overview — drop CSS `zoom` entirely (root cause of iOS shrink-to-fit)
+
+Earlier today gated `zoom: 1.25` behind `lg:` thinking that fixed mobile, but the real issue is that CSS `zoom` is non-standard and triggers iOS Safari's legacy "shrink-to-fit" whenever the scaled content overflows the viewport — exactly the symptom the user reported ("renders responsive for a second, then zooms out and looks non-responsive"). At any viewport that crosses 1024px (iPad portrait, iPhone Pro Max landscape, narrow desktops, browser zoom), the 1.25× scaled content overflowed and Safari rescaled the whole page to fit, making it look "zoomed out." Removed `zoom: 1.25` outright in `OverviewView`, `BranchInfoBar`, and `BranchPerformanceCard`. The existing design-system typography scale (15–36px in CLAUDE.md) keeps desktop readable without `zoom`. Verified at 375px (mobile), 768px (tablet), 1440px (desktop) — no horizontal overflow at any size.
+
+Files modified: `src/components/store-manager/views/OverviewView.tsx`, `src/components/store-manager/BranchInfoBar.tsx`, `src/components/store-manager/charts/BranchPerformanceCard.tsx`.
+
 ### Home page — hero headline rewrite
 
 Replaced the three-line "כל הסניפים שלכם / במסך אחד / בזמן אמת" hero h1 with a product-positioning statement: "Retalio היא פלטפורמת / **AI לביצועי קמעונאות** / שחושפת פערים ומניעה החלטות חכמות יותר ברחבי הרשת". Brand name "Retalio" wrapped in `<span dir="ltr">` so it always renders LTR even inside the RTL Hebrew flow; middle line keeps the brand-blue highlight. Also normalized the supporting paragraph below ("רטליו" → "Retalio") for consistent brand spelling.
