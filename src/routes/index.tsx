@@ -137,11 +137,11 @@ function HeroSection() {
             className="text-4xl sm:text-5xl lg:text-6xl xl:text-[68px] font-bold leading-[1.02] tracking-tighter"
             style={{ color: "#0F1B33" }}
           >
-            כל הסניפים שלכם.
+            <span dir="ltr">Retalio</span> היא פלטפורמת
             <br />
-            <span style={{ color: "#1F6FEB" }}>במסך אחד.</span>
+            <span style={{ color: "#1F6FEB" }}>AI לביצועי קמעונאות</span>
             <br />
-            בזמן אמת.
+            שחושפת פערים ומניעה החלטות חכמות יותר ברחבי הרשת
           </motion.h1>
 
           <motion.p
@@ -149,7 +149,7 @@ function HeroSection() {
             className="text-[17px] lg:text-[20px] leading-relaxed max-w-xl"
             style={{ color: "#475569" }}
           >
-            רטליו מאחדת את כל הנתונים של הרשת — מכירות, מלאי, איכות, כח אדם —
+            Retalio מאחדת את כל הנתונים של הרשת — מכירות, מלאי, איכות, כח אדם —
             לכדי לוח בקרה חי שמדבר עם כל מנהל בשפה שלו.
           </motion.p>
 
@@ -416,7 +416,7 @@ function CTASection() {
             style={{ color: "#6B7A93" }}
             dir="ltr"
           >
-            built for retail, in tel aviv
+            built for retail
           </span>
           <a
             href="mailto:nadav@retalio.net?subject=%D7%91%D7%A7%D7%A9%D7%AA%20%D7%94%D7%A6%D7%A2%D7%94%20-%20Retalio&body=%D7%94%D7%99%D7%99%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A7%D7%91%D7%9C%20%D7%94%D7%A6%D7%A2%D7%94%20%D7%9C%D7%A4%D7%9C%D7%98%D7%A4%D7%95%D7%A8%D7%9E%D7%AA%20Retalio."

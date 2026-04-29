@@ -60,7 +60,7 @@ export function OverviewView({ report, branchId }: OverviewViewProps) {
   ];
 
   return (
-    <div className="space-y-5" style={{ zoom: 1.25 }}>
+    <div className="space-y-5 lg:[zoom:1.25]">
       <StoreAIBriefing
         rows={rows}
         isLoading={isLoading}

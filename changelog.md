@@ -6,6 +6,26 @@
 
 ---
 
+## 2026-04-29
+
+### Home page — hero headline rewrite
+
+Replaced the three-line "כל הסניפים שלכם / במסך אחד / בזמן אמת" hero h1 with a product-positioning statement: "Retalio היא פלטפורמת / **AI לביצועי קמעונאות** / שחושפת פערים ומניעה החלטות חכמות יותר ברחבי הרשת". Brand name "Retalio" wrapped in `<span dir="ltr">` so it always renders LTR even inside the RTL Hebrew flow; middle line keeps the brand-blue highlight. Also normalized the supporting paragraph below ("רטליו" → "Retalio") for consistent brand spelling.
+
+Files modified: `src/routes/index.tsx`.
+
+### Store-manager overview — fix mobile layout (zoom + KPI label overflow)
+
+Yesterday's font/layout pass added `style={{ zoom: 1.25 }}` to three components on the overview path; on mobile this compounded (OverviewView 1.25× → BranchPerformanceCard 1.25× = 1.5625× scale on its tiles) and forced overflow plus value/label overlap. Gated all three behind `lg:` so the desktop view is byte-identical and only mobile/tablet drop the zoom: `<div className="space-y-5 lg:[zoom:1.25]">` in `OverviewView`, the same on the `motion.div` wrapper in `BranchInfoBar`, and on the `<Card>` in `BranchPerformanceCard`. Tailwind v3 arbitrary-property syntax keeps it a one-line responsive change.
+
+Also fixed KPI cards where the trend label (e.g. "יעד: 9.3M ₪") was being `truncate`d on mobile because the trend pill + label couldn't fit on one line in the 2-col mobile grid. Changed the trend row from `flex items-center` + `truncate` to `flex flex-wrap … sm:flex-nowrap … sm:truncate` — on mobile the label wraps to a second line and shows in full, on desktop the original single-line truncate behavior is preserved.
+
+Verified at 375px (no horizontal overflow, branch info bar fits, KPI labels fully visible, BranchPerformanceCard tiles no longer overlap their values) and 1440px (4-col KPI grid, zoom 1.25 still applied, trend labels truncate as before).
+
+Files modified: `src/components/store-manager/views/OverviewView.tsx`, `src/components/store-manager/BranchInfoBar.tsx`, `src/components/store-manager/charts/BranchPerformanceCard.tsx`, `src/components/dashboard/KPICard.tsx`.
+
+---
+
 ## 2026-04-28
 
 ### Home page — landing-only mode: dashboard CTAs hidden, editorial closing section
