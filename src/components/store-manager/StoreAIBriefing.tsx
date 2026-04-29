@@ -127,83 +127,145 @@ export function StoreAIBriefing({
           )}
 
           {rows && rows.length > 0 && (
-            <div className="overflow-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-              <table className="w-full min-w-[500px] text-lg">
-                <thead>
-                  <tr className="border-b-2 border-[#FFF0EA]">
-                    <th className="px-3 py-2.5 text-right font-semibold text-[#2D3748] text-[18px]">
-                      נושא
-                    </th>
-                    <th className="px-3 py-2.5 text-right font-semibold text-[#2D3748] text-[18px]">
-                      המלצה
-                    </th>
-                    <th className="px-3 py-2.5 text-center font-semibold text-[#2D3748] text-[18px]">
-                      סטטוס
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <AnimatePresence mode="popLayout">
-                    {rows.map((row, i) => {
-                      const cfg =
-                        STATUS_CONFIG[row.status] ?? STATUS_CONFIG.yellow;
-                      return (
-                        <motion.tr
-                          key={`${row.subject}-${i}`}
-                          initial={{ opacity: 0, x: 20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ duration: 0.4, delay: i * 0.08 }}
-                          className="border-b border-[#FFF0EA] hover:bg-[#FDF8F6] transition-colors"
-                        >
-                          <td className="px-3 py-3 align-top">
-                            <span className="font-bold text-[20px] text-[#2D3748]">
-                              <TypingText
-                                text={row.subject}
-                                animate={isStreaming}
-                              />
-                            </span>
-                          </td>
-                          <td className="px-3 py-3 align-top">
-                            <span className="text-[18px] text-[#4A5568] leading-relaxed">
-                              <TypingText
-                                text={row.recommendation}
-                                animate={isStreaming}
-                              />
-                            </span>
-                            {row.subActions && row.subActions.length > 0 && (
-                              <ul className="mt-2 space-y-1 ps-5 list-disc text-[16px] text-[#4A5568] leading-relaxed marker:text-[#788390]">
-                                {row.subActions.map((action, j) => (
-                                  <li key={j}>
-                                    <TypingText
-                                      text={action}
-                                      animate={isStreaming}
-                                    />
-                                  </li>
-                                ))}
-                              </ul>
-                            )}
-                          </td>
-                          <td className="px-3 py-3 align-top text-center">
+            <>
+              {/* Mobile: stacked cards (no horizontal scroll) */}
+              <ul className="space-y-3 sm:hidden">
+                <AnimatePresence mode="popLayout">
+                  {rows.map((row, i) => {
+                    const cfg =
+                      STATUS_CONFIG[row.status] ?? STATUS_CONFIG.yellow;
+                    return (
+                      <motion.li
+                        key={`${row.subject}-mobile-${i}`}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.4, delay: i * 0.08 }}
+                        className="rounded-[12px] border border-[#FFF0EA] bg-white px-3 py-3"
+                      >
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <span className="font-bold text-[18px] text-[#2D3748] leading-tight">
+                            <TypingText
+                              text={row.subject}
+                              animate={isStreaming}
+                            />
+                          </span>
+                          <span
+                            className="inline-flex items-center gap-1 text-[13px] font-bold px-2 py-0.5 rounded-full shrink-0"
+                            style={{
+                              backgroundColor: cfg.bg,
+                              color: cfg.color,
+                            }}
+                          >
                             <span
-                              className="inline-flex items-center gap-1.5 text-[15px] font-bold px-3 py-1 rounded-full"
-                              style={{
-                                backgroundColor: cfg.bg,
-                                color: cfg.color,
-                              }}
-                            >
+                              className="w-2 h-2 rounded-full shrink-0"
+                              style={{ backgroundColor: cfg.color }}
+                            />
+                            {cfg.label}
+                          </span>
+                        </div>
+                        <p className="text-[16px] text-[#4A5568] leading-relaxed">
+                          <TypingText
+                            text={row.recommendation}
+                            animate={isStreaming}
+                          />
+                        </p>
+                        {row.subActions && row.subActions.length > 0 && (
+                          <ul className="mt-2 space-y-1 ps-5 list-disc text-[15px] text-[#4A5568] leading-relaxed marker:text-[#788390]">
+                            {row.subActions.map((action, j) => (
+                              <li key={j}>
+                                <TypingText
+                                  text={action}
+                                  animate={isStreaming}
+                                />
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </motion.li>
+                    );
+                  })}
+                </AnimatePresence>
+              </ul>
+
+              {/* Desktop / tablet: table layout */}
+              <div className="hidden sm:block">
+                <table className="w-full text-lg">
+                  <thead>
+                    <tr className="border-b-2 border-[#FFF0EA]">
+                      <th className="px-3 py-2.5 text-right font-semibold text-[#2D3748] text-[18px]">
+                        נושא
+                      </th>
+                      <th className="px-3 py-2.5 text-right font-semibold text-[#2D3748] text-[18px]">
+                        המלצה
+                      </th>
+                      <th className="px-3 py-2.5 text-center font-semibold text-[#2D3748] text-[18px]">
+                        סטטוס
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <AnimatePresence mode="popLayout">
+                      {rows.map((row, i) => {
+                        const cfg =
+                          STATUS_CONFIG[row.status] ?? STATUS_CONFIG.yellow;
+                        return (
+                          <motion.tr
+                            key={`${row.subject}-${i}`}
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.4, delay: i * 0.08 }}
+                            className="border-b border-[#FFF0EA] hover:bg-[#FDF8F6] transition-colors"
+                          >
+                            <td className="px-3 py-3 align-top">
+                              <span className="font-bold text-[20px] text-[#2D3748]">
+                                <TypingText
+                                  text={row.subject}
+                                  animate={isStreaming}
+                                />
+                              </span>
+                            </td>
+                            <td className="px-3 py-3 align-top">
+                              <span className="text-[18px] text-[#4A5568] leading-relaxed">
+                                <TypingText
+                                  text={row.recommendation}
+                                  animate={isStreaming}
+                                />
+                              </span>
+                              {row.subActions && row.subActions.length > 0 && (
+                                <ul className="mt-2 space-y-1 ps-5 list-disc text-[16px] text-[#4A5568] leading-relaxed marker:text-[#788390]">
+                                  {row.subActions.map((action, j) => (
+                                    <li key={j}>
+                                      <TypingText
+                                        text={action}
+                                        animate={isStreaming}
+                                      />
+                                    </li>
+                                  ))}
+                                </ul>
+                              )}
+                            </td>
+                            <td className="px-3 py-3 align-top text-center">
                               <span
-                                className="w-2.5 h-2.5 rounded-full shrink-0"
-                                style={{ backgroundColor: cfg.color }}
-                              />
-                              {cfg.label}
-                            </span>
-                          </td>
-                        </motion.tr>
-                      );
-                    })}
-                  </AnimatePresence>
-                </tbody>
-              </table>
+                                className="inline-flex items-center gap-1.5 text-[15px] font-bold px-3 py-1 rounded-full"
+                                style={{
+                                  backgroundColor: cfg.bg,
+                                  color: cfg.color,
+                                }}
+                              >
+                                <span
+                                  className="w-2.5 h-2.5 rounded-full shrink-0"
+                                  style={{ backgroundColor: cfg.color }}
+                                />
+                                {cfg.label}
+                              </span>
+                            </td>
+                          </motion.tr>
+                        );
+                      })}
+                    </AnimatePresence>
+                  </tbody>
+                </table>
+              </div>
 
               {isStreaming && (
                 <motion.div
@@ -227,7 +289,7 @@ export function StoreAIBriefing({
                   </div>
                 </motion.div>
               )}
-            </div>
+            </>
           )}
         </CardContent>
       </Card>
