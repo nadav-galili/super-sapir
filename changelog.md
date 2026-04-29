@@ -8,6 +8,12 @@
 
 ## 2026-04-29
 
+### Store-manager overview — AI briefing: stack rows on mobile
+
+The AI briefing card rendered as a 3-column `<table>` with `min-w-[500px]` and an `overflow-auto` wrapper. On a 360px Galaxy S8+ the table stayed 500px wide and produced an inner horizontal scroll, which is what made the page look "non-responsive" — the recommendation column got clipped on the left and the status column was off-screen until scrolled. Split into two layouts: a vertical stack of cards (`<ul>` with `sm:hidden`) on phones — each card showing subject + status pill on the top row and the recommendation text below — and the original `<table>` (`hidden sm:block`) on tablet/desktop. Removed `min-w-[500px]` since the desktop table no longer competes with mobile constraints. Verified at 360px and 1440px: no horizontal overflow at either size.
+
+Files modified: `src/components/store-manager/StoreAIBriefing.tsx`.
+
 ### Store-manager overview — drop CSS `zoom` entirely (root cause of iOS shrink-to-fit)
 
 Earlier today gated `zoom: 1.25` behind `lg:` thinking that fixed mobile, but the real issue is that CSS `zoom` is non-standard and triggers iOS Safari's legacy "shrink-to-fit" whenever the scaled content overflows the viewport — exactly the symptom the user reported ("renders responsive for a second, then zooms out and looks non-responsive"). At any viewport that crosses 1024px (iPad portrait, iPhone Pro Max landscape, narrow desktops, browser zoom), the 1.25× scaled content overflowed and Safari rescaled the whole page to fit, making it look "zoomed out." Removed `zoom: 1.25` outright in `OverviewView`, `BranchInfoBar`, and `BranchPerformanceCard`. The existing design-system typography scale (15–36px in CLAUDE.md) keeps desktop readable without `zoom`. Verified at 375px (mobile), 768px (tablet), 1440px (desktop) — no horizontal overflow at any size.
