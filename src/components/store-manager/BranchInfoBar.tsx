@@ -11,7 +11,7 @@ export function BranchInfoBar({ info }: BranchInfoBarProps) {
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="relative rounded-[16px] overflow-hidden bg-white border border-warm-border lg:[zoom:1.25]"
+      className="relative rounded-[16px] overflow-hidden bg-white border border-warm-border"
     >
       {/* Top accent stripe */}
       <div
