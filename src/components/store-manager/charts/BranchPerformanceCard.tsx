@@ -84,7 +84,7 @@ export function BranchPerformanceCard({ report }: BranchPerformanceCardProps) {
   ];
 
   return (
-    <Card className="border-warm-border rounded-[16px]" style={{ zoom: 1.25 }}>
+    <Card className="border-warm-border rounded-[16px] lg:[zoom:1.25]">
       <CardHeader className="pb-3">
         <CardTitle className="text-base text-[#2D3748]">ביצועי סניף</CardTitle>
       </CardHeader>

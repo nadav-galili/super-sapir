@@ -83,7 +83,7 @@ export function KPICard({
         >
           {formatValue(animatedValue, format)}
         </p>
-        <div className="flex items-center justify-center gap-1 sm:gap-1.5 mt-1.5 sm:mt-2">
+        <div className="flex flex-wrap items-center justify-center gap-x-1.5 gap-y-1 mt-1.5 sm:mt-2 sm:flex-nowrap sm:gap-1.5">
           <span
             className="inline-flex items-center gap-0.5 sm:gap-1 text-[15px] sm:text-base font-semibold px-1.5 sm:px-2 py-0.5 rounded-[20px]"
             style={{
@@ -100,7 +100,7 @@ export function KPICard({
             {isPositive ? "+" : ""}
             {trend}%
           </span>
-          <span className="text-[15px] sm:text-[16px] text-warm-muted truncate">
+          <span className="text-[15px] sm:text-[16px] text-warm-muted sm:truncate">
             {trendLabel}
           </span>
         </div>
