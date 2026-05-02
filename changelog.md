@@ -6,6 +6,44 @@
 
 ---
 
+## 2026-05-02
+
+### Promo Simulator Step 1 — taxonomy rebuild + form upgrade (PRs 1–3)
+
+The Step 1 brief screen got a full redesign driven by user-domain input from the Category Manager. Rebuilt the form around a new four-level promo-simulator-only taxonomy (Group → Department → Category → Series), upgraded the visual layer to shadcn primitives, and rewired the Archive sheet to scope by sub-category / supplier / series.
+
+**PR 1 — visual upgrade.** Installed `@radix-ui/react-label`. Added `src/components/ui/label.tsx` (shadcn `<Label>` with built-in red-asterisk support via `required` prop) and `src/components/ui/input.tsx` (shadcn `<Input>`). Replaced raw `<label>` and `<input>` in `Step1Brief.tsx`. Labels jumped from 15px / medium / `#4A5568` to 18px / bold / `#2D3748`. Required fields now show a red `*`. The auto-populated manager field switched from a faux disabled input to a `<Badge variant="secondary">`.
+
+**PR 2 — data layer.** Added four data files: `src/data/mock-promo-taxonomy.ts` (5 Groups × 17 Departments × 64 Categories × 220+ Sub-categories + `GROUP_MANAGERS` map + cascading-lookup helpers), `src/data/mock-subcategory-suppliers.ts` (Sub-category → Supplier ID lookup), `src/data/mock-supplier-series.ts` (Supplier × Sub-category → Series brand-line lookup, ~130 well-known combinations like Wissotzky × hot-tea → תה ירוק / חליטות / מג'יק). Extended `mock-suppliers.ts` from 24 to 49 suppliers (added Coca-Cola, Tempo, Red Bull, נביעות, יקבי הרי גליל, Tefal, Pyrex, עוף העמק, סלמון נורווגי, etc.) plus `getSupplierById` / `getSuppliersByIds` helpers. Added `group / department / subcategory / supplier / series` fields to `BriefSlice` and `SimulatorState` with full URL encode/decode/validate plumbing. Old fields kept in place to avoid breaking downstream consumers (PromoSummaryCard, narrative, PDF export).
+
+**PR 3 — form rewiring.** `Step1Brief.tsx` now drives off the new taxonomy. Five cascading dropdowns: מחלקה → קטגוריה → תת-קטגוריה (grouped by Category) → ספק → סדרה. The קמעונאי field was removed entirely. The manager auto-populates from `GROUP_MANAGERS` keyed by Group, and the legacy `category` field is mirrored to the Group's Hebrew name so PromoSummary, narrative, and the PDF export keep working. Cascading invalidation: changing a parent clears all its descendants.
+
+`ArchiveSheet.tsx` got a new prop contract (`groupId`, `subcategoryId`, `supplierId`, `series`) replacing the old `category` / `product` props. The most-specific selection becomes the page title; a breadcrumb chain (e.g. `מכולת · שתייה · שתייה חמה · תה · ויסוצקי · תה ירוק`) shows the full scope. Archive button is gated by sub-category presence (per spec — supplier optional for archive even though required for advancing past Step 1). Step 1 validation now requires `group / department / subcategory / supplier / salesArena / startDate / durationWeeks` and no longer requires `category / segment / categoryManager`.
+
+Decisions captured in `decisions/2026-05-02-promo-simulator-taxonomy.md` (why the simulator taxonomy is dedicated rather than overlaid on `SEGMENTS_BY_DEPARTMENT`) and `decisions/2026-05-02-promo-simulator-manager-label.md` (why the simulator UI labels the role "מנהל מחלקה" while everywhere else still says "מנהל קטגוריה"). `context.md` updated with new canonical terms (Group, Series) and two new flagged-ambiguity entries.
+
+Tests: 4 vertical TDD slices added — `mock-promo-taxonomy.test.ts` (cascading lookups, slice #1, 6 tests), `state.test.ts` (URL encode/decode for new fields, slice #4, 5 tests), `manager-mirror.test.ts` (manager auto-populate, slice #2, 4 tests), `archive-scope.test.ts` (archive scope title escalation, slice #3, 5 tests). Also fixed the existing `usePromoSimulator.test.ts` step-jump test to use the new required-fields contract. Total: **166 tests / 25 files** green.
+
+Files modified: `src/components/promo-simulator/Step1Brief.tsx`, `src/components/promo-simulator/ArchiveSheet.tsx`, `src/components/promo-simulator/StepContent.tsx`, `src/components/ui/label.tsx` (new), `src/components/ui/input.tsx` (new), `src/data/mock-promo-taxonomy.ts` (new), `src/data/mock-subcategory-suppliers.ts` (new), `src/data/mock-supplier-series.ts` (new), `src/data/mock-suppliers.ts`, `src/lib/promo-simulator/state.ts`, `src/lib/promo-simulator/validation.ts`, `src/data/mock-promo-taxonomy.test.ts` (new), `src/lib/promo-simulator/state.test.ts` (new), `src/lib/promo-simulator/manager-mirror.test.ts` (new), `src/lib/promo-simulator/archive-scope.test.ts` (new), `src/hooks/usePromoSimulator.test.ts`, `context.md`, `decisions/2026-05-02-promo-simulator-taxonomy.md` (new), `decisions/2026-05-02-promo-simulator-manager-label.md` (new), `package.json` (added `@radix-ui/react-label`).
+
+### Promo Simulator — full data coverage + clearable Series
+
+Three follow-ups after the user spotted gaps in the initial PR 3:
+
+**Series dropdown — full coverage.** The bespoke `SUPPLIER_SERIES` map in `mock-supplier-series.ts` only covered ~130 well-known brand combinations, leaving most (supplier × sub-category) pairs with an empty dropdown (e.g. שסטוביץ × טונה → no series). Added `generateDefaultSeries()` plus a `DEFAULT_VARIANTS_BY_DEPARTMENT` map keyed by Department id (drinks → קלאסי / לייט / פרימיום, canned → קלאסי / במים / בשמן זית, white-cheese → 5% / לייט 3% / פרימיום, etc.). When the bespoke map has no entry, the generator builds three plausible series like "שסטוביץ טונה קלאסי", "שסטוביץ טונה במים", "שסטוביץ טונה בשמן זית". The bespoke map still wins for branded combos (Wissotzky × tea → תה ירוק / חליטות / מג'יק).
+
+**Archive + Background sheets — full coverage.** Same problem at the sheet level: the legacy `historicalPromotions`, `buyAndGetPromos`, and `categoryKpis` data was keyed by old Hebrew Department names ("ירקות", "מוצרי חלב", "בשר טרי" …) that don't all match the new Group names. Added `src/data/mock-archive-generator.ts` — a deterministic per-scope generator with three exports: `generateHistoricalPromosForScope({subcategoryId, supplierId, series})` (3-5 promos), `generateBuyAndGetForScope` (2-3 buy-and-get tiles), `generateKpisForScope` (6 KPIs: צמיחת YTD, אפליפט ממוצע, Stockout, Gross Margin, אחוז מכירות במבצע, צמיחת סל). Uses an FNV-style hash of (subcategory + supplier + series + kind + index) so the same scope always produces the same content — no shuffle on re-render — but different scopes produce different content. Statuses (good/warning/bad) and trends (up/down/flat) are derived from the generated values.
+
+`ArchiveSheet.tsx` and `BackgroundDataSheet.tsx` switched from category-name lookups to the generator. `BackgroundDataSheet` got new props (`subcategoryId`, `supplierId`, `series`) replacing the old `category` prop. Title escalates to the most-specific selection (sub-category → supplier → series); subtitle describes the scope.
+
+**"ללא סדרה" — clear-back option.** Series is optional, but Radix Select didn't allow clearing once a value was picked. Added a `SERIES_NONE` sentinel item ("ללא סדרה") at the top of the Series dropdown that maps back to an empty `series` field on selection. User can now toggle freely between specific series and no series.
+
+Tests added: `mock-supplier-series.test.ts` (4 tests, including a coverage scan that asserts every supplier × sub-category pair yields ≥1 series); `mock-archive-generator.test.ts` (7 tests including coverage scans that assert every sub-category yields ≥3 historical promos, ≥5 KPIs, and ≥2 buy-and-get tiles, plus determinism checks). Total: **177 tests / 27 files** green.
+
+Files modified: `src/data/mock-supplier-series.ts`, `src/data/mock-archive-generator.ts` (new), `src/data/mock-archive-generator.test.ts` (new), `src/data/mock-supplier-series.test.ts` (new), `src/components/promo-simulator/ArchiveSheet.tsx`, `src/components/promo-simulator/BackgroundDataSheet.tsx`, `src/components/promo-simulator/Step1Brief.tsx`.
+
+---
+
 ## 2026-04-29
 
 ### Store-manager overview — AI briefing: stack rows on mobile

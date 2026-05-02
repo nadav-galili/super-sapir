@@ -34,18 +34,19 @@ export function missingFieldsForStep(
   const missing: MissingField[] = [];
 
   if (step === 1) {
-    if (isBlank(state.category))
-      missing.push({ key: "category", label: "קטגוריה" });
-    if (isBlank(state.segment))
-      missing.push({ key: "segment", label: "סגמנט" });
+    if (isBlank(state.group)) missing.push({ key: "group", label: "מחלקה" });
+    if (isBlank(state.department))
+      missing.push({ key: "department", label: "קטגוריה" });
+    if (isBlank(state.subcategory))
+      missing.push({ key: "subcategory", label: "תת-קטגוריה" });
+    if (isBlank(state.supplier))
+      missing.push({ key: "supplier", label: "ספק" });
     if (isBlank(state.salesArena))
       missing.push({ key: "salesArena", label: "פורמט" });
     if (isBlank(state.startDate))
       missing.push({ key: "startDate", label: "תאריך התחלה" });
     if (isNonPositive(state.durationWeeks))
       missing.push({ key: "durationWeeks", label: "משך מבצע" });
-    if (isBlank(state.categoryManager))
-      missing.push({ key: "categoryManager", label: "מנהל קטגוריה" });
     return missing;
   }
 

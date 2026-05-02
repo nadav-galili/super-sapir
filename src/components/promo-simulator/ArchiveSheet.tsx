@@ -8,20 +8,76 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import {
-  getBuyAndGetPromosForCategory,
-  getHistoricalPromotionsByCategory,
-  getHistoricalPromotionsByProduct,
-  type BuyAndGetPromo,
-  type HistoricalPromotion,
+import type {
+  BuyAndGetPromo,
+  HistoricalPromotion,
 } from "@/data/mock-promo-history";
+import {
+  generateBuyAndGetForScope,
+  generateHistoricalPromosForScope,
+} from "@/data/mock-archive-generator";
+import { findSubCategoryById, PROMO_GROUPS } from "@/data/mock-promo-taxonomy";
+import { getSupplierById } from "@/data/mock-suppliers";
 import { getUpliftColor } from "@/lib/kpi/resolvers";
 
 interface ArchiveSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  category: string;
-  product: string;
+  /** Promo-simulator Group id (e.g. "grocery"). Used as the broad lookup key. */
+  groupId: string;
+  /** Sub-category id selected in Step 1. The minimum scope to enable archive. */
+  subcategoryId: string;
+  /** Optional Supplier id — narrows results to that supplier × sub-category. */
+  supplierId: string;
+  /** Optional Series name — narrows further to that supplier × series. */
+  series: string;
+}
+
+/**
+ * Resolve the most-specific scope label the user selected, and a Hebrew
+ * label of the broader group used to look up historical promos.
+ */
+interface ArchiveScope {
+  /** Hebrew name to render as the page title (the most-specific selection). */
+  title: string;
+  /** Hebrew name of the broader Group/Department used to query historical promos. */
+  lookupKey: string;
+  /** Human-readable scope chain (e.g. "ויסוצקי · תה ירוק"). Empty if just sub-category. */
+  scopeChain: string;
+}
+
+function resolveScope(
+  groupId: string,
+  subcategoryId: string,
+  supplierId: string,
+  series: string
+): ArchiveScope | null {
+  const found = findSubCategoryById(subcategoryId);
+  if (!found) return null;
+  const groupName =
+    PROMO_GROUPS.find((g) => g.id === groupId)?.nameHe ?? found.group.nameHe;
+  const supplierName = supplierId
+    ? (getSupplierById(supplierId)?.name ?? "")
+    : "";
+
+  // Most specific level becomes the page title.
+  const title = series || supplierName || found.subCategory.nameHe;
+
+  // Broader chain shown as breadcrumb under the title.
+  const chainParts = [
+    groupName,
+    found.department.nameHe,
+    found.category.nameHe,
+    found.subCategory.nameHe,
+    supplierName,
+    series,
+  ].filter(Boolean);
+
+  return {
+    title,
+    lookupKey: groupName,
+    scopeChain: chainParts.join(" · "),
+  };
 }
 
 const numberFmt = new Intl.NumberFormat("he-IL");
@@ -63,25 +119,6 @@ function outcomePillStyle(outcome: HistoricalPromotion["outcome"]): {
   if (outcome === "ממוצע")
     return { bg: "rgba(251, 191, 36, 0.14)", fg: "#B45309" };
   return { bg: "rgba(244, 63, 94, 0.10)", fg: "#BE123C" };
-}
-
-function mergePromotions(
-  byCategory: HistoricalPromotion[],
-  byProduct: HistoricalPromotion[]
-): HistoricalPromotion[] {
-  const seen = new Set<string>();
-  const merged: HistoricalPromotion[] = [];
-  for (const p of byProduct) {
-    if (seen.has(p.id)) continue;
-    seen.add(p.id);
-    merged.push(p);
-  }
-  for (const p of byCategory) {
-    if (seen.has(p.id)) continue;
-    seen.add(p.id);
-    merged.push(p);
-  }
-  return merged;
 }
 
 const container = {
@@ -394,10 +431,14 @@ function BuyAndGetTile({ promo }: { promo: BuyAndGetPromo }) {
 export function ArchiveSheet({
   open,
   onOpenChange,
-  category,
-  product,
+  groupId,
+  subcategoryId,
+  supplierId,
+  series,
 }: ArchiveSheetProps) {
-  if (!category) {
+  const scope = resolveScope(groupId, subcategoryId, supplierId, series);
+
+  if (!scope) {
     return (
       <Sheet open={open} onOpenChange={onOpenChange}>
         <SheetContent
@@ -407,10 +448,10 @@ export function ArchiveSheet({
           <div className="flex h-full flex-col items-center justify-center gap-3 px-8 text-center">
             <Archive className="h-10 w-10 text-[#788390]" />
             <div className="text-2xl font-bold tracking-tight text-[#2D3748]">
-              בחר קטגוריה תחילה
+              בחר תת-קטגוריה תחילה
             </div>
             <div className="text-lg text-[#4A5568]">
-              הארכיון מציג מבצעים קודמים ברמת קטגוריה ומוצר.
+              הארכיון מציג מבצעים קודמים ברזולוציה הנמוכה ביותר שנבחרה.
             </div>
           </div>
         </SheetContent>
@@ -418,10 +459,16 @@ export function ArchiveSheet({
     );
   }
 
-  const byCategory = getHistoricalPromotionsByCategory(category);
-  const byProduct = product ? getHistoricalPromotionsByProduct(product) : [];
-  const promotions = mergePromotions(byCategory, byProduct);
-  const buyAndGet = getBuyAndGetPromosForCategory(category);
+  const promotions: HistoricalPromotion[] = generateHistoricalPromosForScope({
+    subcategoryId,
+    supplierId,
+    series,
+  });
+  const buyAndGet: BuyAndGetPromo[] = generateBuyAndGetForScope({
+    subcategoryId,
+    supplierId,
+    series,
+  });
 
   const [featured, ...rest] = promotions;
 
@@ -456,21 +503,15 @@ export function ArchiveSheet({
                 ארכיון מבצעים
               </div>
               <h2 className="mt-4 text-5xl font-bold leading-[1.05] tracking-tight text-[#2D3748]">
-                {category}
+                {scope.title}
               </h2>
-              {product ? (
-                <p className="mt-3 max-w-[54ch] text-lg leading-relaxed text-[#4A5568]">
-                  מבצעים קודמים במוצר{" "}
-                  <span className="font-semibold text-[#2D3748]">
-                    {product}
-                  </span>{" "}
-                  ובקטגוריה — מה עבד, מה לא, ומה ניתן ללמוד.
-                </p>
-              ) : (
-                <p className="mt-3 max-w-[54ch] text-lg leading-relaxed text-[#4A5568]">
-                  מבצעים קודמים בקטגוריה — מה עבד, מה לא, ומה ניתן ללמוד.
-                </p>
-              )}
+              <p className="mt-3 max-w-[64ch] text-lg leading-relaxed text-[#4A5568]">
+                מבצעים קודמים בסקופ:{" "}
+                <span className="font-semibold text-[#2D3748]">
+                  {scope.scopeChain}
+                </span>
+                . מה עבד, מה לא, ומה ניתן ללמוד.
+              </p>
             </div>
 
             <div className="inline-flex items-center gap-2 rounded-[20px] border border-[#E7E0D8] bg-white px-4 py-2 text-[15px] text-[#4A5568] shadow-[0_1px_0_rgba(220,78,89,0.04)]">
@@ -531,8 +572,8 @@ export function ArchiveSheet({
                   מבצעי "קנה וקבל" ברשת
                 </h3>
                 <p className="mt-1 text-[16px] text-[#788390]">
-                  מעורבים מוצרים מקטגוריה{" "}
-                  <span className="text-[#4A5568]">{category}</span>
+                  מעורבים מוצרים מ-
+                  <span className="text-[#4A5568]">{scope.lookupKey}</span>
                 </p>
               </div>
               <span className="rounded-[20px] border border-[#E7E0D8] bg-white px-3 py-1 text-[15px] font-medium text-[#4A5568]">

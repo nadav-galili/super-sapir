@@ -7,6 +7,16 @@ import type { Goal, SalesArena, Segment, StepId } from "./taxonomy";
  * fields they don't read or write.
  */
 export interface BriefSlice {
+  // New 4-level promo taxonomy (PR 2 — data layer).
+  // Wired into the UI in PR 3; co-exists with legacy `category`/`segment`
+  // until then. See: decisions/2026-05-02-promo-simulator-taxonomy.md
+  group: string;
+  department: string;
+  subcategory: string;
+  supplier: string;
+  series: string;
+
+  // Legacy fields — still drive Step 1 UI today; removed in PR 3.
   category: string;
   segment: Segment | "";
   product: string;
@@ -58,7 +68,13 @@ export type SliceSetter<T> = (update: Partial<T>) => void;
 
 export interface SimulatorState {
   step: StepId;
-  // Step 1 — brief
+  // Step 1 — brief (new promo-simulator taxonomy fields)
+  group: string;
+  department: string;
+  subcategory: string;
+  supplier: string;
+  series: string;
+  // Step 1 — brief (legacy fields, removed in PR 3)
   category: string;
   segment: Segment | "";
   product: string;
@@ -118,6 +134,11 @@ export function createDefaultState(opts?: {
 }): SimulatorState {
   return {
     step: 1,
+    group: "",
+    department: "",
+    subcategory: "",
+    supplier: "",
+    series: "",
     category: opts?.defaultCategory ?? "",
     segment: "",
     product: "",
@@ -155,6 +176,11 @@ export function createDefaultState(opts?: {
  */
 export type SimulatorSearch = Partial<{
   step: number;
+  group: string;
+  department: string;
+  subcategory: string;
+  supplier: string;
+  series: string;
   category: string;
   segment: string;
   product: string;
@@ -211,6 +237,13 @@ export function validateSimulatorSearch(
     const n = toNum(search.step, 1);
     out.step = Math.min(9, Math.max(1, Math.round(n))) as number;
   }
+  if (search.group !== undefined) out.group = toStr(search.group, "");
+  if (search.department !== undefined)
+    out.department = toStr(search.department, "");
+  if (search.subcategory !== undefined)
+    out.subcategory = toStr(search.subcategory, "");
+  if (search.supplier !== undefined) out.supplier = toStr(search.supplier, "");
+  if (search.series !== undefined) out.series = toStr(search.series, "");
   if (search.category !== undefined) out.category = toStr(search.category, "");
   if (search.segment !== undefined) out.segment = toStr(search.segment, "");
   if (search.product !== undefined) out.product = toStr(search.product, "");
@@ -265,6 +298,11 @@ export function decodeState(
 ): SimulatorState {
   return {
     step: (search.step ?? defaults.step) as StepId,
+    group: search.group ?? defaults.group,
+    department: search.department ?? defaults.department,
+    subcategory: search.subcategory ?? defaults.subcategory,
+    supplier: search.supplier ?? defaults.supplier,
+    series: search.series ?? defaults.series,
     category: search.category ?? defaults.category,
     segment: (search.segment ?? defaults.segment) as SimulatorState["segment"],
     product: search.product ?? defaults.product,
@@ -307,6 +345,13 @@ export function encodeState(
 ): SimulatorSearch {
   const out: SimulatorSearch = {};
   if (state.step !== defaults.step) out.step = state.step;
+  if (state.group !== defaults.group) out.group = state.group;
+  if (state.department !== defaults.department)
+    out.department = state.department;
+  if (state.subcategory !== defaults.subcategory)
+    out.subcategory = state.subcategory;
+  if (state.supplier !== defaults.supplier) out.supplier = state.supplier;
+  if (state.series !== defaults.series) out.series = state.series;
   if (state.category !== defaults.category) out.category = state.category;
   if (state.segment !== defaults.segment) out.segment = state.segment;
   if (state.product !== defaults.product) out.product = state.product;

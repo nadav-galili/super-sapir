@@ -119,17 +119,18 @@ describe("usePromoSimulator (boundary contract)", () => {
     });
 
     it("allows forward jumps once every prior required step is valid", () => {
-      // Fill every required field through step 5.
+      // Fill every required field through step 5 — Step 1 now uses the
+      // promo-simulator taxonomy fields (group/department/subcategory/supplier).
       const state: SimulatorState = {
         ...defaults,
         step: 1,
-        category: "חלב",
-        segment: "dairy-milk",
-        product: "חלב תנובה 3% 1 ליטר",
+        group: "dairy",
+        department: "milk",
+        subcategory: "milk-3",
+        supplier: "sup-01",
         salesArena: "כלל הרשת",
         startDate: "2026-05-01",
         durationWeeks: 2,
-        categoryManager: "דנה",
         goal: "משיכת קונים",
         promoType: "מבצעי הוזלה",
         conditionText: "ביחידה",

@@ -175,10 +175,196 @@ const suppliers: ChainSupplier[] = [
     targetSales: 1_050_000,
     grossProfitPercent: 24.8,
   },
+  // Promo simulator extension — see decisions/2026-05-02-promo-simulator-taxonomy.md
+  {
+    id: "sup-26",
+    name: "קוקה קולה",
+    sales: 4_300_000,
+    targetSales: 4_500_000,
+    grossProfitPercent: 24.6,
+  },
+  {
+    id: "sup-27",
+    name: "טמפו",
+    sales: 2_900_000,
+    targetSales: 3_100_000,
+    grossProfitPercent: 26.2,
+  },
+  {
+    id: "sup-28",
+    name: "רד בול",
+    sales: 1_650_000,
+    targetSales: 1_500_000,
+    grossProfitPercent: 32.4,
+  },
+  {
+    id: "sup-29",
+    name: "נביעות",
+    sales: 2_100_000,
+    targetSales: 2_000_000,
+    grossProfitPercent: 19.8,
+  },
+  {
+    id: "sup-30",
+    name: "עין גדי",
+    sales: 1_240_000,
+    targetSales: 1_300_000,
+    grossProfitPercent: 21.5,
+  },
+  {
+    id: "sup-31",
+    name: "יקבי הרי גליל",
+    sales: 1_780_000,
+    targetSales: 1_700_000,
+    grossProfitPercent: 33.1,
+  },
+  {
+    id: "sup-32",
+    name: "ברקן",
+    sales: 1_540_000,
+    targetSales: 1_600_000,
+    grossProfitPercent: 31.2,
+  },
+  {
+    id: "sup-33",
+    name: "יקבי כרמל",
+    sales: 1_320_000,
+    targetSales: 1_400_000,
+    grossProfitPercent: 30.5,
+  },
+  {
+    id: "sup-34",
+    name: "יטבתה",
+    sales: 2_650_000,
+    targetSales: 2_700_000,
+    grossProfitPercent: 22.8,
+  },
+  {
+    id: "sup-35",
+    name: "גד",
+    sales: 1_180_000,
+    targetSales: 1_100_000,
+    grossProfitPercent: 28.9,
+  },
+  {
+    id: "sup-36",
+    name: "סוגת",
+    sales: 1_960_000,
+    targetSales: 2_000_000,
+    grossProfitPercent: 18.2,
+  },
+  {
+    id: "sup-37",
+    name: "ברילה",
+    sales: 1_420_000,
+    targetSales: 1_500_000,
+    grossProfitPercent: 27.6,
+  },
+  {
+    id: "sup-38",
+    name: "אגרקסקו",
+    sales: 2_750_000,
+    targetSales: 2_600_000,
+    grossProfitPercent: 38.1,
+  },
+  {
+    id: "sup-39",
+    name: "יבול שדות",
+    sales: 1_870_000,
+    targetSales: 1_900_000,
+    grossProfitPercent: 35.4,
+  },
+  {
+    id: "sup-40",
+    name: "מהדרין",
+    sales: 2_140_000,
+    targetSales: 2_250_000,
+    grossProfitPercent: 33.7,
+  },
+  {
+    id: "sup-41",
+    name: "פרי גן",
+    sales: 1_640_000,
+    targetSales: 1_700_000,
+    grossProfitPercent: 36.8,
+  },
+  {
+    id: "sup-42",
+    name: "ירקות השרון",
+    sales: 1_980_000,
+    targetSales: 1_900_000,
+    grossProfitPercent: 34.2,
+  },
+  {
+    id: "sup-43",
+    name: "עוף העמק",
+    sales: 2_420_000,
+    targetSales: 2_500_000,
+    grossProfitPercent: 16.8,
+  },
+  {
+    id: "sup-44",
+    name: "עוף טוב",
+    sales: 2_180_000,
+    targetSales: 2_100_000,
+    grossProfitPercent: 17.5,
+  },
+  {
+    id: "sup-45",
+    name: "מאמא עוף",
+    sales: 1_540_000,
+    targetSales: 1_600_000,
+    grossProfitPercent: 18.2,
+  },
+  {
+    id: "sup-46",
+    name: "Pyrex",
+    sales: 720_000,
+    targetSales: 800_000,
+    grossProfitPercent: 36.4,
+  },
+  {
+    id: "sup-47",
+    name: "Tefal",
+    sales: 980_000,
+    targetSales: 950_000,
+    grossProfitPercent: 34.8,
+  },
+  {
+    id: "sup-48",
+    name: "נעמן",
+    sales: 540_000,
+    targetSales: 600_000,
+    grossProfitPercent: 31.2,
+  },
+  {
+    id: "sup-49",
+    name: "Arcosteel",
+    sales: 460_000,
+    targetSales: 500_000,
+    grossProfitPercent: 33.6,
+  },
+  {
+    id: "sup-50",
+    name: "סלמון נורווגי בע״מ",
+    sales: 1_320_000,
+    targetSales: 1_400_000,
+    grossProfitPercent: 19.4,
+  },
 ];
 
 export function getTopSuppliers(): ChainSupplier[] {
   return suppliers;
+}
+
+export function getSupplierById(id: string): ChainSupplier | undefined {
+  return suppliers.find((s) => s.id === id);
+}
+
+export function getSuppliersByIds(ids: readonly string[]): ChainSupplier[] {
+  return ids
+    .map((id) => suppliers.find((s) => s.id === id))
+    .filter((s): s is ChainSupplier => s !== undefined);
 }
 
 export function getMostProfitableSupplier(): ChainSupplier {

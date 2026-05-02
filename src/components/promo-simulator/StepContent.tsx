@@ -53,6 +53,11 @@ export function StepContent({
     state.step === 1 ? (
       <Step1Brief
         brief={{
+          group: state.group,
+          department: state.department,
+          subcategory: state.subcategory,
+          supplier: state.supplier,
+          series: state.series,
           category: state.category,
           segment: state.segment,
           product: state.product,
