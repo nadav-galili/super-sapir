@@ -8,6 +8,20 @@
 
 ## 2026-05-03
 
+### Promo Simulator Step 6 — decision & justification
+
+Step 6 ("תחזית והערכה") was an analysis page that overlapped heavily with the rebuilt Step 5. Recast as **"החלטה והצדקה"**: shows the verdict from Step 4, three headline KPI tiles (`netProfit` / `roi` / selected scenario), three decision buttons (לאשר / לאשר עם תיקונים / לדחות), and a justification textarea backed by the existing `analysisNote` field. The textarea placeholder swaps copy depending on the chosen decision.
+
+State gained `decision: 'approve' | 'revise' | 'reject' | ''` with full URL codec. `analysisNote` kept its name to avoid breaking PromoFullReport / Step9. New `Step6Decision.tsx`; deleted `Step6Analysis.tsx`. Stepper title updated.
+
+### Promo Simulator — downstream alignment (PromoFullReport, Step9 table, Step 4 tab)
+
+After the Step 4+5+6 rebuild, the documentation surfaces still spoke the old vocabulary. Cleaned up:
+
+- **PromoFullReport** (PDF export): renamed "יעדים ותחזית" → "פרמטרי מבצע", dropped the vestigial `stockUnits` / `stockCoverage` rows, added `mktCost` / `opsCost` / `cannibPct` rows, added `extraUnits` / `cannibLoss` / `netProfit` / `baseGrossMargin` / `promoGrossMargin` to "KPI מפתח", replaced "סטטוס" / `statusLabel(m.status)` with "הערכת כדאיות" / `verdictLabel(m.verdict)`, added "תרחיש נבחר" row. The "ניתוח ותיעוד" section became "החלטה ותיעוד" with a new "החלטה" row driven by `state.decision`.
+- **Step 9 documentation table**: replaced the "משמעות ההטבה" column (which combined `statusLabel` + `promoProfit`) with two separate columns — "הערכת כדאיות" (verdictLabel) and "החלטה" (DECISION_LABEL). Renamed "עלות מימוש" → "עלות שיווק" (now shows `state.mktCost` directly instead of the heuristic `m.investment`). Renamed "גידול ריאלי" → "uplift" and added a "רווח תוספתי נטו" column.
+- **Step 4 tab label**: "תוצאות וניתוח" → "תחזית ביצועים" (per direct request).
+
 ### Promo Simulator Steps 4 + 5 — financial sensitivity workbench
 
 Replaced the thin Step 4 (terms text + discount slider) and Step 5 (forecast KPIs) with a full financial-sensitivity workflow ported from a reference HTML simulator. Step 4 ("פרמטרי מבצע ותוצאות") owns the parameter sliders + headline verdict; Step 5 ("תרחישים ונקודת איזון") owns scenario comparison and break-even analysis. Each step has two internal tabs.
