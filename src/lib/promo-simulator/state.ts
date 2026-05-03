@@ -10,6 +10,15 @@ export const SCENARIO_LABEL: Record<Scenario, string> = {
   optimistic: "אופטימי",
 };
 
+export const DECISIONS = ["approve", "revise", "reject"] as const;
+export type Decision = (typeof DECISIONS)[number] | "";
+
+export const DECISION_LABEL: Record<Exclude<Decision, "">, string> = {
+  approve: "לאשר את המבצע",
+  revise: "לאשר עם תיקונים",
+  reject: "לדחות את המבצע",
+};
+
 /**
  * Scoped slice types — each step consumes only the fields it owns,
  * not the entire SimulatorState. Keeps step components unaware of
@@ -119,8 +128,9 @@ export interface SimulatorState {
   controlPrice: boolean;
   controlStock: boolean;
   controlDisplay: boolean;
-  // Step 8 — analysis
+  // Step 6 — decision & justification (was: analysis)
   analysisNote: string;
+  decision: Decision;
   // Step 9 — documentation
   documentation: string;
   completed: boolean;
@@ -182,6 +192,7 @@ export function createDefaultState(opts?: {
     controlStock: false,
     controlDisplay: false,
     analysisNote: "",
+    decision: "",
     documentation: "",
     completed: false,
   };
@@ -228,6 +239,7 @@ export type SimulatorSearch = Partial<{
   controlStock: 1;
   controlDisplay: 1;
   analysisNote: string;
+  decision: string;
   documentation: string;
   completed: 1;
 }>;
@@ -314,6 +326,12 @@ export function validateSimulatorSearch(
   if (search.controlDisplay !== undefined) out.controlDisplay = 1;
   if (search.analysisNote !== undefined)
     out.analysisNote = toStr(search.analysisNote, "");
+  if (search.decision !== undefined) {
+    const v = toStr(search.decision, "");
+    out.decision = (
+      v === "approve" || v === "revise" || v === "reject" ? v : ""
+    ) as Decision;
+  }
   if (search.documentation !== undefined)
     out.documentation = toStr(search.documentation, "");
   if (search.completed !== undefined) out.completed = 1;
@@ -368,6 +386,7 @@ export function decodeState(
     controlDisplay:
       search.controlDisplay === 1 ? true : defaults.controlDisplay,
     analysisNote: search.analysisNote ?? defaults.analysisNote,
+    decision: (search.decision as Decision | undefined) ?? defaults.decision,
     documentation: search.documentation ?? defaults.documentation,
     completed: search.completed === 1 ? true : defaults.completed,
   };
@@ -428,6 +447,7 @@ export function encodeState(
   if (state.controlDisplay) out.controlDisplay = 1;
   if (state.analysisNote !== defaults.analysisNote)
     out.analysisNote = state.analysisNote;
+  if (state.decision !== defaults.decision) out.decision = state.decision;
   if (state.documentation !== defaults.documentation)
     out.documentation = state.documentation;
   if (state.completed) out.completed = 1;

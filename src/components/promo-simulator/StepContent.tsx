@@ -4,7 +4,7 @@ import { Step2Goal } from "./Step2Goal";
 import { Step3PromoType } from "./Step3PromoType";
 import { Step4Params } from "./Step4Params";
 import { Step5Scenarios } from "./Step5Scenarios";
-import { Step6Analysis } from "./Step6Analysis";
+import { Step6Decision } from "./Step6Decision";
 import { Step7Implementation } from "./Step7Implementation";
 import { Step8Control } from "./Step8Control";
 import { Step9Documentation } from "./Step9Documentation";
@@ -83,11 +83,7 @@ export function StepContent({
     ) : state.step === 5 ? (
       <Step5Scenarios state={state} metrics={metrics} onChange={setState} />
     ) : state.step === 6 ? (
-      <Step6Analysis
-        analysisNote={state.analysisNote}
-        metrics={metrics}
-        onChange={setState}
-      />
+      <Step6Decision state={state} metrics={metrics} onChange={setState} />
     ) : state.step === 7 ? (
       <Step7Implementation
         impl={{
