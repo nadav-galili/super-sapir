@@ -95,8 +95,13 @@ export function calcMetrics(
   const uplift = Math.max(0, upliftPct) / 100;
   const cannib = Math.max(0, Math.min(cannibPct, 100)) / 100;
 
+  // Promo-period purchase cost. Defaults to regular unitCost; supplier may
+  // grant a buy-in concession that drops it below.
+  const promoCost =
+    state.promoUnitCost > 0 ? state.promoUnitCost : state.unitCost;
+
   const effectivePrice = round2(state.unitPrice * (1 - effectiveDiscount));
-  const unitMargin = round2(effectivePrice - state.unitCost);
+  const unitMargin = round2(effectivePrice - promoCost);
 
   const promoUnits = Math.round(state.baseUnits * (1 + uplift));
   const extraUnits = promoUnits - state.baseUnits;
@@ -117,7 +122,7 @@ export function calcMetrics(
   );
   const roi = investment > 0 ? Math.round((netProfit / investment) * 100) : 0;
 
-  const beMarginPerUnit = effectivePrice - state.unitCost - state.opsCost;
+  const beMarginPerUnit = effectivePrice - promoCost - state.opsCost;
   const breakEvenUnits =
     beMarginPerUnit > 0
       ? Math.ceil(investment / beMarginPerUnit)
@@ -132,7 +137,7 @@ export function calcMetrics(
       : 0;
   const promoGrossMargin =
     effectivePrice > 0
-      ? round2(((effectivePrice - state.unitCost) / effectivePrice) * 100)
+      ? round2(((effectivePrice - promoCost) / effectivePrice) * 100)
       : 0;
 
   const status = statusOf(unitMargin, promoProfit, baseProfit, stockCoverage);

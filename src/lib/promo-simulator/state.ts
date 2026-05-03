@@ -58,6 +58,12 @@ export interface ForecastSlice {
   baseUnits: number;
   unitPrice: number;
   unitCost: number;
+  /**
+   * Discounted purchase price during the promo (supplier buy-in concession).
+   * Default equals `unitCost` (no supplier discount). Used in promo-period
+   * margin / ROI / break-even calcs; baseline calcs keep using `unitCost`.
+   */
+  promoUnitCost: number;
   upliftPct: number;
   stockUnits: number;
   discountPct: number;
@@ -113,6 +119,8 @@ export interface SimulatorState {
   baseUnits: number;
   unitPrice: number;
   unitCost: number;
+  /** Discounted purchase price during the promo. Default = unitCost. */
+  promoUnitCost: number;
   upliftPct: number;
   stockUnits: number;
   mktCost: number;
@@ -178,6 +186,7 @@ export function createDefaultState(opts?: {
     baseUnits: 1000,
     unitPrice: 12,
     unitCost: 7.5,
+    promoUnitCost: 7.5,
     upliftPct: 20,
     stockUnits: 1500,
     mktCost: 5000,
@@ -225,6 +234,7 @@ export type SimulatorSearch = Partial<{
   baseUnits: number;
   unitPrice: number;
   unitCost: number;
+  promoUnitCost: number;
   upliftPct: number;
   stockUnits: number;
   mktCost: number;
@@ -303,6 +313,8 @@ export function validateSimulatorSearch(
   if (search.unitPrice !== undefined)
     out.unitPrice = toNum(search.unitPrice, 12);
   if (search.unitCost !== undefined) out.unitCost = toNum(search.unitCost, 7.5);
+  if (search.promoUnitCost !== undefined)
+    out.promoUnitCost = toNum(search.promoUnitCost, 7.5);
   if (search.upliftPct !== undefined)
     out.upliftPct = toNum(search.upliftPct, 20);
   if (search.stockUnits !== undefined)
@@ -369,6 +381,7 @@ export function decodeState(
     baseUnits: search.baseUnits ?? defaults.baseUnits,
     unitPrice: search.unitPrice ?? defaults.unitPrice,
     unitCost: search.unitCost ?? defaults.unitCost,
+    promoUnitCost: search.promoUnitCost ?? defaults.promoUnitCost,
     upliftPct: search.upliftPct ?? defaults.upliftPct,
     stockUnits: search.stockUnits ?? defaults.stockUnits,
     mktCost: search.mktCost ?? defaults.mktCost,
@@ -430,6 +443,8 @@ export function encodeState(
   if (state.baseUnits !== defaults.baseUnits) out.baseUnits = state.baseUnits;
   if (state.unitPrice !== defaults.unitPrice) out.unitPrice = state.unitPrice;
   if (state.unitCost !== defaults.unitCost) out.unitCost = state.unitCost;
+  if (state.promoUnitCost !== defaults.promoUnitCost)
+    out.promoUnitCost = state.promoUnitCost;
   if (state.upliftPct !== defaults.upliftPct) out.upliftPct = state.upliftPct;
   if (state.stockUnits !== defaults.stockUnits)
     out.stockUnits = state.stockUnits;

@@ -20,6 +20,7 @@ import { calcMetrics, type PromoMetrics } from "@/lib/promo-simulator/calc";
 import { narrativeFor } from "@/lib/promo-simulator/narrative";
 import type { StepId } from "@/lib/promo-simulator/taxonomy";
 import { getCategorySummaries } from "@/data/mock-categories";
+import { getCatalogForScope } from "@/data/mock-archive-generator";
 import {
   earliestIncompleteStep,
   isStepValid,
@@ -80,10 +81,27 @@ export function usePromoSimulator(search: SimulatorSearch): UsePromoSimulator {
     []
   );
 
-  const state = useMemo(
-    () => decodeState(search, defaults),
-    [search, defaults]
-  );
+  const state = useMemo(() => {
+    const decoded = decodeState(search, defaults);
+    // Apply scope-derived catalog (unitPrice, unitCost, baseUnits, stockUnits)
+    // when the URL hasn't explicitly overridden them. This is what makes the
+    // simulator show distinct catalog values for each (sub-category × supplier
+    // × series) rather than the same hardcoded defaults.
+    if (decoded.subcategory) {
+      const cat = getCatalogForScope({
+        subcategoryId: decoded.subcategory,
+        supplierId: decoded.supplier,
+        series: decoded.series,
+      });
+      if (search.unitPrice === undefined) decoded.unitPrice = cat.unitPrice;
+      if (search.unitCost === undefined) decoded.unitCost = cat.unitCost;
+      if (search.baseUnits === undefined) decoded.baseUnits = cat.baseUnits;
+      if (search.stockUnits === undefined) decoded.stockUnits = cat.stockUnits;
+      if (search.promoUnitCost === undefined)
+        decoded.promoUnitCost = cat.unitCost;
+    }
+    return decoded;
+  }, [search, defaults]);
 
   const setState = useCallback(
     (update: Partial<SimulatorState>) => {
@@ -98,6 +116,30 @@ export function usePromoSimulator(search: SimulatorSearch): UsePromoSimulator {
       if ("segment" in update && update.segment !== state.segment) {
         cascaded.product = "";
       }
+
+      // Scope-aware catalog: when subcategory / supplier / series change,
+      // refresh unitPrice / unitCost / baseUnits / stockUnits to the new
+      // (deterministic) catalog snapshot. Also reset promoUnitCost to match
+      // the new unitCost — the user's previous supplier-discount override
+      // belonged to a different product. The user can re-apply it after.
+      const scopeKeys = ["subcategory", "supplier", "series"] as const;
+      const scopeChanged = scopeKeys.some(
+        (k) => k in update && update[k] !== state[k]
+      );
+      if (scopeChanged) {
+        const nextScope = {
+          subcategoryId: cascaded.subcategory ?? state.subcategory,
+          supplierId: cascaded.supplier ?? state.supplier,
+          series: cascaded.series ?? state.series,
+        };
+        const catalog = getCatalogForScope(nextScope);
+        cascaded.unitPrice = catalog.unitPrice;
+        cascaded.unitCost = catalog.unitCost;
+        cascaded.baseUnits = catalog.baseUnits;
+        cascaded.stockUnits = catalog.stockUnits;
+        cascaded.promoUnitCost = catalog.unitCost;
+      }
+
       const next = { ...state, ...cascaded };
       const params = encodeState(next, defaults);
       navigate({

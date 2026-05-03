@@ -269,6 +269,50 @@ export function generateSalesSnapshotForScope(
   };
 }
 
+/** Catalog snapshot for a (sub-category × supplier × series) scope.
+ *  Deterministic — same scope → same numbers. Used by Step 4 to display the
+ *  product's regular sale price, supplier buy-in, baseline volume, and stock. */
+export interface CatalogSnapshot {
+  /** Regular consumer sale price (₪). */
+  unitPrice: number;
+  /** Regular supplier purchase cost (₪). */
+  unitCost: number;
+  /** Expected period sales volume in units (the "base" for uplift calc). */
+  baseUnits: number;
+  /** On-hand inventory in units. */
+  stockUnits: number;
+}
+
+/** Build catalog values from scope. Hash-seeded so each (subcategory ×
+ *  supplier × series) yields stable, distinct numbers — the user sees
+ *  different prices when switching series, but the same series always
+ *  shows the same price. Empty scope → safe defaults. */
+export function getCatalogForScope(scope: ArchiveScope): CatalogSnapshot {
+  if (!scope.subcategoryId) {
+    return { unitPrice: 12, unitCost: 7.5, baseUnits: 1000, stockUnits: 1500 };
+  }
+
+  const seed = `${scope.subcategoryId}|${scope.supplierId || ""}|${scope.series || ""}`;
+
+  // unitPrice: consumer-facing price, range ₪6.50 → ₪89.50, snapped to 0.5.
+  const priceCents = 650 + (hash(`${seed}|cat-price`) % 8301); // 650..8950 cents
+  const unitPrice = Math.round(priceCents / 50) * 0.5;
+
+  // unitCost: 55%–72% of unitPrice (i.e. supplier margin 28–45%).
+  const costRatio = 0.55 + (hash(`${seed}|cat-cost`) % 171) / 1000; // 0.55..0.72
+  const unitCost = Math.round(unitPrice * costRatio * 2) / 2;
+
+  // baseUnits: 300..3500, snapped to 50.
+  const baseUnitsRaw = 300 + (hash(`${seed}|cat-base`) % 3201);
+  const baseUnits = Math.round(baseUnitsRaw / 50) * 50;
+
+  // stockUnits: 1.4× → 2.2× baseUnits, snapped to 50.
+  const stockRatio = 1.4 + (hash(`${seed}|cat-stock`) % 81) / 100; // 1.40..2.20
+  const stockUnits = Math.round((baseUnits * stockRatio) / 50) * 50;
+
+  return { unitPrice, unitCost, baseUnits, stockUnits };
+}
+
 // Sub-category total YTD revenue in ₪. Range: 2M–20M (seeded).
 function subCategoryYtd(subcategoryId: string): number {
   if (!subcategoryId) return 0;

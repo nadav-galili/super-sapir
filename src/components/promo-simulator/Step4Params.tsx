@@ -22,8 +22,6 @@ interface Step4ParamsProps {
 
 const LABEL =
   "text-[15px] font-medium text-[#4A5568] mb-1.5 flex items-center justify-between";
-const TEXT_INPUT =
-  "flex h-10 w-full items-center rounded-[10px] border border-[#E7E0D8] bg-white px-3 py-2 text-[16px] text-[#2D3748] shadow-sm focus:outline-none focus:ring-2 focus:ring-[#DC4E59]/20 focus:border-[#DC4E59]/40";
 const RANGE = "w-full h-2 rounded-[5px] accent-[#DC4E59]";
 const VALUE = "text-lg font-mono font-semibold text-[#2D3748]";
 
@@ -138,7 +136,7 @@ export function Step4Params({ state, metrics, onChange }: Step4ParamsProps) {
               value="params"
               className="text-[16px] data-[state=active]:bg-white data-[state=active]:text-[#2D3748] px-4 py-1.5"
             >
-              פרמטרי מבצע
+              פרטי המבצע
             </TabsTrigger>
             <TabsTrigger
               value="results"
@@ -168,87 +166,107 @@ export function Step4Params({ state, metrics, onChange }: Step4ParamsProps) {
                   </div>
                 </div>
 
-                <div>
-                  <label className={LABEL} htmlFor="f-condition">
-                    תנאי{" "}
-                    <span className="text-[#788390] text-[14px]">
-                      (אופציונלי)
-                    </span>
-                  </label>
-                  <input
-                    id="f-condition"
-                    type="text"
-                    value={state.conditionText}
-                    onChange={(e) =>
-                      onChange({ conditionText: e.target.value })
-                    }
-                    placeholder="למשל: ביחידה בודדת"
-                    className={TEXT_INPUT}
-                  />
-                </div>
-                <div>
-                  <label className={LABEL} htmlFor="f-benefit">
-                    הטבה{" "}
-                    <span className="text-[#788390] text-[14px]">
-                      (אופציונלי)
-                    </span>
-                  </label>
-                  <input
-                    id="f-benefit"
-                    type="text"
-                    value={state.benefitText}
-                    onChange={(e) => onChange({ benefitText: e.target.value })}
-                    placeholder="למשל: 25% הנחה"
-                    className={TEXT_INPUT}
-                  />
-                </div>
-
-                <div>
-                  <label className={LABEL} htmlFor="f-price">
-                    מחיר מכירה רגיל (₪)
-                    <span className={VALUE} dir="ltr">
-                      ₪{state.unitPrice}
-                    </span>
-                  </label>
-                  <input
-                    id="f-price"
-                    type="range"
-                    min={5}
-                    max={200}
-                    step={1}
-                    value={state.unitPrice}
-                    onChange={(e) =>
-                      onChange({ unitPrice: Number(e.target.value) })
-                    }
-                    className={RANGE}
-                    style={{ background: rangeBg(state.unitPrice, 200) }}
+                <div className="rounded-[10px] bg-[#FAF8F5] border border-[#E7E0D8] p-3 flex items-center justify-between gap-3">
+                  <div>
+                    <div className="text-[15px] text-[#788390] mb-0.5">
+                      מחיר מכירה רגיל
+                    </div>
+                    <div className="text-[14px] text-[#A0AEC0]">
+                      מחיר קטלוגי של המוצר
+                    </div>
+                  </div>
+                  <span
+                    className="text-xl font-mono font-semibold text-[#2D3748]"
                     dir="ltr"
-                  />
+                  >
+                    ₪{state.unitPrice.toFixed(2)}
+                  </span>
+                </div>
+
+                <div className="rounded-[10px] bg-[#FAF8F5] border border-[#E7E0D8] p-3 flex items-center justify-between gap-3">
+                  <div>
+                    <div className="text-[15px] text-[#788390] mb-0.5">
+                      מחיר קנייה
+                    </div>
+                    <div className="text-[14px] text-[#A0AEC0]">
+                      מחיר הספק (מהמערכת)
+                    </div>
+                  </div>
+                  <span
+                    className="text-xl font-mono font-semibold text-[#2D3748]"
+                    dir="ltr"
+                  >
+                    ₪{state.unitCost.toFixed(2)}
+                  </span>
                 </div>
 
                 <div>
-                  <label className={LABEL} htmlFor="f-cost">
-                    עלות מוצר (₪)
+                  <label className={LABEL} htmlFor="f-promo-cost">
+                    <span>
+                      מחיר קנייה בהנחה (מבצע)
+                      {(() => {
+                        const supplierDiscPct =
+                          state.unitCost > 0
+                            ? Math.round(
+                                ((state.unitCost - state.promoUnitCost) /
+                                  state.unitCost) *
+                                  100
+                              )
+                            : 0;
+                        if (supplierDiscPct <= 0) return null;
+                        return (
+                          <span className="ms-2 text-[14px] text-[#10B981] font-semibold">
+                            הנחת ספק -{supplierDiscPct}%
+                          </span>
+                        );
+                      })()}
+                    </span>
                     <span className={VALUE} dir="ltr">
-                      ₪{state.unitCost}
+                      ₪{state.promoUnitCost.toFixed(2)}
                     </span>
                   </label>
                   <input
-                    id="f-cost"
+                    id="f-promo-cost"
                     type="range"
-                    min={1}
-                    max={Math.max(180, state.unitPrice)}
-                    step={0.5}
-                    value={state.unitCost}
+                    min={0}
+                    max={state.unitCost}
+                    step={0.1}
+                    value={state.promoUnitCost}
                     onChange={(e) =>
-                      onChange({ unitCost: Number(e.target.value) })
+                      onChange({ promoUnitCost: Number(e.target.value) })
                     }
                     className={RANGE}
                     style={{
-                      background: rangeBg(state.unitCost, 180, "#A0AEC0"),
+                      background: rangeBg(state.promoUnitCost, state.unitCost),
                     }}
                     dir="ltr"
                   />
+                  <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                    <span className="text-[14px] text-[#788390] me-1">
+                      קיצור — הנחת ספק:
+                    </span>
+                    {[0, 5, 10, 15, 20].map((pct) => {
+                      const target =
+                        Math.round(state.unitCost * (1 - pct / 100) * 100) /
+                        100;
+                      const isActive =
+                        Math.abs(state.promoUnitCost - target) < 0.01;
+                      return (
+                        <button
+                          key={pct}
+                          type="button"
+                          onClick={() => onChange({ promoUnitCost: target })}
+                          className={`rounded-[20px] border px-2.5 py-0.5 text-[14px] font-medium transition-colors ${
+                            isActive
+                              ? "border-[#DC4E59] bg-[#DC4E59] text-white"
+                              : "border-[#E7E0D8] bg-white text-[#4A5568] hover:bg-[#FAF8F5]"
+                          }`}
+                        >
+                          {pct === 0 ? "ללא" : `-${pct}%`}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 <div>
@@ -304,7 +322,7 @@ export function Step4Params({ state, metrics, onChange }: Step4ParamsProps) {
                     </div>
                   </div>
                   <span className="ms-auto rounded-full bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0] px-3 py-1 text-[15px]">
-                    חיסכון ₪{saving.toFixed(2)} ({savingPct}%)
+                    הנחה לקונה ₪{saving.toFixed(2)} ({savingPct}%)
                   </span>
                 </div>
               </div>
@@ -312,7 +330,7 @@ export function Step4Params({ state, metrics, onChange }: Step4ParamsProps) {
               {/* Demand + costs */}
               <div className="rounded-[16px] border border-[#E7E0D8] bg-white p-5 space-y-4">
                 <div className="text-lg font-semibold text-[#2D3748]">
-                  פרמטרי ביקוש ועלויות
+                  נתוני ביקוש ועלויות
                 </div>
 
                 <div>
@@ -465,7 +483,7 @@ export function Step4Params({ state, metrics, onChange }: Step4ParamsProps) {
               <MetricTile
                 label="מחיר לאחר הנחה"
                 value={`₪${m.effectivePrice.toFixed(2)}`}
-                sub={`חיסכון של ${savingPct}%`}
+                sub={`הנחה לקונה של ${savingPct}%`}
                 highlight
               />
               <MetricTile

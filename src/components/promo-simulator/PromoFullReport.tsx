@@ -61,9 +61,6 @@ function formatDateHe(iso: string): string {
 }
 
 export function PromoFullReport({ state, metrics: m }: PromoFullReportProps) {
-  const conditionBenefit = [state.conditionText, state.benefitText]
-    .filter(Boolean)
-    .join(" → ");
   const breakEvenStr = Number.isFinite(m.breakEvenUnits)
     ? formatNumber(m.breakEvenUnits)
     : "—";
@@ -112,14 +109,8 @@ export function PromoFullReport({ state, metrics: m }: PromoFullReportProps) {
         <Row label="סוג המבצע" value={state.promoType} />
       </Section>
 
-      <Section title="התניה והטבה">
-        <Row label="התניה" value={state.conditionText} />
-        <Row label="הטבה" value={state.benefitText} />
-        <Row label="תקציר" value={conditionBenefit} />
+      <Section title="פרטי המבצע">
         <Row label="הנחה" value={`${state.discountPct}%`} />
-      </Section>
-
-      <Section title="פרמטרי מבצע">
         <Row
           label="מכירות בסיס בתקופה (יחידות)"
           value={formatNumber(state.baseUnits)}

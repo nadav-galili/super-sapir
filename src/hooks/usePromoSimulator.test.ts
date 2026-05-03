@@ -50,6 +50,7 @@ describe("usePromoSimulator (boundary contract)", () => {
         baseUnits: 1000,
         unitPrice: 10,
         unitCost: 5,
+        promoUnitCost: 5,
         discountPct: 10,
         upliftPct: 20,
         stockUnits: 2000,
