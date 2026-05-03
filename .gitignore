@@ -25,7 +25,7 @@ studio*.png
 *.njsproj
 *.sln
 *.sw?
-
+.claude/
 # Local Netlify folder
 .netlify
 
