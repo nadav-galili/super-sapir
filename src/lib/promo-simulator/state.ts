@@ -1,6 +1,15 @@
 // Promo Simulator — state type, defaults, URL codec
 import type { Goal, SalesArena, Segment, StepId } from "./taxonomy";
 
+export const SCENARIOS = ["pessimistic", "base", "optimistic"] as const;
+export type Scenario = (typeof SCENARIOS)[number];
+
+export const SCENARIO_LABEL: Record<Scenario, string> = {
+  pessimistic: "שמרני",
+  base: "בסיס",
+  optimistic: "אופטימי",
+};
+
 /**
  * Scoped slice types — each step consumes only the fields it owns,
  * not the entire SimulatorState. Keeps step components unaware of
@@ -91,12 +100,16 @@ export interface SimulatorState {
   conditionText: string;
   benefitText: string;
   discountPct: number;
-  // Step 5 — forecast
+  // Step 4/5 — financial parameters (was: split between Step 4 terms + Step 5 forecast)
   baseUnits: number;
   unitPrice: number;
   unitCost: number;
   upliftPct: number;
   stockUnits: number;
+  mktCost: number;
+  opsCost: number;
+  cannibPct: number;
+  selectedScenario: Scenario;
   // Step 6 — implementation
   signage: boolean;
   shelf: boolean;
@@ -157,6 +170,10 @@ export function createDefaultState(opts?: {
     unitCost: 7.5,
     upliftPct: 20,
     stockUnits: 1500,
+    mktCost: 5000,
+    opsCost: 1,
+    cannibPct: 15,
+    selectedScenario: "base",
     signage: false,
     shelf: false,
     training: false,
@@ -199,6 +216,10 @@ export type SimulatorSearch = Partial<{
   unitCost: number;
   upliftPct: number;
   stockUnits: number;
+  mktCost: number;
+  opsCost: number;
+  cannibPct: number;
+  selectedScenario: Scenario;
   signage: 1;
   shelf: 1;
   training: 1;
@@ -274,6 +295,16 @@ export function validateSimulatorSearch(
     out.upliftPct = toNum(search.upliftPct, 20);
   if (search.stockUnits !== undefined)
     out.stockUnits = toNum(search.stockUnits, 1500);
+  if (search.mktCost !== undefined) out.mktCost = toNum(search.mktCost, 5000);
+  if (search.opsCost !== undefined) out.opsCost = toNum(search.opsCost, 1);
+  if (search.cannibPct !== undefined)
+    out.cannibPct = toNum(search.cannibPct, 15);
+  if (search.selectedScenario !== undefined) {
+    const v = toStr(search.selectedScenario, "base");
+    out.selectedScenario = (
+      v === "pessimistic" || v === "optimistic" ? v : "base"
+    ) as Scenario;
+  }
   if (search.signage !== undefined) out.signage = 1;
   if (search.shelf !== undefined) out.shelf = 1;
   if (search.training !== undefined) out.training = 1;
@@ -322,6 +353,12 @@ export function decodeState(
     unitCost: search.unitCost ?? defaults.unitCost,
     upliftPct: search.upliftPct ?? defaults.upliftPct,
     stockUnits: search.stockUnits ?? defaults.stockUnits,
+    mktCost: search.mktCost ?? defaults.mktCost,
+    opsCost: search.opsCost ?? defaults.opsCost,
+    cannibPct: search.cannibPct ?? defaults.cannibPct,
+    selectedScenario:
+      (search.selectedScenario as Scenario | undefined) ??
+      defaults.selectedScenario,
     signage: search.signage === 1 ? true : defaults.signage,
     shelf: search.shelf === 1 ? true : defaults.shelf,
     training: search.training === 1 ? true : defaults.training,
@@ -377,6 +414,11 @@ export function encodeState(
   if (state.upliftPct !== defaults.upliftPct) out.upliftPct = state.upliftPct;
   if (state.stockUnits !== defaults.stockUnits)
     out.stockUnits = state.stockUnits;
+  if (state.mktCost !== defaults.mktCost) out.mktCost = state.mktCost;
+  if (state.opsCost !== defaults.opsCost) out.opsCost = state.opsCost;
+  if (state.cannibPct !== defaults.cannibPct) out.cannibPct = state.cannibPct;
+  if (state.selectedScenario !== defaults.selectedScenario)
+    out.selectedScenario = state.selectedScenario;
   if (state.signage) out.signage = 1;
   if (state.shelf) out.shelf = 1;
   if (state.training) out.training = 1;

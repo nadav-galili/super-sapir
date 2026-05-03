@@ -6,6 +6,46 @@
 
 ---
 
+## 2026-05-03
+
+### Promo Simulator Steps 4 + 5 — financial sensitivity workbench
+
+Replaced the thin Step 4 (terms text + discount slider) and Step 5 (forecast KPIs) with a full financial-sensitivity workflow ported from a reference HTML simulator. Step 4 ("פרמטרי מבצע ותוצאות") owns the parameter sliders + headline verdict; Step 5 ("תרחישים ונקודת איזון") owns scenario comparison and break-even analysis. Each step has two internal tabs.
+
+**State.** Added four fields to `SimulatorState`: `mktCost` (default 5000), `opsCost` (default 1), `cannibPct` (default 15), `selectedScenario` ('pessimistic' | 'base' | 'optimistic', default 'base'). Added `SCENARIOS` const + `SCENARIO_LABEL` map for canonical Hebrew. Full URL encode / decode / validate plumbing for all four.
+
+**Calc.** Extended `PromoMetrics` with `effectiveDiscount` (adjusts for BOGO / loyalty promo types), `extraUnits`, `cannibUnits`, `cannibLoss`, `netProfit` (incremental after marketing + cannibalization), `baseGrossMargin`, `promoGrossMargin`, `verdict` ('worthIt' | 'borderline' | 'notWorthIt'). Added `calcForScenario(state, scenario)` which scales `upliftPct` and `cannibPct` by per-scenario factors (pessimistic 0.4× uplift × 1.5× cannib, optimistic 1.8× uplift × 0.4× cannib). Added `verdictLabel()` returning canonical Hebrew strings ("מבצע כדאי / כדאיות גבולית / מבצע לא כדאי"). Existing `status` enum kept for back-compat. Break-even formula now subtracts `opsCost` per unit alongside `unitCost`.
+
+**Validation.** Step 4 now requires `unitPrice / unitCost / discountPct / baseUnits / upliftPct` (was: `conditionText / benefitText / unitPrice / unitCost / discountPct`); free-text fields are now optional. Step 5 requires `selectedScenario`. `stockUnits` no longer gates either step.
+
+**Step 4 component (`Step4Params.tsx`).** Two tabs:
+
+- **פרמטרי מבצע** — left card: read-only `promoType` display (sourced from Step 3), optional condition + benefit text fields, sliders for unitPrice / unitCost / discountPct, and a price-arrow card showing "₪X → ₪Y (חיסכון Z%)". Right card: sliders for baseUnits / upliftPct (with derived "X יח'/יום ל-N ימים"), read-only durationWeeks display (from Step 1), and sliders for mktCost / opsCost / cannibPct. Below: 5-tile metric strip (effective price, base GM, promo GM, net profit, ROI) with traffic-light colors via verdict.
+- **תוצאות וניתוח** — two financial-table cards (revenue breakdown + KPIs incl. break-even units), a Recharts `BarChart` comparing base vs promo on price/cost/margin, and a verdict explanation box.
+
+**Step 5 component (`Step5Scenarios.tsx`).** Two tabs:
+
+- **השוואת תרחישים** — three scenario cards (שמרני / בסיס / אופטימי) writing `selectedScenario`. Recharts `BarChart` showing net profit per scenario (red bars for negative, green for positive, faded if not selected). Right-side detail card with effective uplift, cannibalization, promo price, units, profit, ROI, and verdict for the selected scenario.
+- **נקודת איזון** — Recharts `LineChart` plotting "uplift נדרש לאיזון" against discount % from 5% to 50%, with a dashed reference line showing the user's actual uplift. Two tables below: current break-even details (min uplift, safety margin, BE units) + risk factors card (gross-margin / cannibalization / ROI risk levels with a colored progress bar for total risk).
+
+**Narrative.** Replaced `termsNarrative()` and `forecastNarrative()` with `paramsNarrative()` and `scenariosNarrative()`. New copy speaks to the Verdict + Scenario vocabulary instead of stock-coverage / status. Warnings on negative gross margin and on cannibalization > 25%.
+
+**Wiring.** `StepContent.tsx` swapped imports from `Step4Terms` / `Step5Forecast` to `Step4Params` / `Step5Scenarios`. Both new components receive the full `SimulatorState` (instead of slice props) since they read across multiple slices. The route page now hides `LiveKPIPanel` on steps 4–5 (those steps have their own metric strip + verdict card) — kept it on steps 6–7 only. AINarrative still renders below steps 2–5.
+
+**Step titles.** Step 4: "התניה והטבה" → "פרמטרי מבצע ותוצאות". Step 5: "יעדים / תחזית" → "תרחישים ונקודת איזון".
+
+**Cleanup.** Deleted `Step4Terms.tsx`, `Step5Forecast.tsx`, `UpliftChart.tsx` — no remaining references.
+
+**Tests.** Added 3 new tests in `calc.test.ts` (verdict cannibalization-aware net profit, scenario stress test, verdict label canonical strings). Updated existing break-even test for new `(price - cost - opsCost)` formula. Replaced `step 4 — terms` and `step 5 — forecast` narrative test groups with `step 4 — params: verdict copy` and `step 5 — scenarios narrative`. Total: **180 tests / 27 files** green.
+
+**Glossary.** `context.md` gained five new terms under Promotions: Cannibalization Rate (`cannibPct`), Marketing Cost (`mktCost`), Operations Cost per Unit (`opsCost`), Scenario, Verdict. Flagged-ambiguity note added: Step 4 + 5 are sensitivity-analysis steps; `promoType` and `durationWeeks` are read-only there.
+
+Decision captured in `decisions/2026-05-03-promo-simulator-step4-step5-rebuild.md` (why split the new content across both steps rather than merge into one mega-step).
+
+Files modified: `src/components/promo-simulator/Step4Params.tsx` (new), `src/components/promo-simulator/Step5Scenarios.tsx` (new), `src/components/promo-simulator/StepContent.tsx`, `src/routes/category-manager/promo-simulator.tsx`, `src/lib/promo-simulator/state.ts`, `src/lib/promo-simulator/calc.ts`, `src/lib/promo-simulator/validation.ts`, `src/lib/promo-simulator/taxonomy.ts`, `src/lib/promo-simulator/narrative.ts`, `src/lib/promo-simulator/calc.test.ts`, `src/lib/promo-simulator/narrative.test.ts`, `context.md`, `decisions/2026-05-03-promo-simulator-step4-step5-rebuild.md` (new). Deleted: `Step4Terms.tsx`, `Step5Forecast.tsx`, `UpliftChart.tsx`.
+
+---
+
 ## 2026-05-02
 
 ### Promo Simulator Step 1 — taxonomy rebuild + form upgrade (PRs 1–3)

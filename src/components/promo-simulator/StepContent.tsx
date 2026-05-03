@@ -2,8 +2,8 @@ import { StepPlaceholder } from "./StepPlaceholder";
 import { Step1Brief } from "./Step1Brief";
 import { Step2Goal } from "./Step2Goal";
 import { Step3PromoType } from "./Step3PromoType";
-import { Step4Terms } from "./Step4Terms";
-import { Step5Forecast } from "./Step5Forecast";
+import { Step4Params } from "./Step4Params";
+import { Step5Scenarios } from "./Step5Scenarios";
 import { Step6Analysis } from "./Step6Analysis";
 import { Step7Implementation } from "./Step7Implementation";
 import { Step8Control } from "./Step8Control";
@@ -79,32 +79,9 @@ export function StepContent({
         onChange={setState}
       />
     ) : state.step === 4 ? (
-      <Step4Terms
-        terms={{
-          promoType: state.promoType,
-          conditionText: state.conditionText,
-          benefitText: state.benefitText,
-          discountPct: state.discountPct,
-          unitPrice: state.unitPrice,
-          unitCost: state.unitCost,
-        }}
-        metrics={metrics}
-        onChange={setState}
-      />
+      <Step4Params state={state} metrics={metrics} onChange={setState} />
     ) : state.step === 5 ? (
-      <Step5Forecast
-        forecast={{
-          baseUnits: state.baseUnits,
-          unitPrice: state.unitPrice,
-          unitCost: state.unitCost,
-          upliftPct: state.upliftPct,
-          stockUnits: state.stockUnits,
-          discountPct: state.discountPct,
-          durationWeeks: state.durationWeeks,
-        }}
-        metrics={metrics}
-        onChange={setState}
-      />
+      <Step5Scenarios state={state} metrics={metrics} onChange={setState} />
     ) : state.step === 6 ? (
       <Step6Analysis
         analysisNote={state.analysisNote}
