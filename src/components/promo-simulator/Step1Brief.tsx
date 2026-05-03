@@ -229,7 +229,7 @@ export function Step1Brief({ brief, onChange, errorKeys }: Step1BriefProps) {
         <CardHeader>
           <CardTitle className="text-2xl text-[#2D3748]">רקע / בריף</CardTitle>
           <p className="text-lg text-[#4A5568]">
-            פרטי המבצע, הטקסונומיה, הספק וסדרת המוצרים
+            פרטי המבצע, הספק וסדרת המוצרים
           </p>
         </CardHeader>
         <CardContent>
@@ -517,8 +517,8 @@ export function Step1Brief({ brief, onChange, errorKeys }: Step1BriefProps) {
           title="נתונים / רקע"
           description={
             backgroundDisabled
-              ? "בחר תת-קטגוריה כדי לראות KPI-ים ומבצעים לדוגמה"
-              : "KPI-ים מובילים שמנהלי מחלקה עוקבים אחריהם, עם מבצעים היסטוריים לדוגמה."
+              ? "בחר תת-קטגוריה כדי לראות מכר YTD, חודש אחרון ונתח שוק"
+              : "מכר YTD vs LY, חודש אחרון, ונתח השוק שלך מתת-הקטגוריה."
           }
           onClick={() => setDataOpen(true)}
           disabled={backgroundDisabled}

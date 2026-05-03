@@ -8,6 +8,29 @@
 
 ## 2026-05-03
 
+### Background + Archive sheets — no-scroll fit on desktop
+
+User feedback: both modals required scrolling on a 1440×900 desktop. Goal: zero vertical scroll for the typical desktop case.
+
+- **Background sheet (`BackgroundDataSheet`).** Sheet width 860 → 760, container `overflow-y-auto` → `overflow-hidden` with `flex flex-col` body. Header collapsed from a 3-row stack (badge + 5xl title + 64ch description paragraph) into a single row (badge + 3xl title; description dropped — the scope is already obvious from the title). Section gaps `mt-10` → `mt-4`, card padding `p-8/p-6` → `p-5/p-4`, hero font `text-6xl` → `text-5xl`, compact KPI font `text-4xl` → `text-3xl`, descriptive paragraphs under each card removed (the labels are self-explanatory). `SectionHeading` rebuilt as an inline rule (eyebrow + divider + title on one line) instead of a stacked block. Verified: 760×900 dialog, no overflow at all three scopes.
+- **Archive sheet (`ArchiveSheet`).** The 8-card 2-col grid couldn't fit; each card was ~180px tall × 4 rows = 720px just for cards. Switched to a **single-column row layout** (`HistoricalPromoRow` replaces `HistoricalPromoCard`) — name + meta on the start, then 4 numeric cells (discount / revenue / ROI / uplift) on the end, ~64px per row. 8 rows now ≈ 520px instead of 720px. Sheet width 1080 → 920, container `overflow-y-auto` → `overflow-hidden`, header collapsed to a single row, `SummaryRail` rebuilt as inline label-value pairs instead of a 3-column stack with `text-4xl` numbers (now `text-2xl`). Removed the figure/blockquote with `learnings` per-row to reclaim height — the data was repetitive across rows. Dropped the now-unused `numberFmt`, `computeEndDate`, `ArrowLeft`, `Quote` imports/helpers.
+
+Verified in browser: Background scope 1/2/3 all fit at 760×900 with `overflowing: false`; Archive at scope 1 (8 rows) fits at 920×900 with `overflowing: false`. All 190 tests pass; type-check clean.
+
+### Background Data sheet — sales-snapshot rewrite, scope-aware tiles
+
+Refocused the promo simulator's "נתונים / רקע" sheet from a generic KPI dump into a **decision-support sales snapshot for the Category Manager**. After grilling the design, the sheet now answers two questions the CM needs in parallel: _"how is what I'm planning to promote actually performing?"_ and _"what's the broader sub-category context?"_
+
+- **Hero YTD card.** New `YtdHeroCard` shows narrow-scope YTD revenue in ₪ as the headline number, with a secondary line comparing against the same period last year and a colored YoY delta resolved through `getGrowthColor`. Replaces the old percent-only `ytd-growth` tile, which was abstract and target-divorced.
+- **Two labeled blocks.** Sheet body split into two sections with eyebrow labels: **ממוקד** (the narrow scope — series / supplier-in-subcat / sub-category) carrying the new last-month YoY tile + share-of-sub-cat tile, and **הקשר רחב יותר** (always sub-category scope) carrying the existing `avg-uplift`, `gross-margin`, `promo-share` tiles. Stops the CM from flattening tiles with mismatched scopes.
+- **Scope-aware narrow tiles.** New tiles always show the narrowest selection — series at scope 3, supplier-in-subcat at scope 2, sub-category at scope 1. Existing benchmark tiles stay pinned to sub-category scope regardless.
+- **Share tile.** Renders only when supplier or series is selected (label switches between "נתח הספק מתת-הקטגוריה" and "נתח הסדרה מתת-הקטגוריה"). Computed at render time from `scopeYtdCurrent / subCategoryYtdCurrent`, guaranteeing mathematical consistency with the YTD numbers above.
+- **Historical-promos section retired.** Full delete from `BackgroundDataSheet` — that content already lives in the Archive sheet, the duplication added noise. Hint copy in `Step1Brief` updated to match.
+- **New mock-data API.** `generateSalesSnapshotForScope(scope) → SalesSnapshot` in `mock-archive-generator.ts`, deterministic per `(subcategoryId × supplierId × series)` with a hardcoded `SNAPSHOT_NOW_ISO = "2026-05-03"` anchor. Coverage spans every sub-category × supplier × series combination through the same hash-seeded pattern as `generateKpisForScope`, so the sheet is never empty for any selection. Six new tests assert determinism, scope-narrowing math (series < supplier-in-subcat < sub-cat), and stable sub-cat denominator.
+- **KPI_DEFS pruned.** Removed `ytd-growth` (replaced by hero) and `basket-attach` (deemed redundant by the user). Tile count drops from 5 → 3 in the contextual block. Existing test updated and a regression test added asserting neither id ever surfaces.
+
+Files: `BackgroundDataSheet.tsx`, `Step1Brief.tsx`, `mock-archive-generator.ts`, `mock-archive-generator.test.ts`. All 190 tests pass; type-check clean.
+
 ### Promo Simulator Archive + Background — layout, vocabulary, gross-margin floor
 
 Implemented [issue #65](https://github.com/nadav-galili/super-sapir/issues/65). Four refactors on the Category Manager's `/category-manager/promo-simulator` archive and data-background surfaces:
