@@ -34,18 +34,19 @@ export function missingFieldsForStep(
   const missing: MissingField[] = [];
 
   if (step === 1) {
-    if (isBlank(state.category))
-      missing.push({ key: "category", label: "קטגוריה" });
-    if (isBlank(state.segment))
-      missing.push({ key: "segment", label: "סגמנט" });
+    if (isBlank(state.group)) missing.push({ key: "group", label: "מחלקה" });
+    if (isBlank(state.department))
+      missing.push({ key: "department", label: "קטגוריה" });
+    if (isBlank(state.subcategory))
+      missing.push({ key: "subcategory", label: "תת-קטגוריה" });
+    if (isBlank(state.supplier))
+      missing.push({ key: "supplier", label: "ספק" });
     if (isBlank(state.salesArena))
       missing.push({ key: "salesArena", label: "פורמט" });
     if (isBlank(state.startDate))
       missing.push({ key: "startDate", label: "תאריך התחלה" });
     if (isNonPositive(state.durationWeeks))
       missing.push({ key: "durationWeeks", label: "משך מבצע" });
-    if (isBlank(state.categoryManager))
-      missing.push({ key: "categoryManager", label: "מנהל קטגוריה" });
     return missing;
   }
 
@@ -61,26 +62,22 @@ export function missingFieldsForStep(
   }
 
   if (step === 4) {
-    if (isBlank(state.conditionText))
-      missing.push({ key: "conditionText", label: "תנאי" });
-    if (isBlank(state.benefitText))
-      missing.push({ key: "benefitText", label: "הטבה" });
     if (isNonPositive(state.unitPrice))
       missing.push({ key: "unitPrice", label: "מחיר ליחידה" });
     if (isNonPositive(state.unitCost))
       missing.push({ key: "unitCost", label: "עלות ליחידה" });
     if (isNonPositive(state.discountPct))
       missing.push({ key: "discountPct", label: "אחוז הנחה" });
+    if (isNonPositive(state.baseUnits))
+      missing.push({ key: "baseUnits", label: "מכירות בסיס" });
+    if (isNonPositive(state.upliftPct))
+      missing.push({ key: "upliftPct", label: "uplift" });
     return missing;
   }
 
   if (step === 5) {
-    if (isNonPositive(state.baseUnits))
-      missing.push({ key: "baseUnits", label: "בסיס יחידות" });
-    if (isNonPositive(state.upliftPct))
-      missing.push({ key: "upliftPct", label: "אחוז uplift" });
-    if (isNonPositive(state.stockUnits))
-      missing.push({ key: "stockUnits", label: "מלאי יחידות" });
+    if (isBlank(state.selectedScenario))
+      missing.push({ key: "selectedScenario", label: "תרחיש" });
     return missing;
   }
 

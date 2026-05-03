@@ -1,7 +1,7 @@
 // Promo Simulator — pure narrative templating module.
 // Generates consultative AI-style Hebrew commentary from state + step.
 // No React, no DOM, no external calls. Client-side templated strings only.
-import { calcMetrics, statusLabel } from "./calc";
+import { calcMetrics } from "./calc";
 import type { SimulatorState } from "./state";
 import type { Goal } from "./taxonomy";
 import { formatCurrency, formatNumber } from "@/lib/format";
@@ -59,54 +59,58 @@ function promoNarrative(state: SimulatorState): string[] {
   ];
 }
 
-function termsNarrative(state: SimulatorState): string[] {
-  const paragraphs: string[] = [];
-  if (state.discountPct > 25) {
-    paragraphs.push(
-      `הנחה של ${state.discountPct}% היא משמעותית מאוד ועלולה לשחוק את שיעור הרווח הגולמי. ודא שהעלייה בנפח המכירה מצדיקה את שחיקת המרווח.`
-    );
-    paragraphs.push(
-      "שקול האם הנחה של 15–20% עם הטבה נלווית (מוצר חינם, קופון חוזר) לא תניב תוצאה דומה בלי פגיעה ברווחיות."
-    );
-  } else if (state.discountPct < 10) {
-    paragraphs.push(
-      `הנחה של ${state.discountPct}% היא צנועה. אם המטרה היא "${state.goal || "משיכת קונים"}", כדאי לשקול הטבה חזקה יותר — מבצע קל מדי לא יחצה את רף ההבחנה של הקונה.`
-    );
-  } else {
-    paragraphs.push(
-      `הנחה של ${state.discountPct}% היא טווח סביר — נותנת ללקוח תחושת ערך בלי לשחוק מהותית את המרווח.`
-    );
-  }
-  return paragraphs;
-}
-
-function forecastNarrative(state: SimulatorState): string[] {
+function paramsNarrative(state: SimulatorState): string[] {
   const m = calcMetrics(state);
   const paragraphs: string[] = [];
 
-  if (m.status === "notWorthIt") {
-    if (m.unitMargin <= 0) {
+  if (m.verdict === "worthIt") {
+    paragraphs.push(
+      `הפרמטרים מצביעים על מבצע כדאי: רווח תוספתי של ${formatCurrency(m.netProfit)} ושיעור רווח גולמי במבצע ${m.promoGrossMargin.toFixed(1)}%.`
+    );
+  } else if (m.verdict === "notWorthIt") {
+    if (m.promoGrossMargin < 0) {
       paragraphs.push(
-        "המרווח ליחידה לאחר ההנחה אינו חיובי — כל מכירה תוסיף הפסד. יש להפחית את ההנחה או לבחון מחדש את המחיר והעלות."
+        `הנחה של ${state.discountPct}% מורידה את המחיר אל מתחת לעלות — שיעור רווח גולמי שלילי. הפחת את ההנחה או בחן את עלות המוצר.`
       );
     } else {
       paragraphs.push(
-        `כיסוי המלאי (${m.stockCoverage}%) נמוך מדי — צפוי חוסר מלאי בעיצומו של המבצע, מה שיפגע במוניטין ובמטרה.`
+        `הרווח התוספתי הנטו שלילי (${formatCurrency(m.netProfit)}). עלות השיווק (${formatCurrency(state.mktCost)}) או הקניבליזציה (${state.cannibPct}%) שוחקות את התרומה.`
       );
     }
-  } else if (m.status === "needsImprovement") {
-    paragraphs.push(
-      `הסטטוס הנוכחי הוא "${statusLabel(m.status)}". ROI החזוי עומד על ${m.roi}%. ניתן לשפר על ידי חיזוק המרווח (פחות הנחה) או הגברת הגידול הריאלי.`
-    );
   } else {
     paragraphs.push(
-      `ROI החזוי ${m.roi}% מצביע על מבצע כדאי. נקודת האיזון תושג לאחר מכירת ${formatNumber(m.breakEvenUnits)} יחידות.`
+      `כדאיות גבולית: רווח של ${formatCurrency(m.netProfit)} ב-uplift של ${state.upliftPct}%. בדוק מה קורה לתרחיש שמרני יותר לפני אישור.`
     );
   }
 
-  if (state.baseUnits > 0 && m.promoUnits > 0) {
+  if (state.cannibPct > 25) {
     paragraphs.push(
-      `פדיון צפוי ${formatCurrency(m.promoRevenue)} מול בסיס ${formatCurrency(m.baseRevenue)} — גידול של ${state.upliftPct}% ביחידות.`
+      `קניבליזציה של ${state.cannibPct}% גבוהה — חלק ניכר מהמכירות במבצע באות במקום מכירות שהיו ממילא. שקול להפחית את ההערכה.`
+    );
+  }
+
+  return paragraphs;
+}
+
+function scenariosNarrative(state: SimulatorState): string[] {
+  const m = calcMetrics(state);
+  const paragraphs: string[] = [];
+
+  paragraphs.push(
+    `התרחיש שנבחר הוא ${state.selectedScenario === "pessimistic" ? "שמרני" : state.selectedScenario === "optimistic" ? "אופטימי" : "בסיס"}. ${
+      m.netProfit >= 0
+        ? `הרווח התוספתי הצפוי בתרחיש זה: ${formatCurrency(m.netProfit)}.`
+        : `התרחיש מציג הפסד תוספתי של ${formatCurrency(Math.abs(m.netProfit))} — שקול לבחון פרמטרים שמרניים יותר לפני אישור.`
+    }`
+  );
+
+  if (Number.isFinite(m.breakEvenUnits)) {
+    paragraphs.push(
+      `נקודת האיזון תושג לאחר מכירת ${formatNumber(m.breakEvenUnits)} יחידות נוספות במחיר המבצע.`
+    );
+  } else {
+    paragraphs.push(
+      "המרווח האפקטיבי ליחידה לאחר עלות תפעול אינו חיובי — לא ניתן להגיע לאיזון בכל uplift. הפחת את ההנחה או הוזל את עלות התפעול."
     );
   }
 
@@ -128,9 +132,9 @@ export function narrativeFor(state: SimulatorState): string[] {
     case 3:
       return promoNarrative(state);
     case 4:
-      return termsNarrative(state);
+      return paramsNarrative(state);
     case 5:
-      return forecastNarrative(state);
+      return scenariosNarrative(state);
     default:
       return [];
   }

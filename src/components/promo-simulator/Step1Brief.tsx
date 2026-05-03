@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Archive, Database } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -8,11 +11,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { getCategorySummaries } from "@/data/mock-categories";
-import { getSegmentsByDepartmentName } from "@/data/mock-taxonomy";
-import { getItemsBySegment } from "@/data/mock-items";
-import { DEPARTMENT_NAMES } from "@/data/constants";
-import { CATEGORY_MANAGERS } from "@/data/mock-promo-history";
+import {
+  PROMO_GROUPS,
+  GROUP_MANAGERS,
+  getDepartmentsByGroup,
+  getCategoriesByDepartment,
+  getSubCategoriesByCategory,
+  findSubCategoryById,
+} from "@/data/mock-promo-taxonomy";
+import { getSuppliersForSubCategory } from "@/data/mock-subcategory-suppliers";
+import { getSeriesForSupplierAndSubCategory } from "@/data/mock-supplier-series";
+import { getSuppliersByIds } from "@/data/mock-suppliers";
 import { usePromoTaxonomy } from "@/contexts/PromoTaxonomyContext";
 import { ArchiveSheet } from "./ArchiveSheet";
 import { BackgroundDataSheet } from "./BackgroundDataSheet";
@@ -24,18 +33,14 @@ interface Step1BriefProps {
   errorKeys?: ReadonlySet<keyof BriefSlice>;
 }
 
-const LABEL = "text-[15px] font-medium text-[#4A5568] mb-1.5 block";
-
-const INPUT_CLS =
-  "flex h-10 w-full items-center rounded-[10px] border border-[#E7E0D8] bg-white px-3 py-2 text-[16px] text-[#2D3748] shadow-sm transition-colors hover:bg-[#FAF8F5] focus:outline-none focus:ring-2 focus:ring-[#DC4E59]/20 focus:border-[#DC4E59]/40";
-
 const ERROR_RING =
   "border-[#F43F5E] focus:border-[#F43F5E] focus:ring-[#F43F5E]/25";
 
-const READONLY_CLS =
-  "flex h-10 w-full items-center rounded-[10px] border border-[#E7E0D8] bg-[#FAF8F5] px-3 py-2 text-[16px] text-[#2D3748] shadow-sm";
+// Sentinel value for the "no series selected" option in the optional Series
+// dropdown. Radix Select does not support empty-string values, so we map
+// this sentinel to an empty `series` field on selection.
+const SERIES_NONE = "__none__";
 
-// Compute end date = startDate + durationWeeks * 7 (YYYY-MM-DD).
 function computeEndDate(startDate: string, durationWeeks: number): string {
   if (!startDate || !Number.isFinite(durationWeeks) || durationWeeks <= 0)
     return "";
@@ -92,49 +97,131 @@ function ClickableInfoCard({
 }
 
 export function Step1Brief({ brief, onChange, errorKeys }: Step1BriefProps) {
-  const categories = useMemo(() => getCategorySummaries(), []);
   const { salesArenas } = usePromoTaxonomy();
 
   const [archiveOpen, setArchiveOpen] = useState(false);
   const [dataOpen, setDataOpen] = useState(false);
 
-  // Segments depend on the chosen Category (Department).
-  const segments = useMemo(
-    () => getSegmentsByDepartmentName(brief.category, DEPARTMENT_NAMES),
-    [brief.category]
+  // Cascading lists driven by current selection.
+  const departments = useMemo(
+    () => getDepartmentsByGroup(brief.group),
+    [brief.group]
   );
-
-  // Products depend on the chosen Segment.
-  const products = useMemo(
-    () => (brief.segment ? getItemsBySegment(brief.segment) : []),
-    [brief.segment]
+  const categories = useMemo(
+    () => getCategoriesByDepartment(brief.group, brief.department),
+    [brief.group, brief.department]
   );
+  // The sub-category dropdown lists items grouped by Category (rendered
+  // inline inside <SelectContent>). This memo backs the empty-state copy
+  // shown when the chosen Department has no sub-categories defined.
+  const subCategoriesFlat = useMemo(() => {
+    if (!brief.department) return [];
+    return categories.flatMap((c) => c.subCategories);
+  }, [brief.department, categories]);
+  // Reference the helper so future fine-grained scoping has it on hand.
+  void getSubCategoriesByCategory;
 
-  // Auto-populate category manager based on chosen category.
+  const suppliers = useMemo(() => {
+    if (!brief.subcategory) return [];
+    const ids = getSuppliersForSubCategory(brief.subcategory);
+    return getSuppliersByIds(ids);
+  }, [brief.subcategory]);
+
+  const series = useMemo(() => {
+    if (!brief.supplier || !brief.subcategory) return [];
+    return getSeriesForSupplierAndSubCategory(
+      brief.supplier,
+      brief.subcategory
+    );
+  }, [brief.supplier, brief.subcategory]);
+
+  // ── Cascading clears: changing a parent must invalidate children ──
   useEffect(() => {
-    const mapped = brief.category
-      ? (CATEGORY_MANAGERS[brief.category] ?? "")
-      : "";
-    if (mapped && mapped !== brief.categoryManager) {
-      onChange({ categoryManager: mapped });
-    }
-    if (!brief.category && brief.categoryManager) {
-      onChange({ categoryManager: "" });
+    if (
+      brief.department &&
+      !departments.some((d) => d.id === brief.department)
+    ) {
+      onChange({ department: "", subcategory: "", supplier: "", series: "" });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [brief.category]);
+  }, [brief.group]);
+
+  useEffect(() => {
+    if (brief.subcategory) {
+      const found = findSubCategoryById(brief.subcategory);
+      if (
+        !found ||
+        found.group.id !== brief.group ||
+        found.department.id !== brief.department
+      ) {
+        onChange({ subcategory: "", supplier: "", series: "" });
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [brief.department]);
+
+  useEffect(() => {
+    if (brief.supplier) {
+      const ids = getSuppliersForSubCategory(brief.subcategory);
+      if (!ids.includes(brief.supplier)) {
+        onChange({ supplier: "", series: "" });
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [brief.subcategory]);
+
+  useEffect(() => {
+    if (brief.series && brief.supplier && brief.subcategory) {
+      const validSeries = getSeriesForSupplierAndSubCategory(
+        brief.supplier,
+        brief.subcategory
+      );
+      if (!validSeries.includes(brief.series)) {
+        onChange({ series: "" });
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [brief.supplier]);
+
+  // ── Manager + legacy mirror (per group) ──
+  // Updates `categoryManager` from GROUP_MANAGERS, and mirrors group nameHe
+  // into the legacy `category` field so downstream consumers (PromoSummary,
+  // narrative, PDF export) continue to render meaningful values.
+  // See: decisions/2026-05-02-promo-simulator-manager-label.md
+  useEffect(() => {
+    if (brief.group) {
+      const manager = GROUP_MANAGERS[brief.group] ?? "";
+      const groupName =
+        PROMO_GROUPS.find((g) => g.id === brief.group)?.nameHe ?? "";
+      const updates: Partial<BriefSlice> = {};
+      if (manager !== brief.categoryManager) updates.categoryManager = manager;
+      if (groupName !== brief.category) updates.category = groupName;
+      if (Object.keys(updates).length) onChange(updates);
+    } else if (brief.categoryManager || brief.category) {
+      onChange({ categoryManager: "", category: "" });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [brief.group]);
 
   const endDate = computeEndDate(brief.startDate, brief.durationWeeks);
 
   const hasError = (k: keyof BriefSlice) => errorKeys?.has(k) ?? false;
   const triggerCls = (k: keyof BriefSlice) =>
     `text-[16px] ${hasError(k) ? ERROR_RING : ""}`;
-  const inputCls = (k: keyof BriefSlice) =>
-    `${INPUT_CLS} ${hasError(k) ? ERROR_RING : ""}`;
+  const inputErrCls = (k: keyof BriefSlice) => (hasError(k) ? ERROR_RING : "");
 
-  const segmentDisabled = !brief.category;
-  const productDisabled = !brief.segment;
-  const infoCardsDisabled = !brief.category;
+  const departmentDisabled = !brief.group;
+  const subcategoryDisabled = !brief.department;
+  const supplierDisabled = !brief.subcategory;
+  const seriesDisabled = !brief.supplier || series.length === 0;
+
+  // Archive opens once a sub-category is chosen — supplier optional for archive,
+  // even though it is required to advance past Step 1.
+  const archiveDisabled = !brief.subcategory;
+  const backgroundDisabled = !brief.subcategory;
+
+  const subCategoryName =
+    findSubCategoryById(brief.subcategory)?.subCategory.nameHe ?? "";
 
   return (
     <div className="space-y-6">
@@ -142,59 +229,55 @@ export function Step1Brief({ brief, onChange, errorKeys }: Step1BriefProps) {
         <CardHeader>
           <CardTitle className="text-2xl text-[#2D3748]">רקע / בריף</CardTitle>
           <p className="text-lg text-[#4A5568]">
-            פרטי המבצע, הקטגוריה, הקמעונאי ולוח הזמנים
+            פרטי המבצע, הטקסונומיה, הספק וסדרת המוצרים
           </p>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
-              <label className={LABEL} htmlFor="f-category">
-                קטגוריה
-              </label>
+              <Label htmlFor="f-group" required>
+                מחלקה
+              </Label>
               <Select
-                value={brief.category}
-                onValueChange={(v) => onChange({ category: v })}
+                value={brief.group || undefined}
+                onValueChange={(v) => onChange({ group: v })}
+              >
+                <SelectTrigger id="f-group" className={triggerCls("group")}>
+                  <SelectValue placeholder="בחר מחלקה" />
+                </SelectTrigger>
+                <SelectContent>
+                  {PROMO_GROUPS.map((g) => (
+                    <SelectItem key={g.id} value={g.id} className="text-[16px]">
+                      {g.nameHe}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="f-department" required>
+                קטגוריה
+              </Label>
+              <Select
+                value={brief.department || undefined}
+                onValueChange={(v) => onChange({ department: v })}
+                disabled={departmentDisabled}
               >
                 <SelectTrigger
-                  id="f-category"
-                  className={triggerCls("category")}
+                  id="f-department"
+                  className={triggerCls("department")}
                 >
-                  <SelectValue placeholder="בחר קטגוריה" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((c) => (
-                    <SelectItem
-                      key={c.id}
-                      value={c.name}
-                      className="text-[16px]"
-                    >
-                      {c.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <label className={LABEL} htmlFor="f-segment">
-                סגמנט
-              </label>
-              <Select
-                value={brief.segment || undefined}
-                onValueChange={(v) => onChange({ segment: v })}
-                disabled={segmentDisabled}
-              >
-                <SelectTrigger id="f-segment" className={triggerCls("segment")}>
                   <SelectValue
                     placeholder={
-                      segmentDisabled ? "בחר קטגוריה קודם" : "בחר סגמנט"
+                      departmentDisabled ? "בחר מחלקה קודם" : "בחר קטגוריה"
                     }
                   />
                 </SelectTrigger>
                 <SelectContent>
-                  {segments.map((s) => (
-                    <SelectItem key={s.id} value={s.id} className="text-[16px]">
-                      {s.nameHe}
+                  {departments.map((d) => (
+                    <SelectItem key={d.id} value={d.id} className="text-[16px]">
+                      {d.nameHe}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -202,34 +285,120 @@ export function Step1Brief({ brief, onChange, errorKeys }: Step1BriefProps) {
             </div>
 
             <div>
-              <label className={LABEL} htmlFor="f-product">
-                מוצר{" "}
-                <span className="text-[13px] text-[#788390] font-normal">
+              <Label htmlFor="f-subcategory" required>
+                תת-קטגוריה
+              </Label>
+              <Select
+                value={brief.subcategory || undefined}
+                onValueChange={(v) => onChange({ subcategory: v })}
+                disabled={subcategoryDisabled}
+              >
+                <SelectTrigger
+                  id="f-subcategory"
+                  className={triggerCls("subcategory")}
+                >
+                  <SelectValue
+                    placeholder={
+                      subcategoryDisabled
+                        ? "בחר קטגוריה קודם"
+                        : "בחר תת-קטגוריה"
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((cat) => (
+                    <div key={cat.id}>
+                      <div className="px-2 py-1.5 text-[14px] font-semibold text-[#788390] uppercase tracking-wider">
+                        {cat.nameHe}
+                      </div>
+                      {cat.subCategories.map((s) => (
+                        <SelectItem
+                          key={s.id}
+                          value={s.id}
+                          className="text-[16px] ps-6"
+                        >
+                          {s.nameHe}
+                        </SelectItem>
+                      ))}
+                    </div>
+                  ))}
+                  {subCategoriesFlat.length === 0 && brief.department ? (
+                    <div className="px-2 py-1.5 text-[15px] text-[#788390]">
+                      אין תת-קטגוריות מוגדרות
+                    </div>
+                  ) : null}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="f-supplier" required>
+                ספק
+              </Label>
+              <Select
+                value={brief.supplier || undefined}
+                onValueChange={(v) => onChange({ supplier: v })}
+                disabled={supplierDisabled}
+              >
+                <SelectTrigger
+                  id="f-supplier"
+                  className={triggerCls("supplier")}
+                >
+                  <SelectValue
+                    placeholder={
+                      supplierDisabled
+                        ? "בחר תת-קטגוריה קודם"
+                        : suppliers.length === 0
+                          ? "אין ספקים מוגדרים"
+                          : "בחר ספק"
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {suppliers.map((s) => (
+                    <SelectItem key={s.id} value={s.id} className="text-[16px]">
+                      {s.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="f-series">
+                סדרה{" "}
+                <span className="text-[15px] text-[#788390] font-normal">
                   (אופציונלי)
                 </span>
-              </label>
+              </Label>
               <Select
-                value={brief.product || undefined}
-                onValueChange={(v) => onChange({ product: v })}
-                disabled={productDisabled}
+                value={brief.series || SERIES_NONE}
+                onValueChange={(v) =>
+                  onChange({ series: v === SERIES_NONE ? "" : v })
+                }
+                disabled={seriesDisabled}
               >
-                <SelectTrigger id="f-product" className={triggerCls("product")}>
+                <SelectTrigger id="f-series" className={triggerCls("series")}>
                   <SelectValue
                     placeholder={
-                      productDisabled
-                        ? "בחר סגמנט קודם"
-                        : "בחר מוצר — או השאר ריק לכל הסגמנט"
+                      !brief.supplier
+                        ? "בחר ספק קודם"
+                        : series.length === 0
+                          ? "אין סדרות מוגדרות"
+                          : "בחר סדרה"
                     }
                   />
                 </SelectTrigger>
                 <SelectContent>
-                  {products.map((p) => (
-                    <SelectItem
-                      key={p.id}
-                      value={p.nameHe}
-                      className="text-[16px]"
-                    >
-                      {p.nameHe}
+                  <SelectItem
+                    value={SERIES_NONE}
+                    className="text-[16px] text-[#788390]"
+                  >
+                    ללא סדרה
+                  </SelectItem>
+                  {series.map((s) => (
+                    <SelectItem key={s} value={s} className="text-[16px]">
+                      {s}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -237,9 +406,9 @@ export function Step1Brief({ brief, onChange, errorKeys }: Step1BriefProps) {
             </div>
 
             <div>
-              <label className={LABEL} htmlFor="f-arena">
+              <Label htmlFor="f-arena" required>
                 פורמט
-              </label>
+              </Label>
               <Select
                 value={brief.salesArena || undefined}
                 onValueChange={(v) =>
@@ -263,37 +432,24 @@ export function Step1Brief({ brief, onChange, errorKeys }: Step1BriefProps) {
             </div>
 
             <div>
-              <label className={LABEL} htmlFor="f-retailer">
-                קמעונאי
-              </label>
-              <input
-                id="f-retailer"
-                type="text"
-                value={brief.retailer}
-                onChange={(e) => onChange({ retailer: e.target.value })}
-                className={INPUT_CLS}
-              />
-            </div>
-
-            <div>
-              <label className={LABEL} htmlFor="f-start">
+              <Label htmlFor="f-start" required>
                 תאריך התחלה
-              </label>
-              <input
+              </Label>
+              <Input
                 id="f-start"
                 type="date"
                 value={brief.startDate}
                 onChange={(e) => onChange({ startDate: e.target.value })}
-                className={inputCls("startDate")}
+                className={inputErrCls("startDate")}
                 dir="ltr"
               />
             </div>
 
             <div>
-              <label className={LABEL} htmlFor="f-end">
+              <Label htmlFor="f-end" required>
                 תאריך סיום
-              </label>
-              <input
+              </Label>
+              <Input
                 id="f-end"
                 type="date"
                 value={endDate}
@@ -314,54 +470,28 @@ export function Step1Brief({ brief, onChange, errorKeys }: Step1BriefProps) {
                   );
                   onChange({ durationWeeks: diffDays / 7 });
                 }}
-                className={inputCls("durationWeeks")}
+                className={inputErrCls("durationWeeks")}
                 dir="ltr"
               />
             </div>
 
-            {/* Duration field hidden for now — end date is the source of truth.
             <div>
-              <label className={LABEL} htmlFor="f-duration">
-                משך מבצע
-              </label>
-              <Select
-                value={String(brief.durationWeeks)}
-                onValueChange={(v) => onChange({ durationWeeks: Number(v) })}
-              >
-                <SelectTrigger
-                  id="f-duration"
-                  className={triggerCls("durationWeeks")}
-                >
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {durationWeeksOptions.map((o) => (
-                    <SelectItem
-                      key={o.value}
-                      value={String(o.value)}
-                      className="text-[16px]"
-                    >
-                      {o.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            */}
-
-            <div>
-              <label className={LABEL} htmlFor="f-manager">
-                מנהל קטגוריה
-              </label>
+              <Label htmlFor="f-manager">מנהל מחלקה</Label>
               <div
                 id="f-manager"
-                className={READONLY_CLS}
-                aria-readonly="true"
-                aria-label="מנהל הקטגוריה מוגדר אוטומטית לפי הקטגוריה הנבחרת"
+                className="flex h-10 items-center"
+                aria-label="מנהל המחלקה מוגדר אוטומטית לפי המחלקה הנבחרת"
               >
-                {brief.categoryManager || (
-                  <span className="text-[#788390]">
-                    ייבחר אוטומטית לפי הקטגוריה
+                {brief.categoryManager ? (
+                  <Badge
+                    variant="secondary"
+                    className="text-[16px] font-semibold px-3 py-1.5 rounded-full"
+                  >
+                    {brief.categoryManager}
+                  </Badge>
+                ) : (
+                  <span className="text-[16px] text-[#788390]">
+                    ייבחר אוטומטית לפי המחלקה
                   </span>
                 )}
               </div>
@@ -375,36 +505,40 @@ export function Step1Brief({ brief, onChange, errorKeys }: Step1BriefProps) {
           icon={Archive}
           title="ארכיון"
           description={
-            infoCardsDisabled
-              ? "בחר קטגוריה כדי לראות מבצעים דומים מהעבר"
-              : "שלוף מבצעים דומים מהעבר, סקור ביצועים ו-YTD מול הרשת, וקבל נקודת פתיחה מהירה."
+            archiveDisabled
+              ? "בחר תת-קטגוריה כדי לראות מבצעים דומים מהעבר"
+              : `שלוף מבצעים דומים מהעבר${subCategoryName ? ` ב-${subCategoryName}` : ""}, סקור ביצועים, וקבל נקודת פתיחה מהירה.`
           }
           onClick={() => setArchiveOpen(true)}
-          disabled={infoCardsDisabled}
+          disabled={archiveDisabled}
         />
         <ClickableInfoCard
           icon={Database}
           title="נתונים / רקע"
           description={
-            infoCardsDisabled
-              ? "בחר קטגוריה כדי לראות KPI-ים ומבצעים לדוגמה"
-              : "KPI-ים מובילים שמנהלי קטגוריה עוקבים אחריהם, עם מבצעים היסטוריים לדוגמה."
+            backgroundDisabled
+              ? "בחר תת-קטגוריה כדי לראות KPI-ים ומבצעים לדוגמה"
+              : "KPI-ים מובילים שמנהלי מחלקה עוקבים אחריהם, עם מבצעים היסטוריים לדוגמה."
           }
           onClick={() => setDataOpen(true)}
-          disabled={infoCardsDisabled}
+          disabled={backgroundDisabled}
         />
       </div>
 
       <ArchiveSheet
         open={archiveOpen}
         onOpenChange={setArchiveOpen}
-        category={brief.category}
-        product={brief.product}
+        groupId={brief.group}
+        subcategoryId={brief.subcategory}
+        supplierId={brief.supplier}
+        series={brief.series}
       />
       <BackgroundDataSheet
         open={dataOpen}
         onOpenChange={setDataOpen}
-        category={brief.category}
+        subcategoryId={brief.subcategory}
+        supplierId={brief.supplier}
+        series={brief.series}
       />
     </div>
   );

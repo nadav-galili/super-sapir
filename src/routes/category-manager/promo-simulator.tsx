@@ -80,7 +80,8 @@ function PromoSimulatorPage() {
     jumpToStep(step);
   };
 
-  const showLiveKpi = state.step >= 4 && state.step <= 7;
+  // Step 4+5 ship their own metric strip + verdict — drop the side rail there.
+  const showLiveKpi = state.step >= 6 && state.step <= 7;
   const showNarrative = state.step >= 2 && state.step <= 5;
 
   const stepContent = (

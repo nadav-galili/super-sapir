@@ -27,7 +27,10 @@
       "Bash(git stash *)",
       "Bash(xargs -I {} basename {})",
       "WebFetch(domain:21st.dev)",
-      "WebFetch(domain:www.shadcnblocks.com)"
+      "WebFetch(domain:www.shadcnblocks.com)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(sed -n '1,15p' /Users/nadavgalili/personal_projects/superSapir/architecture.md)",
+      "Bash(sed -n '125,140p' /Users/nadavgalili/personal_projects/superSapir/architecture.md)"
     ]
   }
 }

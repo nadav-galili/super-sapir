@@ -6,6 +6,112 @@
 
 ---
 
+## 2026-05-03
+
+### Promo Simulator Archive + Background — layout, vocabulary, gross-margin floor
+
+Implemented [issue #65](https://github.com/nadav-galili/super-sapir/issues/65). Four refactors on the Category Manager's `/category-manager/promo-simulator` archive and data-background surfaces:
+
+- **Archive density.** Bumped the per-scope historical-promo counts from 3 / 4 / 5 to **6 / 7 / 8** (Series / Supplier / Sub-category) so every tier shows enough prior art. Counts are tier-locked by a new test in `mock-archive-generator.test.ts`.
+- **Archive layout.** Cards moved from a single full-width column with an asymmetric "featured" hero card to a uniform **2-col grid on `md+`, single col on mobile**. Card payload shrunk one notch (heading 2xl / uplift 4xl / padding `px-6 py-5`). The `featured` flag and `[featured, ...rest]` split are gone, simplifying `ArchiveSheet`.
+- **shadcn primitives.** `HistoricalPromoCard` migrated to shadcn `Card` + `CardContent`, and the promo-type / outcome chips to shadcn `Badge`, with `className` overrides preserving the warm-eCommerce design system (`rounded-[16px]`, `text-[15px]`).
+- **Buy & Get retired.** Full delete: section JSX, `BuyAndGetTile`, `generateBuyAndGetForScope`, `BuyAndGetPromo` type, `BUY_AND_GET_CONDITIONS` / `BUY_AND_GET_BENEFITS` arrays, the legacy `buyAndGetPromos` dataset (~460 lines in `mock-promo-history.ts`), and `getBuyAndGetPromosForCategory`. No backwards-compat shims.
+- **Stockout KPI removed** from `KPI_DEFS` in `mock-archive-generator.ts`. `BackgroundDataSheet` picks up the change automatically. New regression test asserts no `stockout` id ever appears in generator output.
+- **Gross Margin retuned.** Label `Gross Margin` → **רווחיות גולמית**; range floored at `[28, 38]` with `good: 28` so the indicator reads green whenever actual ≥ 28% (the existing 28% target). Description copy updated to use the canonical term. New test asserts label + `rawValue >= 28` + `status === 'good'` across every Sub-category.
+- **Glossary.** Added **רווחיות גולמית** to `context.md` under "Sales & performance metrics", with `Gross Margin` as the English equivalent and `שיעור רווח גולמי` flagged as alias-to-avoid.
+
+Files: `ArchiveSheet.tsx`, `mock-archive-generator.ts`, `mock-archive-generator.test.ts`, `mock-promo-history.ts`, `context.md`.
+
+### Promo Simulator Step 6 — decision & justification
+
+Step 6 ("תחזית והערכה") was an analysis page that overlapped heavily with the rebuilt Step 5. Recast as **"החלטה והצדקה"**: shows the verdict from Step 4, three headline KPI tiles (`netProfit` / `roi` / selected scenario), three decision buttons (לאשר / לאשר עם תיקונים / לדחות), and a justification textarea backed by the existing `analysisNote` field. The textarea placeholder swaps copy depending on the chosen decision.
+
+State gained `decision: 'approve' | 'revise' | 'reject' | ''` with full URL codec. `analysisNote` kept its name to avoid breaking PromoFullReport / Step9. New `Step6Decision.tsx`; deleted `Step6Analysis.tsx`. Stepper title updated.
+
+### Promo Simulator — downstream alignment (PromoFullReport, Step9 table, Step 4 tab)
+
+After the Step 4+5+6 rebuild, the documentation surfaces still spoke the old vocabulary. Cleaned up:
+
+- **PromoFullReport** (PDF export): renamed "יעדים ותחזית" → "פרמטרי מבצע", dropped the vestigial `stockUnits` / `stockCoverage` rows, added `mktCost` / `opsCost` / `cannibPct` rows, added `extraUnits` / `cannibLoss` / `netProfit` / `baseGrossMargin` / `promoGrossMargin` to "KPI מפתח", replaced "סטטוס" / `statusLabel(m.status)` with "הערכת כדאיות" / `verdictLabel(m.verdict)`, added "תרחיש נבחר" row. The "ניתוח ותיעוד" section became "החלטה ותיעוד" with a new "החלטה" row driven by `state.decision`.
+- **Step 9 documentation table**: replaced the "משמעות ההטבה" column (which combined `statusLabel` + `promoProfit`) with two separate columns — "הערכת כדאיות" (verdictLabel) and "החלטה" (DECISION_LABEL). Renamed "עלות מימוש" → "עלות שיווק" (now shows `state.mktCost` directly instead of the heuristic `m.investment`). Renamed "גידול ריאלי" → "uplift" and added a "רווח תוספתי נטו" column.
+- **Step 4 tab label**: "תוצאות וניתוח" → "תחזית ביצועים" (per direct request).
+
+### Promo Simulator Steps 4 + 5 — financial sensitivity workbench
+
+Replaced the thin Step 4 (terms text + discount slider) and Step 5 (forecast KPIs) with a full financial-sensitivity workflow ported from a reference HTML simulator. Step 4 ("פרמטרי מבצע ותוצאות") owns the parameter sliders + headline verdict; Step 5 ("תרחישים ונקודת איזון") owns scenario comparison and break-even analysis. Each step has two internal tabs.
+
+**State.** Added four fields to `SimulatorState`: `mktCost` (default 5000), `opsCost` (default 1), `cannibPct` (default 15), `selectedScenario` ('pessimistic' | 'base' | 'optimistic', default 'base'). Added `SCENARIOS` const + `SCENARIO_LABEL` map for canonical Hebrew. Full URL encode / decode / validate plumbing for all four.
+
+**Calc.** Extended `PromoMetrics` with `effectiveDiscount` (adjusts for BOGO / loyalty promo types), `extraUnits`, `cannibUnits`, `cannibLoss`, `netProfit` (incremental after marketing + cannibalization), `baseGrossMargin`, `promoGrossMargin`, `verdict` ('worthIt' | 'borderline' | 'notWorthIt'). Added `calcForScenario(state, scenario)` which scales `upliftPct` and `cannibPct` by per-scenario factors (pessimistic 0.4× uplift × 1.5× cannib, optimistic 1.8× uplift × 0.4× cannib). Added `verdictLabel()` returning canonical Hebrew strings ("מבצע כדאי / כדאיות גבולית / מבצע לא כדאי"). Existing `status` enum kept for back-compat. Break-even formula now subtracts `opsCost` per unit alongside `unitCost`.
+
+**Validation.** Step 4 now requires `unitPrice / unitCost / discountPct / baseUnits / upliftPct` (was: `conditionText / benefitText / unitPrice / unitCost / discountPct`); free-text fields are now optional. Step 5 requires `selectedScenario`. `stockUnits` no longer gates either step.
+
+**Step 4 component (`Step4Params.tsx`).** Two tabs:
+
+- **פרמטרי מבצע** — left card: read-only `promoType` display (sourced from Step 3), optional condition + benefit text fields, sliders for unitPrice / unitCost / discountPct, and a price-arrow card showing "₪X → ₪Y (חיסכון Z%)". Right card: sliders for baseUnits / upliftPct (with derived "X יח'/יום ל-N ימים"), read-only durationWeeks display (from Step 1), and sliders for mktCost / opsCost / cannibPct. Below: 5-tile metric strip (effective price, base GM, promo GM, net profit, ROI) with traffic-light colors via verdict.
+- **תוצאות וניתוח** — two financial-table cards (revenue breakdown + KPIs incl. break-even units), a Recharts `BarChart` comparing base vs promo on price/cost/margin, and a verdict explanation box.
+
+**Step 5 component (`Step5Scenarios.tsx`).** Two tabs:
+
+- **השוואת תרחישים** — three scenario cards (שמרני / בסיס / אופטימי) writing `selectedScenario`. Recharts `BarChart` showing net profit per scenario (red bars for negative, green for positive, faded if not selected). Right-side detail card with effective uplift, cannibalization, promo price, units, profit, ROI, and verdict for the selected scenario.
+- **נקודת איזון** — Recharts `LineChart` plotting "uplift נדרש לאיזון" against discount % from 5% to 50%, with a dashed reference line showing the user's actual uplift. Two tables below: current break-even details (min uplift, safety margin, BE units) + risk factors card (gross-margin / cannibalization / ROI risk levels with a colored progress bar for total risk).
+
+**Narrative.** Replaced `termsNarrative()` and `forecastNarrative()` with `paramsNarrative()` and `scenariosNarrative()`. New copy speaks to the Verdict + Scenario vocabulary instead of stock-coverage / status. Warnings on negative gross margin and on cannibalization > 25%.
+
+**Wiring.** `StepContent.tsx` swapped imports from `Step4Terms` / `Step5Forecast` to `Step4Params` / `Step5Scenarios`. Both new components receive the full `SimulatorState` (instead of slice props) since they read across multiple slices. The route page now hides `LiveKPIPanel` on steps 4–5 (those steps have their own metric strip + verdict card) — kept it on steps 6–7 only. AINarrative still renders below steps 2–5.
+
+**Step titles.** Step 4: "התניה והטבה" → "פרמטרי מבצע ותוצאות". Step 5: "יעדים / תחזית" → "תרחישים ונקודת איזון".
+
+**Cleanup.** Deleted `Step4Terms.tsx`, `Step5Forecast.tsx`, `UpliftChart.tsx` — no remaining references.
+
+**Tests.** Added 3 new tests in `calc.test.ts` (verdict cannibalization-aware net profit, scenario stress test, verdict label canonical strings). Updated existing break-even test for new `(price - cost - opsCost)` formula. Replaced `step 4 — terms` and `step 5 — forecast` narrative test groups with `step 4 — params: verdict copy` and `step 5 — scenarios narrative`. Total: **180 tests / 27 files** green.
+
+**Glossary.** `context.md` gained five new terms under Promotions: Cannibalization Rate (`cannibPct`), Marketing Cost (`mktCost`), Operations Cost per Unit (`opsCost`), Scenario, Verdict. Flagged-ambiguity note added: Step 4 + 5 are sensitivity-analysis steps; `promoType` and `durationWeeks` are read-only there.
+
+Decision captured in `decisions/2026-05-03-promo-simulator-step4-step5-rebuild.md` (why split the new content across both steps rather than merge into one mega-step).
+
+Files modified: `src/components/promo-simulator/Step4Params.tsx` (new), `src/components/promo-simulator/Step5Scenarios.tsx` (new), `src/components/promo-simulator/StepContent.tsx`, `src/routes/category-manager/promo-simulator.tsx`, `src/lib/promo-simulator/state.ts`, `src/lib/promo-simulator/calc.ts`, `src/lib/promo-simulator/validation.ts`, `src/lib/promo-simulator/taxonomy.ts`, `src/lib/promo-simulator/narrative.ts`, `src/lib/promo-simulator/calc.test.ts`, `src/lib/promo-simulator/narrative.test.ts`, `context.md`, `decisions/2026-05-03-promo-simulator-step4-step5-rebuild.md` (new). Deleted: `Step4Terms.tsx`, `Step5Forecast.tsx`, `UpliftChart.tsx`.
+
+---
+
+## 2026-05-02
+
+### Promo Simulator Step 1 — taxonomy rebuild + form upgrade (PRs 1–3)
+
+The Step 1 brief screen got a full redesign driven by user-domain input from the Category Manager. Rebuilt the form around a new four-level promo-simulator-only taxonomy (Group → Department → Category → Series), upgraded the visual layer to shadcn primitives, and rewired the Archive sheet to scope by sub-category / supplier / series.
+
+**PR 1 — visual upgrade.** Installed `@radix-ui/react-label`. Added `src/components/ui/label.tsx` (shadcn `<Label>` with built-in red-asterisk support via `required` prop) and `src/components/ui/input.tsx` (shadcn `<Input>`). Replaced raw `<label>` and `<input>` in `Step1Brief.tsx`. Labels jumped from 15px / medium / `#4A5568` to 18px / bold / `#2D3748`. Required fields now show a red `*`. The auto-populated manager field switched from a faux disabled input to a `<Badge variant="secondary">`.
+
+**PR 2 — data layer.** Added four data files: `src/data/mock-promo-taxonomy.ts` (5 Groups × 17 Departments × 64 Categories × 220+ Sub-categories + `GROUP_MANAGERS` map + cascading-lookup helpers), `src/data/mock-subcategory-suppliers.ts` (Sub-category → Supplier ID lookup), `src/data/mock-supplier-series.ts` (Supplier × Sub-category → Series brand-line lookup, ~130 well-known combinations like Wissotzky × hot-tea → תה ירוק / חליטות / מג'יק). Extended `mock-suppliers.ts` from 24 to 49 suppliers (added Coca-Cola, Tempo, Red Bull, נביעות, יקבי הרי גליל, Tefal, Pyrex, עוף העמק, סלמון נורווגי, etc.) plus `getSupplierById` / `getSuppliersByIds` helpers. Added `group / department / subcategory / supplier / series` fields to `BriefSlice` and `SimulatorState` with full URL encode/decode/validate plumbing. Old fields kept in place to avoid breaking downstream consumers (PromoSummaryCard, narrative, PDF export).
+
+**PR 3 — form rewiring.** `Step1Brief.tsx` now drives off the new taxonomy. Five cascading dropdowns: מחלקה → קטגוריה → תת-קטגוריה (grouped by Category) → ספק → סדרה. The קמעונאי field was removed entirely. The manager auto-populates from `GROUP_MANAGERS` keyed by Group, and the legacy `category` field is mirrored to the Group's Hebrew name so PromoSummary, narrative, and the PDF export keep working. Cascading invalidation: changing a parent clears all its descendants.
+
+`ArchiveSheet.tsx` got a new prop contract (`groupId`, `subcategoryId`, `supplierId`, `series`) replacing the old `category` / `product` props. The most-specific selection becomes the page title; a breadcrumb chain (e.g. `מכולת · שתייה · שתייה חמה · תה · ויסוצקי · תה ירוק`) shows the full scope. Archive button is gated by sub-category presence (per spec — supplier optional for archive even though required for advancing past Step 1). Step 1 validation now requires `group / department / subcategory / supplier / salesArena / startDate / durationWeeks` and no longer requires `category / segment / categoryManager`.
+
+Decisions captured in `decisions/2026-05-02-promo-simulator-taxonomy.md` (why the simulator taxonomy is dedicated rather than overlaid on `SEGMENTS_BY_DEPARTMENT`) and `decisions/2026-05-02-promo-simulator-manager-label.md` (why the simulator UI labels the role "מנהל מחלקה" while everywhere else still says "מנהל קטגוריה"). `context.md` updated with new canonical terms (Group, Series) and two new flagged-ambiguity entries.
+
+Tests: 4 vertical TDD slices added — `mock-promo-taxonomy.test.ts` (cascading lookups, slice #1, 6 tests), `state.test.ts` (URL encode/decode for new fields, slice #4, 5 tests), `manager-mirror.test.ts` (manager auto-populate, slice #2, 4 tests), `archive-scope.test.ts` (archive scope title escalation, slice #3, 5 tests). Also fixed the existing `usePromoSimulator.test.ts` step-jump test to use the new required-fields contract. Total: **166 tests / 25 files** green.
+
+Files modified: `src/components/promo-simulator/Step1Brief.tsx`, `src/components/promo-simulator/ArchiveSheet.tsx`, `src/components/promo-simulator/StepContent.tsx`, `src/components/ui/label.tsx` (new), `src/components/ui/input.tsx` (new), `src/data/mock-promo-taxonomy.ts` (new), `src/data/mock-subcategory-suppliers.ts` (new), `src/data/mock-supplier-series.ts` (new), `src/data/mock-suppliers.ts`, `src/lib/promo-simulator/state.ts`, `src/lib/promo-simulator/validation.ts`, `src/data/mock-promo-taxonomy.test.ts` (new), `src/lib/promo-simulator/state.test.ts` (new), `src/lib/promo-simulator/manager-mirror.test.ts` (new), `src/lib/promo-simulator/archive-scope.test.ts` (new), `src/hooks/usePromoSimulator.test.ts`, `context.md`, `decisions/2026-05-02-promo-simulator-taxonomy.md` (new), `decisions/2026-05-02-promo-simulator-manager-label.md` (new), `package.json` (added `@radix-ui/react-label`).
+
+### Promo Simulator — full data coverage + clearable Series
+
+Three follow-ups after the user spotted gaps in the initial PR 3:
+
+**Series dropdown — full coverage.** The bespoke `SUPPLIER_SERIES` map in `mock-supplier-series.ts` only covered ~130 well-known brand combinations, leaving most (supplier × sub-category) pairs with an empty dropdown (e.g. שסטוביץ × טונה → no series). Added `generateDefaultSeries()` plus a `DEFAULT_VARIANTS_BY_DEPARTMENT` map keyed by Department id (drinks → קלאסי / לייט / פרימיום, canned → קלאסי / במים / בשמן זית, white-cheese → 5% / לייט 3% / פרימיום, etc.). When the bespoke map has no entry, the generator builds three plausible series like "שסטוביץ טונה קלאסי", "שסטוביץ טונה במים", "שסטוביץ טונה בשמן זית". The bespoke map still wins for branded combos (Wissotzky × tea → תה ירוק / חליטות / מג'יק).
+
+**Archive + Background sheets — full coverage.** Same problem at the sheet level: the legacy `historicalPromotions`, `buyAndGetPromos`, and `categoryKpis` data was keyed by old Hebrew Department names ("ירקות", "מוצרי חלב", "בשר טרי" …) that don't all match the new Group names. Added `src/data/mock-archive-generator.ts` — a deterministic per-scope generator with three exports: `generateHistoricalPromosForScope({subcategoryId, supplierId, series})` (3-5 promos), `generateBuyAndGetForScope` (2-3 buy-and-get tiles), `generateKpisForScope` (6 KPIs: צמיחת YTD, אפליפט ממוצע, Stockout, Gross Margin, אחוז מכירות במבצע, צמיחת סל). Uses an FNV-style hash of (subcategory + supplier + series + kind + index) so the same scope always produces the same content — no shuffle on re-render — but different scopes produce different content. Statuses (good/warning/bad) and trends (up/down/flat) are derived from the generated values.
+
+`ArchiveSheet.tsx` and `BackgroundDataSheet.tsx` switched from category-name lookups to the generator. `BackgroundDataSheet` got new props (`subcategoryId`, `supplierId`, `series`) replacing the old `category` prop. Title escalates to the most-specific selection (sub-category → supplier → series); subtitle describes the scope.
+
+**"ללא סדרה" — clear-back option.** Series is optional, but Radix Select didn't allow clearing once a value was picked. Added a `SERIES_NONE` sentinel item ("ללא סדרה") at the top of the Series dropdown that maps back to an empty `series` field on selection. User can now toggle freely between specific series and no series.
+
+Tests added: `mock-supplier-series.test.ts` (4 tests, including a coverage scan that asserts every supplier × sub-category pair yields ≥1 series); `mock-archive-generator.test.ts` (7 tests including coverage scans that assert every sub-category yields ≥3 historical promos, ≥5 KPIs, and ≥2 buy-and-get tiles, plus determinism checks). Total: **177 tests / 27 files** green.
+
+Files modified: `src/data/mock-supplier-series.ts`, `src/data/mock-archive-generator.ts` (new), `src/data/mock-archive-generator.test.ts` (new), `src/data/mock-supplier-series.test.ts` (new), `src/components/promo-simulator/ArchiveSheet.tsx`, `src/components/promo-simulator/BackgroundDataSheet.tsx`, `src/components/promo-simulator/Step1Brief.tsx`.
+
+---
+
 ## 2026-04-29
 
 ### Store-manager overview — AI briefing: stack rows on mobile

@@ -8,19 +8,28 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import {
-  getCategoryKpis,
-  getHistoricalPromotionsByCategory,
-  type CategoryKpi,
-  type HistoricalPromotion,
-  type KpiStatus,
-  type KpiTrend,
+import type {
+  CategoryKpi,
+  HistoricalPromotion,
+  KpiStatus,
+  KpiTrend,
 } from "@/data/mock-promo-history";
+import {
+  generateHistoricalPromosForScope,
+  generateKpisForScope,
+} from "@/data/mock-archive-generator";
+import { findSubCategoryById } from "@/data/mock-promo-taxonomy";
+import { getSupplierById } from "@/data/mock-suppliers";
 
 interface BackgroundDataSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  category: string;
+  /** Sub-category id — minimum scope to populate the sheet. */
+  subcategoryId: string;
+  /** Optional supplier id — refines the KPI snapshot to that supplier. */
+  supplierId: string;
+  /** Optional series — refines further. */
+  series: string;
 }
 
 const STATUS_COLOR: Record<KpiStatus, string> = {
@@ -272,12 +281,27 @@ function PromoRow({ promo }: { promo: HistoricalPromotion }) {
 export function BackgroundDataSheet({
   open,
   onOpenChange,
-  category,
+  subcategoryId,
+  supplierId,
+  series,
 }: BackgroundDataSheetProps) {
-  const hasCategory = category.trim().length > 0;
-  const kpis = hasCategory ? getCategoryKpis(category) : [];
-  const promos = hasCategory
-    ? getHistoricalPromotionsByCategory(category).slice(0, 2)
+  const found = findSubCategoryById(subcategoryId);
+  const hasScope = Boolean(found);
+  const subName = found?.subCategory.nameHe ?? "";
+  const supplierName = supplierId
+    ? (getSupplierById(supplierId)?.name ?? "")
+    : "";
+  const headerTitle = series || supplierName || subName;
+
+  const kpis = hasScope
+    ? generateKpisForScope({ subcategoryId, supplierId, series })
+    : [];
+  const promos = hasScope
+    ? generateHistoricalPromosForScope({
+        subcategoryId,
+        supplierId,
+        series,
+      }).slice(0, 2)
     : [];
 
   const [heroKpi, ...restKpis] = kpis;
@@ -288,11 +312,11 @@ export function BackgroundDataSheet({
         side="left"
         className="w-full sm:max-w-[860px] h-screen max-h-screen overflow-y-auto p-0 bg-[#FAF8F5]"
       >
-        {!hasCategory ? (
+        {!hasScope ? (
           <div className="flex h-full flex-col items-center justify-center gap-3 px-8 text-center">
             <Database className="h-10 w-10 text-[#788390]" />
             <div className="text-2xl font-bold tracking-tight text-[#2D3748]">
-              בחר קטגוריה תחילה
+              בחר תת-קטגוריה תחילה
             </div>
             <div className="text-lg text-[#4A5568]">
               המסך מציג את ה-KPI-ים המובילים ומבצעים היסטוריים לדוגמה.
@@ -316,11 +340,13 @@ export function BackgroundDataSheet({
                   נתונים / רקע
                 </div>
                 <h2 className="mt-4 text-5xl font-bold leading-[1.05] tracking-tight text-[#2D3748]">
-                  {category}
+                  {headerTitle}
                 </h2>
-                <p className="mt-3 max-w-[54ch] text-lg leading-relaxed text-[#4A5568]">
-                  המדדים המובילים שמנהלי קטגוריה עוקבים אחריהם, עם מבצעים
-                  היסטוריים כהפניה מהירה.
+                <p className="mt-3 max-w-[64ch] text-lg leading-relaxed text-[#4A5568]">
+                  המדדים המובילים שמנהלי המחלקה עוקבים אחריהם
+                  {supplierName ? ` עבור ${supplierName}` : ""}
+                  {series ? ` בסדרת ${series}` : ""}, עם מבצעים היסטוריים כהפניה
+                  מהירה.
                 </p>
               </div>
 

@@ -1,8 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { statusLabel, type PromoMetrics } from "@/lib/promo-simulator/calc";
+import { verdictLabel, type PromoMetrics } from "@/lib/promo-simulator/calc";
 import { formatCurrency } from "@/lib/format";
 import { PromoSummaryCard } from "./PromoSummaryCard";
-import type { SimulatorState } from "@/lib/promo-simulator/state";
+import {
+  DECISION_LABEL,
+  type SimulatorState,
+} from "@/lib/promo-simulator/state";
 import { findSegmentById } from "@/data/mock-taxonomy";
 
 interface Step9DocumentationProps {
@@ -17,10 +20,12 @@ const TABLE_HEADERS = [
   "קהל יעד",
   "התניה",
   "הטבה",
-  "משמעות ההטבה",
+  "הערכת כדאיות",
+  "החלטה",
   "תקופה",
-  "עלות מימוש",
-  "גידול ריאלי",
+  "עלות שיווק",
+  "רווח תוספתי נטו",
+  "uplift",
 ] as const;
 
 export function Step9Documentation({
@@ -28,15 +33,10 @@ export function Step9Documentation({
   metrics: m,
   onChange,
 }: Step9DocumentationProps) {
-  const benefitMeaning =
-    state.conditionText || state.benefitText
-      ? `${statusLabel(m.status)} · רווח ${formatCurrency(m.promoProfit)}`
-      : "—";
   const period = state.startDate
     ? `${state.startDate} · ${state.durationWeeks} שבועות`
     : "—";
-  const cost = formatCurrency(m.investment);
-  const realGrowth = `+${state.upliftPct}%`;
+  const decisionLabel = state.decision ? DECISION_LABEL[state.decision] : "—";
 
   const segmentLabel = findSegmentById(state.segment)?.nameHe ?? state.segment;
 
@@ -46,10 +46,12 @@ export function Step9Documentation({
     segmentLabel || "—",
     state.conditionText || "—",
     state.benefitText || "—",
-    benefitMeaning,
+    verdictLabel(m.verdict),
+    decisionLabel,
     period,
-    cost,
-    realGrowth,
+    formatCurrency(state.mktCost),
+    formatCurrency(m.netProfit),
+    `+${state.upliftPct}%`,
   ];
 
   return (

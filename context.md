@@ -6,14 +6,16 @@ Domain glossary for **Retalio** (previously "RetailSkillz Analytics") — the B2
 
 ## Organizational hierarchy
 
-| Term           | Definition                                                                                                                                                                  | Aliases to avoid          |
-| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
-| **Chain**      | The entire retailer (Super Sapir) — the top-level aggregate of all branches.                                                                                                | Network, company, group   |
-| **Region**     | A geographic grouping of branches (North / Center / South). **The canonical term — never use "Division".**                                                                  | Division, area, zone      |
-| **Branch**     | A single physical retail location identified by a branch number (e.g. Hadera #44).                                                                                          | Store, shop, outlet, site |
-| **Department** | A top-level merchandise grouping (Dairy, Meat, Grocery, …). Exists at **both** chain scope (owns Categories) and branch scope (a physical area inside a branch, same name). | Aisle, section            |
-| **Category**   | A sub-classification **inside a Department** (e.g. Dairy → _Cheese_, _Milk_, _Yogurt_). Owned chain-wide by the Category Manager.                                           | Sub-department, class     |
-| **Format**     | Branch size classification — `big` (full-size) or `city` (urban compact).                                                                                                   | Size, type, tier          |
+| Term           | Definition                                                                                                                                                                                                                               | Aliases to avoid          |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
+| **Chain**      | The entire retailer (Super Sapir) — the top-level aggregate of all branches.                                                                                                                                                             | Network, company, group   |
+| **Region**     | A geographic grouping of branches (North / Center / South). **The canonical term — never use "Division".**                                                                                                                               | Division, area, zone      |
+| **Branch**     | A single physical retail location identified by a branch number (e.g. Hadera #44).                                                                                                                                                       | Store, shop, outlet, site |
+| **Group**      | **Promo-simulator only.** A merchandise super-grouping above Department, used as the top filter in Step 1 of the promo simulator. Five values: מכולת, ירקות, חלב, נון פוד, בשר. Each Group has one accountable Category Manager.         | Super-department, family  |
+| **Department** | A top-level merchandise grouping (Dairy, Meat, Grocery, …). Exists at **both** chain scope (owns Categories) and branch scope (a physical area inside a branch, same name). In the promo simulator, Departments live underneath a Group. | Aisle, section            |
+| **Category**   | A sub-classification **inside a Department** (e.g. Dairy → _Cheese_, _Milk_, _Yogurt_). Owned chain-wide by the Category Manager.                                                                                                        | Sub-department, class     |
+| **Series**     | **Promo-simulator only.** A brand-line product family within a Supplier, scoped to a Sub-category. Example: Wissotzky × hot drinks → _תה ירוק_, _חליטות_, _מג'יק_. Optional field in the simulator brief.                                | Brand line, range, family |
+| **Format**     | Branch size classification — `big` (full-size) or `city` (urban compact).                                                                                                                                                                | Size, type, tier          |
 
 ### Department vs Category — the critical distinction
 
@@ -41,16 +43,17 @@ Domain glossary for **Retalio** (previously "RetailSkillz Analytics") — the B2
 
 ## Sales & performance metrics
 
-| Term                  | Definition                                                                                                 | Aliases to avoid                |
-| --------------------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------- |
-| **Total Sales**       | Gross sales (revenue) of a branch or department for the current period, in ILS.                            | Gross, top-line                 |
-| **Network Sales**     | Sales measured by the chain's internal "network" channel — a subset of Total Sales tracked against target. | Chain sales                     |
-| **Average Basket**    | Average revenue per customer visit (`totalSales / customers`).                                             | Ticket, cart value              |
-| **Customers per Day** | Average daily unique customer count for the period.                                                        | Footfall, traffic               |
-| **Revenue per Meter** | Sales divided by **Selling Area** (sqm, warehouse excluded). Benchmarked across the chain.                 | Sales density, sqm productivity |
-| **YoY Change**        | Year-over-year percent change vs the same period last year.                                                | LY delta, annual growth         |
-| **vs Target**         | Percent variance against the planned target for the period.                                                | Plan variance, budget delta     |
-| **Comparison Mode**   | The user-selected benchmark axis: `vs-target`, `vs-last-year`, or `vs-last-month`.                         | Baseline, compare against       |
+| Term                  | Definition                                                                                                                                                                                            | Aliases to avoid                    |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| **Total Sales**       | Gross sales (revenue) of a branch or department for the current period, in ILS.                                                                                                                       | Gross, top-line                     |
+| **Network Sales**     | Sales measured by the chain's internal "network" channel — a subset of Total Sales tracked against target.                                                                                            | Chain sales                         |
+| **Average Basket**    | Average revenue per customer visit (`totalSales / customers`).                                                                                                                                        | Ticket, cart value                  |
+| **Customers per Day** | Average daily unique customer count for the period.                                                                                                                                                   | Footfall, traffic                   |
+| **Revenue per Meter** | Sales divided by **Selling Area** (sqm, warehouse excluded). Benchmarked across the chain.                                                                                                            | Sales density, sqm productivity     |
+| **YoY Change**        | Year-over-year percent change vs the same period last year.                                                                                                                                           | LY delta, annual growth             |
+| **vs Target**         | Percent variance against the planned target for the period.                                                                                                                                           | Plan variance, budget delta         |
+| **Comparison Mode**   | The user-selected benchmark axis: `vs-target`, `vs-last-year`, or `vs-last-month`.                                                                                                                    | Baseline, compare against           |
+| **רווחיות גולמית**    | Gross Margin — the gross-profit percentage of a Category, Sub-category, Supplier, or Series. Canonical Hebrew term used in promo-simulator KPI tiles and AI copy. English equivalent: `Gross Margin`. | שיעור רווח גולמי, רווח גולמי, מרווח |
 
 ---
 
@@ -112,14 +115,19 @@ These are the canonical Hebrew terms used across UI labels, AI prompts, and copy
 
 ### Promotions
 
-| Term                | Definition                                                                                  | Aliases to avoid         |
-| ------------------- | ------------------------------------------------------------------------------------------- | ------------------------ |
-| **Promotion**       | A time-boxed price action on an item or bundle, run by the Category Manager.                | Campaign, deal, discount |
-| **Baseline Sales**  | Expected sales for the promo window if no promotion had run.                                | Non-promo baseline       |
-| **Actual Sales**    | Realized sales during the promo window.                                                     | —                        |
-| **Uplift**          | `(actual - baseline) / baseline` expressed as a percent.                                    | Lift, gain               |
-| **ROI**             | Return on promotional investment (margin gained ÷ promo cost).                              | Payback                  |
-| **Cannibalization** | A promotion that shifts demand from other items/categories rather than creating new demand. | Substitution             |
+| Term                         | Definition                                                                                                                                                                                                                    | Aliases to avoid                |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| **Promotion**                | A time-boxed price action on an item or bundle, run by the Category Manager.                                                                                                                                                  | Campaign, deal, discount        |
+| **Baseline Sales**           | Expected sales for the promo window if no promotion had run.                                                                                                                                                                  | Non-promo baseline              |
+| **Actual Sales**             | Realized sales during the promo window.                                                                                                                                                                                       | —                               |
+| **Uplift**                   | `(actual - baseline) / baseline` expressed as a percent.                                                                                                                                                                      | Lift, gain                      |
+| **ROI**                      | Return on promotional investment (margin gained ÷ promo cost).                                                                                                                                                                | Payback                         |
+| **Cannibalization**          | A promotion that shifts demand from other items/categories rather than creating new demand.                                                                                                                                   | Substitution                    |
+| **Cannibalization Rate**     | The percent of promo demand that is shifted from base (non-promo) sales rather than incremental. Field name: `cannibPct`. Hebrew: **שיעור קניבליזציה**.                                                                       | —                               |
+| **Marketing Cost**           | One-time marketing / setup spend for a single promotion (signage, digital push, in-store collateral). Field name: `mktCost`. Hebrew: **עלות שיווק**. Drives the ROI denominator in the simulator.                             | Ad spend, campaign cost         |
+| **Operations Cost per Unit** | Incremental per-unit operational overhead during the promo window (extra picking, stocking, packaging) on top of `unitCost`. Field name: `opsCost`. Hebrew: **עלות תפעול ליחידה**. Reduces effective per-unit margin.         | Handling cost, fulfillment cost |
+| **Scenario**                 | A sensitivity preset in the promo simulator that scales `upliftPct` and `cannibPct` together. Three values: `pessimistic` / `base` / `optimistic` (Hebrew: **שמרני / בסיס / אופטימי**). Used in Step 5 to stress-test a plan. | What-if, case                   |
+| **Verdict**                  | Promo simulator's three-tier worthiness call: **כדאי / כדאיות גבולית / לא כדאי**. Derived from `netProfit` + `promoGrossMargin`. Maps to traffic-light colors (good/warning/bad).                                             | Recommendation, judgement       |
 
 ### Alerts (derived, Category-scoped)
 
@@ -205,3 +213,6 @@ Each alert carries a **Severity**: `high` / `medium` / `low`.
 - **Store vs Branch.** The role is **Store Manager**, but the entity is always a **Branch**. Do not rename `Branch` to `Store` in data models or URLs (`/store-manager/$branchId` is correct).
 - **Shopper vs Customer.** Shopper is the picking system; Customer is a person walking into a branch.
 - **Trade Management.** The Hebrew UI label ניהול סחר maps to the **Category Manager** route. Use "Category Manager" in code and English copy; "Trade Management" only appears as a page title translation.
+- **"מנהל מחלקה" vs "מנהל קטגוריה" — labelling drift inside the simulator.** The role is canonically **Category Manager** in code, English copy, the glossary, and the `/category-manager` route. The promo-simulator Step 1 brief deliberately uses the Hebrew UI label **"מנהל מחלקה"** because the simulator projects ownership at the **Group** level (one of: מכולת, ירקות, חלב, נון פוד, בשר). Same person, same role; the labels reflect different resolution. See `decisions/2026-05-02-promo-simulator-manager-label.md`. Do not "fix" this by renaming the role globally without an explicit decision.
+- **Promo-simulator taxonomy is dedicated, not shared.** The promo simulator owns its own four-level taxonomy (Group → Department → Category → Series) in `src/data/mock-promo-taxonomy.ts` and intentionally does **not** use `SEGMENTS_BY_DEPARTMENT` or `DEPARTMENT_NAMES`. Same item may show under different paths in the simulator vs. the operational dashboards. See `decisions/2026-05-02-promo-simulator-taxonomy.md`.
+- **Step 4 + 5 are sensitivity-analysis steps, not data-entry duplicates.** `promoType` (Step 3) and `durationWeeks` (Step 1) are **read-only** in Step 4 — to change them you go back. Step 4 owns the financial parameter sliders (price/cost/discount/baseSales/uplift/mktCost/opsCost/cannibPct) and the bottom-line verdict; Step 5 owns scenario comparison and break-even map. See `decisions/2026-05-03-promo-simulator-step4-step5-rebuild.md`.

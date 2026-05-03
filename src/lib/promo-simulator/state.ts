@@ -1,12 +1,40 @@
 // Promo Simulator — state type, defaults, URL codec
 import type { Goal, SalesArena, Segment, StepId } from "./taxonomy";
 
+export const SCENARIOS = ["pessimistic", "base", "optimistic"] as const;
+export type Scenario = (typeof SCENARIOS)[number];
+
+export const SCENARIO_LABEL: Record<Scenario, string> = {
+  pessimistic: "שמרני",
+  base: "בסיס",
+  optimistic: "אופטימי",
+};
+
+export const DECISIONS = ["approve", "revise", "reject"] as const;
+export type Decision = (typeof DECISIONS)[number] | "";
+
+export const DECISION_LABEL: Record<Exclude<Decision, "">, string> = {
+  approve: "לאשר את המבצע",
+  revise: "לאשר עם תיקונים",
+  reject: "לדחות את המבצע",
+};
+
 /**
  * Scoped slice types — each step consumes only the fields it owns,
  * not the entire SimulatorState. Keeps step components unaware of
  * fields they don't read or write.
  */
 export interface BriefSlice {
+  // New 4-level promo taxonomy (PR 2 — data layer).
+  // Wired into the UI in PR 3; co-exists with legacy `category`/`segment`
+  // until then. See: decisions/2026-05-02-promo-simulator-taxonomy.md
+  group: string;
+  department: string;
+  subcategory: string;
+  supplier: string;
+  series: string;
+
+  // Legacy fields — still drive Step 1 UI today; removed in PR 3.
   category: string;
   segment: Segment | "";
   product: string;
@@ -58,7 +86,13 @@ export type SliceSetter<T> = (update: Partial<T>) => void;
 
 export interface SimulatorState {
   step: StepId;
-  // Step 1 — brief
+  // Step 1 — brief (new promo-simulator taxonomy fields)
+  group: string;
+  department: string;
+  subcategory: string;
+  supplier: string;
+  series: string;
+  // Step 1 — brief (legacy fields, removed in PR 3)
   category: string;
   segment: Segment | "";
   product: string;
@@ -75,12 +109,16 @@ export interface SimulatorState {
   conditionText: string;
   benefitText: string;
   discountPct: number;
-  // Step 5 — forecast
+  // Step 4/5 — financial parameters (was: split between Step 4 terms + Step 5 forecast)
   baseUnits: number;
   unitPrice: number;
   unitCost: number;
   upliftPct: number;
   stockUnits: number;
+  mktCost: number;
+  opsCost: number;
+  cannibPct: number;
+  selectedScenario: Scenario;
   // Step 6 — implementation
   signage: boolean;
   shelf: boolean;
@@ -90,8 +128,9 @@ export interface SimulatorState {
   controlPrice: boolean;
   controlStock: boolean;
   controlDisplay: boolean;
-  // Step 8 — analysis
+  // Step 6 — decision & justification (was: analysis)
   analysisNote: string;
+  decision: Decision;
   // Step 9 — documentation
   documentation: string;
   completed: boolean;
@@ -118,6 +157,11 @@ export function createDefaultState(opts?: {
 }): SimulatorState {
   return {
     step: 1,
+    group: "",
+    department: "",
+    subcategory: "",
+    supplier: "",
+    series: "",
     category: opts?.defaultCategory ?? "",
     segment: "",
     product: "",
@@ -136,6 +180,10 @@ export function createDefaultState(opts?: {
     unitCost: 7.5,
     upliftPct: 20,
     stockUnits: 1500,
+    mktCost: 5000,
+    opsCost: 1,
+    cannibPct: 15,
+    selectedScenario: "base",
     signage: false,
     shelf: false,
     training: false,
@@ -144,6 +192,7 @@ export function createDefaultState(opts?: {
     controlStock: false,
     controlDisplay: false,
     analysisNote: "",
+    decision: "",
     documentation: "",
     completed: false,
   };
@@ -155,6 +204,11 @@ export function createDefaultState(opts?: {
  */
 export type SimulatorSearch = Partial<{
   step: number;
+  group: string;
+  department: string;
+  subcategory: string;
+  supplier: string;
+  series: string;
   category: string;
   segment: string;
   product: string;
@@ -173,6 +227,10 @@ export type SimulatorSearch = Partial<{
   unitCost: number;
   upliftPct: number;
   stockUnits: number;
+  mktCost: number;
+  opsCost: number;
+  cannibPct: number;
+  selectedScenario: Scenario;
   signage: 1;
   shelf: 1;
   training: 1;
@@ -181,6 +239,7 @@ export type SimulatorSearch = Partial<{
   controlStock: 1;
   controlDisplay: 1;
   analysisNote: string;
+  decision: string;
   documentation: string;
   completed: 1;
 }>;
@@ -211,6 +270,13 @@ export function validateSimulatorSearch(
     const n = toNum(search.step, 1);
     out.step = Math.min(9, Math.max(1, Math.round(n))) as number;
   }
+  if (search.group !== undefined) out.group = toStr(search.group, "");
+  if (search.department !== undefined)
+    out.department = toStr(search.department, "");
+  if (search.subcategory !== undefined)
+    out.subcategory = toStr(search.subcategory, "");
+  if (search.supplier !== undefined) out.supplier = toStr(search.supplier, "");
+  if (search.series !== undefined) out.series = toStr(search.series, "");
   if (search.category !== undefined) out.category = toStr(search.category, "");
   if (search.segment !== undefined) out.segment = toStr(search.segment, "");
   if (search.product !== undefined) out.product = toStr(search.product, "");
@@ -241,6 +307,16 @@ export function validateSimulatorSearch(
     out.upliftPct = toNum(search.upliftPct, 20);
   if (search.stockUnits !== undefined)
     out.stockUnits = toNum(search.stockUnits, 1500);
+  if (search.mktCost !== undefined) out.mktCost = toNum(search.mktCost, 5000);
+  if (search.opsCost !== undefined) out.opsCost = toNum(search.opsCost, 1);
+  if (search.cannibPct !== undefined)
+    out.cannibPct = toNum(search.cannibPct, 15);
+  if (search.selectedScenario !== undefined) {
+    const v = toStr(search.selectedScenario, "base");
+    out.selectedScenario = (
+      v === "pessimistic" || v === "optimistic" ? v : "base"
+    ) as Scenario;
+  }
   if (search.signage !== undefined) out.signage = 1;
   if (search.shelf !== undefined) out.shelf = 1;
   if (search.training !== undefined) out.training = 1;
@@ -250,6 +326,12 @@ export function validateSimulatorSearch(
   if (search.controlDisplay !== undefined) out.controlDisplay = 1;
   if (search.analysisNote !== undefined)
     out.analysisNote = toStr(search.analysisNote, "");
+  if (search.decision !== undefined) {
+    const v = toStr(search.decision, "");
+    out.decision = (
+      v === "approve" || v === "revise" || v === "reject" ? v : ""
+    ) as Decision;
+  }
   if (search.documentation !== undefined)
     out.documentation = toStr(search.documentation, "");
   if (search.completed !== undefined) out.completed = 1;
@@ -265,6 +347,11 @@ export function decodeState(
 ): SimulatorState {
   return {
     step: (search.step ?? defaults.step) as StepId,
+    group: search.group ?? defaults.group,
+    department: search.department ?? defaults.department,
+    subcategory: search.subcategory ?? defaults.subcategory,
+    supplier: search.supplier ?? defaults.supplier,
+    series: search.series ?? defaults.series,
     category: search.category ?? defaults.category,
     segment: (search.segment ?? defaults.segment) as SimulatorState["segment"],
     product: search.product ?? defaults.product,
@@ -284,6 +371,12 @@ export function decodeState(
     unitCost: search.unitCost ?? defaults.unitCost,
     upliftPct: search.upliftPct ?? defaults.upliftPct,
     stockUnits: search.stockUnits ?? defaults.stockUnits,
+    mktCost: search.mktCost ?? defaults.mktCost,
+    opsCost: search.opsCost ?? defaults.opsCost,
+    cannibPct: search.cannibPct ?? defaults.cannibPct,
+    selectedScenario:
+      (search.selectedScenario as Scenario | undefined) ??
+      defaults.selectedScenario,
     signage: search.signage === 1 ? true : defaults.signage,
     shelf: search.shelf === 1 ? true : defaults.shelf,
     training: search.training === 1 ? true : defaults.training,
@@ -293,6 +386,7 @@ export function decodeState(
     controlDisplay:
       search.controlDisplay === 1 ? true : defaults.controlDisplay,
     analysisNote: search.analysisNote ?? defaults.analysisNote,
+    decision: (search.decision as Decision | undefined) ?? defaults.decision,
     documentation: search.documentation ?? defaults.documentation,
     completed: search.completed === 1 ? true : defaults.completed,
   };
@@ -307,6 +401,13 @@ export function encodeState(
 ): SimulatorSearch {
   const out: SimulatorSearch = {};
   if (state.step !== defaults.step) out.step = state.step;
+  if (state.group !== defaults.group) out.group = state.group;
+  if (state.department !== defaults.department)
+    out.department = state.department;
+  if (state.subcategory !== defaults.subcategory)
+    out.subcategory = state.subcategory;
+  if (state.supplier !== defaults.supplier) out.supplier = state.supplier;
+  if (state.series !== defaults.series) out.series = state.series;
   if (state.category !== defaults.category) out.category = state.category;
   if (state.segment !== defaults.segment) out.segment = state.segment;
   if (state.product !== defaults.product) out.product = state.product;
@@ -332,6 +433,11 @@ export function encodeState(
   if (state.upliftPct !== defaults.upliftPct) out.upliftPct = state.upliftPct;
   if (state.stockUnits !== defaults.stockUnits)
     out.stockUnits = state.stockUnits;
+  if (state.mktCost !== defaults.mktCost) out.mktCost = state.mktCost;
+  if (state.opsCost !== defaults.opsCost) out.opsCost = state.opsCost;
+  if (state.cannibPct !== defaults.cannibPct) out.cannibPct = state.cannibPct;
+  if (state.selectedScenario !== defaults.selectedScenario)
+    out.selectedScenario = state.selectedScenario;
   if (state.signage) out.signage = 1;
   if (state.shelf) out.shelf = 1;
   if (state.training) out.training = 1;
@@ -341,6 +447,7 @@ export function encodeState(
   if (state.controlDisplay) out.controlDisplay = 1;
   if (state.analysisNote !== defaults.analysisNote)
     out.analysisNote = state.analysisNote;
+  if (state.decision !== defaults.decision) out.decision = state.decision;
   if (state.documentation !== defaults.documentation)
     out.documentation = state.documentation;
   if (state.completed) out.completed = 1;
