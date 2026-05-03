@@ -620,7 +620,9 @@ export function Step4Params({ state, metrics, onChange }: Step4ParamsProps) {
                         borderRadius: 10,
                         fontSize: 16,
                       }}
-                      formatter={(v: number) => `₪${v.toFixed(2)}`}
+                      formatter={(v) =>
+                        typeof v === "number" ? `₪${v.toFixed(2)}` : String(v)
+                      }
                     />
                     <Legend wrapperStyle={{ fontSize: 16 }} />
                     <Bar

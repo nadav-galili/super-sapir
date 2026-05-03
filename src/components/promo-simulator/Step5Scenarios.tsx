@@ -203,7 +203,9 @@ export function Step5Scenarios({
                           borderRadius: 10,
                           fontSize: 16,
                         }}
-                        formatter={(v: number) => formatCurrency(v)}
+                        formatter={(v) =>
+                          typeof v === "number" ? formatCurrency(v) : String(v)
+                        }
                       />
                       <Bar dataKey="profit" radius={[4, 4, 0, 0]}>
                         {scenarioBars.map((entry, i) => (
@@ -291,7 +293,9 @@ export function Step5Scenarios({
                         borderRadius: 10,
                         fontSize: 16,
                       }}
-                      formatter={(v: number) => `${v}%`}
+                      formatter={(v) =>
+                        typeof v === "number" ? `${v}%` : String(v)
+                      }
                     />
                     <Legend wrapperStyle={{ fontSize: 16 }} />
                     <Line
