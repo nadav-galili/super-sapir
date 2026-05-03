@@ -243,65 +243,63 @@ function HistoricalPromoCard({ promo }: { promo: HistoricalPromotion }) {
             </span>
           </div>
 
-          <div className="mt-4 grid items-end gap-4 md:grid-cols-[minmax(0,150px)_1fr]">
-            <div>
-              <div className="text-[15px] uppercase tracking-[0.12em] text-[#788390]">
-                אפליפט
-              </div>
-              <div
-                dir="ltr"
-                className="mt-1 flex items-baseline gap-1 font-mono text-4xl font-bold tracking-tight"
-                style={{ color: upliftColor }}
-              >
-                <TrendingUp className="h-5 w-5" aria-hidden />
-                <span>
-                  {promo.upliftPct >= 0 ? "+" : ""}
-                  {promo.upliftPct.toFixed(1)}
-                  <span className="text-xl font-semibold">%</span>
-                </span>
-              </div>
+          <div className="mt-4 flex items-baseline justify-between gap-3">
+            <div className="text-[15px] uppercase tracking-[0.12em] text-[#788390]">
+              אפליפט
             </div>
-
-            <dl className="grid grid-cols-3 divide-x divide-[#E7E0D8] rtl:divide-x-reverse">
-              <div className="px-3 first:ps-0">
-                <dt className="text-[15px] uppercase tracking-[0.12em] text-[#788390]">
-                  יחידות
-                </dt>
-                <dd
-                  dir="ltr"
-                  className="mt-1 flex items-center gap-1 font-mono text-lg font-semibold text-[#2D3748]"
-                >
-                  <span className="text-[#788390]">
-                    {numberFmt.format(promo.baseUnits)}
-                  </span>
-                  <ArrowLeft className="h-3 w-3 text-[#788390]" />
-                  <span>{numberFmt.format(promo.actualUnits)}</span>
-                </dd>
-              </div>
-              <div className="px-3">
-                <dt className="text-[15px] uppercase tracking-[0.12em] text-[#788390]">
-                  פדיון
-                </dt>
-                <dd
-                  dir="ltr"
-                  className="mt-1 font-mono text-lg font-semibold text-[#2D3748]"
-                >
-                  {currencyFmt.format(promo.revenue)}
-                </dd>
-              </div>
-              <div className="px-3">
-                <dt className="text-[15px] uppercase tracking-[0.12em] text-[#788390]">
-                  ROI
-                </dt>
-                <dd
-                  dir="ltr"
-                  className="mt-1 font-mono text-lg font-semibold text-[#2D3748]"
-                >
-                  {promo.roi.toFixed(1)}x
-                </dd>
-              </div>
-            </dl>
+            <div
+              dir="ltr"
+              className="flex items-baseline gap-1 font-mono text-3xl font-bold tracking-tight"
+              style={{ color: upliftColor }}
+            >
+              <TrendingUp className="h-5 w-5" aria-hidden />
+              <span>
+                {promo.upliftPct >= 0 ? "+" : ""}
+                {promo.upliftPct.toFixed(1)}
+                <span className="text-lg font-semibold">%</span>
+              </span>
+            </div>
           </div>
+
+          <dl className="mt-4 grid grid-cols-3 divide-x divide-[#E7E0D8] rtl:divide-x-reverse">
+            <div className="min-w-0 px-3 first:ps-0">
+              <dt className="text-[15px] uppercase tracking-[0.12em] text-[#788390]">
+                יחידות
+              </dt>
+              <dd
+                dir="ltr"
+                className="mt-1 flex items-center gap-1 truncate font-mono text-base font-semibold text-[#2D3748]"
+              >
+                <span className="text-[#788390]">
+                  {numberFmt.format(promo.baseUnits)}
+                </span>
+                <ArrowLeft className="h-3 w-3 shrink-0 text-[#788390]" />
+                <span>{numberFmt.format(promo.actualUnits)}</span>
+              </dd>
+            </div>
+            <div className="min-w-0 px-3">
+              <dt className="text-[15px] uppercase tracking-[0.12em] text-[#788390]">
+                פדיון
+              </dt>
+              <dd
+                dir="ltr"
+                className="mt-1 truncate font-mono text-base font-semibold text-[#2D3748]"
+              >
+                {currencyFmt.format(promo.revenue)}
+              </dd>
+            </div>
+            <div className="min-w-0 px-3">
+              <dt className="text-[15px] uppercase tracking-[0.12em] text-[#788390]">
+                ROI
+              </dt>
+              <dd
+                dir="ltr"
+                className="mt-1 truncate font-mono text-base font-semibold text-[#2D3748]"
+              >
+                {promo.roi.toFixed(1)}x
+              </dd>
+            </div>
+          </dl>
 
           <figure className="mt-5 flex gap-3 border-s-2 border-[#DC4E59]/30 ps-4">
             <Quote className="mt-1 h-4 w-4 shrink-0 rotate-180 text-[#DC4E59]/50" />
