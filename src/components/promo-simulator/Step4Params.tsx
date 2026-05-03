@@ -1,3 +1,4 @@
+import { motion } from "motion/react";
 import {
   Bar,
   BarChart,
@@ -12,6 +13,7 @@ import {
   YAxis,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { LiquidCard } from "@/components/ui/liquid-glass-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatCurrency, formatNumber } from "@/lib/format";
 import {
@@ -52,6 +54,32 @@ const RISK_COLOR: Record<"low" | "mid" | "high", string> = {
   low: "#10B981",
   mid: "#FBBF24",
   high: "#F43F5E",
+};
+
+// Headline-strip motion variants — section reveals on mount, tiles fade up
+// in sequence so the eye lands on the verdict first, then on each metric.
+const stripContainer = {
+  hidden: { opacity: 0, y: 16 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      type: "spring" as const,
+      stiffness: 140,
+      damping: 22,
+      staggerChildren: 0.07,
+      delayChildren: 0.08,
+    },
+  },
+};
+const stripItem = {
+  hidden: { opacity: 0, y: 14, scale: 0.97 },
+  show: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { type: "spring" as const, stiffness: 180, damping: 20 },
+  },
 };
 
 interface Step4ParamsProps {
@@ -98,27 +126,27 @@ function MetricTile({
         ? "#F43F5E"
         : "#2D3748";
   return (
-    <div
-      className={`rounded-[16px] p-4 text-center ${
+    <LiquidCard
+      className={`!gap-2 !py-5 px-4 text-center ${
         highlight
-          ? "border border-[#7DD3DD] bg-[#E8F9FB]"
-          : "border border-[#E7E0D8] bg-white"
+          ? "!border-[#7DD3DD] bg-[#E8F9FB]/60"
+          : "!border-[#E7E0D8] bg-white/70"
       }`}
     >
       <div className="text-[15px] text-[#788390]">{label}</div>
       <div
-        className="text-2xl font-mono font-bold mt-1"
+        className="text-3xl font-mono font-bold tracking-tight"
         style={{ color: highlight ? "#0E7C8A" : toneColor }}
         dir="ltr"
       >
         {value}
       </div>
       {sub && (
-        <div className="text-[15px] text-[#788390] mt-0.5" dir="ltr">
+        <div className="text-[15px] text-[#788390]" dir="ltr">
           {sub}
         </div>
       )}
-    </div>
+    </LiquidCard>
   );
 }
 
@@ -506,38 +534,85 @@ export function Step4Params({ state, metrics, onChange }: Step4ParamsProps) {
               </div>
             </div>
 
-            {/* Headline metric strip */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
-              <MetricTile
-                label="מחיר לאחר הנחה"
-                value={`₪${m.effectivePrice.toFixed(2)}`}
-                sub={`הנחה לקונה של ${savingPct}%`}
-                highlight
+            {/* Headline metric strip — emphasized as the verdict at a glance.
+                Entry animation runs once on mount; metric values update in
+                place when sliders move (no reveal re-trigger). */}
+            <motion.section
+              initial="hidden"
+              animate="show"
+              variants={stripContainer}
+              whileHover={{ y: -2 }}
+              transition={{ type: "spring", stiffness: 200, damping: 24 }}
+              className="relative mt-6 overflow-hidden rounded-[20px] border border-[#E7E0D8] bg-gradient-to-br from-[#FFF8F4] via-[#FAF8F5] to-[#F1EBE3] p-5 shadow-[0_18px_40px_-26px_rgba(220,78,89,0.28)]"
+            >
+              <span
+                aria-hidden
+                className="absolute inset-y-4 right-0 w-[3px] rounded-full bg-gradient-to-b from-[#DC4E59] to-[#E8777F]"
               />
-              <MetricTile
-                label="רווחיות גולמית רגילה"
-                value={`${m.baseGrossMargin.toFixed(1)}%`}
-                sub="לפני מבצע"
-              />
-              <MetricTile
-                label="רווחיות גולמית במבצע"
-                value={`${m.promoGrossMargin.toFixed(1)}%`}
-                sub="לאחר הנחה"
-                tone={
-                  m.promoGrossMargin >= 10
-                    ? "positive"
-                    : m.promoGrossMargin >= 0
-                      ? "neutral"
-                      : "negative"
-                }
-              />
-              <MetricTile
-                label="רווח נוסף נטו"
-                value={formatCurrency(m.netProfit)}
-                sub="מול בסיס"
-                tone={m.netProfit >= 0 ? "positive" : "negative"}
-              />
-            </div>
+              <motion.header
+                variants={stripItem}
+                className="mb-4 flex items-baseline justify-between gap-3 ps-2"
+              >
+                <div>
+                  <div className="text-[15px] uppercase tracking-[0.14em] text-[#DC4E59]">
+                    תמונת מצב פיננסית
+                  </div>
+                  <h3 className="mt-1 text-xl font-bold tracking-tight text-[#2D3748]">
+                    מבט-על בארבעה מספרים
+                  </h3>
+                </div>
+                <motion.span
+                  variants={stripItem}
+                  className="inline-flex shrink-0 items-center rounded-full border px-3 py-1 text-[15px] font-semibold transition-colors"
+                  style={{
+                    background: verdict.bg,
+                    borderColor: verdict.border,
+                    color: verdict.text,
+                  }}
+                >
+                  {verdictLabel(m.verdict)}
+                </motion.span>
+              </motion.header>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <motion.div variants={stripItem}>
+                  <MetricTile
+                    label="מחיר לאחר הנחה"
+                    value={`₪${m.effectivePrice.toFixed(2)}`}
+                    sub={`הנחה לקונה של ${savingPct}%`}
+                    highlight
+                  />
+                </motion.div>
+                <motion.div variants={stripItem}>
+                  <MetricTile
+                    label="רווחיות גולמית רגילה"
+                    value={`${m.baseGrossMargin.toFixed(1)}%`}
+                    sub="לפני מבצע"
+                  />
+                </motion.div>
+                <motion.div variants={stripItem}>
+                  <MetricTile
+                    label="רווחיות גולמית במבצע"
+                    value={`${m.promoGrossMargin.toFixed(1)}%`}
+                    sub="לאחר הנחה"
+                    tone={
+                      m.promoGrossMargin >= 10
+                        ? "positive"
+                        : m.promoGrossMargin >= 0
+                          ? "neutral"
+                          : "negative"
+                    }
+                  />
+                </motion.div>
+                <motion.div variants={stripItem}>
+                  <MetricTile
+                    label="רווח נוסף נטו"
+                    value={formatCurrency(m.netProfit)}
+                    sub="מול בסיס"
+                    tone={m.netProfit >= 0 ? "positive" : "negative"}
+                  />
+                </motion.div>
+              </div>
+            </motion.section>
           </TabsContent>
 
           {/* TAB 2 — RESULTS */}
