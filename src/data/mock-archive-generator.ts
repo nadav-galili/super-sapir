@@ -1,7 +1,7 @@
 // Per-scope archive & KPI generator for the promo simulator.
 //
-// Why this exists: the legacy `historicalPromotions` / `buyAndGetPromos` /
-// `categoryKpis` data in `mock-promo-history.ts` is keyed by old Hebrew
+// Why this exists: the legacy `historicalPromotions` / `categoryKpis` data
+// in `mock-promo-history.ts` is keyed by old Hebrew
 // Department names ("ירקות", "מכולת", "מוצרי חלב", …). The simulator now
 // scopes by Group/Department/Category/Sub-category/Supplier/Series — many of
 // which have no entry in the legacy data. This generator produces
@@ -11,11 +11,10 @@
 // "Deterministic" = the same scope always produces the same content. We hash
 // the scope key so the page doesn't shuffle on every render.
 //
-// Coverage: every (subcategoryId, supplierId?, series?) triple yields >= 3
-// historical promos, >= 2 buy-and-get tiles, and >= 5 KPIs.
+// Coverage: every (subcategoryId, supplierId?, series?) triple yields >= 6
+// historical promos and >= 5 KPIs.
 
 import type {
-  BuyAndGetPromo,
   CategoryKpi,
   HistoricalPromotion,
   KpiStatus,
@@ -129,8 +128,8 @@ export function generateHistoricalPromosForScope(
 ): HistoricalPromotion[] {
   if (!scope.subcategoryId) return [];
   const scopeName = buildScopeName(scope);
-  // Series scope = narrowest → 3 results; supplier = 4; sub-cat = 5.
-  const count = scope.series ? 3 : scope.supplierId ? 4 : 5;
+  // Series scope = narrowest → 6 results; supplier = 7; sub-cat = 8.
+  const count = scope.series ? 6 : scope.supplierId ? 7 : 8;
   const seed = seedKey(scope, "history");
 
   const discountIdxs = pickN(seed + "|disc", count, 10, 35);
@@ -187,63 +186,6 @@ export function generateHistoricalPromosForScope(
   });
 }
 
-const BUY_AND_GET_CONDITIONS = ["קנה 2", "קנה 3", "קנה מוצר X", "סל מעל ₪150"];
-const BUY_AND_GET_BENEFITS = [
-  "קבל 1 חינם",
-  "השני ב-50%",
-  "20% הנחה על הסל",
-  "מתנה לחבר מועדון",
-];
-
-export function generateBuyAndGetForScope(
-  scope: ArchiveScope
-): BuyAndGetPromo[] {
-  if (!scope.subcategoryId) return [];
-  const scopeName = buildScopeName(scope);
-  const count = scope.supplierId ? 2 : 3;
-  const seed = seedKey(scope, "bg");
-
-  const dateIdxs = pickN(seed + "|date", count, 0, HISTORY_DATES.length - 1);
-  const upliftIdxs = pickN(seed + "|upl", count, 22, 70);
-  const revenueIdxs = pickN(seed + "|rev", count, 60_000, 240_000);
-  const unitsIdxs = pickN(seed + "|u", count, 2_500, 11_000);
-  const condIdxs = pickN(
-    seed + "|cond",
-    count,
-    0,
-    BUY_AND_GET_CONDITIONS.length - 1
-  );
-  const benefitIdxs = pickN(
-    seed + "|ben",
-    count,
-    0,
-    BUY_AND_GET_BENEFITS.length - 1
-  );
-
-  return Array.from({ length: count }, (_, i) => {
-    const startDate = HISTORY_DATES[dateIdxs[i] ?? 0]!;
-    const start = new Date(startDate);
-    const end = new Date(start.getTime() + 14 * 24 * 60 * 60 * 1000);
-    const endDate = end.toISOString().slice(0, 10);
-    const condition = BUY_AND_GET_CONDITIONS[condIdxs[i] ?? 0]!;
-    const benefit = BUY_AND_GET_BENEFITS[benefitIdxs[i] ?? 0]!;
-
-    return {
-      id: `gen-bg-${seed}-${i}`,
-      category: scopeName,
-      name: `${condition} → ${benefit}`,
-      productName: scopeName,
-      startDate,
-      endDate,
-      condition,
-      benefit,
-      totalRevenue: revenueIdxs[i] ?? 100_000,
-      unitsSold: unitsIdxs[i] ?? 5_000,
-      upliftPct: Number((upliftIdxs[i] ?? 35).toFixed(1)),
-    };
-  });
-}
-
 const KPI_DEFS: Array<{
   id: string;
   label: string;
@@ -276,24 +218,13 @@ const KPI_DEFS: Array<{
     benchmark: "יעד מינימלי: 25%",
   },
   {
-    id: "stockout",
-    label: "Stockout Rate",
-    fmt: (n) => `${n.toFixed(1)}%`,
-    range: [1, 9],
-    good: 3,
-    warn: 5,
-    inverse: true,
-    description: "אחוז ה-SKU שיצאו ממלאי בתקופת המבצע.",
-    benchmark: "יעד: ≤3%",
-  },
-  {
     id: "gross-margin",
-    label: "Gross Margin",
+    label: "רווחיות גולמית",
     fmt: (n) => `${n.toFixed(1)}%`,
-    range: [14, 38],
-    good: 27,
-    warn: 21,
-    description: "שיעור רווח גולמי בקטגוריה.",
+    range: [28, 38],
+    good: 28,
+    warn: 28,
+    description: "שיעור רווחיות גולמית בקטגוריה.",
     benchmark: "יעד: 28%",
   },
   {

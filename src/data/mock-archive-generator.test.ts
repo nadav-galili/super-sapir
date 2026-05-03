@@ -3,7 +3,6 @@
 // (sub-category × supplier × series) selection.
 import { describe, it, expect } from "vitest";
 import {
-  generateBuyAndGetForScope,
   generateHistoricalPromosForScope,
   generateKpisForScope,
 } from "./mock-archive-generator";
@@ -26,7 +25,7 @@ function allSubCategoryIds(): string[] {
 }
 
 describe("per-scope archive generator — full coverage", () => {
-  it("yields >= 3 historical promos for every sub-category alone", () => {
+  it("yields >= 8 historical promos for every sub-category alone", () => {
     const failures: string[] = [];
     for (const subId of allSubCategoryIds()) {
       const promos = generateHistoricalPromosForScope({
@@ -34,7 +33,7 @@ describe("per-scope archive generator — full coverage", () => {
         supplierId: "",
         series: "",
       });
-      if (promos.length < 3) failures.push(`${subId} → ${promos.length}`);
+      if (promos.length < 8) failures.push(`${subId} → ${promos.length}`);
     }
     expect(failures).toEqual([]);
   });
@@ -48,19 +47,6 @@ describe("per-scope archive generator — full coverage", () => {
         series: "",
       });
       if (kpis.length < 5) failures.push(`${subId} → ${kpis.length} KPIs`);
-    }
-    expect(failures).toEqual([]);
-  });
-
-  it("yields >= 2 buy-and-get promos for every sub-category", () => {
-    const failures: string[] = [];
-    for (const subId of allSubCategoryIds()) {
-      const bg = generateBuyAndGetForScope({
-        subcategoryId: subId,
-        supplierId: "",
-        series: "",
-      });
-      if (bg.length < 2) failures.push(`${subId} → ${bg.length}`);
     }
     expect(failures).toEqual([]);
   });
@@ -100,6 +86,66 @@ describe("per-scope archive generator — full coverage", () => {
     });
     expect(promos.length).toBeGreaterThanOrEqual(3);
     expect(promos[0]?.name).toContain("שסטוביץ");
+  });
+
+  it("does not emit a Stockout Rate KPI", () => {
+    const kpis = generateKpisForScope({
+      subcategoryId: "tea",
+      supplierId: "",
+      series: "",
+    });
+    const ids = kpis.map((k) => k.id);
+    const labels = kpis.map((k) => k.label);
+    expect(ids.some((id) => id.startsWith("stockout"))).toBe(false);
+    expect(labels).not.toContain("Stockout Rate");
+    expect(labels).not.toContain("שיעור חוסרים");
+  });
+
+  it("labels the gross-margin KPI in canonical Hebrew (רווחיות גולמית) and floors it at 28%", () => {
+    const failures: string[] = [];
+    for (const subId of allSubCategoryIds()) {
+      const kpis = generateKpisForScope({
+        subcategoryId: subId,
+        supplierId: "",
+        series: "",
+      });
+      const margin = kpis.find((k) => k.id.startsWith("gross-margin"));
+      if (!margin) {
+        failures.push(`${subId} → no gross-margin KPI`);
+        continue;
+      }
+      if (margin.label !== "רווחיות גולמית") {
+        failures.push(`${subId} → label="${margin.label}"`);
+      }
+      if (margin.rawValue < 28) {
+        failures.push(`${subId} → rawValue=${margin.rawValue} (<28)`);
+      }
+      if (margin.status !== "good") {
+        failures.push(`${subId} → status=${margin.status} (not good)`);
+      }
+    }
+    expect(failures).toEqual([]);
+  });
+
+  it("scales count by scope precision: sub-cat=8, supplier=7, series=6", () => {
+    const subOnly = generateHistoricalPromosForScope({
+      subcategoryId: "tea",
+      supplierId: "",
+      series: "",
+    });
+    const withSupplier = generateHistoricalPromosForScope({
+      subcategoryId: "tea",
+      supplierId: "sup-22",
+      series: "",
+    });
+    const withSeries = generateHistoricalPromosForScope({
+      subcategoryId: "tea",
+      supplierId: "sup-22",
+      series: "תה ירוק",
+    });
+    expect(subOnly.length).toBe(8);
+    expect(withSupplier.length).toBe(7);
+    expect(withSeries.length).toBe(6);
   });
 
   it("is deterministic — same scope always produces the same output", () => {

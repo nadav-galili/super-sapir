@@ -8,6 +8,20 @@
 
 ## 2026-05-03
 
+### Promo Simulator Archive + Background — layout, vocabulary, gross-margin floor
+
+Implemented [issue #65](https://github.com/nadav-galili/super-sapir/issues/65). Four refactors on the Category Manager's `/category-manager/promo-simulator` archive and data-background surfaces:
+
+- **Archive density.** Bumped the per-scope historical-promo counts from 3 / 4 / 5 to **6 / 7 / 8** (Series / Supplier / Sub-category) so every tier shows enough prior art. Counts are tier-locked by a new test in `mock-archive-generator.test.ts`.
+- **Archive layout.** Cards moved from a single full-width column with an asymmetric "featured" hero card to a uniform **2-col grid on `md+`, single col on mobile**. Card payload shrunk one notch (heading 2xl / uplift 4xl / padding `px-6 py-5`). The `featured` flag and `[featured, ...rest]` split are gone, simplifying `ArchiveSheet`.
+- **shadcn primitives.** `HistoricalPromoCard` migrated to shadcn `Card` + `CardContent`, and the promo-type / outcome chips to shadcn `Badge`, with `className` overrides preserving the warm-eCommerce design system (`rounded-[16px]`, `text-[15px]`).
+- **Buy & Get retired.** Full delete: section JSX, `BuyAndGetTile`, `generateBuyAndGetForScope`, `BuyAndGetPromo` type, `BUY_AND_GET_CONDITIONS` / `BUY_AND_GET_BENEFITS` arrays, the legacy `buyAndGetPromos` dataset (~460 lines in `mock-promo-history.ts`), and `getBuyAndGetPromosForCategory`. No backwards-compat shims.
+- **Stockout KPI removed** from `KPI_DEFS` in `mock-archive-generator.ts`. `BackgroundDataSheet` picks up the change automatically. New regression test asserts no `stockout` id ever appears in generator output.
+- **Gross Margin retuned.** Label `Gross Margin` → **רווחיות גולמית**; range floored at `[28, 38]` with `good: 28` so the indicator reads green whenever actual ≥ 28% (the existing 28% target). Description copy updated to use the canonical term. New test asserts label + `rawValue >= 28` + `status === 'good'` across every Sub-category.
+- **Glossary.** Added **רווחיות גולמית** to `context.md` under "Sales & performance metrics", with `Gross Margin` as the English equivalent and `שיעור רווח גולמי` flagged as alias-to-avoid.
+
+Files: `ArchiveSheet.tsx`, `mock-archive-generator.ts`, `mock-archive-generator.test.ts`, `mock-promo-history.ts`, `context.md`.
+
 ### Promo Simulator Step 6 — decision & justification
 
 Step 6 ("תחזית והערכה") was an analysis page that overlapped heavily with the rebuilt Step 5. Recast as **"החלטה והצדקה"**: shows the verdict from Step 4, three headline KPI tiles (`netProfit` / `roi` / selected scenario), three decision buttons (לאשר / לאשר עם תיקונים / לדחות), and a justification textarea backed by the existing `analysisNote` field. The textarea placeholder swaps copy depending on the chosen decision.

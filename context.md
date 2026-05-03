@@ -43,16 +43,17 @@ Domain glossary for **Retalio** (previously "RetailSkillz Analytics") — the B2
 
 ## Sales & performance metrics
 
-| Term                  | Definition                                                                                                 | Aliases to avoid                |
-| --------------------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------- |
-| **Total Sales**       | Gross sales (revenue) of a branch or department for the current period, in ILS.                            | Gross, top-line                 |
-| **Network Sales**     | Sales measured by the chain's internal "network" channel — a subset of Total Sales tracked against target. | Chain sales                     |
-| **Average Basket**    | Average revenue per customer visit (`totalSales / customers`).                                             | Ticket, cart value              |
-| **Customers per Day** | Average daily unique customer count for the period.                                                        | Footfall, traffic               |
-| **Revenue per Meter** | Sales divided by **Selling Area** (sqm, warehouse excluded). Benchmarked across the chain.                 | Sales density, sqm productivity |
-| **YoY Change**        | Year-over-year percent change vs the same period last year.                                                | LY delta, annual growth         |
-| **vs Target**         | Percent variance against the planned target for the period.                                                | Plan variance, budget delta     |
-| **Comparison Mode**   | The user-selected benchmark axis: `vs-target`, `vs-last-year`, or `vs-last-month`.                         | Baseline, compare against       |
+| Term                  | Definition                                                                                                                                                                                            | Aliases to avoid                    |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| **Total Sales**       | Gross sales (revenue) of a branch or department for the current period, in ILS.                                                                                                                       | Gross, top-line                     |
+| **Network Sales**     | Sales measured by the chain's internal "network" channel — a subset of Total Sales tracked against target.                                                                                            | Chain sales                         |
+| **Average Basket**    | Average revenue per customer visit (`totalSales / customers`).                                                                                                                                        | Ticket, cart value                  |
+| **Customers per Day** | Average daily unique customer count for the period.                                                                                                                                                   | Footfall, traffic                   |
+| **Revenue per Meter** | Sales divided by **Selling Area** (sqm, warehouse excluded). Benchmarked across the chain.                                                                                                            | Sales density, sqm productivity     |
+| **YoY Change**        | Year-over-year percent change vs the same period last year.                                                                                                                                           | LY delta, annual growth             |
+| **vs Target**         | Percent variance against the planned target for the period.                                                                                                                                           | Plan variance, budget delta         |
+| **Comparison Mode**   | The user-selected benchmark axis: `vs-target`, `vs-last-year`, or `vs-last-month`.                                                                                                                    | Baseline, compare against           |
+| **רווחיות גולמית**    | Gross Margin — the gross-profit percentage of a Category, Sub-category, Supplier, or Series. Canonical Hebrew term used in promo-simulator KPI tiles and AI copy. English equivalent: `Gross Margin`. | שיעור רווח גולמי, רווח גולמי, מרווח |
 
 ---
 
