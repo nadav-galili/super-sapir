@@ -275,17 +275,17 @@ export const DURATION_WEEKS_OPTIONS = [
   { label: "חודש", value: 4 },
 ] as const;
 
-// The 9 wizard steps (in order)
+// The 8 wizard steps (in order). Step 5 (תרחישים ונקודת איזון) was merged
+// into step 4 as additional tabs; subsequent steps were renumbered down by 1.
 export const STEPS = [
   { id: 1, title: "רקע / בריף" },
   { id: 2, title: "בחירת מטרה" },
   { id: 3, title: "סוג מבצע" },
   { id: 4, title: "פרטי המבצע ותוצאות" },
-  { id: 5, title: "תרחישים ונקודת איזון" },
-  { id: 6, title: "החלטה והצדקה" },
-  { id: 7, title: "יישום בשטח" },
-  { id: 8, title: "בקרה" },
-  { id: 9, title: "תיעוד" },
+  { id: 5, title: "החלטה והצדקה" },
+  { id: 6, title: "יישום בשטח" },
+  { id: 7, title: "בקרה" },
+  { id: 8, title: "תיעוד" },
 ] as const;
 
 export type StepId = (typeof STEPS)[number]["id"];

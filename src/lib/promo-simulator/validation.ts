@@ -5,8 +5,8 @@
 // (a) disable the "המשך" button, (b) render a missing-fields helper line,
 // and (c) reveal rose borders on the exact fields the user needs to fill.
 //
-// Steps 6–9 are skippable by product decision — they never return missing
-// fields. Steps 1–5 enforce required fields.
+// Steps 5–8 are skippable by product decision — they never return missing
+// fields. Steps 1–4 enforce required fields.
 import type { SimulatorState } from "./state";
 import type { StepId } from "./taxonomy";
 
@@ -75,13 +75,7 @@ export function missingFieldsForStep(
     return missing;
   }
 
-  if (step === 5) {
-    if (isBlank(state.selectedScenario))
-      missing.push({ key: "selectedScenario", label: "תרחיש" });
-    return missing;
-  }
-
-  // Steps 6–9: skippable by decision.
+  // Steps 5–8: skippable by decision.
   return [];
 }
 
@@ -90,12 +84,12 @@ export function isStepValid(step: StepId, state: SimulatorState): boolean {
 }
 
 /**
- * Returns the earliest step (1..9) that is still missing required fields,
+ * Returns the earliest step (1..8) that is still missing required fields,
  * or null if every step is valid. Used by the Stepper to block forward
  * jumps past incomplete steps.
  */
 export function earliestIncompleteStep(state: SimulatorState): StepId | null {
-  for (const s of [1, 2, 3, 4, 5] as const) {
+  for (const s of [1, 2, 3, 4] as const) {
     if (!isStepValid(s, state)) return s;
   }
   return null;

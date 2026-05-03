@@ -2,7 +2,10 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
+  Cell,
   Legend,
+  Line,
+  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -11,8 +14,45 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatCurrency, formatNumber } from "@/lib/format";
-import { verdictLabel, type PromoMetrics } from "@/lib/promo-simulator/calc";
-import type { SimulatorState } from "@/lib/promo-simulator/state";
+import {
+  calcForScenario,
+  effectiveDiscountFor,
+  verdictLabel,
+  type PromoMetrics,
+} from "@/lib/promo-simulator/calc";
+import {
+  SCENARIOS,
+  SCENARIO_LABEL,
+  type Scenario,
+  type SimulatorState,
+} from "@/lib/promo-simulator/state";
+
+const SCENARIO_DESC: Record<Scenario, string> = {
+  pessimistic: "uplift נמוך",
+  base: "הפרמטרים הנוכחיים שלך",
+  optimistic: "uplift גבוה",
+};
+
+function riskInverse(
+  value: number,
+  midBelow: number,
+  highBelow: number
+): "low" | "mid" | "high" {
+  if (value < highBelow) return "low";
+  if (value < midBelow) return "mid";
+  return "high";
+}
+
+const RISK_LABEL: Record<"low" | "mid" | "high", string> = {
+  low: "נמוך",
+  mid: "בינוני",
+  high: "גבוה",
+};
+const RISK_COLOR: Record<"low" | "mid" | "high", string> = {
+  low: "#10B981",
+  mid: "#FBBF24",
+  high: "#F43F5E",
+};
 
 interface Step4ParamsProps {
   state: SimulatorState;
@@ -89,23 +129,54 @@ export function Step4Params({ state, metrics, onChange }: Step4ParamsProps) {
   const verdict = VERDICT_COLOR[m.verdict];
   const durationDays = Math.max(1, Math.round(state.durationWeeks * 7));
 
-  const chartData = [
-    {
-      name: "מחיר",
-      בסיס: Number(state.unitPrice.toFixed(2)),
-      מבצע: Number(m.effectivePrice.toFixed(2)),
-    },
-    {
-      name: "עלות",
-      בסיס: Number(state.unitCost.toFixed(2)),
-      מבצע: Number(state.unitCost.toFixed(2)),
-    },
-    {
-      name: "מרווח/יח'",
-      בסיס: Number((state.unitPrice - state.unitCost).toFixed(2)),
-      מבצע: Number((m.effectivePrice - state.unitCost).toFixed(2)),
-    },
-  ];
+  // ── Scenario comparison + break-even (was: Step 5) ─────────────────────
+  const scenarioMetrics: Record<Scenario, PromoMetrics> = {
+    pessimistic: calcForScenario(state, "pessimistic"),
+    base: calcForScenario(state, "base"),
+    optimistic: calcForScenario(state, "optimistic"),
+  };
+  const selectedScenario = scenarioMetrics[state.selectedScenario];
+
+  const scenarioBars = SCENARIOS.map((sc) => ({
+    name: SCENARIO_LABEL[sc],
+    profit: scenarioMetrics[sc].netProfit,
+    isSelected: sc === state.selectedScenario,
+  }));
+
+  const beDiscounts = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50];
+  const beCurve = beDiscounts.map((d) => {
+    const pp = state.unitPrice * (1 - d / 100);
+    const beMargin = pp - state.promoUnitCost;
+    const beUnits = beMargin > 0 ? state.mktCost / beMargin : Infinity;
+    const minUpliftPct =
+      Number.isFinite(beUnits) && state.baseUnits > 0
+        ? Math.min(300, Math.round((beUnits / state.baseUnits) * 100))
+        : 300;
+    return {
+      discount: `${d}%`,
+      "uplift נדרש (%)": minUpliftPct,
+      "uplift שלך (%)": Math.round(state.upliftPct),
+    };
+  });
+
+  const effDisc = effectiveDiscountFor(state.promoType, state.discountPct);
+  const ppNow = state.unitPrice * (1 - effDisc);
+  const beMarginNow = ppNow - state.promoUnitCost;
+  const beUnitsNow =
+    beMarginNow > 0 ? Math.round(state.mktCost / beMarginNow) : Infinity;
+  const minUplift =
+    beMarginNow > 0 && state.baseUnits > 0
+      ? Math.round((beUnitsNow / state.baseUnits) * 100)
+      : 999;
+  const safetyMargin = Math.round(state.upliftPct) - minUplift;
+
+  const gmRisk = riskInverse(m.promoGrossMargin, 20, 10);
+  const upliftRisk = riskInverse(state.upliftPct, 25, 10);
+  const riskScore =
+    [gmRisk, upliftRisk].filter((x) => x === "high").length * 50 +
+    [gmRisk, upliftRisk].filter((x) => x === "mid").length * 25;
+  const totalRiskLevel: "low" | "mid" | "high" =
+    riskScore >= 66 ? "high" : riskScore >= 33 ? "mid" : "low";
 
   return (
     <Card className="border-[#E7E0D8] rounded-[16px]">
@@ -143,6 +214,18 @@ export function Step4Params({ state, metrics, onChange }: Step4ParamsProps) {
               className="text-[16px] data-[state=active]:bg-white data-[state=active]:text-[#2D3748] px-4 py-1.5"
             >
               תחזית ביצועים
+            </TabsTrigger>
+            <TabsTrigger
+              value="compare"
+              className="text-[16px] data-[state=active]:bg-white data-[state=active]:text-[#2D3748] px-4 py-1.5"
+            >
+              השוואת תרחישים
+            </TabsTrigger>
+            <TabsTrigger
+              value="breakeven"
+              className="text-[16px] data-[state=active]:bg-white data-[state=active]:text-[#2D3748] px-4 py-1.5"
+            >
+              נקודת איזון
             </TabsTrigger>
           </TabsList>
 
@@ -333,28 +416,24 @@ export function Step4Params({ state, metrics, onChange }: Step4ParamsProps) {
                   נתוני ביקוש ועלויות
                 </div>
 
-                <div>
-                  <label className={LABEL} htmlFor="f-base-units">
-                    מכירות בסיס בתקופה (יח')
-                    <span className={VALUE} dir="ltr">
+                <div className="rounded-[10px] bg-[#FAF8F5] border border-[#E7E0D8] p-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <div className="text-[15px] text-[#788390] mb-0.5">
+                        מכירות בסיס בתקופה (יח')
+                      </div>
+                      <div className="text-[14px] text-[#A0AEC0]">
+                        ממוצע מכר היסטורי (מה-ERP)
+                      </div>
+                    </div>
+                    <span
+                      className="text-xl font-mono font-semibold text-[#2D3748]"
+                      dir="ltr"
+                    >
                       {formatNumber(state.baseUnits)}
                     </span>
-                  </label>
-                  <input
-                    id="f-base-units"
-                    type="range"
-                    min={50}
-                    max={10000}
-                    step={50}
-                    value={state.baseUnits}
-                    onChange={(e) =>
-                      onChange({ baseUnits: Number(e.target.value) })
-                    }
-                    className={RANGE}
-                    style={{ background: rangeBg(state.baseUnits, 10000) }}
-                    dir="ltr"
-                  />
-                  <div className="text-[14px] text-[#788390] mt-1" dir="rtl">
+                  </div>
+                  <div className="mt-1.5 text-[14px] text-[#788390]" dir="rtl">
                     כ-{Math.round(state.baseUnits / durationDays)} יח'/יום ל-
                     {durationDays} ימים
                   </div>
@@ -397,23 +476,20 @@ export function Step4Params({ state, metrics, onChange }: Step4ParamsProps) {
                 </div>
 
                 <hr className="border-[#F1EBE3]" />
-                <div className="text-[16px] font-semibold text-[#2D3748]">
-                  עלויות שיווק והפצה
-                </div>
 
                 <div>
-                  <label className={LABEL} htmlFor="f-mkt">
-                    עלות שיווק חד-פעמית (₪)
+                  <label className={LABEL} htmlFor="f-extra-costs">
+                    עלויות נוספות (₪)
                     <span className={VALUE} dir="ltr">
                       ₪{formatNumber(state.mktCost)}
                     </span>
                   </label>
                   <input
-                    id="f-mkt"
+                    id="f-extra-costs"
                     type="range"
                     min={0}
                     max={50000}
-                    step={500}
+                    step={100}
                     value={state.mktCost}
                     onChange={(e) =>
                       onChange({ mktCost: Number(e.target.value) })
@@ -422,64 +498,16 @@ export function Step4Params({ state, metrics, onChange }: Step4ParamsProps) {
                     style={{ background: rangeBg(state.mktCost, 50000) }}
                     dir="ltr"
                   />
-                </div>
-
-                <div>
-                  <label className={LABEL} htmlFor="f-ops">
-                    עלות תפעול נוספת ליח' (₪)
-                    <span className={VALUE} dir="ltr">
-                      ₪{state.opsCost.toFixed(1)}
-                    </span>
-                  </label>
-                  <input
-                    id="f-ops"
-                    type="range"
-                    min={0}
-                    max={20}
-                    step={0.5}
-                    value={state.opsCost}
-                    onChange={(e) =>
-                      onChange({ opsCost: Number(e.target.value) })
-                    }
-                    className={RANGE}
-                    style={{ background: rangeBg(state.opsCost, 20) }}
-                    dir="ltr"
-                  />
-                </div>
-
-                <div>
-                  <label className={LABEL} htmlFor="f-cannib">
-                    שיעור קניבליזציה (%)
-                    <span
-                      className={VALUE}
-                      style={{ color: "#6C5CE7" }}
-                      dir="ltr"
-                    >
-                      {state.cannibPct}%
-                    </span>
-                  </label>
-                  <input
-                    id="f-cannib"
-                    type="range"
-                    min={0}
-                    max={80}
-                    step={5}
-                    value={state.cannibPct}
-                    onChange={(e) =>
-                      onChange({ cannibPct: Number(e.target.value) })
-                    }
-                    className="w-full h-2 rounded-[5px] accent-[#6C5CE7]"
-                    style={{
-                      background: rangeBg(state.cannibPct, 80, "#6C5CE7"),
-                    }}
-                    dir="ltr"
-                  />
+                  <div className="mt-1 text-[14px] text-[#788390]">
+                    שיווק, תפעול נוסף, קניבליזציה — סך הוצאות צד מעבר להנחה
+                    הישירה.
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Headline metric strip */}
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mt-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
               <MetricTile
                 label="מחיר לאחר הנחה"
                 value={`₪${m.effectivePrice.toFixed(2)}`}
@@ -487,12 +515,12 @@ export function Step4Params({ state, metrics, onChange }: Step4ParamsProps) {
                 highlight
               />
               <MetricTile
-                label="רווח גולמי רגיל"
+                label="רווחיות גולמית רגילה"
                 value={`${m.baseGrossMargin.toFixed(1)}%`}
                 sub="לפני מבצע"
               />
               <MetricTile
-                label="רווח גולמי במבצע"
+                label="רווחיות גולמית במבצע"
                 value={`${m.promoGrossMargin.toFixed(1)}%`}
                 sub="לאחר הנחה"
                 tone={
@@ -508,12 +536,6 @@ export function Step4Params({ state, metrics, onChange }: Step4ParamsProps) {
                 value={formatCurrency(m.netProfit)}
                 sub="מול בסיס"
                 tone={m.netProfit >= 0 ? "positive" : "negative"}
-              />
-              <MetricTile
-                label="ROI מבצע"
-                value={`${m.roi}%`}
-                sub="על עלות שיווק"
-                tone={m.roi >= 0 ? "positive" : "negative"}
               />
             </div>
           </TabsContent>
@@ -550,15 +572,8 @@ export function Step4Params({ state, metrics, onChange }: Step4ParamsProps) {
                   tone="negative"
                 />
                 <ResultRow
-                  label="עלויות שיווק ותפעול"
-                  value={formatCurrency(
-                    Math.round(state.mktCost + state.opsCost * m.promoUnits)
-                  )}
-                  tone="negative"
-                />
-                <ResultRow
-                  label="השפעת קניבליזציה"
-                  value={formatCurrency(m.cannibLoss)}
+                  label="עלויות נוספות"
+                  value={formatCurrency(state.mktCost)}
                   tone="negative"
                 />
                 <ResultRow
@@ -611,46 +626,6 @@ export function Step4Params({ state, metrics, onChange }: Step4ParamsProps) {
                       : "לא ניתן לאיזון"
                   }
                 />
-                <ResultRow label="ROI" value={`${m.roi}%`} bold />
-              </div>
-            </div>
-
-            <div className="rounded-[16px] border border-[#E7E0D8] bg-white p-5 mt-4">
-              <div className="text-lg font-semibold text-[#2D3748] mb-3">
-                גרף השוואת מחיר ורווחיות — בסיס מול מבצע
-              </div>
-              <div dir="ltr" className="w-full h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={chartData}
-                    margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#F1EBE3" />
-                    <XAxis
-                      dataKey="name"
-                      tick={{ fontSize: 16, fill: "#4A5568" }}
-                    />
-                    <YAxis tick={{ fontSize: 16, fill: "#4A5568" }} />
-                    <Tooltip
-                      contentStyle={{
-                        background: "white",
-                        border: "1px solid #E7E0D8",
-                        borderRadius: 10,
-                        fontSize: 16,
-                      }}
-                      formatter={(v) =>
-                        typeof v === "number" ? `₪${v.toFixed(2)}` : String(v)
-                      }
-                    />
-                    <Legend wrapperStyle={{ fontSize: 16 }} />
-                    <Bar
-                      dataKey="בסיס"
-                      fill="rgba(160, 174, 192, 0.6)"
-                      radius={[4, 4, 0, 0]}
-                    />
-                    <Bar dataKey="מבצע" fill="#DC4E59" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
               </div>
             </div>
 
@@ -666,7 +641,260 @@ export function Step4Params({ state, metrics, onChange }: Step4ParamsProps) {
                 ? `המבצע כדאי: הרווח התוספתי חיובי והמרווח הגולמי שמור (${m.promoGrossMargin.toFixed(1)}%). מחיר המבצע ₪${m.effectivePrice.toFixed(2)} עדיין מעל עלות המוצר. מומלץ לאשר.`
                 : m.verdict === "notWorthIt"
                   ? `המבצע לא כדאי: מחיר המבצע ₪${m.effectivePrice.toFixed(2)} קרוב מדי לעלות (₪${state.unitCost.toFixed(2)}) או שהרווח הנטו שלילי. שקול להפחית את ההנחה או להעלות את ה-uplift הצפוי.`
-                  : `כדאיות גבולית: מחיר המבצע ₪${m.effectivePrice.toFixed(2)} (הנחה ${savingPct}%) — הרווח חיובי אך נמוך. בדוק את הנחת ה-uplift או הפחת את עלות השיווק.`}
+                  : `כדאיות גבולית: מחיר המבצע ₪${m.effectivePrice.toFixed(2)} (הנחה ${savingPct}%) — הרווח חיובי אך נמוך. בדוק את הנחת ה-uplift או הפחת את העלויות הנוספות.`}
+            </div>
+          </TabsContent>
+
+          {/* TAB 3 — SCENARIO COMPARISON */}
+          <TabsContent value="compare" className="mt-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+              {SCENARIOS.map((sc) => {
+                const isSel = sc === state.selectedScenario;
+                return (
+                  <button
+                    key={sc}
+                    type="button"
+                    onClick={() => onChange({ selectedScenario: sc })}
+                    className={`text-right rounded-[12px] p-4 transition-all ${
+                      isSel
+                        ? "border-2 border-[#DC4E59] bg-[#FFF1F0]"
+                        : "border border-[#E7E0D8] bg-white hover:bg-[#FAF8F5]"
+                    }`}
+                  >
+                    <div className="text-[16px] font-semibold text-[#2D3748]">
+                      תרחיש {SCENARIO_LABEL[sc]}
+                    </div>
+                    <div className="text-[15px] text-[#788390] mt-1">
+                      {SCENARIO_DESC[sc]}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="rounded-[16px] border border-[#E7E0D8] bg-white p-5">
+                <div className="text-lg font-semibold text-[#2D3748] mb-3">
+                  ניתוח רגישות — ב-3 תרחישים
+                </div>
+                <div dir="ltr" className="w-full h-[280px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={scenarioBars}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#F1EBE3" />
+                      <XAxis
+                        dataKey="name"
+                        tick={{ fontSize: 16, fill: "#4A5568" }}
+                      />
+                      <YAxis
+                        tick={{ fontSize: 16, fill: "#4A5568" }}
+                        tickFormatter={(v) => `₪${Math.round(v / 1000)}K`}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          background: "white",
+                          border: "1px solid #E7E0D8",
+                          borderRadius: 10,
+                          fontSize: 16,
+                        }}
+                        formatter={(v) =>
+                          typeof v === "number" ? formatCurrency(v) : String(v)
+                        }
+                      />
+                      <Bar dataKey="profit" radius={[4, 4, 0, 0]}>
+                        {scenarioBars.map((entry, i) => (
+                          <Cell
+                            key={i}
+                            fill={entry.profit >= 0 ? "#10B981" : "#F43F5E"}
+                            opacity={entry.isSelected ? 1 : 0.5}
+                          />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              <div className="rounded-[16px] border border-[#E7E0D8] bg-white p-5">
+                <div className="text-lg font-semibold text-[#2D3748] mb-3">
+                  פרוט תרחיש נבחר — {SCENARIO_LABEL[state.selectedScenario]}
+                </div>
+                <ResultRow
+                  label="uplift אפקטיבי"
+                  value={`${Math.round((selectedScenario.extraUnits / Math.max(state.baseUnits, 1)) * 100)}%`}
+                />
+                <ResultRow
+                  label="מחיר לאחר הנחה"
+                  value={`₪${selectedScenario.effectivePrice.toFixed(2)}`}
+                  highlight
+                />
+                <ResultRow
+                  label="מכירות נוספות (יח')"
+                  value={`${formatNumber(selectedScenario.extraUnits)} יח'`}
+                />
+                <ResultRow
+                  label="רווח תוספתי"
+                  value={formatCurrency(selectedScenario.netProfit)}
+                  tone={
+                    selectedScenario.netProfit >= 0 ? "positive" : "negative"
+                  }
+                  bold
+                />
+                <ResultRow
+                  label="הערכה"
+                  value={verdictLabel(selectedScenario.verdict)}
+                  tone={
+                    selectedScenario.verdict === "worthIt"
+                      ? "positive"
+                      : selectedScenario.verdict === "notWorthIt"
+                        ? "negative"
+                        : "neutral"
+                  }
+                />
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* TAB 4 — BREAK-EVEN */}
+          <TabsContent value="breakeven" className="mt-4">
+            <div className="rounded-[16px] border border-[#E7E0D8] bg-white p-5 mb-4">
+              <div className="text-lg font-semibold text-[#2D3748] mb-3">
+                מפת נקודת איזון — uplift נדרש לפי גובה הנחה
+              </div>
+              <div dir="ltr" className="w-full h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={beCurve}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#F1EBE3" />
+                    <XAxis
+                      dataKey="discount"
+                      tick={{ fontSize: 16, fill: "#4A5568" }}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 16, fill: "#4A5568" }}
+                      tickFormatter={(v) => `${v}%`}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        background: "white",
+                        border: "1px solid #E7E0D8",
+                        borderRadius: 10,
+                        fontSize: 16,
+                      }}
+                      formatter={(v) =>
+                        typeof v === "number" ? `${v}%` : String(v)
+                      }
+                    />
+                    <Legend wrapperStyle={{ fontSize: 16 }} />
+                    <Line
+                      type="monotone"
+                      dataKey="uplift נדרש (%)"
+                      stroke="#DC4E59"
+                      strokeWidth={2.5}
+                      dot={{ r: 4 }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="uplift שלך (%)"
+                      stroke="#10B981"
+                      strokeDasharray="6 3"
+                      strokeWidth={2}
+                      dot={false}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="rounded-[16px] border border-[#E7E0D8] bg-white p-5">
+                <div className="text-lg font-semibold text-[#2D3748] mb-3">
+                  נקודת איזון — הנחה נוכחית
+                </div>
+                <ResultRow
+                  label="הנחה אפקטיבית"
+                  value={`${Math.round(effDisc * 100)}%`}
+                />
+                <ResultRow
+                  label="מחיר לאחר הנחה"
+                  value={`₪${ppNow.toFixed(2)}`}
+                  highlight
+                />
+                <ResultRow
+                  label="uplift מינימלי לאיזון"
+                  value={`${minUplift}%`}
+                />
+                <ResultRow
+                  label="uplift שהוגדר"
+                  value={`${Math.round(state.upliftPct)}%`}
+                />
+                <ResultRow
+                  label="מרווח ביטחון"
+                  value={`${safetyMargin >= 0 ? "+" : ""}${safetyMargin}%`}
+                  tone={safetyMargin >= 0 ? "positive" : "negative"}
+                  bold
+                />
+                <ResultRow
+                  label="יחידות נוספות לאיזון"
+                  value={
+                    Number.isFinite(beUnitsNow)
+                      ? `${formatNumber(beUnitsNow)} יח'`
+                      : "לא ניתן לאיזון"
+                  }
+                />
+              </div>
+
+              <div className="rounded-[16px] border border-[#E7E0D8] bg-white p-5">
+                <div className="text-lg font-semibold text-[#2D3748] mb-3">
+                  גורמי סיכון
+                </div>
+                <div className="flex items-center justify-between border-b border-[#F1EBE3] py-2">
+                  <span className="text-[16px] text-[#4A5568]">
+                    סיכון צמצום מרווח
+                  </span>
+                  <span
+                    className="text-[16px] font-medium"
+                    style={{ color: RISK_COLOR[gmRisk] }}
+                  >
+                    {RISK_LABEL[gmRisk]}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between border-b border-[#F1EBE3] py-2">
+                  <span className="text-[16px] text-[#4A5568]">
+                    סיכון uplift נמוך
+                  </span>
+                  <span
+                    className="text-[16px] font-medium"
+                    style={{ color: RISK_COLOR[upliftRisk] }}
+                  >
+                    {RISK_LABEL[upliftRisk]}
+                  </span>
+                </div>
+                <ResultRow
+                  label="ציון סיכון כולל"
+                  value={`${RISK_LABEL[totalRiskLevel]} (${Math.round(riskScore)}/100)`}
+                  tone={
+                    totalRiskLevel === "low"
+                      ? "positive"
+                      : totalRiskLevel === "high"
+                        ? "negative"
+                        : "neutral"
+                  }
+                  bold
+                />
+                <div className="mt-3">
+                  <div className="text-[15px] text-[#788390] mb-1">
+                    רמת סיכון כוללת
+                  </div>
+                  <div className="h-2.5 w-full rounded-[5px] bg-[#F1EBE3] overflow-hidden">
+                    <div
+                      className="h-full rounded-[5px] transition-all"
+                      style={{
+                        width: `${Math.round(riskScore)}%`,
+                        background: RISK_COLOR[totalRiskLevel],
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           </TabsContent>
         </Tabs>

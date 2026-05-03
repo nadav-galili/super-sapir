@@ -8,8 +8,8 @@ function stateWith(overrides: Partial<SimulatorState>): SimulatorState {
 }
 
 describe("narrativeFor", () => {
-  it("returns an empty array for steps that have no narrative (1, 6, 7, 8, 9)", () => {
-    for (const step of [1, 6, 7, 8, 9] as const) {
+  it("returns an empty array for steps that have no narrative (1, 5, 6, 7, 8)", () => {
+    for (const step of [1, 5, 6, 7, 8] as const) {
       expect(narrativeFor(stateWith({ step }))).toEqual([]);
     }
   });
@@ -78,17 +78,6 @@ describe("narrativeFor", () => {
       expect(text).toMatch(/שלילי|מתחת לעלות/);
     });
 
-    it("warns on high cannibalization (>25%)", () => {
-      const s = stateWith({
-        step: 4,
-        discountPct: 15,
-        cannibPct: 35,
-        promoType: "מבצעי הוזלה",
-      });
-      const text = narrativeFor(s).join(" ");
-      expect(text).toContain("קניבליזציה");
-    });
-
     it("reports the verdict for a healthy promo", () => {
       const s = stateWith({
         step: 4,
@@ -104,41 +93,6 @@ describe("narrativeFor", () => {
       });
       const text = narrativeFor(s).join(" ");
       expect(text).toMatch(/כדאי|רווח תוספתי/);
-    });
-  });
-
-  describe("step 5 — scenarios narrative", () => {
-    it("mentions the selected scenario name", () => {
-      const s = stateWith({ step: 5, selectedScenario: "optimistic" });
-      const text = narrativeFor(s).join(" ");
-      expect(text).toContain("אופטימי");
-    });
-
-    it("reports break-even when margin is positive", () => {
-      const s = stateWith({
-        step: 5,
-        discountPct: 10,
-        unitPrice: 20,
-        unitCost: 10,
-        opsCost: 0.5,
-        baseUnits: 1000,
-        upliftPct: 25,
-      });
-      const text = narrativeFor(s).join(" ");
-      expect(text).toContain("נקודת האיזון");
-    });
-
-    it("explains lack of break-even when effective margin is non-positive", () => {
-      const s = stateWith({
-        step: 5,
-        discountPct: 70,
-        unitPrice: 10,
-        unitCost: 8,
-        opsCost: 5,
-        promoType: "מבצעי הוזלה",
-      });
-      const text = narrativeFor(s).join(" ");
-      expect(text).toMatch(/לא ניתן להגיע לאיזון|אינו חיובי/);
     });
   });
 });

@@ -189,9 +189,9 @@ export function createDefaultState(opts?: {
     promoUnitCost: 7.5,
     upliftPct: 20,
     stockUnits: 1500,
-    mktCost: 5000,
-    opsCost: 1,
-    cannibPct: 15,
+    mktCost: 0,
+    opsCost: 0,
+    cannibPct: 0,
     selectedScenario: "base",
     signage: false,
     shelf: false,
@@ -319,10 +319,10 @@ export function validateSimulatorSearch(
     out.upliftPct = toNum(search.upliftPct, 20);
   if (search.stockUnits !== undefined)
     out.stockUnits = toNum(search.stockUnits, 1500);
-  if (search.mktCost !== undefined) out.mktCost = toNum(search.mktCost, 5000);
-  if (search.opsCost !== undefined) out.opsCost = toNum(search.opsCost, 1);
+  if (search.mktCost !== undefined) out.mktCost = toNum(search.mktCost, 0);
+  if (search.opsCost !== undefined) out.opsCost = toNum(search.opsCost, 0);
   if (search.cannibPct !== undefined)
-    out.cannibPct = toNum(search.cannibPct, 15);
+    out.cannibPct = toNum(search.cannibPct, 0);
   if (search.selectedScenario !== undefined) {
     const v = toStr(search.selectedScenario, "base");
     out.selectedScenario = (

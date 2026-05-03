@@ -3,7 +3,6 @@ import { Step1Brief } from "./Step1Brief";
 import { Step2Goal } from "./Step2Goal";
 import { Step3PromoType } from "./Step3PromoType";
 import { Step4Params } from "./Step4Params";
-import { Step5Scenarios } from "./Step5Scenarios";
 import { Step6Decision } from "./Step6Decision";
 import { Step7Implementation } from "./Step7Implementation";
 import { Step8Control } from "./Step8Control";
@@ -18,11 +17,10 @@ const SLICE_BY_STEP: Record<number, number> = {
   2: 3,
   3: 3,
   4: 4,
-  5: 5,
+  5: 6,
   6: 6,
-  7: 6,
+  7: 7,
   8: 7,
-  9: 7,
 };
 
 interface StepContentProps {
@@ -47,7 +45,7 @@ export function StepContent({
 }: StepContentProps) {
   const stepMeta = STEPS[state.step - 1];
   const sliceNum = SLICE_BY_STEP[state.step];
-  const showBeam = withBeam && state.step >= 4 && state.step <= 7;
+  const showBeam = withBeam && state.step >= 4 && state.step <= 6;
 
   const raw =
     state.step === 1 ? (
@@ -81,10 +79,8 @@ export function StepContent({
     ) : state.step === 4 ? (
       <Step4Params state={state} metrics={metrics} onChange={setState} />
     ) : state.step === 5 ? (
-      <Step5Scenarios state={state} metrics={metrics} onChange={setState} />
-    ) : state.step === 6 ? (
       <Step6Decision state={state} metrics={metrics} onChange={setState} />
-    ) : state.step === 7 ? (
+    ) : state.step === 6 ? (
       <Step7Implementation
         impl={{
           signage: state.signage,
@@ -94,7 +90,7 @@ export function StepContent({
         }}
         onChange={setState}
       />
-    ) : state.step === 8 ? (
+    ) : state.step === 7 ? (
       <Step8Control
         control={{
           controlPrice: state.controlPrice,
@@ -112,7 +108,7 @@ export function StepContent({
         }
         onChange={setState}
       />
-    ) : state.step === 9 ? (
+    ) : state.step === 8 ? (
       <Step9Documentation state={state} metrics={metrics} onChange={setState} />
     ) : (
       <StepPlaceholder

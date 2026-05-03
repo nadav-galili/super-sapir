@@ -65,7 +65,7 @@ function pickDefaultCategory(): string {
  * - Jumps to the current step (or any completed step) are allowed.
  */
 export function canJumpToStep(state: SimulatorState, target: StepId): boolean {
-  if (target < 1 || target > 9) return false;
+  if (target < 1 || target > 8) return false;
   if (target <= state.step) return true;
   const earliestGap = earliestIncompleteStep(state);
   if (earliestGap == null) return true;
@@ -173,7 +173,7 @@ export function usePromoSimulator(search: SimulatorSearch): UsePromoSimulator {
   }, [state.step, setState]);
 
   const goNext = useCallback(() => {
-    if (state.step >= 9) return;
+    if (state.step >= 8) return;
     if (!isStepValid(state.step, state)) return;
     setState({ step: (state.step + 1) as StepId });
   }, [state, setState]);

@@ -74,9 +74,9 @@ describe("usePromoSimulator (boundary contract)", () => {
       expect(paragraphs.length).toBeGreaterThanOrEqual(2);
     });
 
-    it("returns empty narrative for steps outside the 2..5 range", () => {
+    it("returns empty narrative for steps outside the 2..4 range", () => {
       expect(narrativeFor({ ...defaults, step: 1 })).toEqual([]);
-      expect(narrativeFor({ ...defaults, step: 6 })).toEqual([]);
+      expect(narrativeFor({ ...defaults, step: 5 })).toEqual([]);
     });
   });
 
@@ -143,14 +143,14 @@ describe("usePromoSimulator (boundary contract)", () => {
         upliftPct: 25,
         stockUnits: 2000,
       };
-      expect(canJumpToStep(state, 6)).toBe(true);
-      expect(canJumpToStep(state, 9)).toBe(true);
+      expect(canJumpToStep(state, 5)).toBe(true);
+      expect(canJumpToStep(state, 8)).toBe(true);
     });
 
     it("rejects out-of-range steps", () => {
       const state: SimulatorState = { ...defaults, step: 5 };
       expect(canJumpToStep(state, 0 as 1)).toBe(false);
-      expect(canJumpToStep(state, 10 as 9)).toBe(false);
+      expect(canJumpToStep(state, 9 as 8)).toBe(false);
     });
   });
 
