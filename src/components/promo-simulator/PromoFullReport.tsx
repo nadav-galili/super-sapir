@@ -1,6 +1,10 @@
-import { statusLabel, type PromoMetrics } from "@/lib/promo-simulator/calc";
+import { verdictLabel, type PromoMetrics } from "@/lib/promo-simulator/calc";
 import { formatCurrency, formatNumber } from "@/lib/format";
-import type { SimulatorState } from "@/lib/promo-simulator/state";
+import {
+  DECISION_LABEL,
+  SCENARIO_LABEL,
+  type SimulatorState,
+} from "@/lib/promo-simulator/state";
 import { findSegmentById } from "@/data/mock-taxonomy";
 
 function resolveSegmentLabel(segmentId: string): string {
@@ -115,15 +119,17 @@ export function PromoFullReport({ state, metrics: m }: PromoFullReportProps) {
         <Row label="הנחה" value={`${state.discountPct}%`} />
       </Section>
 
-      <Section title="יעדים ותחזית">
+      <Section title="פרמטרי מבצע">
         <Row
-          label="מכר בסיסי צפוי (יחידות)"
+          label="מכירות בסיס בתקופה (יחידות)"
           value={formatNumber(state.baseUnits)}
         />
         <Row label="מחיר רגיל ליחידה" value={formatCurrency(state.unitPrice)} />
         <Row label="עלות ליחידה" value={formatCurrency(state.unitCost)} />
-        <Row label="גידול צפוי במכר" value={`${state.upliftPct}%`} />
-        <Row label="מלאי זמין ליחידות" value={formatNumber(state.stockUnits)} />
+        <Row label="גידול צפוי במכר (uplift)" value={`${state.upliftPct}%`} />
+        <Row label="עלות שיווק" value={formatCurrency(state.mktCost)} />
+        <Row label="עלות תפעול ליחידה" value={formatCurrency(state.opsCost)} />
+        <Row label="שיעור קניבליזציה" value={`${state.cannibPct}%`} />
         <Row
           label="מחיר אפקטיבי ליחידה"
           value={formatCurrency(m.effectivePrice)}
@@ -133,15 +139,22 @@ export function PromoFullReport({ state, metrics: m }: PromoFullReportProps) {
 
       <Section title="KPI מפתח">
         <Row label="יחידות במבצע" value={formatNumber(m.promoUnits)} />
+        <Row label="יחידות נוספות" value={formatNumber(m.extraUnits)} />
         <Row label="פדיון בסיס" value={formatCurrency(m.baseRevenue)} />
         <Row label="פדיון במבצע" value={formatCurrency(m.promoRevenue)} />
         <Row label="רווח בסיס" value={formatCurrency(m.baseProfit)} />
         <Row label="רווח במבצע" value={formatCurrency(m.promoProfit)} />
-        <Row label="השקעה מוערכת" value={formatCurrency(m.investment)} />
+        <Row label="השפעת קניבליזציה" value={formatCurrency(m.cannibLoss)} />
+        <Row label="רווח תוספתי נטו" value={formatCurrency(m.netProfit)} />
+        <Row label="שולי רווח גולמי בסיס" value={`${m.baseGrossMargin}%`} />
+        <Row label="שולי רווח גולמי מבצע" value={`${m.promoGrossMargin}%`} />
         <Row label="ROI" value={`${m.roi}%`} />
         <Row label="Break-even (יחידות לאיזון)" value={breakEvenStr} />
-        <Row label="כיסוי מלאי" value={`${m.stockCoverage}%`} />
-        <Row label="סטטוס" value={statusLabel(m.status)} />
+        <Row label="הערכת כדאיות" value={verdictLabel(m.verdict)} />
+        <Row
+          label="תרחיש נבחר"
+          value={SCENARIO_LABEL[state.selectedScenario]}
+        />
       </Section>
 
       <Section title="יישום בשטח">
@@ -157,11 +170,14 @@ export function PromoFullReport({ state, metrics: m }: PromoFullReportProps) {
         <Row label="בקרת תצוגה" value={boolLabel(state.controlDisplay)} />
       </Section>
 
-      {(state.analysisNote || state.documentation) && (
-        <Section title="ניתוח ותיעוד">
+      {(state.decision || state.analysisNote || state.documentation) && (
+        <Section title="החלטה ותיעוד">
+          {state.decision && (
+            <Row label="החלטה" value={DECISION_LABEL[state.decision]} />
+          )}
           {state.analysisNote && (
             <div className="py-2 border-b border-[#F1EBE3]">
-              <p className="text-[14px] text-[#4A5568] mb-1">הערות ניתוח</p>
+              <p className="text-[14px] text-[#4A5568] mb-1">הצדקה ותובנות</p>
               <p className="text-[14px] text-[#2D3748] whitespace-pre-wrap">
                 {state.analysisNote}
               </p>

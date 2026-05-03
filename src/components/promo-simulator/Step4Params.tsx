@@ -144,7 +144,7 @@ export function Step4Params({ state, metrics, onChange }: Step4ParamsProps) {
               value="results"
               className="text-[16px] data-[state=active]:bg-white data-[state=active]:text-[#2D3748] px-4 py-1.5"
             >
-              תוצאות וניתוח
+              תחזית ביצועים
             </TabsTrigger>
           </TabsList>
 
