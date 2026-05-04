@@ -8,6 +8,20 @@
 
 ## 2026-05-04
 
+### Step 5 — renamed "החלטה והצדקה" → "אישור מבצע" + "Sign-off Document" redesign
+
+User asked to rename Step 5 in both the timeline and the tab header, then to use the `frontend-design` skill to redesign the layout. Committed to a "Sign-off Document" aesthetic — Step 5 is the gate before implementation, so the screen should feel ceremonial: a system recommendation panel followed by a sign-off panel with the manager's decision.
+
+- **Renamed in two places.** `taxonomy.ts` STEPS → `{ id: 5, title: "אישור מבצע" }` (sidebar/timeline label). `Step6Decision.tsx` `<CardTitle>` → "אישור מבצע" with new descriptor "סקור את ההמלצה, אשר את ההחלטה, ותעד את ההצדקה לארכיון".
+- **Card header overhauled.** Added a "שלב 5" uppercase eyebrow above the title in primary-red tracked text. Bottom border on the header (`border-b border-[#F1EBE3]`) visually separates the chrome from the content.
+- **Evidence panel** ("המלצת המערכת") — replaces the previously detached verdict pill + 3-KPI grid. Tinted gradient background `softBg` derived from the verdict (`worthIt → green tint, borderline → amber tint, notWorthIt → rose tint`), vertical accent stripe in the verdict color, large `Scale` icon in a filled circle. Big 3xl headline (`"המבצע כדאי" / "כדאיות גבולית" / "המבצע לא כדאי"`) plus a 1-line rationale. Below: 3 compact `KpiPill`s replace the previous 3 full `KpiTile`s — smaller, supporting-evidence feel rather than competing with the headline.
+- **Sign-off panel** ("ההחלטה שלך") — separate white card. Header has a `ClipboardCheck` icon in a rose-tinted circle, "ההחלטה שלך" eyebrow, and (when a decision is selected) a small "נבחר: …" pill on the start side echoing the chosen decision's color. The 3 decision buttons keep their existing structure but get `motion.button` with `whileHover={y:-2}` / `whileTap={scale:0.98}` plus a colored drop-shadow on the selected state (`0 12px 28px -16px <accent>66`). Selected decision label now switches to its accent color (was solid grey before).
+- **Justification field linked to decision color.** The textarea container now adopts the chosen decision's border color, creating a subtle visual chain from "I picked Approve" → "the comment box uses approve-green border" → "I'm explaining why I approved." Falls back to neutral border before any decision is selected.
+- **Entry animation.** Two `motion.section`s (Evidence + Sign-off) fade up on mount with a small stagger delay (`delay: 0.08` on the second). Spring-tuned to feel deliberate, not bouncy. Once the panels settle, value updates happen in place — no re-trigger when the verdict changes from amber → green.
+- **New imports.** `Scale`, `ClipboardCheck` from `lucide-react`. `motion` from `motion/react`.
+
+Files: `taxonomy.ts`, `Step6Decision.tsx`. 186 tests pass; typecheck clean.
+
 ### Tab 1 "פרטי המבצע" — redesign separating ERP data from manager decisions
 
 User feedback: it wasn't visually clear which fields are auto-pulled from ERP vs. which the category manager actively decides. Used the `frontend-design` skill to commit to a "Ledger vs Workbench" aesthetic that telegraphs the distinction at first glance.

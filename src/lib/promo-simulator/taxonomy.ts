@@ -282,7 +282,7 @@ export const STEPS = [
   { id: 2, title: "בחירת מטרה" },
   { id: 3, title: "סוג מבצע" },
   { id: 4, title: "פרטי המבצע ותוצאות" },
-  { id: 5, title: "החלטה והצדקה" },
+  { id: 5, title: "אישור מבצע" },
   { id: 6, title: "יישום בשטח" },
   { id: 7, title: "בקרה" },
   { id: 8, title: "תיעוד" },
