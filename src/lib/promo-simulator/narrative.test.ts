@@ -8,8 +8,8 @@ function stateWith(overrides: Partial<SimulatorState>): SimulatorState {
 }
 
 describe("narrativeFor", () => {
-  it("returns an empty array for steps that have no narrative (1, 5, 6, 7, 8)", () => {
-    for (const step of [1, 5, 6, 7, 8] as const) {
+  it("returns an empty array for steps that have no narrative (1, 5, 6, 7)", () => {
+    for (const step of [1, 5, 6, 7] as const) {
       expect(narrativeFor(stateWith({ step }))).toEqual([]);
     }
   });

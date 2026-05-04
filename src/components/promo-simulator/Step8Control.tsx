@@ -1,8 +1,9 @@
-import { Check, HelpCircle } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Activity, Check, HelpCircle } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { getProgressColor, getStatusColor } from "@/lib/kpi/resolvers";
 import { statusLabel, type PromoMetrics } from "@/lib/promo-simulator/calc";
 import type { ControlSlice, SliceSetter } from "@/lib/promo-simulator/state";
+import { StepHeader } from "./StepHeader";
 
 interface Step8ControlProps {
   control: ControlSlice;
@@ -44,16 +45,24 @@ export function Step8Control({
     percent: (readinessCount / 4) * 100,
   });
 
+  const statusPill =
+    m.status === "worthIt"
+      ? { bg: "#ECFDF5", border: "#A7F3D0", text: "#065F46" }
+      : m.status === "needsImprovement"
+        ? { bg: "#FFFBEB", border: "#FCD34D", text: "#92400E" }
+        : { bg: "#FFF1F2", border: "#FDA4AF", text: "#9F1239" };
+
   return (
     <div className="space-y-4">
       <Card className="border-[#E7E0D8] rounded-[16px]">
-        <CardHeader>
-          <CardTitle className="text-2xl text-[#2D3748]">בקרה</CardTitle>
-          <p className="text-lg text-[#4A5568]">
-            ווידוא תקינות בזמן הרצה — מחיר, מלאי, נראות
-          </p>
-        </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
+          <StepHeader
+            step={7}
+            title="בקרה"
+            description="וידוא תקינות בזמן הרצה — מחיר, מלאי, נראות"
+            icon={Activity}
+            pill={{ label: statusLabel(m.status), ...statusPill }}
+          />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {CHECKS.map((c) => {
               const checked = Boolean(control[c.field]);

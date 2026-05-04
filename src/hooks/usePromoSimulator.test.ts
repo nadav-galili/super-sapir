@@ -144,13 +144,13 @@ describe("usePromoSimulator (boundary contract)", () => {
         stockUnits: 2000,
       };
       expect(canJumpToStep(state, 5)).toBe(true);
-      expect(canJumpToStep(state, 8)).toBe(true);
+      expect(canJumpToStep(state, 7)).toBe(true);
     });
 
     it("rejects out-of-range steps", () => {
       const state: SimulatorState = { ...defaults, step: 5 };
       expect(canJumpToStep(state, 0 as 1)).toBe(false);
-      expect(canJumpToStep(state, 9 as 8)).toBe(false);
+      expect(canJumpToStep(state, 9 as 7)).toBe(false);
     });
   });
 

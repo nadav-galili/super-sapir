@@ -8,6 +8,73 @@
 
 ## 2026-05-04
 
+### ROI hidden when there's no marketing investment
+
+User noticed the success-screen ROI row showed "0%" in green even when net profit was strongly negative — misleading. Root cause: `calc.ts` returns `roi = 0` when `investment === 0` to avoid divide-by-zero, but the UI rendered that fallback as a real metric.
+
+- **`PromoSummaryCard`** — ROI row now hidden entirely when `state.mktCost === 0`. Section "תוצאות פיננסיות" goes from 4 rows to 3 rows in the no-investment case.
+- **`PromoFullReport`** (PDF template) — same conditional hide.
+- **`Step6Decision` (Step 5 — אישור מבצע)** — middle KpiPill in the evidence panel switches to "מרווח גולמי במבצע" (`m.promoGrossMargin`%) when there's no marketing investment, keeping the 3-up grid balanced with a metric that's always meaningful. Tone now follows promo-margin thresholds: ≥10% green, ≥0% amber, <0% rose.
+
+### Misc copy / layout polish
+
+- **Tab 1 slider label** — `גובה ההנחה / ההטבה (%)` → `גובה ההנחה לקונה`.
+- **Step 6 rename** — `יישום בשטח` → `הנחיות לשטח` in both the timeline (`taxonomy.ts`) and the tab header (`Step7Implementation.tsx`).
+- **PDF — סגמנט row dropped.** No longer in the brief section. Removed the now-unused `findSegmentById` import + `resolveSegmentLabel` helper from `PromoFullReport.tsx`.
+
+### Hero gauges layout — all 5 small gauges fit beside the big gauge
+
+User reported the KPI command center was clipping the 5 small gauges. Reshaped the hero so the gauge column dominates, the text column shrinks, and the big gauge sheds enough size to free room for the row.
+
+- **`HeroBanner.tsx`** — outer grid `xl:grid-cols-[minmax(300px,0.82fr)_minmax(620px,1.18fr)]` → `xl:grid-cols-[minmax(280px,0.62fr)_minmax(720px,1.38fr)]`. Inner grid `lg:grid-cols-[250px_minmax(0,1fr)]` → `lg:grid-cols-[200px_minmax(0,1fr)]`, padding tightened from `p-5` to `p-3`. `GAUGE_SIZE` 200→160, `GAUGE_STROKE` 14→12, center percentage from `text-[72px]/text-3xl` to `text-[56px]/text-2xl`, label from `text-[15px]` to `text-[13px]`.
+- **`KPIGaugeRow.tsx`** — heroInline cell `min-w-[92px]` → `min-w-[84px]`, horizontal padding `px-2` → `px-1.5` so 5 gauges share the strip without horizontal scroll on standard widths. Also flipped strip alignment from `items-end` to `items-start` so all 5 gauge circles share a single top baseline; previously cells with multi-line labels ("סל ממוצע ללקוח", "מכירות מבצעים") pushed their gauges higher than single-line cells ("לקוחות").
+
+### Success screen + PDF template — dead fields removed, missing fields added, brand logo on PDF
+
+User flagged two things on the final screen ("המבצע מוכן"): (a) two rows showed "—" persistently — investigate and remove if dead, (b) earlier-step fields worth surfacing here were missing. Also asked to embed the Retalio logo on the generated PDF.
+
+- **Removed dead rows from `PromoSummaryCard`.** "מוצר" (`state.product`) and "התניה + הטבה" (`conditionText`/`benefitText`) — both fields were dropped from the wizard during the 2026-05-03 refactor but the summary kept rendering them as empty "—" rows. Also removed from `PromoFullReport` (PDF template).
+- **`PromoSummaryCard` reorganized into 5 sections** with small red eyebrow titles ("מוצר ושיוך" / "אסטרטגיה ותזמון" / "פרמטרים" / "תוצאות פיננסיות" / "החלטה"). New rows added: תת-קטגוריה (resolved via `findSubCategoryById`), ספק (via `getSupplierById`), במה (`salesArena`), קהל יעד (resolved via `findSegmentById`, only shown when present), תקופה (formatted "DD.MM.YYYY ← DD.MM.YYYY · N שבועות"), combined "מחיר רגיל ← מבצע" with the % chip in one row, מכירות בסיס בתקופה, תרחיש נבחר.
+- **`PromoFullReport` (PDF template) cleaned up.** Removed legacy "מוצר" row from the brief section. Removed "עלות תפעול ליחידה" and "שיעור קניבליזציה" rows (no UI sets these anymore — always 0). Removed "השפעת קניבליזציה" from KPIs (same reason). Removed "בקרה" section since Step 7 (Control) is commented out — restoration breadcrumb left in a comment. Added "עלות ליחידה במבצע" (`promoUnitCost`) which was missing despite being a key user-controlled field. Renamed "עלות שיווק" → "עלויות נוספות" to match the field's current label in the wizard.
+- **Brand logo on PDF.** Added `<img src="/retalio-transparent.png" alt="Retalio" crossOrigin="anonymous">` to the PDF report header, placed on the start side of the title row (in RTL: left of "תיק מבצע"). Sized at h-14 with `maxWidth: 160` and `object-contain` to keep aspect ratio. The logo is fetched same-origin from `/public` so html2canvas (which has `useCORS: true`) rasterizes it cleanly into the PDF capture. Verified: `naturalWidth = 1536` after page load, confirming the image actually decodes.
+
+Files: `PromoSummaryCard.tsx` (complete rewrite), `PromoFullReport.tsx`. 186 tests pass; typecheck clean.
+
+### "בקרה" (legacy step 7) commented out — wizard now ends at "תיעוד" as step 7
+
+User asked to disable "בקרה" for the pitch but keep the code on disk for later. Done with reversible commenting + renumbering — to bring it back, restore the four marked spots.
+
+- **`taxonomy.ts` STEPS** — commented out `{ id: 7, title: "בקרה" }`, renumbered `תיעוד` from id 8 to id 7. Inline comment marks the spot for restoration.
+- **`StepContent.tsx`** — `Step8Control` import commented out (path preserved); the `state.step === 7` branch now routes to `<Step9Documentation>`. Restoration breadcrumb in a comment block. `SLICE_BY_STEP` updated to omit step 8.
+- **`usePromoSimulator.ts`** — `goNext` clamp lowered from `>= 8` to `>= 7`.
+- **`Step9Documentation.tsx`** — `<StepHeader step={…} />` updated from 8 to 7 so the eyebrow matches the new ID.
+- **`promo-simulator.tsx` route** — both `state.step === 8` checks (the "סיום" button label and the `handleNext` finish trigger) renamed to `state.step === 7`.
+- **Tests** — `usePromoSimulator.test.ts` and `narrative.test.ts` updated to expect the new max step (7) and the narrative-empty list `[1, 5, 6, 7]`.
+
+`Step8Control.tsx` and `LiveKPIPanel.tsx` files left intact on disk — only routing references touched. Reverse-engineered restoration: re-enable the entry in STEPS, un-comment the import + branch in `StepContent`, bump goNext back to 8, and switch the route comparisons / `Step9Documentation` step prop back.
+
+Files: `taxonomy.ts`, `StepContent.tsx`, `usePromoSimulator.ts`, `Step9Documentation.tsx`, `routes/category-manager/promo-simulator.tsx`, `usePromoSimulator.test.ts`, `narrative.test.ts`. 186 tests pass; typecheck clean.
+
+### Removed "KPI חי" side rail from Steps 5 and 6
+
+User flagged that the persistent "KPI חי" side rail on Step 5 (אישור מבצע) and Step 6 (יישום בשטח) was redundant — those steps now surface their own decision-supporting context inline (evidence panel on 5, readiness pill on 6). Disabled the side rail across the wizard by setting `showLiveKpi = false` in `routes/category-manager/promo-simulator.tsx`. The grid collapses from `1fr,320px` to a single full-width column, giving each step room to breathe.
+
+File: `routes/category-manager/promo-simulator.tsx`.
+
+### All 8 wizard steps — unified `StepHeader` for client-pitch consistency
+
+User flagged that the simulator goes to a client pitch tomorrow and asked for "top standard" consistency across every phase. Built a shared `StepHeader` primitive and applied it to all 8 wizard steps so every phase opens with the same visual rhythm.
+
+- **New `StepHeader` component** (`src/components/promo-simulator/StepHeader.tsx`). Receives `{ step, title, description, icon, pill, accent, children }`. Renders: colored circle icon (start side) + tracked uppercase eyebrow ("שלב N") + 2xl bold title + 16px muted descriptor + optional status pill on the end side. Bottom border (`border-b border-[#F1EBE3]`) creates the chrome/content separator.
+- **Applied to every step.** Each `Step{N}*.tsx` now uses `<StepHeader />` instead of its bespoke `<CardHeader>`. Step 1 (`ClipboardList` + "בריף מוכן" pill when complete), Step 2 (`Target` + selected-goal pill), Step 3 (`Sparkles` + "מטרה: …" pill), Step 4 (`Calculator` + verdict pill), Step 5 (`FileSignature` + verdict pill — replaces the bespoke header from this morning), Step 6 (`Megaphone` + "מוכנות N/4" pill that turns green/amber/rose by readiness), Step 7 (`Activity` + status-label pill), Step 8 (`FileCheck2` + verdict pill, plus a `Table` icon on the secondary "טבלת סיכום מבצע" card).
+- **Status pills are semantic.** Green (`#ECFDF5/#A7F3D0/#065F46`) for ready/positive, amber (`#FFFBEB/#FCD34D/#92400E`) for partial/borderline, rose (`#FFF1F2/#FDA4AF/#9F1239`) for absent/negative, violet (`#F0EEFE/#C9C3F4/#6C5CE7`) for cross-step references like "מטרה: X". Same triple appears across all steps so the user reads color the same way everywhere.
+- **`CardHeader`/`CardTitle` removed from steps 1–7** since `StepHeader` now owns that surface. Step 8 keeps a secondary `CardHeader` for the summary table card (with a Table icon next to the title to match the new iconography pattern).
+- **Sidebar/timeline labels remain authoritative** via `taxonomy.ts` `STEPS`. `StepHeader` reads its step number from props, not the taxonomy, so individual screens can stay in sync via the eyebrow.
+
+Verified end-to-end across all 8 steps in the live preview: each renders the expected eyebrow + title without error boundaries, and pills surface high-signal context (verdict, readiness, completion) at a glance.
+
+Files: `StepHeader.tsx` (new), `Step1Brief.tsx`, `Step2Goal.tsx`, `Step3PromoType.tsx`, `Step4Params.tsx`, `Step6Decision.tsx`, `Step7Implementation.tsx`, `Step8Control.tsx`, `Step9Documentation.tsx`. 186 tests pass; typecheck clean.
+
 ### Step 5 — renamed "החלטה והצדקה" → "אישור מבצע" + "Sign-off Document" redesign
 
 User asked to rename Step 5 in both the timeline and the tab header, then to use the `frontend-design` skill to redesign the layout. Committed to a "Sign-off Document" aesthetic — Step 5 is the gate before implementation, so the screen should feel ceremonial: a system recommendation panel followed by a sign-off panel with the manager's decision.

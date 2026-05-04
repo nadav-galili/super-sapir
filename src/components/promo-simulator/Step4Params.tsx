@@ -1,5 +1,6 @@
 import {
   ArrowLeft,
+  Calculator,
   Database,
   Info,
   Lock,
@@ -20,10 +21,11 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { LiquidCard } from "@/components/ui/liquid-glass-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip } from "@/components/ui/tooltip";
+import { StepHeader } from "./StepHeader";
 import { formatCurrency, formatNumber } from "@/lib/format";
 import {
   calcForScenario,
@@ -237,27 +239,19 @@ export function Step4Params({ state, metrics, onChange }: Step4ParamsProps) {
 
   return (
     <Card className="border-[#E7E0D8] rounded-[16px]">
-      <CardHeader className="flex flex-row items-start justify-between gap-4">
-        <div>
-          <CardTitle className="text-2xl text-[#2D3748]">
-            סימולטור ניתוח מבצעים
-          </CardTitle>
-          <p className="text-lg text-[#4A5568]">
-            ניתוח כדאיות מבצעים — פרמטרים פיננסיים ותוצאה מיידית
-          </p>
-        </div>
-        <span
-          className="inline-flex items-center rounded-full px-3 py-1 text-[15px] font-medium border"
-          style={{
-            background: verdict.bg,
-            borderColor: verdict.border,
-            color: verdict.text,
+      <CardContent className="pt-6">
+        <StepHeader
+          step={4}
+          title="פרטי המבצע ותוצאות"
+          description="ניתוח כדאיות מבצעים — פרמטרים פיננסיים ותוצאה מיידית"
+          icon={Calculator}
+          pill={{
+            label: verdictLabel(m.verdict),
+            bg: verdict.bg,
+            border: verdict.border,
+            text: verdict.text,
           }}
-        >
-          {verdictLabel(m.verdict)}
-        </span>
-      </CardHeader>
-      <CardContent>
+        />
         <Tabs defaultValue="params" dir="rtl" className="w-full">
           <TabsList className="bg-[#FAF8F5] border border-[#E7E0D8] rounded-[10px] h-auto p-1">
             <TabsTrigger
@@ -397,7 +391,7 @@ export function Step4Params({ state, metrics, onChange }: Step4ParamsProps) {
                   {/* Discount % */}
                   <div>
                     <label className={LABEL} htmlFor="f-discount">
-                      גובה ההנחה / ההטבה (%)
+                      גובה ההנחה לקונה
                       <span
                         className={VALUE}
                         style={{ color: "#2EC4D5" }}

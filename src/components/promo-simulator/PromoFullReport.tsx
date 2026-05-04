@@ -5,13 +5,6 @@ import {
   SCENARIO_LABEL,
   type SimulatorState,
 } from "@/lib/promo-simulator/state";
-import { findSegmentById } from "@/data/mock-taxonomy";
-
-function resolveSegmentLabel(segmentId: string): string {
-  if (!segmentId) return "";
-  return findSegmentById(segmentId)?.nameHe ?? segmentId;
-}
-
 interface PromoFullReportProps {
   state: SimulatorState;
   metrics: PromoMetrics;
@@ -78,22 +71,33 @@ export function PromoFullReport({ state, metrics: m }: PromoFullReportProps) {
       className="bg-[#FAF8F5] p-8 space-y-4"
       style={{ width: 800, fontFamily: "Rubik, sans-serif" }}
     >
-      <header className="space-y-1 pb-4 border-b border-[#E7E0D8]">
-        <h1 className="text-[28px] font-bold text-[#2D3748]">תיק מבצע</h1>
-        <p className="text-[14px] text-[#4A5568]">
-          סימולטור מבצעים · {state.retailer || "סופר ספיר"} · הופק {generatedAt}
-        </p>
-        {(state.product || state.category) && (
-          <p className="text-[16px] font-semibold text-[#DC4E59]">
-            {[state.category, state.product].filter(Boolean).join(" · ")}
+      <header className="flex items-start justify-between gap-6 pb-4 border-b border-[#E7E0D8]">
+        <div className="space-y-1 flex-1 min-w-0">
+          <h1 className="text-[28px] font-bold text-[#2D3748]">תיק מבצע</h1>
+          <p className="text-[14px] text-[#4A5568]">
+            סימולטור מבצעים · {state.retailer || "סופר ספיר"} · הופק{" "}
+            {generatedAt}
           </p>
-        )}
+          {(state.product || state.category) && (
+            <p className="text-[16px] font-semibold text-[#DC4E59]">
+              {[state.category, state.product].filter(Boolean).join(" · ")}
+            </p>
+          )}
+        </div>
+        {/* App brand mark — fetched from /public so html2canvas can rasterize
+            it as part of the PDF capture. crossOrigin avoids tainting the
+            canvas; same-origin fetch is the default for /public assets. */}
+        <img
+          src="/retalio-transparent.png"
+          alt="Retalio"
+          crossOrigin="anonymous"
+          className="h-14 w-auto shrink-0 object-contain"
+          style={{ maxWidth: 160 }}
+        />
       </header>
 
       <Section title="רקע / בריף">
         <Row label="קטגוריה" value={state.category} />
-        <Row label="סגמנט" value={resolveSegmentLabel(state.segment)} />
-        <Row label="מוצר" value={state.product} />
         <Row label="פורמט" value={state.salesArena} />
         <Row label="רשת" value={state.retailer} />
         <Row label="תאריך תחילת מבצע" value={formatDateHe(state.startDate)} />
@@ -117,10 +121,12 @@ export function PromoFullReport({ state, metrics: m }: PromoFullReportProps) {
         />
         <Row label="מחיר רגיל ליחידה" value={formatCurrency(state.unitPrice)} />
         <Row label="עלות ליחידה" value={formatCurrency(state.unitCost)} />
+        <Row
+          label="עלות ליחידה במבצע"
+          value={formatCurrency(state.promoUnitCost)}
+        />
         <Row label="גידול צפוי במכר (uplift)" value={`${state.upliftPct}%`} />
-        <Row label="עלות שיווק" value={formatCurrency(state.mktCost)} />
-        <Row label="עלות תפעול ליחידה" value={formatCurrency(state.opsCost)} />
-        <Row label="שיעור קניבליזציה" value={`${state.cannibPct}%`} />
+        <Row label="עלויות נוספות" value={formatCurrency(state.mktCost)} />
         <Row
           label="מחיר אפקטיבי ליחידה"
           value={formatCurrency(m.effectivePrice)}
@@ -135,11 +141,10 @@ export function PromoFullReport({ state, metrics: m }: PromoFullReportProps) {
         <Row label="פדיון במבצע" value={formatCurrency(m.promoRevenue)} />
         <Row label="רווח בסיס" value={formatCurrency(m.baseProfit)} />
         <Row label="רווח במבצע" value={formatCurrency(m.promoProfit)} />
-        <Row label="השפעת קניבליזציה" value={formatCurrency(m.cannibLoss)} />
         <Row label="רווח תוספתי נטו" value={formatCurrency(m.netProfit)} />
         <Row label="שולי רווח גולמי בסיס" value={`${m.baseGrossMargin}%`} />
         <Row label="שולי רווח גולמי מבצע" value={`${m.promoGrossMargin}%`} />
-        <Row label="ROI" value={`${m.roi}%`} />
+        {state.mktCost > 0 && <Row label="ROI" value={`${m.roi}%`} />}
         <Row label="Break-even (יחידות לאיזון)" value={breakEvenStr} />
         <Row label="הערכת כדאיות" value={verdictLabel(m.verdict)} />
         <Row
@@ -155,11 +160,8 @@ export function PromoFullReport({ state, metrics: m }: PromoFullReportProps) {
         <Row label="תדריך קופות" value={boolLabel(state.cashierBrief)} />
       </Section>
 
-      <Section title="בקרה">
-        <Row label="בקרת מחיר" value={boolLabel(state.controlPrice)} />
-        <Row label="בקרת מלאי" value={boolLabel(state.controlStock)} />
-        <Row label="בקרת תצוגה" value={boolLabel(state.controlDisplay)} />
-      </Section>
+      {/* בקרה section removed — Step 7 (Control) is disabled for the pitch.
+          When restoring it, re-add the section here. */}
 
       {(state.decision || state.analysisNote || state.documentation) && (
         <Section title="החלטה ותיעוד">

@@ -1,6 +1,13 @@
-import { AlertTriangle, Check, ClipboardCheck, Scale, X } from "lucide-react";
+import {
+  AlertTriangle,
+  Check,
+  ClipboardCheck,
+  FileSignature,
+  Scale,
+  X,
+} from "lucide-react";
 import { motion } from "motion/react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/format";
 import { verdictLabel, type PromoMetrics } from "@/lib/promo-simulator/calc";
 import {
@@ -10,6 +17,7 @@ import {
   type Decision,
   type SimulatorState,
 } from "@/lib/promo-simulator/state";
+import { StepHeader } from "./StepHeader";
 
 interface Step6DecisionProps {
   state: SimulatorState;
@@ -130,37 +138,43 @@ export function Step6Decision({
 }: Step6DecisionProps) {
   const theme = VERDICT_THEME[m.verdict];
   const netProfitColor = m.netProfit >= 0 ? "#10B981" : "#F43F5E";
-  const roiColor = m.roi >= 0 ? "#10B981" : "#F43F5E";
+  // ROI is undefined without a marketing investment (would be a div-by-zero).
+  // When there's no spend, swap the middle pill to gross-margin-in-promo —
+  // a metric that's always meaningful at the same "ratio" register.
+  const hasInvestment = state.mktCost > 0;
+  const middleTitle = hasInvestment ? "ROI" : "מרווח גולמי במבצע";
+  const middleValue = hasInvestment
+    ? `${m.roi}%`
+    : `${m.promoGrossMargin.toFixed(1)}%`;
+  const middleSub = hasInvestment ? "על עלות השיווק" : "אחרי הנחה לקונה ולספק";
+  const middleColor = hasInvestment
+    ? m.roi >= 0
+      ? "#10B981"
+      : "#F43F5E"
+    : m.promoGrossMargin >= 10
+      ? "#10B981"
+      : m.promoGrossMargin >= 0
+        ? "#F59E0B"
+        : "#F43F5E";
   const selectedDecisionMeta = state.decision
     ? DECISION_META[state.decision]
     : undefined;
 
   return (
     <Card className="border-[#E7E0D8] rounded-[16px]">
-      <CardHeader className="flex flex-row items-start justify-between gap-4 border-b border-[#F1EBE3]">
-        <div>
-          <div className="text-[15px] font-semibold uppercase tracking-[0.14em] text-[#DC4E59]">
-            שלב 5
-          </div>
-          <CardTitle className="text-2xl text-[#2D3748] mt-1">
-            אישור מבצע
-          </CardTitle>
-          <p className="text-lg text-[#4A5568] mt-1">
-            סקור את ההמלצה, אשר את ההחלטה, ותעד את ההצדקה לארכיון.
-          </p>
-        </div>
-        <span
-          className="inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-[16px] font-semibold border shrink-0"
-          style={{
-            background: theme.bg,
-            borderColor: theme.border,
-            color: theme.text,
+      <CardContent className="pt-6 space-y-6">
+        <StepHeader
+          step={5}
+          title="אישור מבצע"
+          description="סקור את ההמלצה, אשר את ההחלטה, ותעד את ההצדקה לארכיון."
+          icon={FileSignature}
+          pill={{
+            label: verdictLabel(m.verdict),
+            bg: theme.bg,
+            border: theme.border,
+            text: theme.text,
           }}
-        >
-          {verdictLabel(m.verdict)}
-        </span>
-      </CardHeader>
-      <CardContent className="space-y-6 pt-6">
+        />
         {/* ── EVIDENCE PANEL ──────────────────────────────────────────
             The system's recommendation as a single visual unit:
             big verdict + 1-line rationale + 3 supporting KPI pills. */}
@@ -214,10 +228,10 @@ export function Step6Decision({
               accent={netProfitColor}
             />
             <KpiPill
-              title="ROI"
-              value={`${m.roi}%`}
-              sub="על עלות השיווק"
-              accent={roiColor}
+              title={middleTitle}
+              value={middleValue}
+              sub={middleSub}
+              accent={middleColor}
             />
             <KpiPill
               title="תרחיש נבחר"

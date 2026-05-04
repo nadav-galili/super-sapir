@@ -275,17 +275,20 @@ export const DURATION_WEEKS_OPTIONS = [
   { label: "חודש", value: 4 },
 ] as const;
 
-// The 8 wizard steps (in order). Step 5 (תרחישים ונקודת איזון) was merged
-// into step 4 as additional tabs; subsequent steps were renumbered down by 1.
+// The wizard steps (in order). Step 5 (תרחישים ונקודת איזון) was merged
+// into step 4 as additional tabs; subsequent steps were renumbered down.
+// "בקרה" (legacy id 7) is commented out for the current pitch — restore the
+// entry below and re-enable the routing in `StepContent.tsx` and the goNext
+// max bound in `usePromoSimulator.ts` to bring it back.
 export const STEPS = [
   { id: 1, title: "רקע / בריף" },
   { id: 2, title: "בחירת מטרה" },
   { id: 3, title: "סוג מבצע" },
   { id: 4, title: "פרטי המבצע ותוצאות" },
   { id: 5, title: "אישור מבצע" },
-  { id: 6, title: "יישום בשטח" },
-  { id: 7, title: "בקרה" },
-  { id: 8, title: "תיעוד" },
+  { id: 6, title: "הנחיות לשטח" },
+  // { id: 7, title: "בקרה" },  // disabled for pitch — see Step8Control.tsx
+  { id: 7, title: "תיעוד" },
 ] as const;
 
 export type StepId = (typeof STEPS)[number]["id"];

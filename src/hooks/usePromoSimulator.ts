@@ -173,7 +173,9 @@ export function usePromoSimulator(search: SimulatorSearch): UsePromoSimulator {
   }, [state.step, setState]);
 
   const goNext = useCallback(() => {
-    if (state.step >= 8) return;
+    // Clamp at 7 — Control (legacy step 7) is disabled for the pitch.
+    // When restoring it, bump this back to 8.
+    if (state.step >= 7) return;
     if (!isStepValid(state.step, state)) return;
     setState({ step: (state.step + 1) as StepId });
   }, [state, setState]);
