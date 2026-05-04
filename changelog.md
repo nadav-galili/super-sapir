@@ -6,6 +6,56 @@
 
 ---
 
+## 2026-05-04
+
+### Tab 4 sensitivity chart — axis labels + corrected formula
+
+User flagged that the "מפת נקודת איזון" chart in Tab 4 was unclear and asked to verify its math. Three real bugs surfaced; all are now fixed and the chart shows axis labels.
+
+- **`beCurve` formula was inconsistent with the canonical break-even.** It still used the old marketing-only recovery (`mktCost / margin`), didn't subtract `opsCost`, and computed uplift % as `(beUnits / baseUnits) × 100` (a ratio) instead of `((beUnits − baseUnits) / baseUnits) × 100`. After the fix, the chart curve at the current discount slot matches the headline number in Tab 2 (e.g., 15% discount → 67% uplift required).
+- **Axis labels added.** X axis now reads `גובה הנחה (%)`, Y axis reads `uplift נדרש (%)` (rotated −90°, anchored mid-Y). Margin around the plot widened (`bottom: 30, left: 30`) so labels don't crowd the ticks. Chart container height bumped from 300 → 340 to fit the new labels and a top-anchored legend.
+- **Subtitle added under the chart title** explaining what the chart shows: "לכל גובה הנחה: כמה אחוז uplift במכירות נדרש כדי שהמבצע לא יפסיד מול תרחיש 'ללא מבצע'".
+- **Tooltip-on-hover label clarified** — the data tooltip now prefixes with "הנחה: 25%" instead of just "25%".
+
+Verified curve values against the new formula at default state (baseProfit=₪4,500, mktCost=₪0, opsCost=₪0):
+
+- 5% discount → margin 3.90 → 1,154 units → 15% uplift required
+- 15% discount → margin 2.70 → 1,667 units → 67% uplift required (matches Tab 2)
+- 25% discount → margin 1.50 → 3,000 units → 200% uplift required
+- ≥30% discount → margin too thin → curve hits the 300% cap
+
+File: `Step4Params.tsx`. 186 tests pass; typecheck clean.
+
+### Break-even now reflects true promo profitability
+
+User feedback: the previous break-even formula only asked "how many units recoup marketing cost?" — it didn't answer the real category-manager question: "is it worth running this promo at all vs. selling at full price?"
+
+- **`breakEvenUnits` formula rewritten in `calc.ts`.** Previously: `ceil(mktCost / promoMargin)` — only marketing recovery. Now: `ceil((baseProfit + mktCost + cannibLoss) / promoMargin)` — total promo units required for `netProfit ≥ 0`, derived directly from solving the netProfit equation. Includes the foregone full-price margin from base sales (the real opportunity cost of running the promo).
+- **`minUplift` in Tab 4 corrected.** Previously computed `(beUnits / baseUnits) × 100` which is a ratio, not an uplift. Now `((beUnits − baseUnits) / baseUnits) × 100`, floored at 0. Now expresses the actual % growth in sales required to reach break-even.
+- **"יחידות נוספות לאיזון" → "סך מכירות לאיזון".** Renamed in Tab 4 since the value now represents total promo units (not increment), consistent with the new formula.
+- **Tooltip + UX of the Tab 2 break-even row.** Shows the full computation with values plugged in. Also shows current `promoUnits` next to break-even and a green ✓ / red ✗ verdict (above/below break-even). Removed the "אין עלויות להחזר" fallback — even at `mktCost=0`, break-even now has a real value driven by `baseProfit`.
+- **Test updated** in `calc.test.ts` to assert the new formula and verify break-even with `mktCost > 0` exceeds the old marketing-only recovery (sanity check that `baseProfit` is now included).
+
+Result for the default state (unitPrice=12, unitCost=7.5, discount=15%, baseUnits=1000, mktCost=0): break-even = 1,667 units (vs. previous 0). With `upliftPct=20%`, `promoUnits=1,200` < `breakEvenUnits=1,667` → `netProfit=−₪1,260` (red, "מתחת לנקודת האיזון"). The previous "0 יח'" result hid this — the promo looked safe when it was actually losing money against the no-promo baseline.
+
+Files: `calc.ts`, `calc.test.ts`, `Step4Params.tsx`. 186 tests pass; typecheck clean.
+
+### Step 4 "תחזית ביצועים" — layout swap, formula transparency, calc fixes
+
+User asked to swap the two cards on Tab 2 of `Step4Params` and audit every metric for correctness. Three real anomalies surfaced in the audit; all are now fixed and every metric exposes its formula directly to the user.
+
+- **Card layout swap.** In Tab `תחזית ביצועים`, `מדדי ביצוע` now renders before `תוצאות פיננסיות` in the DOM, which in RTL puts performance metrics on the right and financials on the left. No data changes — just child-order swap inside the `lg:grid-cols-2` grid.
+- **Break-even consistency fix.** Tab 4 (`נקודת איזון`) was duplicating the break-even calc with a _different formula_ than Tab 2 (`Math.round(mktCost / (effPrice − promoCost))` vs. canonical `Math.ceil(mktCost / (effPrice − promoCost − opsCost))`). Removed the duplicate `effDisc / ppNow / beMarginNow / beUnitsNow` block in `Step4Params.tsx`; Tab 4 now reads `m.effectiveDiscount`, `m.effectivePrice`, and `m.breakEvenUnits` from the canonical resolver. `effectiveDiscountFor` import dropped — no longer used outside `calc.ts`.
+- **Loss-flooring removed in `calcMetrics`.** `promoUnitProfit = max(unitMargin − opsCost, 0)` and `baseUnitProfit = max(unitPrice − unitCost, 0)` were silently clipping negative margins to zero, which masked losses in `netProfit` for bad-promo scenarios. Both floors removed; `cannibLoss` keeps a `Math.max(baseUnitProfit, 0)` floor so cannibalizing a losing item doesn't show as a _gain_ (which would be confusing UX). All 15 calc tests still pass — existing test cases all had positive margins.
+- **Formula transparency on every row.** `ResultRow` now accepts optional `formula` (always-visible subtext under the label, monospace LTR) and `info` (long-form explainer rendered via the existing `Tooltip` component triggered by a hover-help `Info` icon from `lucide-react`). All 14 rows in Tab 2 (`מדדי ביצוע` + `תוצאות פיננסיות`) plus all 6 rows in Tab 4's "נקודת איזון" card now show their exact formula with the actual values plugged in (e.g., `(₪10.20 − ₪7.50) ÷ ₪10.20 = 26.5%`).
+- **`עלות ההנחה הכוללת` renamed to `סך הנחה ללקוחות`.** The previous label implied the value was deducted from `netProfit` (it isn't — `netProfit` accounts for everything correctly via `promoProfit − baseProfit − mktCost − cannibLoss`). The tooltip explicitly notes this is descriptive, not a P&L deduction.
+- **Tooltip primitive upgraded.** `src/components/ui/tooltip.tsx` now accepts `ReactNode` content (was string-only) and a `width` prop (`auto | sm | md | lg`); previous `whitespace-nowrap` prevented multi-line formula tooltips. Switched to dark theme (`#2D3748` bg) for contrast on cream surfaces.
+- **`Tooltip` import collision resolved.** `recharts` exports a `Tooltip` component used in the scenario / break-even charts. Aliased to `Tooltip as RechartsTooltip` so the UI tooltip can be imported as `Tooltip` from `@/components/ui/tooltip`.
+
+Files: `Step4Params.tsx`, `calc.ts`, `tooltip.tsx`. 186 tests pass; typecheck clean.
+
+---
+
 ## 2026-05-03
 
 ### Step 4 — `simulator-refactor` polish session

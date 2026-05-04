@@ -1,3 +1,4 @@
+import { Info } from "lucide-react";
 import { motion } from "motion/react";
 import {
   Bar,
@@ -8,17 +9,17 @@ import {
   Line,
   LineChart,
   ResponsiveContainer,
-  Tooltip,
+  Tooltip as RechartsTooltip,
   XAxis,
   YAxis,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LiquidCard } from "@/components/ui/liquid-glass-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tooltip } from "@/components/ui/tooltip";
 import { formatCurrency, formatNumber } from "@/lib/format";
 import {
   calcForScenario,
-  effectiveDiscountFor,
   verdictLabel,
   type PromoMetrics,
 } from "@/lib/promo-simulator/calc";
@@ -171,14 +172,30 @@ export function Step4Params({ state, metrics, onChange }: Step4ParamsProps) {
     isSelected: sc === state.selectedScenario,
   }));
 
+  // Sensitivity curve: for each candidate discount, what uplift % is needed
+  // for the promo to break-even against no-promo? Uses the same canonical
+  // formula as `calcMetrics`:
+  //   breakEvenUnits = ⌈(baseProfit + mktCost + cannibLoss) ÷ promoUnitProfit⌉
+  //   uplift%        = (breakEvenUnits − baseUnits) / baseUnits × 100
+  // Constants across the curve: baseUnits, baseProfit, mktCost, cannibLoss,
+  // promoUnitCost, opsCost. Variable: pp (price after discount).
   const beDiscounts = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50];
   const beCurve = beDiscounts.map((d) => {
     const pp = state.unitPrice * (1 - d / 100);
-    const beMargin = pp - state.promoUnitCost;
-    const beUnits = beMargin > 0 ? state.mktCost / beMargin : Infinity;
+    const beMargin = pp - state.promoUnitCost - state.opsCost;
+    const beUnits =
+      beMargin > 0
+        ? Math.ceil((m.baseProfit + state.mktCost + m.cannibLoss) / beMargin)
+        : Infinity;
     const minUpliftPct =
       Number.isFinite(beUnits) && state.baseUnits > 0
-        ? Math.min(300, Math.round((beUnits / state.baseUnits) * 100))
+        ? Math.min(
+            300,
+            Math.max(
+              0,
+              Math.round(((beUnits - state.baseUnits) / state.baseUnits) * 100)
+            )
+          )
         : 300;
     return {
       discount: `${d}%`,
@@ -187,14 +204,19 @@ export function Step4Params({ state, metrics, onChange }: Step4ParamsProps) {
     };
   });
 
-  const effDisc = effectiveDiscountFor(state.promoType, state.discountPct);
-  const ppNow = state.unitPrice * (1 - effDisc);
-  const beMarginNow = ppNow - state.promoUnitCost;
-  const beUnitsNow =
-    beMarginNow > 0 ? Math.round(state.mktCost / beMarginNow) : Infinity;
+  // Break-even comes from the canonical resolver (calc.ts) so the numbers
+  // here match Tab 2 exactly. True break-even: total promo units required
+  // for promo profit to match the no-promo baseline profit:
+  //   breakEvenUnits = ceil((baseProfit + mktCost + cannibLoss) / promoUnitProfit)
+  // The minimum uplift % needed is the gap between break-even units and the
+  // current base, expressed as a % of base.
+  const beUnitsNow = m.breakEvenUnits;
   const minUplift =
-    beMarginNow > 0 && state.baseUnits > 0
-      ? Math.round((beUnitsNow / state.baseUnits) * 100)
+    Number.isFinite(beUnitsNow) && state.baseUnits > 0
+      ? Math.max(
+          0,
+          Math.round(((beUnitsNow - state.baseUnits) / state.baseUnits) * 100)
+        )
       : 999;
   const safetyMargin = Math.round(state.upliftPct) - minUplift;
 
@@ -620,78 +642,44 @@ export function Step4Params({ state, metrics, onChange }: Step4ParamsProps) {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div className="rounded-[16px] border border-[#E7E0D8] bg-white p-5">
                 <div className="text-lg font-semibold text-[#2D3748] mb-3">
-                  תוצאות פיננסיות
-                </div>
-                <ResultRow
-                  label="הכנסה רגילה (תקופה)"
-                  value={formatCurrency(m.baseRevenue)}
-                />
-                <ResultRow
-                  label="הכנסה במבצע (תקופה)"
-                  value={formatCurrency(m.promoRevenue)}
-                />
-                <ResultRow
-                  label="גידול הכנסות"
-                  value={formatCurrency(m.promoRevenue - m.baseRevenue)}
-                  tone={
-                    m.promoRevenue >= m.baseRevenue ? "positive" : "negative"
-                  }
-                />
-                <ResultRow
-                  label="עלות ההנחה הכוללת"
-                  value={formatCurrency(
-                    Math.round(
-                      (state.unitPrice - m.effectivePrice) * m.promoUnits
-                    )
-                  )}
-                  tone="negative"
-                />
-                <ResultRow
-                  label="עלויות נוספות"
-                  value={formatCurrency(state.mktCost)}
-                  tone="negative"
-                />
-                <ResultRow
-                  label="רווח תוספתי נטו"
-                  value={formatCurrency(m.netProfit)}
-                  tone={m.netProfit >= 0 ? "positive" : "negative"}
-                  bold
-                />
-              </div>
-
-              <div className="rounded-[16px] border border-[#E7E0D8] bg-white p-5">
-                <div className="text-lg font-semibold text-[#2D3748] mb-3">
                   מדדי ביצוע
                 </div>
                 <ResultRow
                   label="מכירות בסיס (תקופה)"
                   value={`${formatNumber(state.baseUnits)} יח'`}
+                  info="כמות יחידות שהיו נמכרות בתקופה זו ללא מבצע. זהו הבסיס להשוואה."
                 />
                 <ResultRow
                   label="מכירות במבצע (תקופה)"
                   value={`${formatNumber(m.promoUnits)} יח'`}
+                  info={`מכירות צפויות במבצע = מכירות בסיס × (1 + uplift%).\n= ${formatNumber(state.baseUnits)} × (1 + ${state.upliftPct}%)\n= ${formatNumber(m.promoUnits)} יח'`}
                 />
                 <ResultRow
                   label="יחידות נוספות"
                   value={`${formatNumber(m.extraUnits)} יח'`}
                   tone="positive"
+                  info={`התוספת שהמבצע צפוי לייצר.\npromoUnits − baseUnits\n= ${formatNumber(m.promoUnits)} − ${formatNumber(state.baseUnits)} = ${formatNumber(m.extraUnits)}`}
                 />
                 <ResultRow
                   label="מחיר רגיל"
                   value={`₪${state.unitPrice.toFixed(2)}`}
+                  info="המחיר הרגיל של המוצר ללא מבצע. ערך מהמערכת — מחיר קטלוגי."
                 />
                 <ResultRow
                   label="מחיר לאחר הנחה"
                   value={`₪${m.effectivePrice.toFixed(2)} (-${savingPct}%)`}
                   highlight
+                  info={`מחיר רגיל × (1 − הנחה אפקטיבית)\n= ₪${state.unitPrice.toFixed(2)} × (1 − ${m.effectiveDiscount.toFixed(2)})\n= ₪${m.effectivePrice.toFixed(2)}\nההנחה האפקטיבית מותאמת לסוג המבצע (BOGO≈50%, מועדון×0.6).`}
                 />
                 <ResultRow
                   label="שולי רווח גולמי רגיל"
                   value={`${m.baseGrossMargin.toFixed(1)}%`}
+                  info={`(unitPrice − unitCost) ÷ unitPrice × 100\n= (₪${state.unitPrice.toFixed(2)} − ₪${state.unitCost.toFixed(2)}) ÷ ₪${state.unitPrice.toFixed(2)}\n= ${m.baseGrossMargin.toFixed(1)}%`}
                 />
                 <ResultRow
                   label="שולי רווח גולמי מבצע"
                   value={`${m.promoGrossMargin.toFixed(1)}%`}
+                  info={`(effectivePrice − promoUnitCost) ÷ effectivePrice × 100\n= (₪${m.effectivePrice.toFixed(2)} − ₪${state.promoUnitCost.toFixed(2)}) ÷ ₪${m.effectivePrice.toFixed(2)}\n= ${m.promoGrossMargin.toFixed(1)}%`}
                 />
                 <ResultRow
                   label="נקודת איזון (יח')"
@@ -700,6 +688,61 @@ export function Step4Params({ state, metrics, onChange }: Step4ParamsProps) {
                       ? `${formatNumber(m.breakEvenUnits)} יח'`
                       : "לא ניתן לאיזון"
                   }
+                  tone={
+                    !Number.isFinite(m.breakEvenUnits)
+                      ? "negative"
+                      : m.breakEvenUnits <= m.promoUnits
+                        ? "positive"
+                        : "neutral"
+                  }
+                  info={`כמה יחידות במבצע צריך למכור כדי שהמבצע יחזיר את עצמו — כלומר, רווח עם המבצע ≥ רווח ללא מבצע.\n⌈(baseProfit + עלויות נוספות + cannibLoss) ÷ (מחיר מבצע − מחיר קנייה במבצע − opsCost)⌉\n= ⌈(${formatCurrency(m.baseProfit)} + ${formatCurrency(state.mktCost)} + ${formatCurrency(m.cannibLoss)}) ÷ (₪${m.effectivePrice.toFixed(2)} − ₪${state.promoUnitCost.toFixed(2)} − ₪${state.opsCost.toFixed(2)})⌉\n= ${Number.isFinite(m.breakEvenUnits) ? formatNumber(m.breakEvenUnits) : "—"} יח'\n\nתחזית מכירות נוכחית: ${formatNumber(m.promoUnits)} יח'. ${Number.isFinite(m.breakEvenUnits) ? (m.breakEvenUnits <= m.promoUnits ? "✓ מעבר לנקודת האיזון — המבצע כדאי." : "✗ מתחת לנקודת האיזון — המבצע מפסיד מול תרחיש 'ללא מבצע'.") : ""}`}
+                />
+              </div>
+
+              <div className="rounded-[16px] border border-[#E7E0D8] bg-white p-5">
+                <div className="text-lg font-semibold text-[#2D3748] mb-3">
+                  תוצאות פיננסיות
+                </div>
+                <ResultRow
+                  label="הכנסה רגילה (תקופה)"
+                  value={formatCurrency(m.baseRevenue)}
+                  info={`מכירות בסיס × מחיר רגיל\n= ${formatNumber(state.baseUnits)} × ₪${state.unitPrice.toFixed(2)}\n= ${formatCurrency(m.baseRevenue)}`}
+                />
+                <ResultRow
+                  label="הכנסה במבצע (תקופה)"
+                  value={formatCurrency(m.promoRevenue)}
+                  info={`מכירות במבצע × מחיר מבצע\n= ${formatNumber(m.promoUnits)} × ₪${m.effectivePrice.toFixed(2)}\n= ${formatCurrency(m.promoRevenue)}`}
+                />
+                <ResultRow
+                  label="גידול הכנסות"
+                  value={formatCurrency(m.promoRevenue - m.baseRevenue)}
+                  tone={
+                    m.promoRevenue >= m.baseRevenue ? "positive" : "negative"
+                  }
+                  info={`הכנסה במבצע − הכנסה רגילה\n= ${formatCurrency(m.promoRevenue)} − ${formatCurrency(m.baseRevenue)}\n= ${formatCurrency(m.promoRevenue - m.baseRevenue)}\nשים לב: גידול הכנסות אינו רווח — צריך לנכות את ההנחה ועלויות שיווק.`}
+                />
+                <ResultRow
+                  label="סך הנחה ללקוחות"
+                  value={formatCurrency(
+                    Math.round(
+                      (state.unitPrice - m.effectivePrice) * m.promoUnits
+                    )
+                  )}
+                  tone="negative"
+                  info={`סך הסכום שניתן ללקוחות כהנחה.\n(מחיר רגיל − מחיר מבצע) × promoUnits\n= (₪${state.unitPrice.toFixed(2)} − ₪${m.effectivePrice.toFixed(2)}) × ${formatNumber(m.promoUnits)}\nתיאורי בלבד — לא מנוכה ישירות מהרווח. רק החלק על מכירות הבסיס הוא "מרווח שאבד"; ההנחה על יחידות נוספות מומנה משולי רווח חדשים.`}
+                />
+                <ResultRow
+                  label="עלויות נוספות"
+                  value={formatCurrency(state.mktCost)}
+                  tone="negative"
+                  info="שיווק, תפעול נוסף, קניבליזציה. ערך הסליידר 'עלויות נוספות'. ערך זה כן מנוכה מהרווח התוספתי הנטו."
+                />
+                <ResultRow
+                  label="רווח תוספתי נטו"
+                  value={formatCurrency(m.netProfit)}
+                  tone={m.netProfit >= 0 ? "positive" : "negative"}
+                  bold
+                  info={`promoProfit − baseProfit − mktCost − cannibLoss\n= ${formatCurrency(m.promoProfit)} − ${formatCurrency(m.baseProfit)} − ${formatCurrency(state.mktCost)} − ${formatCurrency(m.cannibLoss)}\n= ${formatCurrency(m.netProfit)}\n\nההפרש בין רווח עם מבצע לרווח ללא מבצע, אחרי שיווק וקניבליזציה.`}
                 />
               </div>
             </div>
@@ -764,7 +807,7 @@ export function Step4Params({ state, metrics, onChange }: Step4ParamsProps) {
                         tick={{ fontSize: 16, fill: "#4A5568" }}
                         tickFormatter={(v) => `₪${Math.round(v / 1000)}K`}
                       />
-                      <Tooltip
+                      <RechartsTooltip
                         contentStyle={{
                           background: "white",
                           border: "1px solid #E7E0D8",
@@ -832,22 +875,47 @@ export function Step4Params({ state, metrics, onChange }: Step4ParamsProps) {
           {/* TAB 4 — BREAK-EVEN */}
           <TabsContent value="breakeven" className="mt-4">
             <div className="rounded-[16px] border border-[#E7E0D8] bg-white p-5 mb-4">
-              <div className="text-lg font-semibold text-[#2D3748] mb-3">
+              <div className="text-lg font-semibold text-[#2D3748] mb-1">
                 מפת נקודת איזון — uplift נדרש לפי גובה הנחה
               </div>
-              <div dir="ltr" className="w-full h-[300px]">
+              <div className="text-[15px] text-[#788390] mb-3">
+                לכל גובה הנחה: כמה אחוז uplift במכירות נדרש כדי שהמבצע לא יפסיד
+                מול תרחיש "ללא מבצע".
+              </div>
+              <div dir="ltr" className="w-full h-[340px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={beCurve}>
+                  <LineChart
+                    data={beCurve}
+                    margin={{ top: 10, right: 20, left: 30, bottom: 30 }}
+                  >
                     <CartesianGrid strokeDasharray="3 3" stroke="#F1EBE3" />
                     <XAxis
                       dataKey="discount"
                       tick={{ fontSize: 16, fill: "#4A5568" }}
+                      label={{
+                        value: "גובה הנחה (%)",
+                        position: "insideBottom",
+                        offset: -16,
+                        fill: "#2D3748",
+                        fontSize: 16,
+                      }}
                     />
                     <YAxis
                       tick={{ fontSize: 16, fill: "#4A5568" }}
                       tickFormatter={(v) => `${v}%`}
+                      label={{
+                        value: "uplift נדרש (%)",
+                        angle: -90,
+                        position: "insideLeft",
+                        offset: -10,
+                        style: {
+                          textAnchor: "middle",
+                          fill: "#2D3748",
+                          fontSize: 16,
+                        },
+                      }}
                     />
-                    <Tooltip
+                    <RechartsTooltip
                       contentStyle={{
                         background: "white",
                         border: "1px solid #E7E0D8",
@@ -857,8 +925,12 @@ export function Step4Params({ state, metrics, onChange }: Step4ParamsProps) {
                       formatter={(v) =>
                         typeof v === "number" ? `${v}%` : String(v)
                       }
+                      labelFormatter={(label) => `הנחה: ${label}`}
                     />
-                    <Legend wrapperStyle={{ fontSize: 16 }} />
+                    <Legend
+                      wrapperStyle={{ fontSize: 16, paddingTop: 8 }}
+                      verticalAlign="top"
+                    />
                     <Line
                       type="monotone"
                       dataKey="uplift נדרש (%)"
@@ -886,34 +958,40 @@ export function Step4Params({ state, metrics, onChange }: Step4ParamsProps) {
                 </div>
                 <ResultRow
                   label="הנחה אפקטיבית"
-                  value={`${Math.round(effDisc * 100)}%`}
+                  value={`${Math.round(m.effectiveDiscount * 100)}%`}
+                  info={`הנחה לאחר התאמה לסוג מבצע. עבור "מארז" המערכת מעגלת ל-50% (BOGO ≈ 50% על היחידה השנייה); עבור "מועדון/נקודות" מוכפל ב-0.6.\nנוסחה: discountPct × גורם סוג המבצע`}
                 />
                 <ResultRow
                   label="מחיר לאחר הנחה"
-                  value={`₪${ppNow.toFixed(2)}`}
+                  value={`₪${m.effectivePrice.toFixed(2)}`}
                   highlight
+                  info={`מחיר רגיל × (1 − הנחה אפקטיבית)\n= ₪${state.unitPrice.toFixed(2)} × (1 − ${m.effectiveDiscount.toFixed(2)})`}
                 />
                 <ResultRow
                   label="uplift מינימלי לאיזון"
                   value={`${minUplift}%`}
+                  info={`כמה אחוזי uplift נדרשים כדי שהמבצע יחזיר את עצמו (רווח עם המבצע ≥ רווח ללא מבצע).\nנוסחה: (נקודת איזון − מכירות בסיס) ÷ מכירות בסיס × 100\n= (${formatNumber(beUnitsNow)} − ${formatNumber(state.baseUnits)}) ÷ ${formatNumber(state.baseUnits)} × 100\n= ${minUplift}%`}
                 />
                 <ResultRow
                   label="uplift שהוגדר"
                   value={`${Math.round(state.upliftPct)}%`}
+                  info="ערך הסליידר 'צפי גידול בביקוש' מטאב 'פרטי המבצע'."
                 />
                 <ResultRow
                   label="מרווח ביטחון"
                   value={`${safetyMargin >= 0 ? "+" : ""}${safetyMargin}%`}
                   tone={safetyMargin >= 0 ? "positive" : "negative"}
                   bold
+                  info={`uplift שהוגדר − uplift מינימלי לאיזון\n= ${Math.round(state.upliftPct)}% − ${minUplift}% = ${safetyMargin}%\nחיובי = יש מרווח, שלילי = ההנחה לא מוחזרת.`}
                 />
                 <ResultRow
-                  label="יחידות נוספות לאיזון"
+                  label="סך מכירות לאיזון"
                   value={
                     Number.isFinite(beUnitsNow)
                       ? `${formatNumber(beUnitsNow)} יח'`
                       : "לא ניתן לאיזון"
                   }
+                  info={`סך היחידות במבצע שצריך למכור כדי שהמבצע יחזיר את עצמו.\nנוסחה: ⌈(baseProfit + עלויות נוספות + cannibLoss) ÷ (מחיר מבצע − מחיר קנייה במבצע − עלות תפעול)⌉\n= ⌈(${formatCurrency(m.baseProfit)} + ${formatCurrency(state.mktCost)} + ${formatCurrency(m.cannibLoss)}) ÷ (₪${m.effectivePrice.toFixed(2)} − ₪${state.promoUnitCost.toFixed(2)} − ₪${state.opsCost.toFixed(2)})⌉`}
                 />
               </div>
 
@@ -984,6 +1062,22 @@ interface ResultRowProps {
   tone?: "positive" | "negative" | "neutral";
   bold?: boolean;
   highlight?: boolean;
+  /** Inline subtext shown under the label — describes the calculation. */
+  formula?: string;
+  /** Long-form explanation revealed via the ⓘ tooltip. */
+  info?: string;
+}
+
+function FormulaTooltipContent({ text }: { text: string }) {
+  return (
+    <div className="space-y-1">
+      {text.split("\n").map((line, i) => (
+        <div key={i} className="font-mono text-[14px]">
+          {line}
+        </div>
+      ))}
+    </div>
+  );
 }
 
 function ResultRow({
@@ -992,6 +1086,8 @@ function ResultRow({
   tone = "neutral",
   bold,
   highlight,
+  formula,
+  info,
 }: ResultRowProps) {
   const color = highlight
     ? "#2EC4D5"
@@ -1001,10 +1097,30 @@ function ResultRow({
         ? "#F43F5E"
         : "#2D3748";
   return (
-    <div className="flex items-center justify-between border-b border-[#F1EBE3] last:border-b-0 py-2">
-      <span className="text-[16px] text-[#4A5568]">{label}</span>
+    <div className="flex items-start justify-between border-b border-[#F1EBE3] last:border-b-0 py-2 gap-3">
+      <div className="flex flex-col items-start min-w-0">
+        <span className="text-[16px] text-[#4A5568] flex items-center gap-1.5">
+          {label}
+          {info && (
+            <Tooltip content={<FormulaTooltipContent text={info} />} width="md">
+              <Info
+                className="h-3.5 w-3.5 text-[#A0AEC0] hover:text-[#2EC4D5] cursor-help"
+                aria-label="הסבר חישוב"
+              />
+            </Tooltip>
+          )}
+        </span>
+        {formula && (
+          <span
+            className="text-[15px] text-[#A0AEC0] font-mono mt-0.5"
+            dir="ltr"
+          >
+            {formula}
+          </span>
+        )}
+      </div>
       <span
-        className={`font-mono ${bold ? "font-bold" : "font-medium"}`}
+        className={`font-mono ${bold ? "font-bold" : "font-medium"} shrink-0`}
         style={{ color, fontSize: 16 }}
         dir="ltr"
       >

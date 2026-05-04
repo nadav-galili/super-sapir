@@ -30,7 +30,7 @@ describe("calcMetrics", () => {
     expect(m.promoUnits).toBe(1250);
   });
 
-  it("computes break-even units from investment and per-unit promo margin", () => {
+  it("computes break-even units as promo units needed to match no-promo profit", () => {
     const s = createDefaultState();
     s.unitPrice = 10;
     s.unitCost = 6;
@@ -38,10 +38,20 @@ describe("calcMetrics", () => {
     s.discountPct = 20;
     s.opsCost = 0.5;
     s.baseUnits = 1000;
+    s.mktCost = 1500;
     const m = calcMetrics(s);
-    // break-even uses (effectivePrice - unitCost - opsCost) per unit
-    const beMarginPerUnit = m.effectivePrice - s.unitCost - s.opsCost;
-    expect(m.breakEvenUnits).toBe(Math.ceil(m.investment / beMarginPerUnit));
+    // Total promo units required for: promoUnits × promoMargin
+    //                                  ≥ baseProfit + investment + cannibLoss
+    const beUnitProfit = m.effectivePrice - s.promoUnitCost - s.opsCost;
+    const expected = Math.ceil(
+      (m.baseProfit + m.investment + m.cannibLoss) / beUnitProfit
+    );
+    expect(m.breakEvenUnits).toBe(expected);
+    // Sanity: with non-zero baseProfit, break-even must exceed pure-marketing
+    // recovery (which would be just investment / margin).
+    expect(m.breakEvenUnits).toBeGreaterThan(
+      Math.ceil(m.investment / beUnitProfit)
+    );
   });
 
   it("computes stock coverage as stock / promo units in percent", () => {

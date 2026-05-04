@@ -110,11 +110,11 @@ export function calcMetrics(
   const baseRevenue = Math.round(state.baseUnits * state.unitPrice);
   const promoRevenue = Math.round(promoUnits * effectivePrice);
 
-  const baseUnitProfit = Math.max(state.unitPrice - state.unitCost, 0);
+  const baseUnitProfit = state.unitPrice - state.unitCost;
   const baseProfit = Math.round(state.baseUnits * baseUnitProfit);
-  const promoUnitProfit = Math.max(unitMargin - state.opsCost, 0);
+  const promoUnitProfit = unitMargin - state.opsCost;
   const promoProfit = Math.round(promoUnits * promoUnitProfit);
-  const cannibLoss = Math.round(baseUnitProfit * cannibUnits);
+  const cannibLoss = Math.round(Math.max(baseUnitProfit, 0) * cannibUnits);
 
   const investment = Math.max(state.mktCost, 0);
   const netProfit = Math.round(
@@ -122,10 +122,16 @@ export function calcMetrics(
   );
   const roi = investment > 0 ? Math.round((netProfit / investment) * 100) : 0;
 
-  const beMarginPerUnit = effectivePrice - promoCost - state.opsCost;
+  // True break-even: total promo units required for promo profit to equal
+  // (or exceed) the profit we'd have made without the promo. This includes
+  // the foregone full-price margin on base sales (baseProfit) plus the
+  // marketing investment plus cannibalization loss — not just the marketing
+  // investment in isolation. Solving netProfit ≥ 0 for promoUnits:
+  //   promoUnits × promoUnitProfit ≥ baseProfit + mktCost + cannibLoss
+  const beUnitProfit = effectivePrice - promoCost - state.opsCost;
   const breakEvenUnits =
-    beMarginPerUnit > 0
-      ? Math.ceil(investment / beMarginPerUnit)
+    beUnitProfit > 0
+      ? Math.ceil((baseProfit + investment + cannibLoss) / beUnitProfit)
       : Number.POSITIVE_INFINITY;
 
   const stockCoverage =
