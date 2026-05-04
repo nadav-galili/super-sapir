@@ -6,7 +6,193 @@
 
 ---
 
+## 2026-05-04
+
+### ROI hidden when there's no marketing investment
+
+User noticed the success-screen ROI row showed "0%" in green even when net profit was strongly negative — misleading. Root cause: `calc.ts` returns `roi = 0` when `investment === 0` to avoid divide-by-zero, but the UI rendered that fallback as a real metric.
+
+- **`PromoSummaryCard`** — ROI row now hidden entirely when `state.mktCost === 0`. Section "תוצאות פיננסיות" goes from 4 rows to 3 rows in the no-investment case.
+- **`PromoFullReport`** (PDF template) — same conditional hide.
+- **`Step6Decision` (Step 5 — אישור מבצע)** — middle KpiPill in the evidence panel switches to "מרווח גולמי במבצע" (`m.promoGrossMargin`%) when there's no marketing investment, keeping the 3-up grid balanced with a metric that's always meaningful. Tone now follows promo-margin thresholds: ≥10% green, ≥0% amber, <0% rose.
+
+### Misc copy / layout polish
+
+- **Tab 1 slider label** — `גובה ההנחה / ההטבה (%)` → `גובה ההנחה לקונה`.
+- **Step 6 rename** — `יישום בשטח` → `הנחיות לשטח` in both the timeline (`taxonomy.ts`) and the tab header (`Step7Implementation.tsx`).
+- **PDF — סגמנט row dropped.** No longer in the brief section. Removed the now-unused `findSegmentById` import + `resolveSegmentLabel` helper from `PromoFullReport.tsx`.
+
+### Hero gauges layout — all 5 small gauges fit beside the big gauge
+
+User reported the KPI command center was clipping the 5 small gauges. Reshaped the hero so the gauge column dominates, the text column shrinks, and the big gauge sheds enough size to free room for the row.
+
+- **`HeroBanner.tsx`** — outer grid `xl:grid-cols-[minmax(300px,0.82fr)_minmax(620px,1.18fr)]` → `xl:grid-cols-[minmax(280px,0.62fr)_minmax(720px,1.38fr)]`. Inner grid `lg:grid-cols-[250px_minmax(0,1fr)]` → `lg:grid-cols-[200px_minmax(0,1fr)]`, padding tightened from `p-5` to `p-3`. `GAUGE_SIZE` 200→160, `GAUGE_STROKE` 14→12, center percentage from `text-[72px]/text-3xl` to `text-[56px]/text-2xl`, label from `text-[15px]` to `text-[13px]`.
+- **`KPIGaugeRow.tsx`** — heroInline cell `min-w-[92px]` → `min-w-[84px]`, horizontal padding `px-2` → `px-1.5` so 5 gauges share the strip without horizontal scroll on standard widths. Also flipped strip alignment from `items-end` to `items-start` so all 5 gauge circles share a single top baseline; previously cells with multi-line labels ("סל ממוצע ללקוח", "מכירות מבצעים") pushed their gauges higher than single-line cells ("לקוחות").
+
+### Success screen + PDF template — dead fields removed, missing fields added, brand logo on PDF
+
+User flagged two things on the final screen ("המבצע מוכן"): (a) two rows showed "—" persistently — investigate and remove if dead, (b) earlier-step fields worth surfacing here were missing. Also asked to embed the Retalio logo on the generated PDF.
+
+- **Removed dead rows from `PromoSummaryCard`.** "מוצר" (`state.product`) and "התניה + הטבה" (`conditionText`/`benefitText`) — both fields were dropped from the wizard during the 2026-05-03 refactor but the summary kept rendering them as empty "—" rows. Also removed from `PromoFullReport` (PDF template).
+- **`PromoSummaryCard` reorganized into 5 sections** with small red eyebrow titles ("מוצר ושיוך" / "אסטרטגיה ותזמון" / "פרמטרים" / "תוצאות פיננסיות" / "החלטה"). New rows added: תת-קטגוריה (resolved via `findSubCategoryById`), ספק (via `getSupplierById`), במה (`salesArena`), קהל יעד (resolved via `findSegmentById`, only shown when present), תקופה (formatted "DD.MM.YYYY ← DD.MM.YYYY · N שבועות"), combined "מחיר רגיל ← מבצע" with the % chip in one row, מכירות בסיס בתקופה, תרחיש נבחר.
+- **`PromoFullReport` (PDF template) cleaned up.** Removed legacy "מוצר" row from the brief section. Removed "עלות תפעול ליחידה" and "שיעור קניבליזציה" rows (no UI sets these anymore — always 0). Removed "השפעת קניבליזציה" from KPIs (same reason). Removed "בקרה" section since Step 7 (Control) is commented out — restoration breadcrumb left in a comment. Added "עלות ליחידה במבצע" (`promoUnitCost`) which was missing despite being a key user-controlled field. Renamed "עלות שיווק" → "עלויות נוספות" to match the field's current label in the wizard.
+- **Brand logo on PDF.** Added `<img src="/retalio-transparent.png" alt="Retalio" crossOrigin="anonymous">` to the PDF report header, placed on the start side of the title row (in RTL: left of "תיק מבצע"). Sized at h-14 with `maxWidth: 160` and `object-contain` to keep aspect ratio. The logo is fetched same-origin from `/public` so html2canvas (which has `useCORS: true`) rasterizes it cleanly into the PDF capture. Verified: `naturalWidth = 1536` after page load, confirming the image actually decodes.
+
+Files: `PromoSummaryCard.tsx` (complete rewrite), `PromoFullReport.tsx`. 186 tests pass; typecheck clean.
+
+### "בקרה" (legacy step 7) commented out — wizard now ends at "תיעוד" as step 7
+
+User asked to disable "בקרה" for the pitch but keep the code on disk for later. Done with reversible commenting + renumbering — to bring it back, restore the four marked spots.
+
+- **`taxonomy.ts` STEPS** — commented out `{ id: 7, title: "בקרה" }`, renumbered `תיעוד` from id 8 to id 7. Inline comment marks the spot for restoration.
+- **`StepContent.tsx`** — `Step8Control` import commented out (path preserved); the `state.step === 7` branch now routes to `<Step9Documentation>`. Restoration breadcrumb in a comment block. `SLICE_BY_STEP` updated to omit step 8.
+- **`usePromoSimulator.ts`** — `goNext` clamp lowered from `>= 8` to `>= 7`.
+- **`Step9Documentation.tsx`** — `<StepHeader step={…} />` updated from 8 to 7 so the eyebrow matches the new ID.
+- **`promo-simulator.tsx` route** — both `state.step === 8` checks (the "סיום" button label and the `handleNext` finish trigger) renamed to `state.step === 7`.
+- **Tests** — `usePromoSimulator.test.ts` and `narrative.test.ts` updated to expect the new max step (7) and the narrative-empty list `[1, 5, 6, 7]`.
+
+`Step8Control.tsx` and `LiveKPIPanel.tsx` files left intact on disk — only routing references touched. Reverse-engineered restoration: re-enable the entry in STEPS, un-comment the import + branch in `StepContent`, bump goNext back to 8, and switch the route comparisons / `Step9Documentation` step prop back.
+
+Files: `taxonomy.ts`, `StepContent.tsx`, `usePromoSimulator.ts`, `Step9Documentation.tsx`, `routes/category-manager/promo-simulator.tsx`, `usePromoSimulator.test.ts`, `narrative.test.ts`. 186 tests pass; typecheck clean.
+
+### Removed "KPI חי" side rail from Steps 5 and 6
+
+User flagged that the persistent "KPI חי" side rail on Step 5 (אישור מבצע) and Step 6 (יישום בשטח) was redundant — those steps now surface their own decision-supporting context inline (evidence panel on 5, readiness pill on 6). Disabled the side rail across the wizard by setting `showLiveKpi = false` in `routes/category-manager/promo-simulator.tsx`. The grid collapses from `1fr,320px` to a single full-width column, giving each step room to breathe.
+
+File: `routes/category-manager/promo-simulator.tsx`.
+
+### All 8 wizard steps — unified `StepHeader` for client-pitch consistency
+
+User flagged that the simulator goes to a client pitch tomorrow and asked for "top standard" consistency across every phase. Built a shared `StepHeader` primitive and applied it to all 8 wizard steps so every phase opens with the same visual rhythm.
+
+- **New `StepHeader` component** (`src/components/promo-simulator/StepHeader.tsx`). Receives `{ step, title, description, icon, pill, accent, children }`. Renders: colored circle icon (start side) + tracked uppercase eyebrow ("שלב N") + 2xl bold title + 16px muted descriptor + optional status pill on the end side. Bottom border (`border-b border-[#F1EBE3]`) creates the chrome/content separator.
+- **Applied to every step.** Each `Step{N}*.tsx` now uses `<StepHeader />` instead of its bespoke `<CardHeader>`. Step 1 (`ClipboardList` + "בריף מוכן" pill when complete), Step 2 (`Target` + selected-goal pill), Step 3 (`Sparkles` + "מטרה: …" pill), Step 4 (`Calculator` + verdict pill), Step 5 (`FileSignature` + verdict pill — replaces the bespoke header from this morning), Step 6 (`Megaphone` + "מוכנות N/4" pill that turns green/amber/rose by readiness), Step 7 (`Activity` + status-label pill), Step 8 (`FileCheck2` + verdict pill, plus a `Table` icon on the secondary "טבלת סיכום מבצע" card).
+- **Status pills are semantic.** Green (`#ECFDF5/#A7F3D0/#065F46`) for ready/positive, amber (`#FFFBEB/#FCD34D/#92400E`) for partial/borderline, rose (`#FFF1F2/#FDA4AF/#9F1239`) for absent/negative, violet (`#F0EEFE/#C9C3F4/#6C5CE7`) for cross-step references like "מטרה: X". Same triple appears across all steps so the user reads color the same way everywhere.
+- **`CardHeader`/`CardTitle` removed from steps 1–7** since `StepHeader` now owns that surface. Step 8 keeps a secondary `CardHeader` for the summary table card (with a Table icon next to the title to match the new iconography pattern).
+- **Sidebar/timeline labels remain authoritative** via `taxonomy.ts` `STEPS`. `StepHeader` reads its step number from props, not the taxonomy, so individual screens can stay in sync via the eyebrow.
+
+Verified end-to-end across all 8 steps in the live preview: each renders the expected eyebrow + title without error boundaries, and pills surface high-signal context (verdict, readiness, completion) at a glance.
+
+Files: `StepHeader.tsx` (new), `Step1Brief.tsx`, `Step2Goal.tsx`, `Step3PromoType.tsx`, `Step4Params.tsx`, `Step6Decision.tsx`, `Step7Implementation.tsx`, `Step8Control.tsx`, `Step9Documentation.tsx`. 186 tests pass; typecheck clean.
+
+### Step 5 — renamed "החלטה והצדקה" → "אישור מבצע" + "Sign-off Document" redesign
+
+User asked to rename Step 5 in both the timeline and the tab header, then to use the `frontend-design` skill to redesign the layout. Committed to a "Sign-off Document" aesthetic — Step 5 is the gate before implementation, so the screen should feel ceremonial: a system recommendation panel followed by a sign-off panel with the manager's decision.
+
+- **Renamed in two places.** `taxonomy.ts` STEPS → `{ id: 5, title: "אישור מבצע" }` (sidebar/timeline label). `Step6Decision.tsx` `<CardTitle>` → "אישור מבצע" with new descriptor "סקור את ההמלצה, אשר את ההחלטה, ותעד את ההצדקה לארכיון".
+- **Card header overhauled.** Added a "שלב 5" uppercase eyebrow above the title in primary-red tracked text. Bottom border on the header (`border-b border-[#F1EBE3]`) visually separates the chrome from the content.
+- **Evidence panel** ("המלצת המערכת") — replaces the previously detached verdict pill + 3-KPI grid. Tinted gradient background `softBg` derived from the verdict (`worthIt → green tint, borderline → amber tint, notWorthIt → rose tint`), vertical accent stripe in the verdict color, large `Scale` icon in a filled circle. Big 3xl headline (`"המבצע כדאי" / "כדאיות גבולית" / "המבצע לא כדאי"`) plus a 1-line rationale. Below: 3 compact `KpiPill`s replace the previous 3 full `KpiTile`s — smaller, supporting-evidence feel rather than competing with the headline.
+- **Sign-off panel** ("ההחלטה שלך") — separate white card. Header has a `ClipboardCheck` icon in a rose-tinted circle, "ההחלטה שלך" eyebrow, and (when a decision is selected) a small "נבחר: …" pill on the start side echoing the chosen decision's color. The 3 decision buttons keep their existing structure but get `motion.button` with `whileHover={y:-2}` / `whileTap={scale:0.98}` plus a colored drop-shadow on the selected state (`0 12px 28px -16px <accent>66`). Selected decision label now switches to its accent color (was solid grey before).
+- **Justification field linked to decision color.** The textarea container now adopts the chosen decision's border color, creating a subtle visual chain from "I picked Approve" → "the comment box uses approve-green border" → "I'm explaining why I approved." Falls back to neutral border before any decision is selected.
+- **Entry animation.** Two `motion.section`s (Evidence + Sign-off) fade up on mount with a small stagger delay (`delay: 0.08` on the second). Spring-tuned to feel deliberate, not bouncy. Once the panels settle, value updates happen in place — no re-trigger when the verdict changes from amber → green.
+- **New imports.** `Scale`, `ClipboardCheck` from `lucide-react`. `motion` from `motion/react`.
+
+Files: `taxonomy.ts`, `Step6Decision.tsx`. 186 tests pass; typecheck clean.
+
+### Tab 1 "פרטי המבצע" — redesign separating ERP data from manager decisions
+
+User feedback: it wasn't visually clear which fields are auto-pulled from ERP vs. which the category manager actively decides. Used the `frontend-design` skill to commit to a "Ledger vs Workbench" aesthetic that telegraphs the distinction at first glance.
+
+- **Two clearly differentiated cards in Tab 1.**
+  - "ההחלטות שלך" — first in DOM (right side in RTL): warm gradient surface (`white → #FFF6F2`), vertical accent stripe in primary red on the start edge, `SlidersHorizontal` icon in a filled red circle. Houses all four user-controlled sliders: `promoUnitCost`, `discountPct`, `upliftPct`, `mktCost`. Soft drop shadow tinted to brand red emphasizes "active workbench."
+  - "נתוני מערכת" — second in DOM (left side in RTL): muted paper-cool background (`#FBFAF7`), `Database` icon in a teal circle, `Lock` icon top-right corner. New `ErpFieldRow` component renders five read-only entries with dashed bottom separators (`border-dashed border-[#E5DBC8]`) — "ledger" feel reinforces "system data, you can't edit here." Houses `promoType`, `unitPrice`, `unitCost`, `baseUnits`, `durationWeeks`.
+- **Logical regrouping.** Previously the two cards mixed ERP and manager fields together by topic (product vs. demand). Now the split is by _data origin_ — much clearer for a category manager scanning the screen for "what do I control?"
+- **Eyebrow + headline + subtitle pattern** in each card header: 15px uppercase tracked eyebrow ("ההחלטות שלך" / "נתוני מערכת") above a 20px bold headline above a 15px muted descriptor. Provides hierarchy without shouting.
+- **Live price preview moved to a full-width strip below the two cards.** The "₪X → ₪Y, הנחה לקונה ₪Z" preview is the _result_ of the inputs above, so it earns its own surface (cyan-tinted gradient) and a proper Lucide `ArrowLeft` icon (replacing the inline `←` glyph). Bigger numbers (`text-2xl` instead of `text-lg`).
+- **Per-field copy refinements.** Supplier-discount badge moved from inline plain text to a green pill (`bg-[#ECFDF5] border-[#A7F3D0]`) so it visually echoes the "discount achieved" badge in the price strip. Added a one-line description under the `upliftPct` slider explaining what uplift means.
+- **New imports.** Added `ArrowLeft`, `Database`, `Lock`, `SlidersHorizontal` from `lucide-react` and a `ReactNode` type-only import from `react`.
+- **New helper component:** `ErpFieldRow({ label, sub, value })` rendering the dashed-separator row pattern used throughout the ERP card.
+
+Files: `Step4Params.tsx`. 186 tests pass; typecheck clean.
+
+### Tab 4 sensitivity chart — axis labels + corrected formula
+
+User flagged that the "מפת נקודת איזון" chart in Tab 4 was unclear and asked to verify its math. Three real bugs surfaced; all are now fixed and the chart shows axis labels.
+
+- **`beCurve` formula was inconsistent with the canonical break-even.** It still used the old marketing-only recovery (`mktCost / margin`), didn't subtract `opsCost`, and computed uplift % as `(beUnits / baseUnits) × 100` (a ratio) instead of `((beUnits − baseUnits) / baseUnits) × 100`. After the fix, the chart curve at the current discount slot matches the headline number in Tab 2 (e.g., 15% discount → 67% uplift required).
+- **Axis labels added.** X axis now reads `גובה הנחה (%)`, Y axis reads `uplift נדרש (%)` (rotated −90°, anchored mid-Y). Margin around the plot widened (`bottom: 30, left: 30`) so labels don't crowd the ticks. Chart container height bumped from 300 → 340 to fit the new labels and a top-anchored legend.
+- **Subtitle added under the chart title** explaining what the chart shows: "לכל גובה הנחה: כמה אחוז uplift במכירות נדרש כדי שהמבצע לא יפסיד מול תרחיש 'ללא מבצע'".
+- **Tooltip-on-hover label clarified** — the data tooltip now prefixes with "הנחה: 25%" instead of just "25%".
+
+Verified curve values against the new formula at default state (baseProfit=₪4,500, mktCost=₪0, opsCost=₪0):
+
+- 5% discount → margin 3.90 → 1,154 units → 15% uplift required
+- 15% discount → margin 2.70 → 1,667 units → 67% uplift required (matches Tab 2)
+- 25% discount → margin 1.50 → 3,000 units → 200% uplift required
+- ≥30% discount → margin too thin → curve hits the 300% cap
+
+File: `Step4Params.tsx`. 186 tests pass; typecheck clean.
+
+### Break-even now reflects true promo profitability
+
+User feedback: the previous break-even formula only asked "how many units recoup marketing cost?" — it didn't answer the real category-manager question: "is it worth running this promo at all vs. selling at full price?"
+
+- **`breakEvenUnits` formula rewritten in `calc.ts`.** Previously: `ceil(mktCost / promoMargin)` — only marketing recovery. Now: `ceil((baseProfit + mktCost + cannibLoss) / promoMargin)` — total promo units required for `netProfit ≥ 0`, derived directly from solving the netProfit equation. Includes the foregone full-price margin from base sales (the real opportunity cost of running the promo).
+- **`minUplift` in Tab 4 corrected.** Previously computed `(beUnits / baseUnits) × 100` which is a ratio, not an uplift. Now `((beUnits − baseUnits) / baseUnits) × 100`, floored at 0. Now expresses the actual % growth in sales required to reach break-even.
+- **"יחידות נוספות לאיזון" → "סך מכירות לאיזון".** Renamed in Tab 4 since the value now represents total promo units (not increment), consistent with the new formula.
+- **Tooltip + UX of the Tab 2 break-even row.** Shows the full computation with values plugged in. Also shows current `promoUnits` next to break-even and a green ✓ / red ✗ verdict (above/below break-even). Removed the "אין עלויות להחזר" fallback — even at `mktCost=0`, break-even now has a real value driven by `baseProfit`.
+- **Test updated** in `calc.test.ts` to assert the new formula and verify break-even with `mktCost > 0` exceeds the old marketing-only recovery (sanity check that `baseProfit` is now included).
+
+Result for the default state (unitPrice=12, unitCost=7.5, discount=15%, baseUnits=1000, mktCost=0): break-even = 1,667 units (vs. previous 0). With `upliftPct=20%`, `promoUnits=1,200` < `breakEvenUnits=1,667` → `netProfit=−₪1,260` (red, "מתחת לנקודת האיזון"). The previous "0 יח'" result hid this — the promo looked safe when it was actually losing money against the no-promo baseline.
+
+Files: `calc.ts`, `calc.test.ts`, `Step4Params.tsx`. 186 tests pass; typecheck clean.
+
+### Step 4 "תחזית ביצועים" — layout swap, formula transparency, calc fixes
+
+User asked to swap the two cards on Tab 2 of `Step4Params` and audit every metric for correctness. Three real anomalies surfaced in the audit; all are now fixed and every metric exposes its formula directly to the user.
+
+- **Card layout swap.** In Tab `תחזית ביצועים`, `מדדי ביצוע` now renders before `תוצאות פיננסיות` in the DOM, which in RTL puts performance metrics on the right and financials on the left. No data changes — just child-order swap inside the `lg:grid-cols-2` grid.
+- **Break-even consistency fix.** Tab 4 (`נקודת איזון`) was duplicating the break-even calc with a _different formula_ than Tab 2 (`Math.round(mktCost / (effPrice − promoCost))` vs. canonical `Math.ceil(mktCost / (effPrice − promoCost − opsCost))`). Removed the duplicate `effDisc / ppNow / beMarginNow / beUnitsNow` block in `Step4Params.tsx`; Tab 4 now reads `m.effectiveDiscount`, `m.effectivePrice`, and `m.breakEvenUnits` from the canonical resolver. `effectiveDiscountFor` import dropped — no longer used outside `calc.ts`.
+- **Loss-flooring removed in `calcMetrics`.** `promoUnitProfit = max(unitMargin − opsCost, 0)` and `baseUnitProfit = max(unitPrice − unitCost, 0)` were silently clipping negative margins to zero, which masked losses in `netProfit` for bad-promo scenarios. Both floors removed; `cannibLoss` keeps a `Math.max(baseUnitProfit, 0)` floor so cannibalizing a losing item doesn't show as a _gain_ (which would be confusing UX). All 15 calc tests still pass — existing test cases all had positive margins.
+- **Formula transparency on every row.** `ResultRow` now accepts optional `formula` (always-visible subtext under the label, monospace LTR) and `info` (long-form explainer rendered via the existing `Tooltip` component triggered by a hover-help `Info` icon from `lucide-react`). All 14 rows in Tab 2 (`מדדי ביצוע` + `תוצאות פיננסיות`) plus all 6 rows in Tab 4's "נקודת איזון" card now show their exact formula with the actual values plugged in (e.g., `(₪10.20 − ₪7.50) ÷ ₪10.20 = 26.5%`).
+- **`עלות ההנחה הכוללת` renamed to `סך הנחה ללקוחות`.** The previous label implied the value was deducted from `netProfit` (it isn't — `netProfit` accounts for everything correctly via `promoProfit − baseProfit − mktCost − cannibLoss`). The tooltip explicitly notes this is descriptive, not a P&L deduction.
+- **Tooltip primitive upgraded.** `src/components/ui/tooltip.tsx` now accepts `ReactNode` content (was string-only) and a `width` prop (`auto | sm | md | lg`); previous `whitespace-nowrap` prevented multi-line formula tooltips. Switched to dark theme (`#2D3748` bg) for contrast on cream surfaces.
+- **`Tooltip` import collision resolved.** `recharts` exports a `Tooltip` component used in the scenario / break-even charts. Aliased to `Tooltip as RechartsTooltip` so the UI tooltip can be imported as `Tooltip` from `@/components/ui/tooltip`.
+
+Files: `Step4Params.tsx`, `calc.ts`, `tooltip.tsx`. 186 tests pass; typecheck clean.
+
+---
+
 ## 2026-05-03
+
+### Step 4 — `simulator-refactor` polish session
+
+Multiple in-place refinements to the promo simulator's "פרטי המבצע ותוצאות" step (Step 4), driven by user feedback during a single working session. Pre-existing commits on this branch (`67e7ad7`, `1d736e2`) already captured the upstream renames, scope-aware catalog, and Step 5 → Step 4 merge; this entry covers the trailing visual layer.
+
+- **Step 4 vocabulary cleanup.** Tab label `פרמטרי מבצע` → `פרטי המבצע`; sidebar step title `פרמטרי מבצע ותוצאות` → `פרטי המבצע ותוצאות`; right-panel section `פרמטרי ביקוש ועלויות` → `נתוני ביקוש ועלויות`. Free-text `תנאי` and `הטבה` inputs removed (deemed redundant); the dead `התניה והטבה` section in `PromoFullReport` was dropped to match. `חיסכון` → `הנחה לקונה` everywhere it surfaces. `רווח גולמי רגיל/במבצע` → `רווחיות גולמית רגילה/במבצע` to match the canonical glossary term in `context.md`.
+- **Catalog data is now scope-aware.** The `מחיר מכירה רגיל` and `מחיר קנייה` sliders converted to read-only ERP-style display panels. New `getCatalogForScope()` in `mock-archive-generator.ts` returns `{ unitPrice, unitCost, baseUnits, stockUnits }` deterministically per `(subcategoryId × supplierId × series)`. The hook applies the catalog snapshot inside `useMemo(state)` whenever the URL hasn't explicitly overridden the field, and re-syncs in `setState` on any scope change. `מכירות בסיס בתקופה` collapsed from a slider to a read-only ERP figure too.
+- **Supplier buy-in concession (`promoUnitCost`).** New state field; default = `unitCost` (no concession). Slider 0 → `unitCost` plus quick-select chips (-0% / -5% / -10% / -15% / -20%). Calc updated so promo-period margin / break-even / promoGrossMargin use `promoUnitCost`; baseline calcs (`baseProfit`, `baseGrossMargin`, `cannibLoss`) keep using `unitCost`. URL codec wired through.
+- **Costs consolidated into one slider.** Removed `עלות שיווק חד-פעמית`, `עלות תפעול נוספת ליח'`, and `שיעור קניבליזציה` sliders + the `עלויות שיווק והפצה` section header. Replaced with a single `עלויות נוספות (₪)` slider bound to `mktCost`; defaults for `mktCost` / `opsCost` / `cannibPct` all moved to `0`. `narrative.ts` rewritten to stop referencing cannibalization (no UI to set it) and to reflect the simplified cost model.
+- **Result-tab cleanup.** Removed the `ROI מבצע` MetricTile (and the `ROI` ResultRow), the `השפעת קניבליזציה` row, and the bar-chart "גרף השוואת מחיר ורווחיות" along with all `recharts` Bar/Line imports that no longer had consumers (the new scenario/break-even tabs reintroduced their own subset).
+- **LiquidCard primitive (new).** Added `src/components/ui/liquid-glass-card.tsx` — a minimal `LiquidCard` extracted from the designali-in liquid-glass-card kit (the kit's English `FinancialScoreCards` / `LiquidButton` / Badge were deliberately left out — they don't fit the retail-RTL design system). Used to wrap each of the four headline `MetricTile` cards so they read as premium glass surfaces.
+- **Headline metric strip — emphasized container.** The four-tile row is now wrapped in a dedicated `motion.section` with a warm gradient background (`#FFF8F4 → #FAF8F5 → #F1EBE3`), a soft drop shadow tinted to the brand red, a vertical `#DC4E59 → #E8777F` accent rule on the start edge, an eyebrow `תמונת מצב פיננסית`, a sub-heading `מבט-על בארבעה מספרים`, and the verdict pill (`כדאי` / `כדאיות גבולית` / `לא כדאי`) pulled in next to the heading. Reads as a single "verdict at a glance" panel.
+- **Framer entry animation.** The strip section uses `motion/react` with `stripContainer` (spring + `staggerChildren: 0.07, delayChildren: 0.08`) and `stripItem` variants on each tile, header, and verdict pill. Plays once on mount of the params tab; `whileHover={{ y: -2 }}` for a subtle lift. Critically: there is no `key={...}` re-mount trigger, so moving the discount / extra-cost / uplift / promo-cost sliders updates the in-place numbers without re-running the entry animation (per explicit user request — animation = first impression, sliders = live editing).
+- **Background sheet hint copy.** Step 1's `נתונים / רקע` button hint refreshed: `בחר תת-קטגוריה כדי לראות KPI-ים ומבצעים לדוגמה` → `בחר תת-קטגוריה כדי לראות מכר YTD, חודש אחרון ונתח שוק`. The trailing `הטקסונומיה` token was also pulled out of the brief subtitle since the explicit field labels make it redundant.
+
+Files: `Step4Params.tsx`, `Step1Brief.tsx`, `PromoFullReport.tsx`, `BackgroundDataSheet.tsx`, `narrative.ts`, `narrative.test.ts`, `mock-archive-generator.ts`, `mock-archive-generator.test.ts`, `usePromoSimulator.ts`, `usePromoSimulator.test.ts`, `state.ts`, `calc.ts`, `calc.test.ts`, `validation.ts`, `taxonomy.ts`, `StepContent.tsx`, `BentoLiveDashboard.tsx`, `routes/.../promo-simulator.tsx`, `liquid-glass-card.tsx` (new); `Step5Scenarios.tsx` deleted. 186 tests pass; type-check clean.
+
+### Background + Archive sheets — no-scroll fit on desktop
+
+User feedback: both modals required scrolling on a 1440×900 desktop. Goal: zero vertical scroll for the typical desktop case.
+
+- **Background sheet (`BackgroundDataSheet`).** Sheet width 860 → 760, container `overflow-y-auto` → `overflow-hidden` with `flex flex-col` body. Header collapsed from a 3-row stack (badge + 5xl title + 64ch description paragraph) into a single row (badge + 3xl title; description dropped — the scope is already obvious from the title). Section gaps `mt-10` → `mt-4`, card padding `p-8/p-6` → `p-5/p-4`, hero font `text-6xl` → `text-5xl`, compact KPI font `text-4xl` → `text-3xl`, descriptive paragraphs under each card removed (the labels are self-explanatory). `SectionHeading` rebuilt as an inline rule (eyebrow + divider + title on one line) instead of a stacked block. Verified: 760×900 dialog, no overflow at all three scopes.
+- **Archive sheet (`ArchiveSheet`).** The 8-card 2-col grid couldn't fit; each card was ~180px tall × 4 rows = 720px just for cards. Switched to a **single-column row layout** (`HistoricalPromoRow` replaces `HistoricalPromoCard`) — name + meta on the start, then 4 numeric cells (discount / revenue / ROI / uplift) on the end, ~64px per row. 8 rows now ≈ 520px instead of 720px. Sheet width 1080 → 920, container `overflow-y-auto` → `overflow-hidden`, header collapsed to a single row, `SummaryRail` rebuilt as inline label-value pairs instead of a 3-column stack with `text-4xl` numbers (now `text-2xl`). Removed the figure/blockquote with `learnings` per-row to reclaim height — the data was repetitive across rows. Dropped the now-unused `numberFmt`, `computeEndDate`, `ArrowLeft`, `Quote` imports/helpers.
+
+Verified in browser: Background scope 1/2/3 all fit at 760×900 with `overflowing: false`; Archive at scope 1 (8 rows) fits at 920×900 with `overflowing: false`. All 190 tests pass; type-check clean.
+
+### Background Data sheet — sales-snapshot rewrite, scope-aware tiles
+
+Refocused the promo simulator's "נתונים / רקע" sheet from a generic KPI dump into a **decision-support sales snapshot for the Category Manager**. After grilling the design, the sheet now answers two questions the CM needs in parallel: _"how is what I'm planning to promote actually performing?"_ and _"what's the broader sub-category context?"_
+
+- **Hero YTD card.** New `YtdHeroCard` shows narrow-scope YTD revenue in ₪ as the headline number, with a secondary line comparing against the same period last year and a colored YoY delta resolved through `getGrowthColor`. Replaces the old percent-only `ytd-growth` tile, which was abstract and target-divorced.
+- **Two labeled blocks.** Sheet body split into two sections with eyebrow labels: **ממוקד** (the narrow scope — series / supplier-in-subcat / sub-category) carrying the new last-month YoY tile + share-of-sub-cat tile, and **הקשר רחב יותר** (always sub-category scope) carrying the existing `avg-uplift`, `gross-margin`, `promo-share` tiles. Stops the CM from flattening tiles with mismatched scopes.
+- **Scope-aware narrow tiles.** New tiles always show the narrowest selection — series at scope 3, supplier-in-subcat at scope 2, sub-category at scope 1. Existing benchmark tiles stay pinned to sub-category scope regardless.
+- **Share tile.** Renders only when supplier or series is selected (label switches between "נתח הספק מתת-הקטגוריה" and "נתח הסדרה מתת-הקטגוריה"). Computed at render time from `scopeYtdCurrent / subCategoryYtdCurrent`, guaranteeing mathematical consistency with the YTD numbers above.
+- **Historical-promos section retired.** Full delete from `BackgroundDataSheet` — that content already lives in the Archive sheet, the duplication added noise. Hint copy in `Step1Brief` updated to match.
+- **New mock-data API.** `generateSalesSnapshotForScope(scope) → SalesSnapshot` in `mock-archive-generator.ts`, deterministic per `(subcategoryId × supplierId × series)` with a hardcoded `SNAPSHOT_NOW_ISO = "2026-05-03"` anchor. Coverage spans every sub-category × supplier × series combination through the same hash-seeded pattern as `generateKpisForScope`, so the sheet is never empty for any selection. Six new tests assert determinism, scope-narrowing math (series < supplier-in-subcat < sub-cat), and stable sub-cat denominator.
+- **KPI_DEFS pruned.** Removed `ytd-growth` (replaced by hero) and `basket-attach` (deemed redundant by the user). Tile count drops from 5 → 3 in the contextual block. Existing test updated and a regression test added asserting neither id ever surfaces.
+
+Files: `BackgroundDataSheet.tsx`, `Step1Brief.tsx`, `mock-archive-generator.ts`, `mock-archive-generator.test.ts`. All 190 tests pass; type-check clean.
 
 ### Promo Simulator Archive + Background — layout, vocabulary, gross-margin floor
 

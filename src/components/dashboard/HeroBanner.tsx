@@ -15,8 +15,8 @@ interface HeroBannerProps {
   periodControl?: ReactNode;
 }
 
-const GAUGE_SIZE = 200;
-const GAUGE_STROKE = 14;
+const GAUGE_SIZE = 160;
+const GAUGE_STROKE = 12;
 const GAUGE_R = (GAUGE_SIZE - GAUGE_STROKE) / 2;
 
 const TICK_MARKS = Array.from({ length: 40 }, (_, i) => {
@@ -95,13 +95,13 @@ function BigGauge({ actual, target }: { actual: number; target: number }) {
 
       <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
         <span
-          className="text-[72px] leading-none font-semibold font-mono text-white tracking-tight"
+          className="text-[56px] leading-none font-semibold font-mono text-white tracking-tight"
           dir="ltr"
         >
           {animatedPct}
-          <span className="text-3xl text-white/60 ms-0.5">%</span>
+          <span className="text-2xl text-white/60 ms-0.5">%</span>
         </span>
-        <span className="text-[15px] text-white/70 mt-2 tracking-wide font-medium">
+        <span className="text-[13px] text-white/70 mt-2 tracking-wide font-medium">
           עמידה ביעד מכירות
         </span>
       </div>
@@ -171,7 +171,7 @@ export function HeroBanner({
           }}
           aria-hidden
         />
-        <div className="relative grid grid-cols-1 gap-8 xl:grid-cols-[minmax(300px,0.82fr)_minmax(620px,1.18fr)] xl:items-center">
+        <div className="relative grid grid-cols-1 gap-8 xl:grid-cols-[minmax(280px,0.62fr)_minmax(720px,1.38fr)] xl:items-center">
           <div className="flex min-h-[360px] flex-col justify-center">
             {/* Top meta — live indicator on its own line so it doesn't
                 fight the taller period filter for vertical alignment. */}
@@ -286,8 +286,8 @@ export function HeroBanner({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-4 lg:grid-cols-[250px_minmax(0,1fr)] lg:items-center">
-                <div className="flex justify-center rounded-[18px] border border-white/10 bg-[#0F172A]/55 p-5">
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-[200px_minmax(0,1fr)] lg:items-center">
+                <div className="flex justify-center rounded-[18px] border border-white/10 bg-[#0F172A]/55 p-3">
                   <BigGauge actual={totalSales} target={targetSales} />
                 </div>
                 {middleContent}

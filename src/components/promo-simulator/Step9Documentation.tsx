@@ -1,3 +1,4 @@
+import { FileCheck2, Table } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { verdictLabel, type PromoMetrics } from "@/lib/promo-simulator/calc";
 import { formatCurrency } from "@/lib/format";
@@ -7,6 +8,13 @@ import {
   type SimulatorState,
 } from "@/lib/promo-simulator/state";
 import { findSegmentById } from "@/data/mock-taxonomy";
+import { StepHeader } from "./StepHeader";
+
+const VERDICT_PILL = {
+  worthIt: { bg: "#ECFDF5", border: "#A7F3D0", text: "#065F46" },
+  borderline: { bg: "#FFFBEB", border: "#FCD34D", text: "#92400E" },
+  notWorthIt: { bg: "#FFF1F2", border: "#FDA4AF", text: "#9F1239" },
+} as const;
 
 interface Step9DocumentationProps {
   state: SimulatorState;
@@ -58,16 +66,20 @@ export function Step9Documentation({
     <div className="space-y-4">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card className="border-[#E7E0D8] rounded-[16px]">
-          <CardHeader>
-            <CardTitle className="text-2xl text-[#2D3748]">תיעוד</CardTitle>
-            <p className="text-lg text-[#4A5568]">
-              תעד את המבצע להעברה להנהלה ולארכיון
-            </p>
-          </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
+            <StepHeader
+              step={7}
+              title="תיעוד"
+              description="תעד את המבצע להעברה להנהלה ולארכיון"
+              icon={FileCheck2}
+              pill={{
+                label: verdictLabel(m.verdict),
+                ...VERDICT_PILL[m.verdict],
+              }}
+            />
             <label
               htmlFor="documentation"
-              className="text-[15px] font-medium text-[#4A5568] mb-1.5 block"
+              className="text-[16px] font-semibold text-[#2D3748] mb-1.5 block"
             >
               תיעוד מלא
             </label>
@@ -85,12 +97,13 @@ export function Step9Documentation({
       </div>
 
       <Card className="border-[#E7E0D8] rounded-[16px]">
-        <CardHeader>
-          <CardTitle className="text-xl text-[#2D3748]">
+        <CardHeader className="border-b border-[#F1EBE3]">
+          <CardTitle className="text-xl text-[#2D3748] flex items-center gap-2">
+            <Table className="h-5 w-5 text-[#DC4E59]" strokeWidth={2.2} />
             טבלת סיכום מבצע
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-4">
           <div className="overflow-x-auto">
             <table className="w-full text-right">
               <thead>

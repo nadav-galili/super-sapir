@@ -15,6 +15,7 @@ describe("calcMetrics", () => {
     const s = createDefaultState();
     s.unitPrice = 10;
     s.unitCost = 6;
+    s.promoUnitCost = 6;
     s.discountPct = 20;
     const m = calcMetrics(s);
     // effectivePrice = 8, margin = 2
@@ -29,17 +30,28 @@ describe("calcMetrics", () => {
     expect(m.promoUnits).toBe(1250);
   });
 
-  it("computes break-even units from investment and per-unit promo margin", () => {
+  it("computes break-even units as promo units needed to match no-promo profit", () => {
     const s = createDefaultState();
     s.unitPrice = 10;
     s.unitCost = 6;
+    s.promoUnitCost = 6;
     s.discountPct = 20;
     s.opsCost = 0.5;
     s.baseUnits = 1000;
+    s.mktCost = 1500;
     const m = calcMetrics(s);
-    // break-even uses (effectivePrice - unitCost - opsCost) per unit
-    const beMarginPerUnit = m.effectivePrice - s.unitCost - s.opsCost;
-    expect(m.breakEvenUnits).toBe(Math.ceil(m.investment / beMarginPerUnit));
+    // Total promo units required for: promoUnits × promoMargin
+    //                                  ≥ baseProfit + investment + cannibLoss
+    const beUnitProfit = m.effectivePrice - s.promoUnitCost - s.opsCost;
+    const expected = Math.ceil(
+      (m.baseProfit + m.investment + m.cannibLoss) / beUnitProfit
+    );
+    expect(m.breakEvenUnits).toBe(expected);
+    // Sanity: with non-zero baseProfit, break-even must exceed pure-marketing
+    // recovery (which would be just investment / margin).
+    expect(m.breakEvenUnits).toBeGreaterThan(
+      Math.ceil(m.investment / beUnitProfit)
+    );
   });
 
   it("computes stock coverage as stock / promo units in percent", () => {
@@ -63,6 +75,7 @@ describe("calcMetrics", () => {
       const s = createDefaultState();
       s.unitPrice = 10;
       s.unitCost = 10;
+      s.promoUnitCost = 10;
       s.discountPct = 20;
       const m = calcMetrics(s);
       expect(m.status).toBe("notWorthIt");
@@ -82,6 +95,7 @@ describe("calcMetrics", () => {
       const s = createDefaultState();
       s.unitPrice = 20;
       s.unitCost = 5;
+      s.promoUnitCost = 5;
       s.discountPct = 5; // modest discount → keeps margin high
       s.baseUnits = 500;
       s.upliftPct = 30;
@@ -96,6 +110,7 @@ describe("calcMetrics", () => {
       const s = createDefaultState();
       s.unitPrice = 10;
       s.unitCost = 6;
+      s.promoUnitCost = 6;
       s.discountPct = 30; // aggressive discount
       s.baseUnits = 1000;
       s.upliftPct = 5; // small uplift → profit drops below baseline
@@ -114,6 +129,7 @@ describe("calcMetrics", () => {
       // Force a clean baseline: high margin, modest uplift, real cannibalization
       s.unitPrice = 20;
       s.unitCost = 8;
+      s.promoUnitCost = 8;
       s.discountPct = 10;
       s.baseUnits = 1000;
       s.upliftPct = 30;
@@ -136,6 +152,7 @@ describe("calcMetrics", () => {
       const s = createDefaultState();
       s.unitPrice = 30;
       s.unitCost = 10;
+      s.promoUnitCost = 10;
       s.discountPct = 15;
       s.baseUnits = 2000;
       s.upliftPct = 40;

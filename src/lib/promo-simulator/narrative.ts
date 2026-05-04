@@ -4,7 +4,7 @@
 import { calcMetrics } from "./calc";
 import type { SimulatorState } from "./state";
 import type { Goal } from "./taxonomy";
-import { formatCurrency, formatNumber } from "@/lib/format";
+import { formatCurrency } from "@/lib/format";
 
 const GOAL_NARRATIVE: Record<Goal, string[]> = {
   "משיכת קונים": [
@@ -70,47 +70,20 @@ function paramsNarrative(state: SimulatorState): string[] {
   } else if (m.verdict === "notWorthIt") {
     if (m.promoGrossMargin < 0) {
       paragraphs.push(
-        `הנחה של ${state.discountPct}% מורידה את המחיר אל מתחת לעלות — שיעור רווח גולמי שלילי. הפחת את ההנחה או בחן את עלות המוצר.`
+        `הנחה של ${state.discountPct}% מורידה את המחיר אל מתחת לעלות הקנייה — רווחיות גולמית שלילית. הפחת את ההנחה או נסה להשיג הנחת ספק.`
+      );
+    } else if (state.mktCost > 0) {
+      paragraphs.push(
+        `הרווח התוספתי הנטו שלילי (${formatCurrency(m.netProfit)}). העלויות הנוספות (${formatCurrency(state.mktCost)}) שוחקות את התרומה — שקול להפחית אותן או להגדיל את צפי ה-uplift.`
       );
     } else {
       paragraphs.push(
-        `הרווח התוספתי הנטו שלילי (${formatCurrency(m.netProfit)}). עלות השיווק (${formatCurrency(state.mktCost)}) או הקניבליזציה (${state.cannibPct}%) שוחקות את התרומה.`
+        `הרווח התוספתי הנטו שלילי (${formatCurrency(m.netProfit)}). ההנחה לקונה גדולה מהתוספת ברווח ממכירות נוספות — הפחת את ההנחה, הגדל את צפי ה-uplift, או השג הנחת ספק.`
       );
     }
   } else {
     paragraphs.push(
       `כדאיות גבולית: רווח של ${formatCurrency(m.netProfit)} ב-uplift של ${state.upliftPct}%. בדוק מה קורה לתרחיש שמרני יותר לפני אישור.`
-    );
-  }
-
-  if (state.cannibPct > 25) {
-    paragraphs.push(
-      `קניבליזציה של ${state.cannibPct}% גבוהה — חלק ניכר מהמכירות במבצע באות במקום מכירות שהיו ממילא. שקול להפחית את ההערכה.`
-    );
-  }
-
-  return paragraphs;
-}
-
-function scenariosNarrative(state: SimulatorState): string[] {
-  const m = calcMetrics(state);
-  const paragraphs: string[] = [];
-
-  paragraphs.push(
-    `התרחיש שנבחר הוא ${state.selectedScenario === "pessimistic" ? "שמרני" : state.selectedScenario === "optimistic" ? "אופטימי" : "בסיס"}. ${
-      m.netProfit >= 0
-        ? `הרווח התוספתי הצפוי בתרחיש זה: ${formatCurrency(m.netProfit)}.`
-        : `התרחיש מציג הפסד תוספתי של ${formatCurrency(Math.abs(m.netProfit))} — שקול לבחון פרמטרים שמרניים יותר לפני אישור.`
-    }`
-  );
-
-  if (Number.isFinite(m.breakEvenUnits)) {
-    paragraphs.push(
-      `נקודת האיזון תושג לאחר מכירת ${formatNumber(m.breakEvenUnits)} יחידות נוספות במחיר המבצע.`
-    );
-  } else {
-    paragraphs.push(
-      "המרווח האפקטיבי ליחידה לאחר עלות תפעול אינו חיובי — לא ניתן להגיע לאיזון בכל uplift. הפחת את ההנחה או הוזל את עלות התפעול."
     );
   }
 
@@ -133,8 +106,6 @@ export function narrativeFor(state: SimulatorState): string[] {
       return promoNarrative(state);
     case 4:
       return paramsNarrative(state);
-    case 5:
-      return scenariosNarrative(state);
     default:
       return [];
   }

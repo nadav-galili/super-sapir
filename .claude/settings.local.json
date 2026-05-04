@@ -30,7 +30,12 @@
       "WebFetch(domain:www.shadcnblocks.com)",
       "mcp__Claude_Preview__preview_start",
       "Bash(sed -n '1,15p' /Users/nadavgalili/personal_projects/superSapir/architecture.md)",
-      "Bash(sed -n '125,140p' /Users/nadavgalili/personal_projects/superSapir/architecture.md)"
+      "Bash(sed -n '125,140p' /Users/nadavgalili/personal_projects/superSapir/architecture.md)",
+      "Bash(awk 'NR<1012 || NR>1476' src/data/mock-promo-history.ts)",
+      "Bash(mv /tmp/mph.tmp src/data/mock-promo-history.ts)",
+      "Bash(awk '/id: \"white-cheese\"/{wc=NR; for\\(i=NR-1;i>=NR-30;i--\\) print i\": \"L[i]}{L[NR]=$0}' /Users/nadavgalili/personal_projects/superSapir/src/data/mock-promo-taxonomy.ts)",
+      "Bash(sips -s format png \"/var/folders/y7/cly96s757gdbsrr3rt0vdh9w0000gn/T/TemporaryItems/NSIRD_screencaptureui_jAfKWX/Screenshot 2026-05-03 at 18.25.53.heic\" --out /tmp/archive_overflow.png)",
+      "Bash(gh pr create --repo nadav-galili/super-sapir --base main --head simulator-refactor --title 'Promo Simulator refactor: full rebuild of Steps 1-6 + archive UX' --body ' *)"
     ]
   }
 }

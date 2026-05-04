@@ -1,9 +1,10 @@
 import { motion, useReducedMotion } from "motion/react";
-import { Star, ArrowLeft } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Sparkles, Star } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { usePromoTaxonomy } from "@/contexts/PromoTaxonomyContext";
 import type { Goal } from "@/lib/promo-simulator/taxonomy";
 import type { SimulatorState } from "@/lib/promo-simulator/state";
+import { StepHeader } from "./StepHeader";
 
 interface Step3PromoTypeProps {
   goal: SimulatorState["goal"];
@@ -42,12 +43,13 @@ export function Step3PromoType({
   if (!goal) {
     return (
       <Card className="border-[#E7E0D8] rounded-[16px]">
-        <CardHeader>
-          <CardTitle className="text-2xl text-[#2D3748]">
-            בחירת סוג מבצע
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
+          <StepHeader
+            step={3}
+            title="בחירת סוג מבצע"
+            description="הצעות סוגי מבצע יותאמו למטרה שתבחר בשלב 2"
+            icon={Sparkles}
+          />
           <div
             className="rounded-[16px] border-2 border-dashed p-10 text-center"
             style={{ borderColor: "#E7E0D8", background: "#FAF8F5" }}
@@ -68,24 +70,19 @@ export function Step3PromoType({
 
   return (
     <Card className="border-[#E7E0D8] rounded-[16px]">
-      <CardHeader>
-        <div className="flex items-center justify-between gap-4 flex-wrap">
-          <CardTitle className="text-2xl text-[#2D3748]">
-            בחירת סוג מבצע
-          </CardTitle>
-          <span
-            className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[15px] font-semibold"
-            style={{ background: "#6C5CE71A", color: "#6C5CE7" }}
-          >
-            <ArrowLeft className="w-4 h-4" />
-            מטרה: {goal}
-          </span>
-        </div>
-        <p className="text-lg text-[#4A5568]">
-          סוגי המבצע המומלצים למטרה שבחרת, מדורגים לפי התאמה
-        </p>
-      </CardHeader>
-      <CardContent>
+      <CardContent className="pt-6">
+        <StepHeader
+          step={3}
+          title="בחירת סוג מבצע"
+          description="סוגי המבצע המומלצים למטרה שבחרת, מדורגים לפי התאמה"
+          icon={Sparkles}
+          pill={{
+            label: `מטרה: ${goal}`,
+            bg: "#F0EEFE",
+            border: "#C9C3F4",
+            text: "#6C5CE7",
+          }}
+        />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {options.map((p, i) => {
             const isActive = promoType === p.name;

@@ -5,6 +5,7 @@ import { describe, it, expect } from "vitest";
 import {
   generateHistoricalPromosForScope,
   generateKpisForScope,
+  generateSalesSnapshotForScope,
 } from "./mock-archive-generator";
 import { getSuppliersForSubCategory } from "./mock-subcategory-suppliers";
 import { getSeriesForSupplierAndSubCategory } from "./mock-supplier-series";
@@ -38,7 +39,7 @@ describe("per-scope archive generator — full coverage", () => {
     expect(failures).toEqual([]);
   });
 
-  it("yields >= 5 KPIs for every sub-category", () => {
+  it("yields 3 KPIs (avg-uplift, gross-margin, promo-share) for every sub-category", () => {
     const failures: string[] = [];
     for (const subId of allSubCategoryIds()) {
       const kpis = generateKpisForScope({
@@ -46,9 +47,20 @@ describe("per-scope archive generator — full coverage", () => {
         supplierId: "",
         series: "",
       });
-      if (kpis.length < 5) failures.push(`${subId} → ${kpis.length} KPIs`);
+      if (kpis.length !== 3) failures.push(`${subId} → ${kpis.length} KPIs`);
     }
     expect(failures).toEqual([]);
+  });
+
+  it("does not emit ytd-growth or basket-attach KPIs (replaced by SalesSnapshot)", () => {
+    const kpis = generateKpisForScope({
+      subcategoryId: "tea",
+      supplierId: "",
+      series: "",
+    });
+    const ids = kpis.map((k) => k.id);
+    expect(ids.some((id) => id.startsWith("ytd-growth"))).toBe(false);
+    expect(ids.some((id) => id.startsWith("basket-attach"))).toBe(false);
   });
 
   it("yields populated content for every supplier × subcategory pair declared in the supplier mapping", () => {
@@ -174,5 +186,115 @@ describe("per-scope archive generator — full coverage", () => {
       series: "",
     });
     expect(tunaPromos[0]?.name).not.toEqual(teaPromos[0]?.name);
+  });
+});
+
+describe("generateSalesSnapshotForScope", () => {
+  it("returns positive ILS amounts for every sub-category alone", () => {
+    const failures: string[] = [];
+    for (const subId of allSubCategoryIds()) {
+      const snap = generateSalesSnapshotForScope({
+        subcategoryId: subId,
+        supplierId: "",
+        series: "",
+      });
+      if (
+        snap.scopeYtdCurrent <= 0 ||
+        snap.scopeYtdPriorYear <= 0 ||
+        snap.scopeMonthCurrent <= 0 ||
+        snap.scopeMonthPriorYear <= 0 ||
+        snap.subCategoryYtdCurrent <= 0
+      ) {
+        failures.push(`${subId} → ${JSON.stringify(snap)}`);
+      }
+    }
+    expect(failures).toEqual([]);
+  });
+
+  it("at sub-category scope, scopeYtdCurrent === subCategoryYtdCurrent (share = 100%)", () => {
+    const snap = generateSalesSnapshotForScope({
+      subcategoryId: "tea",
+      supplierId: "",
+      series: "",
+    });
+    expect(snap.scopeYtdCurrent).toBe(snap.subCategoryYtdCurrent);
+  });
+
+  it("at supplier scope, scopeYtdCurrent < subCategoryYtdCurrent (share < 100%)", () => {
+    const snap = generateSalesSnapshotForScope({
+      subcategoryId: "tea",
+      supplierId: "sup-22",
+      series: "",
+    });
+    expect(snap.scopeYtdCurrent).toBeLessThan(snap.subCategoryYtdCurrent);
+    expect(snap.scopeYtdCurrent).toBeGreaterThan(0);
+  });
+
+  it("at series scope, scopeYtdCurrent < supplier-scope amount (series is a slice of supplier)", () => {
+    const supplierSnap = generateSalesSnapshotForScope({
+      subcategoryId: "tea",
+      supplierId: "sup-22",
+      series: "",
+    });
+    const seriesSnap = generateSalesSnapshotForScope({
+      subcategoryId: "tea",
+      supplierId: "sup-22",
+      series: "תה ירוק",
+    });
+    expect(seriesSnap.scopeYtdCurrent).toBeLessThan(
+      supplierSnap.scopeYtdCurrent
+    );
+  });
+
+  it("preserves the sub-category total across scope narrowing (denominator is stable)", () => {
+    const subOnly = generateSalesSnapshotForScope({
+      subcategoryId: "tea",
+      supplierId: "",
+      series: "",
+    });
+    const withSupplier = generateSalesSnapshotForScope({
+      subcategoryId: "tea",
+      supplierId: "sup-22",
+      series: "",
+    });
+    const withSeries = generateSalesSnapshotForScope({
+      subcategoryId: "tea",
+      supplierId: "sup-22",
+      series: "תה ירוק",
+    });
+    expect(withSupplier.subCategoryYtdCurrent).toBe(
+      subOnly.subCategoryYtdCurrent
+    );
+    expect(withSeries.subCategoryYtdCurrent).toBe(
+      subOnly.subCategoryYtdCurrent
+    );
+  });
+
+  it("is deterministic — same scope always returns the same numbers", () => {
+    const a = generateSalesSnapshotForScope({
+      subcategoryId: "tea",
+      supplierId: "sup-22",
+      series: "תה ירוק",
+    });
+    const b = generateSalesSnapshotForScope({
+      subcategoryId: "tea",
+      supplierId: "sup-22",
+      series: "תה ירוק",
+    });
+    expect(a).toEqual(b);
+  });
+
+  it("changes output when scope changes", () => {
+    const tea = generateSalesSnapshotForScope({
+      subcategoryId: "tea",
+      supplierId: "",
+      series: "",
+    });
+    const tuna = generateSalesSnapshotForScope({
+      subcategoryId: "tuna",
+      supplierId: "",
+      series: "",
+    });
+    expect(tea.scopeYtdCurrent).not.toBe(tuna.scopeYtdCurrent);
   });
 });

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { Archive, Database } from "lucide-react";
+import { Archive, ClipboardList, Database } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { StepHeader } from "./StepHeader";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -223,16 +224,32 @@ export function Step1Brief({ brief, onChange, errorKeys }: Step1BriefProps) {
   const subCategoryName =
     findSubCategoryById(brief.subcategory)?.subCategory.nameHe ?? "";
 
+  const briefComplete = Boolean(
+    brief.group && brief.department && brief.subcategory && brief.supplier
+  );
+
   return (
     <div className="space-y-6">
       <Card className="border-[#E7E0D8] rounded-[16px]">
-        <CardHeader>
-          <CardTitle className="text-2xl text-[#2D3748]">רקע / בריף</CardTitle>
-          <p className="text-lg text-[#4A5568]">
-            פרטי המבצע, הטקסונומיה, הספק וסדרת המוצרים
-          </p>
-        </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
+          <StepHeader
+            step={1}
+            title="רקע / בריף"
+            description="פרטי המבצע, הספק וסדרת המוצרים"
+            icon={ClipboardList}
+            pill={
+              briefComplete
+                ? {
+                    label: subCategoryName
+                      ? `נבחר: ${subCategoryName}`
+                      : "בריף מוכן",
+                    bg: "#ECFDF5",
+                    border: "#A7F3D0",
+                    text: "#065F46",
+                  }
+                : undefined
+            }
+          />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
               <Label htmlFor="f-group" required>
@@ -517,8 +534,8 @@ export function Step1Brief({ brief, onChange, errorKeys }: Step1BriefProps) {
           title="נתונים / רקע"
           description={
             backgroundDisabled
-              ? "בחר תת-קטגוריה כדי לראות KPI-ים ומבצעים לדוגמה"
-              : "KPI-ים מובילים שמנהלי מחלקה עוקבים אחריהם, עם מבצעים היסטוריים לדוגמה."
+              ? "בחר תת-קטגוריה כדי לראות מכר YTD, חודש אחרון ונתח שוק"
+              : "מכר YTD vs LY, חודש אחרון, ונתח השוק שלך מתת-הקטגוריה."
           }
           onClick={() => setDataOpen(true)}
           disabled={backgroundDisabled}

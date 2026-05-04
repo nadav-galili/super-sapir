@@ -3,10 +3,9 @@ import { Step1Brief } from "./Step1Brief";
 import { Step2Goal } from "./Step2Goal";
 import { Step3PromoType } from "./Step3PromoType";
 import { Step4Params } from "./Step4Params";
-import { Step5Scenarios } from "./Step5Scenarios";
 import { Step6Decision } from "./Step6Decision";
 import { Step7Implementation } from "./Step7Implementation";
-import { Step8Control } from "./Step8Control";
+// import { Step8Control } from "./Step8Control"; // disabled for pitch — see taxonomy.ts STEPS
 import { Step9Documentation } from "./Step9Documentation";
 import { BorderBeam } from "@/components/ui/border-beam";
 import type { BriefSlice, SimulatorState } from "@/lib/promo-simulator/state";
@@ -18,11 +17,10 @@ const SLICE_BY_STEP: Record<number, number> = {
   2: 3,
   3: 3,
   4: 4,
-  5: 5,
+  5: 6,
   6: 6,
-  7: 6,
-  8: 7,
-  9: 7,
+  // Step 7 is now Documentation (Control was commented out).
+  7: 7,
 };
 
 interface StepContentProps {
@@ -47,7 +45,7 @@ export function StepContent({
 }: StepContentProps) {
   const stepMeta = STEPS[state.step - 1];
   const sliceNum = SLICE_BY_STEP[state.step];
-  const showBeam = withBeam && state.step >= 4 && state.step <= 7;
+  const showBeam = withBeam && state.step >= 4 && state.step <= 6;
 
   const raw =
     state.step === 1 ? (
@@ -81,10 +79,8 @@ export function StepContent({
     ) : state.step === 4 ? (
       <Step4Params state={state} metrics={metrics} onChange={setState} />
     ) : state.step === 5 ? (
-      <Step5Scenarios state={state} metrics={metrics} onChange={setState} />
-    ) : state.step === 6 ? (
       <Step6Decision state={state} metrics={metrics} onChange={setState} />
-    ) : state.step === 7 ? (
+    ) : state.step === 6 ? (
       <Step7Implementation
         impl={{
           signage: state.signage,
@@ -94,25 +90,12 @@ export function StepContent({
         }}
         onChange={setState}
       />
-    ) : state.step === 8 ? (
-      <Step8Control
-        control={{
-          controlPrice: state.controlPrice,
-          controlStock: state.controlStock,
-          controlDisplay: state.controlDisplay,
-        }}
-        metrics={metrics}
-        readinessCount={
-          [
-            state.signage,
-            state.shelf,
-            state.training,
-            state.cashierBrief,
-          ].filter(Boolean).length
-        }
-        onChange={setState}
-      />
-    ) : state.step === 9 ? (
+    ) : state.step === 7 ? (
+      // Step 7 is now Documentation (Control is commented out for the
+      // pitch). To restore Control: re-add `{ id: 7, title: "בקרה" }` in
+      // taxonomy.ts STEPS, bump Documentation back to id 8, restore the
+      // Step8Control branch (see git history), and update the goNext
+      // max bound in usePromoSimulator.ts.
       <Step9Documentation state={state} metrics={metrics} onChange={setState} />
     ) : (
       <StepPlaceholder

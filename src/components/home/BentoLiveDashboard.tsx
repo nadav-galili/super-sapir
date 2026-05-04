@@ -68,12 +68,11 @@ const PROMO_STEPS = [
   { id: 1, label: "בריף" },
   { id: 2, label: "מטרה" },
   { id: 3, label: "סוג מבצע" },
-  { id: 4, label: "התניה" },
-  { id: 5, label: "יעדים" },
-  { id: 6, label: "תחזית" },
-  { id: 7, label: "יישום" },
-  { id: 8, label: "בקרה" },
-  { id: 9, label: "תיעוד" },
+  { id: 4, label: "פרטי המבצע" },
+  { id: 5, label: "החלטה" },
+  { id: 6, label: "יישום" },
+  { id: 7, label: "בקרה" },
+  { id: 8, label: "תיעוד" },
 ];
 
 type Phase = "brief" | "plan" | "forecast" | "deploy";

@@ -60,7 +60,7 @@ function PromoSimulatorPage() {
       : undefined;
 
   const handleNext = () => {
-    if (state.step === 9) {
+    if (state.step === 7) {
       finish();
       return;
     }
@@ -80,9 +80,11 @@ function PromoSimulatorPage() {
     jumpToStep(step);
   };
 
-  // Step 4+5 ship their own metric strip + verdict — drop the side rail there.
-  const showLiveKpi = state.step >= 6 && state.step <= 7;
-  const showNarrative = state.step >= 2 && state.step <= 5;
+  // Steps 4–6 each surface their own decision-supporting context inline
+  // (verdict strip on 4, evidence panel on 5, readiness pill on 6) — no
+  // need for a duplicate "KPI חי" side rail. Disabled across the wizard.
+  const showLiveKpi = false;
+  const showNarrative = state.step >= 2 && state.step <= 4;
 
   const stepContent = (
     <StepContent
@@ -105,7 +107,7 @@ function PromoSimulatorPage() {
     );
   }
 
-  const nextDisabled = state.step < 9 && !currentStepValid;
+  const nextDisabled = state.step < 8 && !currentStepValid;
   const missingLabels = missingFields.map((f) => f.label).join(", ");
 
   return (
@@ -192,7 +194,7 @@ function PromoSimulatorPage() {
                         onClick={handleNext}
                         shimmerColor="rgba(255,255,255,0.35)"
                       >
-                        {state.step === 9 ? "סיום" : "המשך"}
+                        {state.step === 7 ? "סיום" : "המשך"}
                         <ArrowLeft className="w-4 h-4" />
                       </ShimmerButton>
                     )}

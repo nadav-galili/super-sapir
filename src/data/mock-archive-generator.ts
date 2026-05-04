@@ -186,6 +186,140 @@ export function generateHistoricalPromosForScope(
   });
 }
 
+// Anchored "now" for the demo so daily date drift doesn't move the numbers.
+// Today: 2026-05-03 → "last month" = April 2026, YTD covers Jan-1 → May-3 2026.
+export const SNAPSHOT_NOW_ISO = "2026-05-03";
+
+export interface SalesSnapshot {
+  /** Narrow-scope YTD revenue (₪) — Jan-1 → 2026-05-03. */
+  scopeYtdCurrent: number;
+  /** Narrow-scope YTD revenue (₪) — Jan-1 → 2025-05-03. */
+  scopeYtdPriorYear: number;
+  /** Narrow-scope last-completed-month revenue (₪) — April 2026. */
+  scopeMonthCurrent: number;
+  /** Narrow-scope same-month-last-year revenue (₪) — April 2025. */
+  scopeMonthPriorYear: number;
+  /** Sub-category total YTD (₪) — denominator for the share %.
+   *  Stable across scope narrowing inside the same sub-category. */
+  subCategoryYtdCurrent: number;
+}
+
+/** Produce a deterministic sales snapshot for any scope. The narrow-scope
+ *  amount equals `subCategoryYtdCurrent` at sub-cat scope, shrinks to a
+ *  supplier slice at supplier scope, and to a series slice at series scope.
+ *  Same scope → same numbers (hash-seeded). */
+export function generateSalesSnapshotForScope(
+  scope: ArchiveScope
+): SalesSnapshot {
+  const subCategoryYtdCurrent = subCategoryYtd(scope.subcategoryId);
+
+  // Sub-cat YoY growth in [-8%, +18%], deterministic per sub-cat.
+  // Drives the narrow-scope YoY baseline below.
+  const subYoyPct = -8 + (hash(`${scope.subcategoryId}|sub-yoy`) % 261) / 10; // 0.0..26.1 → -8..+18.1
+
+  // Supplier share of sub-cat in [12%, 48%].
+  const supplierShare = scope.supplierId
+    ? 0.12 +
+      (hash(`${scope.subcategoryId}|${scope.supplierId}|sup-share`) % 361) /
+        1000
+    : 1;
+
+  // Series share of supplier in [22%, 65%].
+  const seriesShare = scope.series
+    ? 0.22 +
+      (hash(
+        `${scope.subcategoryId}|${scope.supplierId}|${scope.series}|ser-share`
+      ) %
+        431) /
+        1000
+    : 1;
+
+  const scopeYtdCurrent = Math.round(
+    subCategoryYtdCurrent * supplierShare * seriesShare
+  );
+
+  // Narrow-scope YoY can deviate from sub-cat YoY by ±6 pp (seeded).
+  const yoyJitter = -6 + (hash(`${seedKey(scope, "scope-yoy")}`) % 121) / 10; // -6..+6
+  const scopeYoyPct = subYoyPct + yoyJitter;
+  const scopeYtdPriorYear = Math.max(
+    1000,
+    Math.round(scopeYtdCurrent / (1 + scopeYoyPct / 100))
+  );
+
+  // Last-completed-month = ~ YTD/4.6 (5 months in YTD, last month is partial-ish),
+  // with a ±15% seeded shape so months aren't identical sixths.
+  const monthShape =
+    0.85 + (hash(`${seedKey(scope, "month-shape")}`) % 301) / 1000; // 0.85..1.15
+  const scopeMonthCurrent = Math.round((scopeYtdCurrent / 4.6) * monthShape);
+
+  const monthYoyJitter =
+    -8 + (hash(`${seedKey(scope, "month-yoy")}`) % 161) / 10; // -8..+8
+  const scopeMonthYoyPct = scopeYoyPct + monthYoyJitter;
+  const scopeMonthPriorYear = Math.max(
+    500,
+    Math.round(scopeMonthCurrent / (1 + scopeMonthYoyPct / 100))
+  );
+
+  return {
+    scopeYtdCurrent,
+    scopeYtdPriorYear,
+    scopeMonthCurrent,
+    scopeMonthPriorYear,
+    subCategoryYtdCurrent,
+  };
+}
+
+/** Catalog snapshot for a (sub-category × supplier × series) scope.
+ *  Deterministic — same scope → same numbers. Used by Step 4 to display the
+ *  product's regular sale price, supplier buy-in, baseline volume, and stock. */
+export interface CatalogSnapshot {
+  /** Regular consumer sale price (₪). */
+  unitPrice: number;
+  /** Regular supplier purchase cost (₪). */
+  unitCost: number;
+  /** Expected period sales volume in units (the "base" for uplift calc). */
+  baseUnits: number;
+  /** On-hand inventory in units. */
+  stockUnits: number;
+}
+
+/** Build catalog values from scope. Hash-seeded so each (subcategory ×
+ *  supplier × series) yields stable, distinct numbers — the user sees
+ *  different prices when switching series, but the same series always
+ *  shows the same price. Empty scope → safe defaults. */
+export function getCatalogForScope(scope: ArchiveScope): CatalogSnapshot {
+  if (!scope.subcategoryId) {
+    return { unitPrice: 12, unitCost: 7.5, baseUnits: 1000, stockUnits: 1500 };
+  }
+
+  const seed = `${scope.subcategoryId}|${scope.supplierId || ""}|${scope.series || ""}`;
+
+  // unitPrice: consumer-facing price, range ₪6.50 → ₪89.50, snapped to 0.5.
+  const priceCents = 650 + (hash(`${seed}|cat-price`) % 8301); // 650..8950 cents
+  const unitPrice = Math.round(priceCents / 50) * 0.5;
+
+  // unitCost: 55%–72% of unitPrice (i.e. supplier margin 28–45%).
+  const costRatio = 0.55 + (hash(`${seed}|cat-cost`) % 171) / 1000; // 0.55..0.72
+  const unitCost = Math.round(unitPrice * costRatio * 2) / 2;
+
+  // baseUnits: 300..3500, snapped to 50.
+  const baseUnitsRaw = 300 + (hash(`${seed}|cat-base`) % 3201);
+  const baseUnits = Math.round(baseUnitsRaw / 50) * 50;
+
+  // stockUnits: 1.4× → 2.2× baseUnits, snapped to 50.
+  const stockRatio = 1.4 + (hash(`${seed}|cat-stock`) % 81) / 100; // 1.40..2.20
+  const stockUnits = Math.round((baseUnits * stockRatio) / 50) * 50;
+
+  return { unitPrice, unitCost, baseUnits, stockUnits };
+}
+
+// Sub-category total YTD revenue in ₪. Range: 2M–20M (seeded).
+function subCategoryYtd(subcategoryId: string): number {
+  if (!subcategoryId) return 0;
+  const h = hash(`${subcategoryId}|sub-cat-ytd`);
+  return 2_000_000 + (h % 18_001) * 1000;
+}
+
 const KPI_DEFS: Array<{
   id: string;
   label: string;
@@ -197,16 +331,6 @@ const KPI_DEFS: Array<{
   description: string;
   benchmark?: string;
 }> = [
-  {
-    id: "ytd-growth",
-    label: "צמיחת YTD",
-    fmt: (n) => `${n >= 0 ? "+" : ""}${n.toFixed(1)}%`,
-    range: [-3, 18],
-    good: 7,
-    warn: 2,
-    description: "צמיחת מכירות מצטברת מתחילת השנה מול אשתקד.",
-    benchmark: "יעד: +7%",
-  },
   {
     id: "avg-uplift",
     label: "אפליפט ממוצע במבצעים",
@@ -235,15 +359,6 @@ const KPI_DEFS: Array<{
     good: 35,
     warn: 25,
     description: "חלקם של מבצעים מתוך המחזור הכולל בקטגוריה.",
-  },
-  {
-    id: "basket-attach",
-    label: "צמיחת סל מצורף",
-    fmt: (n) => `${n >= 0 ? "+" : ""}${n.toFixed(1)}%`,
-    range: [-2, 14],
-    good: 6,
-    warn: 2,
-    description: "השפעת מבצעים על גודל הסל הממוצע של הקונה.",
   },
 ];
 

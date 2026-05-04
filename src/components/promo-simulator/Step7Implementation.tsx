@@ -1,9 +1,10 @@
-import { Check, Monitor, Box, Users } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Box, Check, Megaphone, Monitor, Users } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import type {
   ImplementationSlice,
   SliceSetter,
 } from "@/lib/promo-simulator/state";
+import { StepHeader } from "./StepHeader";
 
 interface Step7ImplementationProps {
   impl: ImplementationSlice;
@@ -59,15 +60,25 @@ export function Step7Implementation({
   impl,
   onChange,
 }: Step7ImplementationProps) {
+  const readyCount = CHECKS.filter((c) => Boolean(impl[c.field])).length;
+  const total = CHECKS.length;
+  const allReady = readyCount === total;
+  const anyReady = readyCount > 0;
   return (
     <Card className="border-[#E7E0D8] rounded-[16px]">
-      <CardHeader>
-        <CardTitle className="text-2xl text-[#2D3748]">יישום בשטח</CardTitle>
-        <p className="text-lg text-[#4A5568]">
-          ודא שהמבצע מוכן להשקה — שילוט, מדף, הדרכה ותדריך
-        </p>
-      </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="pt-6 space-y-6">
+        <StepHeader
+          step={6}
+          title="הנחיות לשטח"
+          description="ודא שהמבצע מוכן להשקה — שילוט, מדף, הדרכה ותדריך"
+          icon={Megaphone}
+          pill={{
+            label: `מוכנות ${readyCount}/${total}`,
+            bg: allReady ? "#ECFDF5" : anyReady ? "#FFFBEB" : "#FFF1F2",
+            border: allReady ? "#A7F3D0" : anyReady ? "#FCD34D" : "#FDA4AF",
+            text: allReady ? "#065F46" : anyReady ? "#92400E" : "#9F1239",
+          }}
+        />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {CHECKS.map((c) => {
             const checked = Boolean(impl[c.field]);

@@ -1,8 +1,10 @@
+import { Target } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { usePromoTaxonomy } from "@/contexts/PromoTaxonomyContext";
 import type { Goal } from "@/lib/promo-simulator/taxonomy";
 import type { SimulatorState } from "@/lib/promo-simulator/state";
+import { StepHeader } from "./StepHeader";
 
 interface Step2GoalProps {
   goal: SimulatorState["goal"];
@@ -25,13 +27,23 @@ export function Step2Goal({ goal, onChange }: Step2GoalProps) {
 
   return (
     <Card className="border-[#E7E0D8] rounded-[16px]">
-      <CardHeader>
-        <CardTitle className="text-2xl text-[#2D3748]">בחירת מטרה</CardTitle>
-        <p className="text-lg text-[#4A5568]">
-          בחר את המטרה האסטרטגית של המבצע — היא תמיד קובעת את סוג המבצע המומלץ
-        </p>
-      </CardHeader>
-      <CardContent>
+      <CardContent className="pt-6">
+        <StepHeader
+          step={2}
+          title="בחירת מטרה"
+          description="בחר את המטרה האסטרטגית של המבצע — היא תקבע את סוג המבצע המומלץ"
+          icon={Target}
+          pill={
+            goal
+              ? {
+                  label: `נבחר: ${goal}`,
+                  bg: "#ECFDF5",
+                  border: "#A7F3D0",
+                  text: "#065F46",
+                }
+              : undefined
+          }
+        />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {goals.map((g, i) => {
             const isActive = goal === g;

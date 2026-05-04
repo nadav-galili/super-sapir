@@ -293,13 +293,13 @@ export function KPIGaugeRow({
           - Dividers between items via divide-x.
           - Horizontal scroll on small viewports. */}
       <div
-        className={`${isHeroInline ? "py-3" : "py-6"} flex items-end divide-x divide-white/[0.07] overflow-x-auto px-2`}
+        className={`${isHeroInline ? "py-3" : "py-6"} flex items-start divide-x divide-white/[0.07] overflow-x-auto px-2`}
         style={{ scrollbarWidth: "none" }}
       >
         {items.map((item, i) => (
           <div
             key={item.label}
-            className={`${isHeroInline ? "min-w-[92px]" : "min-w-[110px]"} flex-1 flex justify-center px-2`}
+            className={`${isHeroInline ? "min-w-[84px]" : "min-w-[110px]"} flex-1 flex justify-center px-1.5`}
           >
             <GaugeCell
               item={item}
