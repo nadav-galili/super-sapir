@@ -1,5 +1,12 @@
-import { Info } from "lucide-react";
+import {
+  ArrowLeft,
+  Database,
+  Info,
+  Lock,
+  SlidersHorizontal,
+} from "lucide-react";
 import { motion } from "motion/react";
+import type { ReactNode } from "react";
 import {
   Bar,
   BarChart,
@@ -279,280 +286,330 @@ export function Step4Params({ state, metrics, onChange }: Step4ParamsProps) {
             </TabsTrigger>
           </TabsList>
 
-          {/* TAB 1 — PARAMS */}
+          {/* TAB 1 — PARAMS — "Ledger vs Workbench"
+              Two visually distinct cards make it instantly clear what comes
+              from the system and what the manager controls:
+              • RIGHT (in RTL) = ההחלטות שלך — manager inputs, warm accent
+                stripe, prominent sliders, white surface.
+              • LEFT (in RTL) = נתוני מערכת — ERP-sourced read-only fields,
+                dashed separators, locked feel, paper-cool surface. */}
           <TabsContent value="params" className="mt-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {/* Product + discount */}
-              <div className="rounded-[16px] border border-[#E7E0D8] bg-white p-5 space-y-4">
-                <div className="text-lg font-semibold text-[#2D3748]">
-                  סוג המבצע ונתוני מוצר
-                </div>
-
-                <div className="rounded-[10px] bg-[#FAF8F5] border border-[#E7E0D8] p-3">
-                  <div className="text-[15px] text-[#788390] mb-0.5">
-                    סוג המבצע (משלב 3)
+              {/* Manager inputs — first in DOM ⇒ right side in RTL */}
+              <section className="relative overflow-hidden rounded-[16px] border border-[#F1D0CF] bg-gradient-to-br from-white via-white to-[#FFF6F2] p-5 shadow-[0_10px_30px_-22px_rgba(220,78,89,0.4)]">
+                <span
+                  aria-hidden
+                  className="absolute inset-y-5 right-0 w-[3px] rounded-full bg-gradient-to-b from-[#DC4E59] to-[#E8777F]"
+                />
+                <header className="mb-5 flex items-start gap-3 ps-2">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#DC4E59] to-[#E8777F] text-white shadow-[0_6px_14px_-6px_rgba(220,78,89,0.6)]">
+                    <SlidersHorizontal className="h-5 w-5" />
                   </div>
-                  <div className="text-[16px] text-[#2D3748] font-medium">
-                    {state.promoType || (
-                      <span className="text-[#788390]">טרם נבחר</span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="rounded-[10px] bg-[#FAF8F5] border border-[#E7E0D8] p-3 flex items-center justify-between gap-3">
                   <div>
-                    <div className="text-[15px] text-[#788390] mb-0.5">
-                      מחיר מכירה רגיל
+                    <div className="text-[15px] font-semibold uppercase tracking-[0.14em] text-[#DC4E59]">
+                      ההחלטות שלך
                     </div>
-                    <div className="text-[14px] text-[#A0AEC0]">
-                      מחיר קטלוגי של המוצר
-                    </div>
+                    <h3 className="text-xl font-bold tracking-tight text-[#2D3748]">
+                      פרמטרים שאתה שולט בהם
+                    </h3>
+                    <p className="mt-1 text-[15px] text-[#788390]">
+                      הזז סליידרים — התוצאות מתעדכנות מיידית.
+                    </p>
                   </div>
-                  <span
-                    className="text-xl font-mono font-semibold text-[#2D3748]"
-                    dir="ltr"
-                  >
-                    ₪{state.unitPrice.toFixed(2)}
-                  </span>
-                </div>
+                </header>
 
-                <div className="rounded-[10px] bg-[#FAF8F5] border border-[#E7E0D8] p-3 flex items-center justify-between gap-3">
+                <div className="space-y-5 ps-2">
+                  {/* Supplier promo cost */}
                   <div>
-                    <div className="text-[15px] text-[#788390] mb-0.5">
-                      מחיר קנייה
-                    </div>
-                    <div className="text-[14px] text-[#A0AEC0]">
-                      מחיר הספק (מהמערכת)
-                    </div>
-                  </div>
-                  <span
-                    className="text-xl font-mono font-semibold text-[#2D3748]"
-                    dir="ltr"
-                  >
-                    ₪{state.unitCost.toFixed(2)}
-                  </span>
-                </div>
-
-                <div>
-                  <label className={LABEL} htmlFor="f-promo-cost">
-                    <span>
-                      מחיר קנייה בהנחה (מבצע)
-                      {(() => {
-                        const supplierDiscPct =
-                          state.unitCost > 0
-                            ? Math.round(
-                                ((state.unitCost - state.promoUnitCost) /
-                                  state.unitCost) *
-                                  100
-                              )
-                            : 0;
-                        if (supplierDiscPct <= 0) return null;
-                        return (
-                          <span className="ms-2 text-[14px] text-[#10B981] font-semibold">
-                            הנחת ספק -{supplierDiscPct}%
-                          </span>
-                        );
-                      })()}
-                    </span>
-                    <span className={VALUE} dir="ltr">
-                      ₪{state.promoUnitCost.toFixed(2)}
-                    </span>
-                  </label>
-                  <input
-                    id="f-promo-cost"
-                    type="range"
-                    min={0}
-                    max={state.unitCost}
-                    step={0.1}
-                    value={state.promoUnitCost}
-                    onChange={(e) =>
-                      onChange({ promoUnitCost: Number(e.target.value) })
-                    }
-                    className={RANGE}
-                    style={{
-                      background: rangeBg(state.promoUnitCost, state.unitCost),
-                    }}
-                    dir="ltr"
-                  />
-                  <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                    <span className="text-[14px] text-[#788390] me-1">
-                      קיצור — הנחת ספק:
-                    </span>
-                    {[0, 5, 10, 15, 20].map((pct) => {
-                      const target =
-                        Math.round(state.unitCost * (1 - pct / 100) * 100) /
-                        100;
-                      const isActive =
-                        Math.abs(state.promoUnitCost - target) < 0.01;
-                      return (
-                        <button
-                          key={pct}
-                          type="button"
-                          onClick={() => onChange({ promoUnitCost: target })}
-                          className={`rounded-[20px] border px-2.5 py-0.5 text-[14px] font-medium transition-colors ${
-                            isActive
-                              ? "border-[#DC4E59] bg-[#DC4E59] text-white"
-                              : "border-[#E7E0D8] bg-white text-[#4A5568] hover:bg-[#FAF8F5]"
-                          }`}
-                        >
-                          {pct === 0 ? "ללא" : `-${pct}%`}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div>
-                  <label className={LABEL} htmlFor="f-discount">
-                    גובה ההנחה / ההטבה (%)
-                    <span
-                      className={VALUE}
-                      style={{ color: "#2EC4D5" }}
+                    <label className={LABEL} htmlFor="f-promo-cost">
+                      <span className="flex items-center gap-2">
+                        <span>מחיר קנייה בהנחה (מבצע)</span>
+                        {(() => {
+                          const supplierDiscPct =
+                            state.unitCost > 0
+                              ? Math.round(
+                                  ((state.unitCost - state.promoUnitCost) /
+                                    state.unitCost) *
+                                    100
+                                )
+                              : 0;
+                          if (supplierDiscPct <= 0) return null;
+                          return (
+                            <span className="rounded-full bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0] px-2 py-0.5 text-[15px] font-semibold">
+                              הנחת ספק -{supplierDiscPct}%
+                            </span>
+                          );
+                        })()}
+                      </span>
+                      <span className={VALUE} dir="ltr">
+                        ₪{state.promoUnitCost.toFixed(2)}
+                      </span>
+                    </label>
+                    <input
+                      id="f-promo-cost"
+                      type="range"
+                      min={0}
+                      max={state.unitCost}
+                      step={0.1}
+                      value={state.promoUnitCost}
+                      onChange={(e) =>
+                        onChange({ promoUnitCost: Number(e.target.value) })
+                      }
+                      className={RANGE}
+                      style={{
+                        background: rangeBg(
+                          state.promoUnitCost,
+                          state.unitCost
+                        ),
+                      }}
                       dir="ltr"
-                    >
-                      {state.discountPct}%
-                    </span>
-                  </label>
-                  <input
-                    id="f-discount"
-                    type="range"
-                    min={0}
-                    max={70}
-                    step={1}
-                    value={state.discountPct}
-                    onChange={(e) =>
-                      onChange({ discountPct: Number(e.target.value) })
-                    }
-                    className="w-full h-2 rounded-[5px] accent-[#2EC4D5]"
-                    style={{
-                      background: rangeBg(state.discountPct, 70, "#2EC4D5"),
-                    }}
-                    dir="ltr"
-                  />
-                </div>
+                    />
+                    <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                      <span className="text-[15px] text-[#788390] me-1">
+                        קיצור — הנחת ספק:
+                      </span>
+                      {[0, 5, 10, 15, 20].map((pct) => {
+                        const target =
+                          Math.round(state.unitCost * (1 - pct / 100) * 100) /
+                          100;
+                        const isActive =
+                          Math.abs(state.promoUnitCost - target) < 0.01;
+                        return (
+                          <button
+                            key={pct}
+                            type="button"
+                            onClick={() => onChange({ promoUnitCost: target })}
+                            className={`rounded-[20px] border px-2.5 py-0.5 text-[15px] font-medium transition-colors ${
+                              isActive
+                                ? "border-[#DC4E59] bg-[#DC4E59] text-white"
+                                : "border-[#E7E0D8] bg-white text-[#4A5568] hover:bg-[#FAF8F5]"
+                            }`}
+                          >
+                            {pct === 0 ? "ללא" : `-${pct}%`}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
 
-                <div className="flex items-center gap-3 rounded-[10px] bg-[#FAF8F5] border border-[#E7E0D8] p-3">
+                  <div className="border-t border-[#F1EBE3]" />
+
+                  {/* Discount % */}
+                  <div>
+                    <label className={LABEL} htmlFor="f-discount">
+                      גובה ההנחה / ההטבה (%)
+                      <span
+                        className={VALUE}
+                        style={{ color: "#2EC4D5" }}
+                        dir="ltr"
+                      >
+                        {state.discountPct}%
+                      </span>
+                    </label>
+                    <input
+                      id="f-discount"
+                      type="range"
+                      min={0}
+                      max={70}
+                      step={1}
+                      value={state.discountPct}
+                      onChange={(e) =>
+                        onChange({ discountPct: Number(e.target.value) })
+                      }
+                      className="w-full h-2 rounded-[5px] accent-[#2EC4D5]"
+                      style={{
+                        background: rangeBg(state.discountPct, 70, "#2EC4D5"),
+                      }}
+                      dir="ltr"
+                    />
+                  </div>
+
+                  <div className="border-t border-[#F1EBE3]" />
+
+                  {/* Uplift % */}
+                  <div>
+                    <label className={LABEL} htmlFor="f-uplift">
+                      צפי גידול בביקוש — uplift (%)
+                      <span
+                        className={VALUE}
+                        style={{ color: "#DC4E59" }}
+                        dir="ltr"
+                      >
+                        {state.upliftPct}%
+                      </span>
+                    </label>
+                    <input
+                      id="f-uplift"
+                      type="range"
+                      min={0}
+                      max={300}
+                      step={5}
+                      value={state.upliftPct}
+                      onChange={(e) =>
+                        onChange({ upliftPct: Number(e.target.value) })
+                      }
+                      className={RANGE}
+                      style={{ background: rangeBg(state.upliftPct, 300) }}
+                      dir="ltr"
+                    />
+                    <div className="mt-1 text-[15px] text-[#788390]">
+                      כמה אחוזים מעבר למכירות הבסיס אתה צופה שייווצרו בזכות
+                      המבצע.
+                    </div>
+                  </div>
+
+                  <div className="border-t border-[#F1EBE3]" />
+
+                  {/* Extra costs */}
+                  <div>
+                    <label className={LABEL} htmlFor="f-extra-costs">
+                      עלויות נוספות (₪)
+                      <span className={VALUE} dir="ltr">
+                        ₪{formatNumber(state.mktCost)}
+                      </span>
+                    </label>
+                    <input
+                      id="f-extra-costs"
+                      type="range"
+                      min={0}
+                      max={50000}
+                      step={100}
+                      value={state.mktCost}
+                      onChange={(e) =>
+                        onChange({ mktCost: Number(e.target.value) })
+                      }
+                      className={RANGE}
+                      style={{ background: rangeBg(state.mktCost, 50000) }}
+                      dir="ltr"
+                    />
+                    <div className="mt-1 text-[15px] text-[#788390]">
+                      שיווק, תפעול נוסף, קניבליזציה — סך הוצאות צד מעבר להנחה
+                      הישירה.
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* ERP read-only — second in DOM ⇒ left side in RTL */}
+              <section className="relative overflow-hidden rounded-[16px] border border-[#E5DBC8] bg-[#FBFAF7] p-5">
+                <header className="mb-5 flex items-start gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#E8F4F6] border border-[#7DD3DD] text-[#0E7C8A]">
+                    <Database className="h-5 w-5" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-[15px] font-semibold uppercase tracking-[0.14em] text-[#0E7C8A]">
+                      נתוני מערכת
+                    </div>
+                    <h3 className="text-xl font-bold tracking-tight text-[#2D3748]">
+                      מתעדכן אוטומטית מה-ERP
+                    </h3>
+                    <p className="mt-1 text-[15px] text-[#788390]">
+                      ערכי קריאה בלבד. לא ניתן לעריכה כאן.
+                    </p>
+                  </div>
+                  <Lock
+                    className="h-4 w-4 text-[#A0AEC0] mt-1"
+                    aria-label="קריאה בלבד"
+                  />
+                </header>
+
+                <dl className="space-y-0">
+                  <ErpFieldRow
+                    label="סוג המבצע"
+                    sub="נבחר משלב 3"
+                    value={
+                      state.promoType ? (
+                        <span className="text-[16px] font-medium text-[#2D3748]">
+                          {state.promoType}
+                        </span>
+                      ) : (
+                        <span className="text-[16px] text-[#A0AEC0]">
+                          טרם נבחר
+                        </span>
+                      )
+                    }
+                  />
+                  <ErpFieldRow
+                    label="מחיר מכירה רגיל"
+                    sub="מחיר קטלוגי של המוצר"
+                    value={
+                      <span
+                        className="text-xl font-mono font-semibold text-[#2D3748]"
+                        dir="ltr"
+                      >
+                        ₪{state.unitPrice.toFixed(2)}
+                      </span>
+                    }
+                  />
+                  <ErpFieldRow
+                    label="מחיר קנייה"
+                    sub="מחיר ספק מהמערכת"
+                    value={
+                      <span
+                        className="text-xl font-mono font-semibold text-[#2D3748]"
+                        dir="ltr"
+                      >
+                        ₪{state.unitCost.toFixed(2)}
+                      </span>
+                    }
+                  />
+                  <ErpFieldRow
+                    label="מכירות בסיס בתקופה"
+                    sub={`ממוצע מכר היסטורי — כ-${formatNumber(Math.round(state.baseUnits / durationDays))} יח'/יום`}
+                    value={
+                      <span
+                        className="text-xl font-mono font-semibold text-[#2D3748]"
+                        dir="ltr"
+                      >
+                        {formatNumber(state.baseUnits)} יח'
+                      </span>
+                    }
+                  />
+                  <ErpFieldRow
+                    label="משך המבצע"
+                    sub="נבחר משלב 1"
+                    value={
+                      <span className="text-[16px] font-medium text-[#2D3748]">
+                        {state.durationWeeks} שבועות ({durationDays} ימים)
+                      </span>
+                    }
+                  />
+                </dl>
+              </section>
+            </div>
+
+            {/* Live price preview — full-width strip below the two cards.
+                Treats the discount transformation as the "result of the
+                inputs above" — neutral surface, prominent typography. */}
+            <div className="mt-4 rounded-[16px] border border-[#E7E0D8] bg-gradient-to-l from-[#F8FCFD] via-white to-white p-5">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
                   <div>
                     <div className="text-[15px] text-[#788390]">מחיר רגיל</div>
                     <div
-                      className="text-lg font-mono font-semibold text-[#2D3748]"
+                      className="text-2xl font-mono font-semibold text-[#2D3748]"
                       dir="ltr"
                     >
                       ₪{state.unitPrice.toFixed(2)}
                     </div>
                   </div>
-                  <span className="text-2xl text-[#A0AEC0]">←</span>
+                  <ArrowLeft className="h-6 w-6 text-[#A0AEC0]" aria-hidden />
                   <div>
                     <div className="text-[15px] text-[#788390]">
                       מחיר לאחר הנחה
                     </div>
                     <div
-                      className="text-lg font-mono font-semibold"
+                      className="text-2xl font-mono font-semibold"
                       style={{ color: "#2EC4D5" }}
                       dir="ltr"
                     >
                       ₪{m.effectivePrice.toFixed(2)}
                     </div>
                   </div>
-                  <span className="ms-auto rounded-full bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0] px-3 py-1 text-[15px]">
-                    הנחה לקונה ₪{saving.toFixed(2)} ({savingPct}%)
-                  </span>
                 </div>
-              </div>
-
-              {/* Demand + costs */}
-              <div className="rounded-[16px] border border-[#E7E0D8] bg-white p-5 space-y-4">
-                <div className="text-lg font-semibold text-[#2D3748]">
-                  נתוני ביקוש ועלויות
-                </div>
-
-                <div className="rounded-[10px] bg-[#FAF8F5] border border-[#E7E0D8] p-3">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <div className="text-[15px] text-[#788390] mb-0.5">
-                        מכירות בסיס בתקופה (יח')
-                      </div>
-                      <div className="text-[14px] text-[#A0AEC0]">
-                        ממוצע מכר היסטורי (מה-ERP)
-                      </div>
-                    </div>
-                    <span
-                      className="text-xl font-mono font-semibold text-[#2D3748]"
-                      dir="ltr"
-                    >
-                      {formatNumber(state.baseUnits)}
-                    </span>
-                  </div>
-                  <div className="mt-1.5 text-[14px] text-[#788390]" dir="rtl">
-                    כ-{Math.round(state.baseUnits / durationDays)} יח'/יום ל-
-                    {durationDays} ימים
-                  </div>
-                </div>
-
-                <div>
-                  <label className={LABEL} htmlFor="f-uplift">
-                    צפי גידול בביקוש — uplift (%)
-                    <span
-                      className={VALUE}
-                      style={{ color: "#DC4E59" }}
-                      dir="ltr"
-                    >
-                      {state.upliftPct}%
-                    </span>
-                  </label>
-                  <input
-                    id="f-uplift"
-                    type="range"
-                    min={0}
-                    max={300}
-                    step={5}
-                    value={state.upliftPct}
-                    onChange={(e) =>
-                      onChange({ upliftPct: Number(e.target.value) })
-                    }
-                    className={RANGE}
-                    style={{ background: rangeBg(state.upliftPct, 300) }}
-                    dir="ltr"
-                  />
-                </div>
-
-                <div className="rounded-[10px] bg-[#FAF8F5] border border-[#E7E0D8] p-3">
-                  <div className="text-[15px] text-[#788390]">
-                    משך המבצע (משלב 1)
-                  </div>
-                  <div className="text-[16px] text-[#2D3748] font-medium">
-                    {state.durationWeeks} שבועות ({durationDays} ימים)
-                  </div>
-                </div>
-
-                <hr className="border-[#F1EBE3]" />
-
-                <div>
-                  <label className={LABEL} htmlFor="f-extra-costs">
-                    עלויות נוספות (₪)
-                    <span className={VALUE} dir="ltr">
-                      ₪{formatNumber(state.mktCost)}
-                    </span>
-                  </label>
-                  <input
-                    id="f-extra-costs"
-                    type="range"
-                    min={0}
-                    max={50000}
-                    step={100}
-                    value={state.mktCost}
-                    onChange={(e) =>
-                      onChange({ mktCost: Number(e.target.value) })
-                    }
-                    className={RANGE}
-                    style={{ background: rangeBg(state.mktCost, 50000) }}
-                    dir="ltr"
-                  />
-                  <div className="mt-1 text-[14px] text-[#788390]">
-                    שיווק, תפעול נוסף, קניבליזציה — סך הוצאות צד מעבר להנחה
-                    הישירה.
-                  </div>
-                </div>
+                <span className="rounded-full bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0] px-4 py-1.5 text-[16px] font-medium">
+                  הנחה לקונה ₪{saving.toFixed(2)} ({savingPct}%)
+                </span>
               </div>
             </div>
 
@@ -1126,6 +1183,29 @@ function ResultRow({
       >
         {value}
       </span>
+    </div>
+  );
+}
+
+interface ErpFieldRowProps {
+  label: string;
+  sub?: string;
+  value: ReactNode;
+}
+
+/**
+ * Read-only ERP field. Dashed bottom separator + muted left-side label
+ * communicates "fixed/system data" without forbidding interaction visually.
+ * Used inside the "נתוני מערכת" card on Tab 1.
+ */
+function ErpFieldRow({ label, sub, value }: ErpFieldRowProps) {
+  return (
+    <div className="flex items-start justify-between gap-4 py-3 border-b border-dashed border-[#E5DBC8] last:border-b-0">
+      <div className="min-w-0 flex-1">
+        <div className="text-[16px] text-[#4A5568] font-medium">{label}</div>
+        {sub && <div className="text-[15px] text-[#A0AEC0] mt-0.5">{sub}</div>}
+      </div>
+      <div className="shrink-0 text-end">{value}</div>
     </div>
   );
 }

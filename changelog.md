@@ -8,6 +8,22 @@
 
 ## 2026-05-04
 
+### Tab 1 "פרטי המבצע" — redesign separating ERP data from manager decisions
+
+User feedback: it wasn't visually clear which fields are auto-pulled from ERP vs. which the category manager actively decides. Used the `frontend-design` skill to commit to a "Ledger vs Workbench" aesthetic that telegraphs the distinction at first glance.
+
+- **Two clearly differentiated cards in Tab 1.**
+  - "ההחלטות שלך" — first in DOM (right side in RTL): warm gradient surface (`white → #FFF6F2`), vertical accent stripe in primary red on the start edge, `SlidersHorizontal` icon in a filled red circle. Houses all four user-controlled sliders: `promoUnitCost`, `discountPct`, `upliftPct`, `mktCost`. Soft drop shadow tinted to brand red emphasizes "active workbench."
+  - "נתוני מערכת" — second in DOM (left side in RTL): muted paper-cool background (`#FBFAF7`), `Database` icon in a teal circle, `Lock` icon top-right corner. New `ErpFieldRow` component renders five read-only entries with dashed bottom separators (`border-dashed border-[#E5DBC8]`) — "ledger" feel reinforces "system data, you can't edit here." Houses `promoType`, `unitPrice`, `unitCost`, `baseUnits`, `durationWeeks`.
+- **Logical regrouping.** Previously the two cards mixed ERP and manager fields together by topic (product vs. demand). Now the split is by _data origin_ — much clearer for a category manager scanning the screen for "what do I control?"
+- **Eyebrow + headline + subtitle pattern** in each card header: 15px uppercase tracked eyebrow ("ההחלטות שלך" / "נתוני מערכת") above a 20px bold headline above a 15px muted descriptor. Provides hierarchy without shouting.
+- **Live price preview moved to a full-width strip below the two cards.** The "₪X → ₪Y, הנחה לקונה ₪Z" preview is the _result_ of the inputs above, so it earns its own surface (cyan-tinted gradient) and a proper Lucide `ArrowLeft` icon (replacing the inline `←` glyph). Bigger numbers (`text-2xl` instead of `text-lg`).
+- **Per-field copy refinements.** Supplier-discount badge moved from inline plain text to a green pill (`bg-[#ECFDF5] border-[#A7F3D0]`) so it visually echoes the "discount achieved" badge in the price strip. Added a one-line description under the `upliftPct` slider explaining what uplift means.
+- **New imports.** Added `ArrowLeft`, `Database`, `Lock`, `SlidersHorizontal` from `lucide-react` and a `ReactNode` type-only import from `react`.
+- **New helper component:** `ErpFieldRow({ label, sub, value })` rendering the dashed-separator row pattern used throughout the ERP card.
+
+Files: `Step4Params.tsx`. 186 tests pass; typecheck clean.
+
 ### Tab 4 sensitivity chart — axis labels + corrected formula
 
 User flagged that the "מפת נקודת איזון" chart in Tab 4 was unclear and asked to verify its math. Three real bugs surfaced; all are now fixed and the chart shows axis labels.
